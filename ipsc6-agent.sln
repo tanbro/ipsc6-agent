@@ -5,9 +5,11 @@ VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pjsua2_wrap", "pjsua2_wrap\pjsua2_wrap.vcxproj", "{3478F33B-3544-4D31-AB64-E5FE32C21244}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "org.pjsip.pjsua2", "org.pjsip.pjsua2\org.pjsip.pjsua2.csproj", "{8C33211B-00B7-414F-AF11-1262899195FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "org.pjsip.pjsua2", "org.pjsip.pjsua2\org.pjsip.pjsua2.csproj", "{8C33211B-00B7-414F-AF11-1262899195FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pjsua2-consoleapp", "pjsua2-consoleapp\pjsua2-consoleapp.csproj", "{95BAB390-687B-4D18-9324-08D18855DF6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pjsua2-consoleapp", "pjsua2-consoleapp\pjsua2-consoleapp.csproj", "{95BAB390-687B-4D18-9324-08D18855DF6C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ipsc6.agent.network", "ipsc6.agent.network\ipsc6.agent.network.vcxproj", "{8EA7C273-4AEE-4F5B-9134-63256ADFADC1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,16 @@ Global
 		{95BAB390-687B-4D18-9324-08D18855DF6C}.Release|x64.Build.0 = Release|Any CPU
 		{95BAB390-687B-4D18-9324-08D18855DF6C}.Release|x86.ActiveCfg = Release|Any CPU
 		{95BAB390-687B-4D18-9324-08D18855DF6C}.Release|x86.Build.0 = Release|Any CPU
+		{8EA7C273-4AEE-4F5B-9134-63256ADFADC1}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{8EA7C273-4AEE-4F5B-9134-63256ADFADC1}.Debug|x64.ActiveCfg = Debug|x64
+		{8EA7C273-4AEE-4F5B-9134-63256ADFADC1}.Debug|x64.Build.0 = Debug|x64
+		{8EA7C273-4AEE-4F5B-9134-63256ADFADC1}.Debug|x86.ActiveCfg = Debug|Win32
+		{8EA7C273-4AEE-4F5B-9134-63256ADFADC1}.Debug|x86.Build.0 = Debug|Win32
+		{8EA7C273-4AEE-4F5B-9134-63256ADFADC1}.Release|Any CPU.ActiveCfg = Release|Win32
+		{8EA7C273-4AEE-4F5B-9134-63256ADFADC1}.Release|x64.ActiveCfg = Release|x64
+		{8EA7C273-4AEE-4F5B-9134-63256ADFADC1}.Release|x64.Build.0 = Release|x64
+		{8EA7C273-4AEE-4F5B-9134-63256ADFADC1}.Release|x86.ActiveCfg = Release|Win32
+		{8EA7C273-4AEE-4F5B-9134-63256ADFADC1}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
