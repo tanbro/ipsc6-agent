@@ -3,3 +3,7 @@
 	url = https://github.com/pjsip/pjproject.git
 	ignore = dirty
 	branch = 2.11
+[submodule "submodules/RakNet"]
+	path = submodules/RakNet
+	url = https://github.com/facebookarchive/RakNet.git
+	ignore = dirty
