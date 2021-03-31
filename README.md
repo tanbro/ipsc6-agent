@@ -1,5 +1,7 @@
 # IPSC 6 呼叫中心系统 的 Agent Windows 桌面客户端程序
 
+这个项目依赖于许多 Native 代码。为了兼容 32bit 系统，我们统一采用 Win32 构建。
+
 ## pjproject
 
 这个依赖项目作为 `git submodule` 存放在 `submodules/pjproject`，如果尚未初始化这个 `git` 子模块，应执行：
@@ -17,3 +19,29 @@ git submodule update --init
 3. 如果提示安装 `UWP SDK`，不必理会
 4. 在项目列表中，将 `pjsua` "设为启动项目"
 5. 生成 `pjsua`。生成的库文件在 `lib` 目录，形如 `libpjproject-i386-Win32-vc14-Debug.lib`
+
+## RakNet
+
+IPSC 一向以来使用这个库进行服务器-坐席客户端的网络通信
+
+此依赖项十分的老旧，无法使用现有的 VisualStudio 打开。
+
+不过目前尚可用其提供的 `CMake` 设置，利用 `CMake` 配置出与本机开发环境相符的 VisualStudio 项目文件。
+
+在这个子项目的目录下新建子目录 `build`，然后在该目录中执行:
+
+```sh
+cmake -G"Visual Studio 2019" -A Win32 ..
+```
+
+从而产生 VisualStudio 项目文件。
+
+但是，生成的 `.vcxproj` 项目文件中，有错误。
+
+我们应这样处理：使用文本编辑器打开生成的 Visual Studio 项目文件， 如 `build/Lib/LibStatic/RakNetLibStatic.vcxproj`，找到其中行如
+
+```xml
+<AdditionalOptions>%(AdditionalOptions) /machine:X86 LIBCMTD.lib "MSVCRT.lib&amp;quot"%3B""</AdditionalOptions>
+```
+
+的设置项，将 这样包含错误转义字符的选项改为 `%(AdditionalOptions) /machine:X86 LIBCMTD.lib MSVCRT.lib` 。

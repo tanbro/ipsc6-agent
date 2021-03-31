@@ -15,30 +15,30 @@ namespace pjsua2_consoleapp
 
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
             try
             {
                 // Create endpoint
-                Endpoint ep = new Endpoint();
+                Endpoint ep = new();
                 ep.libCreate();
                 // Initialize endpoint
-                EpConfig epConfig = new EpConfig();
+                EpConfig epConfig = new();
                 ep.libInit(epConfig);
                 // Create SIP transport. Error handling sample is shown
-                TransportConfig sipTpConfig = new TransportConfig();
+                TransportConfig sipTpConfig = new();
                 sipTpConfig.port = 5060;
                 ep.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
                 // Start the library
                 ep.libStart();
 
-                AccountConfig acfg = new AccountConfig();
+                AccountConfig acfg = new();
                 acfg.idUri = "sip:test@pjsip.org";
                 acfg.regConfig.registrarUri = "sip:pjsip.org";
-                AuthCredInfo cred = new AuthCredInfo("digest", "*", "test", 0, "secret");
+                AuthCredInfo cred = new("digest", "*", "test", 0, "secret");
                 acfg.sipConfig.authCreds.Add(cred);
                 // Create the account
-                MyAccount acc = new MyAccount();
+                MyAccount acc = new();
                 acc.create(acfg);
 
                 // Here we don't have anything else to do..
