@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <PJPROJECT_ROOT>..\submodules\pjproject</PJPROJECT_ROOT>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetName>pjsua2</TargetName>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="'$(Platform)'=='Win32' ">
+      <PropertyGroup Label="UserMacros">
+        <TargetCPU>i386</TargetCPU>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(Platform)'=='x64'">
+      <PropertyGroup Label="UserMacros">
+        <TargetCPU>x86_64</TargetCPU>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(PJPROJECT_ROOT)\pjlib\include;$(PJPROJECT_ROOT)\pjlib-util\include;$(PJPROJECT_ROOT)\pjmedia\include;$(PJPROJECT_ROOT)\pjnath\include;$(PJPROJECT_ROOT)\pjsip\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;libpjproject-$(TargetCPU)-$(PlatformName)-vc14-$(ConfigurationName).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(PJPROJECT_ROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="PJPROJECT_ROOT">
+      <Value>$(PJPROJECT_ROOT)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+  </ItemGroup>
+</Project>
