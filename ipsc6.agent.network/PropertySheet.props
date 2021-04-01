@@ -13,11 +13,15 @@
       <CompileAsManaged>NetCore</CompileAsManaged>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(RAKNET_ROOT)\build\Lib\LibStatic\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ws2_32.lib;RakNetLibStatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(RAKNET_ROOT)\build\Lib\DLL\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ws2_32.lib;RakNetDLL.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>
       </AdditionalOptions>
     </Link>
+    <PostBuildEvent>
+      <Message>Copy native libraries to output directory</Message>
+      <Command>copy /y $(RAKNET_ROOT)\build\Lib\DLL\$(ConfigurationName)\RakNetDLL.dll $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="RAKNET_ROOT">

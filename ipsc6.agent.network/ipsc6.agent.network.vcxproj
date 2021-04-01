@@ -86,8 +86,8 @@
       </RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies />
-      <AdditionalOptions>/VERBOSE</AdditionalOptions>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -98,8 +98,8 @@
       </RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies />
-      <AdditionalOptions>/VERBOSE</AdditionalOptions>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -109,9 +109,8 @@
       <RuntimeLibrary>
       </RuntimeLibrary>
     </ClCompile>
-    <Link>
-      <AdditionalDependencies />
-    </Link>
+    <Link />
+    <Link />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -120,9 +119,8 @@
       <RuntimeLibrary>
       </RuntimeLibrary>
     </ClCompile>
-    <Link>
-      <AdditionalDependencies />
-    </Link>
+    <Link />
+    <Link />
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Connection.h" />

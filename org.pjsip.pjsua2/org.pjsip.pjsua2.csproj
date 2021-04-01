@@ -12,4 +12,8 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy /y &quot;$(TargetDir)$(ProjectName).dll&quot; $(SolutionDir)$(Configuration)" />
+  </Target>
+
 </Project>

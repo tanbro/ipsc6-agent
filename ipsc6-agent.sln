@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pjsua2_wrap", "pjsua2_wrap\pjsua2_wrap.vcxproj", "{3478F33B-3544-4D31-AB64-E5FE32C21244}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "org.pjsip.pjsua2", "org.pjsip.pjsua2\org.pjsip.pjsua2.csproj", "{8C33211B-00B7-414F-AF11-1262899195FB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3478F33B-3544-4D31-AB64-E5FE32C21244} = {3478F33B-3544-4D31-AB64-E5FE32C21244}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pjsua2-consoleapp", "pjsua2-consoleapp\pjsua2-consoleapp.csproj", "{95BAB390-687B-4D18-9324-08D18855DF6C}"
 EndProject

@@ -18,4 +18,8 @@
     <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy /y &quot;$(TargetDir)$(ProjectName).dll&quot; $(SolutionDir)$(Configuration)" />
+  </Target>
+
 </Project>
