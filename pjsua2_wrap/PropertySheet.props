@@ -22,6 +22,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(PJPROJECT_ROOT)\pjlib\include;$(PJPROJECT_ROOT)\pjlib-util\include;$(PJPROJECT_ROOT)\pjmedia\include;$(PJPROJECT_ROOT)\pjnath\include;$(PJPROJECT_ROOT)\pjsip\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;libpjproject-$(TargetCPU)-$(PlatformName)-vc14-$(ConfigurationName).lib;%(AdditionalDependencies)</AdditionalDependencies>

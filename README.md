@@ -38,10 +38,16 @@ cmake -G"Visual Studio 2019" -A Win32 ..
 
 但是，生成的 `.vcxproj` 项目文件中，有错误。
 
-我们应这样处理：使用文本编辑器打开生成的 Visual Studio 项目文件， 如 `build/Lib/LibStatic/RakNetLibStatic.vcxproj`，找到其中行如
+1. 转义字符串错误:
 
-```xml
-<AdditionalOptions>%(AdditionalOptions) /machine:X86 LIBCMTD.lib "MSVCRT.lib&amp;quot"%3B""</AdditionalOptions>
-```
+   使用文本编辑器打开生成的 Visual Studio 项目文件， 如 `build/Lib/LibStatic/RakNetLibStatic.vcxproj`，找到其中行如
 
-的设置项，将 这样包含错误转义字符的选项改为 `%(AdditionalOptions) /machine:X86 LIBCMTD.lib MSVCRT.lib` 。
+   ```xml
+   <AdditionalOptions>%(AdditionalOptions) /machine:X86 LIBCMTD.lib "MSVCRT.lib&amp;quot"%3B""</AdditionalOptions>
+   ```
+
+   的设置项，将 这样包含错误转义字符的选项改为 `%(AdditionalOptions) /machine:X86 LIBCMTD.lib MSVCRT.lib` 。
+
+1. “首选的生成工具体系结构”设置错误
+
+   使用 IDE 查看这几个项目的属性，将 `配置属性 -> 高级 -> 首选的生成工具体系结构` 修改为 "32 位(x86)"

@@ -170,6 +170,10 @@
     </ClCompile>
     <ClCompile Include="src\pjsua2_wrap.cxx" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include=".clang-format" />
+    <None Include=".editorconfig" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -1,0 +1,20 @@
+# Visual Studio 生成的 .clang-format 文件
+
+# 此文件中的样式选项是通过“工具”>“选项”
+# 复制当前 IDE 格式配置的最佳尝试。 但
+# 应该验证以下样式选项:
+# AfterClass, AfterControlStatement, AfterEnum, AfterFunction, AfterNamespace, 
+# AfterStruct, AfterUnion
+
+BasedOnStyle: Chromium
+BraceWrapping:
+IndentWidth: 4
+PointerAlignment: Left
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+TabWidth: 4
+UseTab: false
