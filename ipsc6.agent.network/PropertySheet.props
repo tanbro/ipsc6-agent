@@ -20,7 +20,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Copy native libraries to output directory</Message>
-      <Command>copy /y $(RAKNET_ROOT)\build\Lib\DLL\$(ConfigurationName)\RakNetDLL.dll $(OutDir)</Command>
+      <Command>copy /y "$(RAKNET_ROOT)\build\Lib\DLL\$(ConfigurationName)\RakNetDLL.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
