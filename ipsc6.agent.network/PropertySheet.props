@@ -11,6 +11,8 @@
       <LanguageStandard_C>stdc11</LanguageStandard_C>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CompileAsManaged>NetCore</CompileAsManaged>
+      <RuntimeLibrary>
+      </RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(RAKNET_ROOT)\build\Lib\DLL\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

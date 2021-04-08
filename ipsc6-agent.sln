@@ -16,7 +16,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ipsc6.agent.network", "ipsc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{23703BE7-2769-4832-90B6-3F8F1FE5D2AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "agent-consoleapp", "agent-consoleapp\agent-consoleapp.csproj", "{944CDA02-4E38-49BD-A43A-528C30D9E147}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "agent-consoleapp", "agent-consoleapp\agent-consoleapp.csproj", "{944CDA02-4E38-49BD-A43A-528C30D9E147}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
