@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ipsc6.agent.network\ipsc6.agent.network.vcxproj" />
-    <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
   </ItemGroup>
 
 </Project>

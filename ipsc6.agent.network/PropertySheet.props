@@ -3,20 +3,21 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <RAKNET_ROOT>$(ProjectDir.TrimEnd('\'))\..\submodules\RakNet</RAKNET_ROOT>
+    <RAKNET_LIB_SUFFIX>DLL</RAKNET_LIB_SUFFIX>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(RAKNET_ROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CompileAsManaged>NetCore</CompileAsManaged>
       <RuntimeLibrary>
       </RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(RAKNET_ROOT)\build\Lib\DLL\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ws2_32.lib;RakNetDLL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(RAKNET_ROOT)\build\Lib\$(RAKNET_LIB_SUFFIX)\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ws2_32.lib;RakNet$(RAKNET_LIB_SUFFIX).lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>
       </AdditionalOptions>
     </Link>
@@ -29,6 +30,9 @@
     <BuildMacro Include="RAKNET_ROOT">
       <Value>$(RAKNET_ROOT)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="RAKNET_LIB_SUFFIX">
+      <Value>$(RAKNET_LIB_SUFFIX)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>
