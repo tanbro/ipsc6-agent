@@ -70,6 +70,15 @@ ref class Connector {
     event ConnectedEventHandler ^ OnConnected;
     event AgentMessageReceivedEventHandler ^ OnAgentMessageReceived;
 
+    property int ConnectionId {
+        int get() { return _connectionId; }
+    }
+
+    property bool Connected {
+        bool get() { return _connectionId > 0; }
+    }
+
+
 };  // ref class Connector
 
 enum MsgType {

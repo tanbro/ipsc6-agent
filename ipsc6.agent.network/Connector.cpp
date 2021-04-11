@@ -157,7 +157,7 @@ int Connector::Receive() {
         if (nowMsec - _msecConnectionRequestAccepted > 5000) {
             Shutdown();
             try {
-                OnConnectAttemptFailed();
+                OnConnectAttemptFailed(this);
             } catch (NullReferenceException ^) {
             }
         }
@@ -174,13 +174,17 @@ int Connector::Receive() {
         case ID_DISCONNECTION_NOTIFICATION: {
             _remoteAddrIndex = -1;
             _connectionId = 0;
+            try {
+                OnDisconnected(this);
+            } catch (NullReferenceException ^) {
+            }
         } break;
 
         case ID_CONNECTION_ATTEMPT_FAILED: {
             _remoteAddrIndex = -1;
             _connectionId = 0;
             try {
-                OnConnectAttemptFailed();
+                OnConnectAttemptFailed(this);
             } catch (NullReferenceException ^) {
             }
         } break;
@@ -189,7 +193,7 @@ int Connector::Receive() {
             _remoteAddrIndex = -1;
             _connectionId = 0;
             try {
-                OnConnectAttemptFailed();
+                OnConnectAttemptFailed(this);
             } catch (NullReferenceException ^) {
             }
         } break;
@@ -197,6 +201,10 @@ int Connector::Receive() {
         case ID_CONNECTION_LOST: {
             _remoteAddrIndex = -1;
             _connectionId = 0;
+            try {
+                OnConnectionLost(this);
+            } catch (NullReferenceException ^) {
+            }
         } break;
 
         case ID_CONNECTION_REQUEST_ACCEPTED: {
@@ -335,8 +343,9 @@ void Connector::DoOnUserPacketReceived(RakNet::Packet* packet) {
         case mtTellAgentId: {
             _connectionId = *(int*)ptr;
             /// 连接成功事件
+            auto e = gcnew ConnectedEventArgs(_connectionId);
             try {
-                OnConnected(_connectionId);
+                OnConnected(this, e);
             } catch (NullReferenceException ^) {
             }
         } break;
@@ -358,8 +367,10 @@ void Connector::DoOnUserPacketReceived(RakNet::Packet* packet) {
             //
             String ^ s = marshal_as<String ^>((char*)ptr);
             /// 抛出事件：坐席收到来自服务器端的数据
+            auto e =
+                gcnew AgentMessageReceivedEventArgs(command_type, n1, n2, s);
             try {
-                OnAgentMessageReceived(command_type, n1, n2, s);
+                OnAgentMessageReceived(this, e);
             } catch (NullReferenceException ^) {
             }
         } break;
