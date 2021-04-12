@@ -18,10 +18,10 @@ delegate void ConnectionLostEventHandler(Object ^ sender);
 public
 ref class ConnectedEventArgs : EventArgs {
    public:
-    property int ConnectionId;
+    property int AgentId;
     ConnectedEventArgs() : EventArgs(){};
-    ConnectedEventArgs(int connectionId) : EventArgs() {
-        ConnectionId = connectionId;
+    ConnectedEventArgs(int agentId) : EventArgs() {
+        AgentId = agentId;
     };
 };
 
@@ -33,16 +33,16 @@ public
 ref class AgentMessageReceivedEventArgs : EventArgs {
    public:
     property int CommandType;
-    property int n1;
-    property int n2;
-    property String ^ s;
+    property int N1;
+    property int N2;
+    property String ^ S;
     AgentMessageReceivedEventArgs() : EventArgs(){};
     AgentMessageReceivedEventArgs(int commandType, int n1, int n2, String ^ s)
         : EventArgs() {
         CommandType = commandType;
-        this->n1 = n1;
-        this->n2 = n2;
-        this->s = s;
+        N1 = n1;
+        N2 = n2;
+        S = s;
     };
 };
 

@@ -1,53 +1,60 @@
 using System;
+using System.Text;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ipsc6.agent.network;
+using ipsc6.agent.client;
 
 namespace agent_consoleapp
 {
     class Program
     {
-        static Connector connector;
+
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(Program));
 
         static async Task Main(string[] args)
         {
+            log4net.Config.BasicConfigurator.Configure();
 
-            Console.WriteLine("Connector.Initial ...");
+            // Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.WriteLine("Console.OutputEncoding: {0}", Console.OutputEncoding);
+            Console.WriteLine("Default Encoding: {0}", Encoding.Default.EncodingName);
+            Console.WriteLine("汉字测试。");
+
             Connector.Initial();
-            Console.WriteLine("Connector.CreateInstance ...");
+            try
+            {
+                do
+                {
+                    using Connection conn = new();
+                    var server = "192.168.2.108";
+                    Console.WriteLine("Connect ... {0}", server);
+                    try
+                    {
+                        await conn.Connect(server);
+                        Console.WriteLine("Connected ... AgentId={0}", conn.AgentId);
+                    }
+                    catch (AgentConnectException exce)
+                    {
+                        Console.WriteLine("Connected ... Failed: {0}", exce);
+                        break;
+                    }
+                    await conn.LogIn("1001", "1001");
+                    Console.WriteLine("LogIn OK");
 
-            connector = Connector.CreateInstance();
-            connector.OnConnectAttemptFailed += Connector_OnConnectAttemptFailed;
-            connector.OnConnected += Connector_OnConnected;
+                    while (true)
+                    {
+                        var s = Console.ReadLine();
+                    }
 
-            Console.WriteLine("Connector.Connect ...");
-            var connectId = await ConnectAsync("192.168.2.107", 13920);
-            Console.WriteLine("_connectId={0}", connectId);
+                } while (false);
 
-            Console.WriteLine("Connector.DeallocateInstance ...");
-            Connector.DeallocateInstance(connector);
-            Console.WriteLine("Connector.Release ...");
-            Connector.Release();
-        }
-
-        static TaskCompletionSource<int> ctConnect;
-
-        static Task<int> ConnectAsync(string host, UInt16 port = 13920)
-        {
-            ctConnect = new();
-            connector.Connect(host, port);
-            return ctConnect.Task;
-        }
-
-        private static void Connector_OnConnected(int connectionId)
-        {
-            ctConnect.SetResult(connectionId);
-        }
-
-        private static void Connector_OnConnectAttemptFailed()
-        {
-            ctConnect.SetException(new SystemException("ConnectAttemptFailed"));
+            }
+            finally
+            {
+                Connector.Release();
+            }
         }
     }
 }

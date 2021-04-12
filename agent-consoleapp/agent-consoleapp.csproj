@@ -11,7 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ipsc6.agent.network\ipsc6.agent.network.vcxproj" />
+    <PackageReference Include="log4net" Version="2.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ipsc6.agent.client\ipsc6.agent.client.csproj" />
   </ItemGroup>
 
 </Project>

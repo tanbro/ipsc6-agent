@@ -14,6 +14,7 @@
       <CompileAsManaged>NetCore</CompileAsManaged>
       <RuntimeLibrary>
       </RuntimeLibrary>
+      <AdditionalOptions>/utf-8</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(RAKNET_ROOT)\build\Lib\$(RAKNET_LIB_SUFFIX)\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

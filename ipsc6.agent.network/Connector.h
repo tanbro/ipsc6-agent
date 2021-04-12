@@ -4,6 +4,7 @@
 #include "framework.h"
 /* clang-format on */
 
+#include <iostream>
 #include <RakNet/RakNetTypes.h>
 #include <RakNet/RakPeerInterface.h>
 #include "Events.h"
@@ -35,7 +36,7 @@ ref class Connector {
     String ^ _address;
     UInt16 _localPort;
     int _remoteAddrIndex;
-    int _connectionId;
+    int _agentId;
     long long _msecConnectionRequestAccepted;
     RakNet::RakPeerInterface* _peer;
     RakNet::BitStream* _sendStream;
@@ -70,12 +71,12 @@ ref class Connector {
     event ConnectedEventHandler ^ OnConnected;
     event AgentMessageReceivedEventHandler ^ OnAgentMessageReceived;
 
-    property int ConnectionId {
-        int get() { return _connectionId; }
+    property int AgentId {
+        int get() { return _agentId; }
     }
 
     property bool Connected {
-        bool get() { return _connectionId > 0; }
+        bool get() { return _agentId > 0; }
     }
 
 

@@ -19,7 +19,7 @@ Connector::Connector(UInt16 localPort, String ^ address) {
     _localPort = localPort;
     _peer = RakNet::RakPeerInterface::GetInstance();
     _sendStream = RakNet::BitStream::GetInstance();
-    _connectionId = 0;
+    _agentId = 0;
     _remoteAddrIndex = -1;
     _msecConnectionRequestAccepted = 0;
 }
@@ -38,6 +38,10 @@ void Connector::Initial() {
 }
 
 void Connector::Release() {
+    if (Thread::CurrentThread == receiveThread) {
+        throw gcnew InvalidOperationException(
+            "Can not Release Connectors from inside receive thread");
+    }
     do {
         lock l(connectors);
         for each (auto connector in connectors) {
@@ -73,6 +77,10 @@ Connector ^ Connector::CreateInstance() {
 }
 
 void Connector::DeallocateInstance(Connector ^ connector) {
+    if (Thread::CurrentThread == receiveThread) {
+        throw gcnew InvalidOperationException(
+            "Can not deallocate Connector from inside receive thread");
+    }
     do {
         lock l(connectors);
         connectors->Remove(connector);
@@ -127,7 +135,7 @@ void Connector::ReceiveThreadProc() {
             break;
         }
         // 睡眠，死循环
-        Thread::Sleep(receiveCount > 0 ? 0 : 25);
+        Thread::Sleep(receiveCount > 0 ? 0 : 1000);
     }
 }
 
@@ -145,14 +153,14 @@ void Connector::Shutdown() {
     if (_peer->IsActive()) {
         _peer->Shutdown(1000);
     }
-    _connectionId = 0;
+    _agentId = 0;
     _remoteAddrIndex = -1;
     _msecConnectionRequestAccepted = 0;
 }
 
 int Connector::Receive() {
     // 检查: 等待 connection Id 是否超时
-    if ((_remoteAddrIndex >= 0) && (_connectionId <= 0)) {
+    if ((_remoteAddrIndex >= 0) && (_agentId <= 0)) {
         auto nowMsec = DateTimeOffset::UtcNow.ToUnixTimeMilliseconds();
         if (nowMsec - _msecConnectionRequestAccepted > 5000) {
             Shutdown();
@@ -173,7 +181,7 @@ int Connector::Receive() {
     switch (msgId) {
         case ID_DISCONNECTION_NOTIFICATION: {
             _remoteAddrIndex = -1;
-            _connectionId = 0;
+            _agentId = 0;
             try {
                 OnDisconnected(this);
             } catch (NullReferenceException ^) {
@@ -182,7 +190,7 @@ int Connector::Receive() {
 
         case ID_CONNECTION_ATTEMPT_FAILED: {
             _remoteAddrIndex = -1;
-            _connectionId = 0;
+            _agentId = 0;
             try {
                 OnConnectAttemptFailed(this);
             } catch (NullReferenceException ^) {
@@ -191,7 +199,7 @@ int Connector::Receive() {
 
         case ID_INVALID_PASSWORD: {
             _remoteAddrIndex = -1;
-            _connectionId = 0;
+            _agentId = 0;
             try {
                 OnConnectAttemptFailed(this);
             } catch (NullReferenceException ^) {
@@ -200,7 +208,7 @@ int Connector::Receive() {
 
         case ID_CONNECTION_LOST: {
             _remoteAddrIndex = -1;
-            _connectionId = 0;
+            _agentId = 0;
             try {
                 OnConnectionLost(this);
             } catch (NullReferenceException ^) {
@@ -210,7 +218,7 @@ int Connector::Receive() {
         case ID_CONNECTION_REQUEST_ACCEPTED: {
             _remoteAddrIndex =
                 _peer->GetIndexFromSystemAddress(packet->systemAddress);
-            _connectionId = 0;
+            _agentId = 0;
             DoOnConnectionRequestAccepted(packet);
         } break;
 
@@ -218,9 +226,10 @@ int Connector::Receive() {
             DoOnUserPacketReceived(packet);
         } break;
 
-        default: {
-        } break;
+        default:
+            break;
     }
+
     return 1;
 }
 
@@ -228,17 +237,20 @@ void Connector::SendRawData(const BYTE* data, size_t length) {
     if (length > 1024) {
         throw gcnew InvalidOperationException("The data is too big.");
     }
-    _sendStream->Reset();
-    _sendStream->Write((RakNet::MessageID)ID_TIMESTAMP);
-    _sendStream->Write(RakNet::GetTime());
-    _sendStream->Write((RakNet::MessageID)ID_USER_PACKET_ENUM);
-    _sendStream->Write((char)0);  //压缩标志——不压缩
-    _sendStream->Write((const char*)data, length);  // user data
-    if (0 == _peer->Send(_sendStream, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0,
-                         _peer->GetSystemAddressFromIndex(_remoteAddrIndex),
-                         false)) {
-        throw gcnew InvalidOperationException("RakNetPeer Send() failed");
-    }
+    do {
+        lock l(this);
+        _sendStream->Reset();
+        _sendStream->Write((RakNet::MessageID)ID_TIMESTAMP);
+        _sendStream->Write(RakNet::GetTime());
+        _sendStream->Write((RakNet::MessageID)ID_USER_PACKET_ENUM);
+        _sendStream->Write((char)0);  //压缩标志——不压缩
+        _sendStream->Write((const char*)data, length);  // user data
+        if (0 == _peer->Send(_sendStream, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0,
+                             _peer->GetSystemAddressFromIndex(_remoteAddrIndex),
+                             false)) {
+            throw gcnew InvalidOperationException("RakNetPeer Send() failed");
+        }
+    } while (0);
 }
 
 void Connector::SendRawData(array<Byte> ^ data) {
@@ -341,9 +353,9 @@ void Connector::DoOnUserPacketReceived(RakNet::Packet* packet) {
     BYTE* ptr = user_data + sizeof(MsgType);
     switch (msgType) {
         case mtTellAgentId: {
-            _connectionId = *(int*)ptr;
+            _agentId = *(int*)ptr;
             /// 连接成功事件
-            auto e = gcnew ConnectedEventArgs(_connectionId);
+            auto e = gcnew ConnectedEventArgs(_agentId);
             try {
                 OnConnected(this, e);
             } catch (NullReferenceException ^) {
@@ -365,7 +377,7 @@ void Connector::DoOnUserPacketReceived(RakNet::Packet* packet) {
             int n2 = *(int*)ptr;
             ptr += sizeof(int);
             //
-            String ^ s = marshal_as<String ^>((char*)ptr);
+            auto s = marshal_as<String ^>((char*)ptr);
             /// 抛出事件：坐席收到来自服务器端的数据
             auto e =
                 gcnew AgentMessageReceivedEventArgs(command_type, n1, n2, s);
