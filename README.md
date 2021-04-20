@@ -36,9 +36,11 @@ cmake -G"Visual Studio 2019" -A Win32 ..
 
 从而产生 VisualStudio 项目文件。
 
-但是，生成的 `.vcxproj` 项目文件中，有错误。
+但是，生成的 `.vcxproj` 项目文件可能有错误。
 
 1. 转义字符串错误:
+
+   在低版本的 `Windows` (如 `Windows 7`) 上生成的 `.vcxproj` 项目文件中可能存在转义字符错误。
 
    使用文本编辑器打开生成的 Visual Studio 项目文件， 如 `build/Lib/LibStatic/RakNetLibStatic.vcxproj`，找到其中行如
 
