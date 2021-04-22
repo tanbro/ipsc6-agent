@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ipsc6.agent.client
 {
-    public enum AgentMessageEnum:int
+    public enum AgentMessageEnum
     {
         UNKNOWN = 0,
         REMOTE_MSG_LOGIN = 2,    // 登录

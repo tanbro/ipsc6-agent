@@ -19,9 +19,9 @@ namespace ipsc6.agent.client
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Connection));
 
         private Connector connector;
-        private TaskCompletionSource<int> tcsConnected;
+        private TaskCompletionSource<int> tcsConnect;
         private AgentMessageEnum msgtypRequest;
-        private TaskCompletionSource<AgentMessageReceivedEventArgs> tcsRequest = null;
+        private TaskCompletionSource<AgentMessageReceivedEventArgs> tcsRequest;
 
         private void Initialize(Connector connector)
         {
@@ -73,48 +73,58 @@ namespace ipsc6.agent.client
             var utfBytes = Console.OutputEncoding.GetBytes(e.S);
             e.S = Encoding.Default.GetString(utfBytes, 0, utfBytes.Length);
             logger.DebugFormat("OnAgentMessageReceived 0 - {0} {1} {2} {3}", e.CommandType, e.N1, e.N2, e.S);
-            lock (this)
+            if (e.CommandType == (int)msgtypRequest)
             {
-                if ((e.CommandType == (int)msgtypRequest) && (tcsRequest != null))
-                {
-                    /// response
-                    Task.Run(() => tcsRequest.SetResult(e));
-                    return;
-                }
-                else
-                {
-                    /// server->client event
-                    // TODO: EVENT!
-                }
+                /// response
+                Task.Run(() => tcsRequest.SetResult(e));
+            }
+            else
+            {
+                /// server->client event
+                // TODO: EVENT!
             }
         }
 
         private void Connector_OnConnectionLost(object sender)
         {
-            if (tcsConnected.Task.Status == TaskStatus.Running)
+            if (tcsConnect != null)
             {
-                Task.Run(() => tcsConnected.SetException(new AgentConnectFailedException("ConnectionLost")));
-                return;
+                if (tcsConnect.Task.Status == TaskStatus.Running)
+                {
+                    Task.Run(() =>
+                    {
+                        tcsConnect.SetException(new AgentConnectFailedException("ConnectionLost"));
+                    });
+                }
             }
         }
 
         private void Connector_OnDisconnected(object sender)
         {
-            if (tcsConnected.Task.Status == TaskStatus.Running)
+            if (tcsConnect != null)
             {
-                Task.Run(() => tcsConnected.SetException(new AgentConnectFailedException("Disconnected")));
-                return;
+                if (tcsConnect.Task.Status == TaskStatus.Running)
+                {
+                    Task.Run(() =>
+                    {
+                        tcsConnect.SetException(new AgentConnectFailedException("Disconnected"));
+                    });
+                }
+            }
+            else
+            {
+                /// TODO: 连接断开事件
             }
         }
 
         private void Connector_OnConnected(object sender, ConnectedEventArgs e)
         {
-            Task.Run(() => tcsConnected.SetResult(e.AgentId));
+            Task.Run(() => tcsConnect.SetResult(e.AgentId));
         }
 
         private void Connector_OnConnectAttemptFailed(object sender)
         {
-            Task.Run(() => tcsConnected.SetException(new AgentConnectFailedException("ConnectAttemptFailed")));
+            Task.Run(() => tcsConnect.SetException(new AgentConnectFailedException("ConnectAttemptFailed")));
         }
 
         public Connection(Connector connector)
@@ -128,21 +138,40 @@ namespace ipsc6.agent.client
             Initialize(connector);
         }
 
-        public Task<int> Connect(string host, ushort port)
+        private static readonly object connectLock = new();
+
+        public async Task<int> Connect(string host, ushort port = 0)
         {
-            tcsConnected = new();
-            connector.Connect(host, port);
-            return tcsConnected.Task;
+            lock (connectLock)
+            {
+                if (tcsConnect != null)
+                {
+                    throw new InvalidOperationException(string.Format("{0}", tcsConnect.Task.Status));
+                }
+                tcsConnect = new();
+            }
+            try
+            {
+                lock (connectLock)
+                {
+                    connector.Connect(host, port > 0 ? port : Connector.DEFAULT_REMOTE_PORT);
+                }
+                return await tcsConnect.Task;
+            }
+            finally
+            {
+                lock (connectLock)
+                {
+                    tcsConnect = null;
+                }
+            }
         }
 
-        public Task<int> Connect(string host)
-        {
-            return Connect(host, Connector.DEFAULT_REMOTE_PORT);
-        }
+        private static readonly object requestLock = new();
 
         public async Task<AgentMessageReceivedEventArgs> Request(AgentRequestArgs args, int millisecondsTimeout = 2500)
         {
-            lock (this)
+            lock (requestLock)
             {
                 if (tcsRequest != null)
                 {
@@ -150,17 +179,12 @@ namespace ipsc6.agent.client
                 }
                 tcsRequest = new TaskCompletionSource<AgentMessageReceivedEventArgs>();
             }
-            msgtypRequest = args.Type;
             try
             {
-                try
+                lock (requestLock)
                 {
+                    msgtypRequest = args.Type;
                     connector.SendAgentMessage(connector.AgentId, (int)args.Type, args.N, args.S);
-                }
-                catch
-                {
-                    msgtypRequest = AgentMessageEnum.UNKNOWN;
-                    throw;
                 }
                 var task = await Task.WhenAny(tcsRequest.Task, Task.Delay(millisecondsTimeout));
                 if (task != tcsRequest.Task)
@@ -171,8 +195,11 @@ namespace ipsc6.agent.client
             }
             finally
             {
-                msgtypRequest = AgentMessageEnum.UNKNOWN;
-                tcsRequest = null;
+                lock (requestLock)
+                {
+                    msgtypRequest = AgentMessageEnum.UNKNOWN;
+                    tcsRequest = null;
+                }
             }
         }
 
@@ -182,8 +209,6 @@ namespace ipsc6.agent.client
             var msg = new AgentRequestArgs(AgentMessageEnum.REMOTE_MSG_LOGIN, 0, s);
             await Request(msg);
         }
-
-
 
     }
 }
