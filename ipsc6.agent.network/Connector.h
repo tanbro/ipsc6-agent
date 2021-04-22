@@ -22,7 +22,7 @@ static RakNet::MessageID getPacketIdentifier(const RakNet::Packet* packet);
 public
 ref class Connector {
    public:
-    Connector(UInt16 localPort, String ^ address);
+    Connector(unsigned short localPort, String ^ address);
     ~Connector();
 
    private:
@@ -34,7 +34,8 @@ ref class Connector {
     static void ReceiveThreadProc();
 
     String ^ _address;
-    UInt16 _localPort;
+    unsigned short _localPort;
+    String ^ _boundAddress;
     int _remoteAddrIndex;
     int _agentId;
     long long _msecConnectionRequestAccepted;
@@ -50,20 +51,21 @@ ref class Connector {
     void DoOnUserPacketReceived(RakNet::Packet* packet);
 
    public:
-    static const UInt16 DEFAULT_REMOTE_PORT = 13920;
+    static const unsigned short DEFAULT_REMOTE_PORT = 13920;
 
     static void Initial();
     static void Release();
 
-    static Connector ^ CreateInstance(UInt16 localPort, String ^ address);
-    static Connector ^ CreateInstance(UInt16 localPort);
+    static Connector ^
+        CreateInstance(unsigned short localPort, String ^ address);
+    static Connector ^ CreateInstance(unsigned short localPort);
     static Connector ^ CreateInstance();
     static void DeallocateInstance(Connector ^ connector);
 
-    void Connect(String ^ host, UInt16 remotePort);
+    void Connect(String ^ host, unsigned short remotePort);
     void Connect(String ^ host);
-    void SendRawData(array<Byte>^ data);
-    void SendAgentMessage(int agentId, int commandType, int n, String^ s);
+    void SendRawData(array<Byte> ^ data);
+    void SendAgentMessage(int agentId, int commandType, int n, String ^ s);
 
     event ConnectAttemptFailedEventHandler ^ OnConnectAttemptFailed;
     event DisconnectedEventHandler ^ OnDisconnected;
@@ -79,6 +81,7 @@ ref class Connector {
         bool get() { return _agentId > 0; }
     }
 
+    property String ^ BoundAddress { String ^ get() { return _boundAddress; } }
 
 };  // ref class Connector
 

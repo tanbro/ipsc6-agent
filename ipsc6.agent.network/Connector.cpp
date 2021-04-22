@@ -14,7 +14,7 @@ namespace ipsc6 {
 namespace agent {
 namespace network {
 
-Connector::Connector(UInt16 localPort, String ^ address) {
+Connector::Connector(unsigned short localPort, String ^ address) {
     _address = address;
     _localPort = localPort;
     _peer = RakNet::RakPeerInterface::GetInstance();
@@ -49,11 +49,14 @@ void Connector::Release() {
         }
         receiveThreadStopping = true;
     } while (0);
-    receiveThread->Join();
+    if (receiveThread->IsAlive) {
+        receiveThread->Join();
+    }
     connectors->Clear();
 }
 
-Connector ^ Connector::CreateInstance(UInt16 localPort, String ^ address) {
+Connector ^
+    Connector::CreateInstance(unsigned short localPort, String ^ address) {
     auto connector = gcnew Connector(localPort, address);
     connector->StartUp();
     do {
@@ -68,7 +71,7 @@ Connector ^ Connector::CreateInstance(UInt16 localPort, String ^ address) {
     return connector;
 }
 
-Connector ^ Connector::CreateInstance(UInt16 localPort) {
+Connector ^ Connector::CreateInstance(unsigned short localPort) {
     return CreateInstance(localPort, "");
 }
 
@@ -94,7 +97,7 @@ void Connector::DeallocateInstance(Connector ^ connector) {
     connector->Shutdown();
 }
 
-void Connector::Connect(String ^ host, UInt16 remotePort) {
+void Connector::Connect(String ^ host, unsigned short remotePort) {
     static const char CONNECT_PASSWORD[] = "Rumpelstiltskin";
     marshal_context ^ context = gcnew marshal_context();
     try {
@@ -140,12 +143,21 @@ void Connector::ReceiveThreadProc() {
 }
 
 void Connector::StartUp() {
-    RakNet::SocketDescriptor socketDescriptor(0, "");
-    RakNet::StartupResult startupResult =
-        _peer->Startup(1, &socketDescriptor, 1);
-    if (startupResult != RakNet::RAKNET_STARTED) {
-        throw gcnew InvalidOperationException(String::Format(
-            "RakNetPeer Startup failed(code={0})", (int)startupResult));
+    marshal_context ^ context = gcnew marshal_context();
+    try {
+        lock l(this);
+        const char* address_cstr = context->marshal_as<const char*>(_address);
+        RakNet::SocketDescriptor socketDescriptor(_localPort, address_cstr);
+        RakNet::StartupResult startupResult =
+            _peer->Startup(1, &socketDescriptor, 1);
+        if (startupResult != RakNet::RAKNET_STARTED) {
+            throw gcnew InvalidOperationException(String::Format(
+                "RakNetPeer Startup failed(code={0})", (int)startupResult));
+        }
+        _boundAddress =
+            marshal_as<String ^>((char*)_peer->GetMyBoundAddress().ToString());
+    } finally {
+        delete context;
     }
 }
 
@@ -153,6 +165,7 @@ void Connector::Shutdown() {
     if (_peer->IsActive()) {
         _peer->Shutdown(1000);
     }
+    _boundAddress = "";
     _agentId = 0;
     _remoteAddrIndex = -1;
     _msecConnectionRequestAccepted = 0;
@@ -378,9 +391,12 @@ void Connector::DoOnUserPacketReceived(RakNet::Packet* packet) {
             ptr += sizeof(int);
             //
             auto s = marshal_as<String ^>((char*)ptr);
+            auto utfBytes = System::Console::OutputEncoding->GetBytes(s);
+            auto encodedString = System::Text::Encoding::Default->GetString(
+                utfBytes, 0, utfBytes->Length);
             /// 抛出事件：坐席收到来自服务器端的数据
-            auto e =
-                gcnew AgentMessageReceivedEventArgs(command_type, n1, n2, s);
+            auto e = gcnew AgentMessageReceivedEventArgs(command_type, n1, n2,
+                                                         encodedString);
             try {
                 OnAgentMessageReceived(this, e);
             } catch (NullReferenceException ^) {

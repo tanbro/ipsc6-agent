@@ -28,6 +28,6 @@ namespace ipsc6.agent.client
         public AgentRequestTimeoutException() { }
         public AgentRequestTimeoutException(string message) : base(message) { }
         public AgentRequestTimeoutException(string message, Exception inner) : base(message, inner) { }
-
     }
+
 }

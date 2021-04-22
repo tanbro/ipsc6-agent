@@ -16,20 +16,21 @@ using System.Windows.Shapes;
 namespace ipsc6_agent_app
 {
 
-    public class MyData
-    {
-        public string Prop1 = "value1";
-        public string Prop2 = "value2";
-    }
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
+        public Dictionary<string, string> MyDict;
         public MainWindow()
         {
             InitializeComponent();
+
+            //
+            MyDict = new();
+            MyDict["key1"] = "This is value1";
+            MyDict["key2"] = "This is value2";
+            DataContext = MyDict;
         }
     }
 }

@@ -5,11 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ipsc6_agent_app"
         mc:Ignorable="d"
-        Title="MainWindow" Height="120" Width="800">
-    <Window.Resources>
-        <local:MyData x:Key="myDataSource" />
-    </Window.Resources>
+        Title="MainWindow" Height="120" Width="800"
+        >
     <Grid>
-        <Label Content="{Binding Source={StaticResource myDataSource}, Path=Prop1}"></Label>
+        <Label Content="{Binding [key1]}"/>
     </Grid>
 </Window>

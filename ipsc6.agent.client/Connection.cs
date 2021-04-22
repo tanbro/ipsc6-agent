@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-
 using ipsc6.agent.network;
 
 
@@ -25,7 +23,6 @@ namespace ipsc6.agent.client
 
         private void Initialize(Connector connector)
         {
-            logger.Info("Initialize");
             //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             this.connector = connector;
             this.connector.OnConnectAttemptFailed += Connector_OnConnectAttemptFailed;
@@ -68,25 +65,47 @@ namespace ipsc6.agent.client
             get { return connector.Connected; }
         }
 
+        public delegate void ServerSendEventHandler(object sender, AgentMessageReceivedEventArgs e);
+        public event ServerSendEventHandler OnServerSendEventReceived;
+
         private void Connector_OnAgentMessageReceived(object sender, AgentMessageReceivedEventArgs e)
         {
-            var utfBytes = Console.OutputEncoding.GetBytes(e.S);
-            e.S = Encoding.Default.GetString(utfBytes, 0, utfBytes.Length);
-            logger.DebugFormat("OnAgentMessageReceived 0 - {0} {1} {2} {3}", e.CommandType, e.N1, e.N2, e.S);
-            if (e.CommandType == (int)msgtypRequest)
+            //var utfBytes = Console.OutputEncoding.GetBytes(e.S);
+            //e.S = Encoding.Default.GetString(utfBytes, 0, utfBytes.Length);
+            logger.DebugFormat("{0} OnAgentMessageReceived: {1} {2} {3} {4}", connector.BoundAddress, e.CommandType, e.N1, e.N2, e.S);
+            if (null != tcsRequest)
             {
-                /// response
-                Task.Run(() => tcsRequest.SetResult(e));
+                if (e.CommandType == (int)msgtypRequest)
+                {
+                    /// response
+                    if (e.N1 == 1)
+                    {
+                        Task.Run(() => tcsRequest.SetResult(e));
+                    }
+                    else
+                    {
+                        var errMsg = string.Format("Code: {0}", e.CommandType);
+                        Task.Run(() => tcsRequest.SetException(new ErrorResponseException(errMsg)));
+                    }
+
+                }
+                else if (e.CommandType < 1)
+                {
+                    var errMsg = string.Format("ServerSendError Code: {0}", e.CommandType);
+                    Task.Run(() => tcsRequest.SetException(new ServerSendError(errMsg)));
+                }
             }
             else
             {
                 /// server->client event
                 // TODO: EVENT!
+                Task.Run(() => OnServerSendEventReceived?.Invoke(this, e));
             }
         }
 
         private void Connector_OnConnectionLost(object sender)
         {
+            logger.WarnFormat("{0} OnConnectionLost", connector.BoundAddress);
             if (tcsConnect != null)
             {
                 if (tcsConnect.Task.Status == TaskStatus.Running)
@@ -101,6 +120,7 @@ namespace ipsc6.agent.client
 
         private void Connector_OnDisconnected(object sender)
         {
+            logger.InfoFormat("{0} OnDisconnected", connector.BoundAddress);
             if (tcsConnect != null)
             {
                 if (tcsConnect.Task.Status == TaskStatus.Running)
@@ -119,11 +139,13 @@ namespace ipsc6.agent.client
 
         private void Connector_OnConnected(object sender, ConnectedEventArgs e)
         {
+            logger.InfoFormat("{0} OnConnected", connector.BoundAddress);
             Task.Run(() => tcsConnect.SetResult(e.AgentId));
         }
 
         private void Connector_OnConnectAttemptFailed(object sender)
         {
+            logger.InfoFormat("{0} OnConnectAttemptFailed", connector.BoundAddress);
             Task.Run(() => tcsConnect.SetException(new AgentConnectFailedException("ConnectAttemptFailed")));
         }
 
@@ -134,6 +156,7 @@ namespace ipsc6.agent.client
 
         public Connection(ushort localPort = 0, string address = "")
         {
+            logger.InfoFormat("{0} CreateInstance(localPort={1}, address={2})", typeof(Connector), localPort, address);
             var connector = Connector.CreateInstance(localPort, address);
             Initialize(connector);
         }
@@ -142,6 +165,8 @@ namespace ipsc6.agent.client
 
         public async Task<int> Connect(string host, ushort port = 0)
         {
+            port = port > 0 ? port : Connector.DEFAULT_REMOTE_PORT;
+            logger.InfoFormat("Connect(host={0}, port={1}) ...", host, port);
             lock (connectLock)
             {
                 if (tcsConnect != null)
@@ -154,7 +179,7 @@ namespace ipsc6.agent.client
             {
                 lock (connectLock)
                 {
-                    connector.Connect(host, port > 0 ? port : Connector.DEFAULT_REMOTE_PORT);
+                    connector.Connect(host, port);
                 }
                 return await tcsConnect.Task;
             }
@@ -169,7 +194,7 @@ namespace ipsc6.agent.client
 
         private static readonly object requestLock = new();
 
-        public async Task<AgentMessageReceivedEventArgs> Request(AgentRequestArgs args, int millisecondsTimeout = 2500)
+        public async Task<AgentMessageReceivedEventArgs> Request(AgentRequestArgs args, int millisecondsTimeout = 5000)
         {
             lock (requestLock)
             {
@@ -205,9 +230,25 @@ namespace ipsc6.agent.client
 
         public async Task LogIn(string username, string password)
         {
-            var s = string.Format("{0}|{1}|1|0|{0}", username, password);
-            var msg = new AgentRequestArgs(AgentMessageEnum.REMOTE_MSG_LOGIN, 0, s);
-            await Request(msg);
+            await Request(new AgentRequestArgs(
+                AgentMessageEnum.REMOTE_MSG_LOGIN,
+                0,
+                string.Format("{0}|{1}|1|0|{0}", username, password)
+            ));
+        }
+
+        public async Task LogOut()
+        {
+            await Request(new AgentRequestArgs(AgentMessageEnum.REMOTE_MSG_LOGIN));
+        }
+
+        public async Task SignOn(string groupId)
+        {
+            await Request(new AgentRequestArgs(
+                AgentMessageEnum.REMOTE_MSG_SIGNON,
+                0,
+                groupId
+            ));
         }
 
     }
