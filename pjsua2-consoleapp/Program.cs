@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using org.pjsip.pjsua2;
 
@@ -20,40 +20,38 @@ namespace pjsua2_consoleapp
             try
             {
                 // Create endpoint
-                Endpoint ep = new();
+                using Endpoint ep = new();
                 ep.libCreate();
-                // Initialize endpoint
-                EpConfig epConfig = new();
-                ep.libInit(epConfig);
-                // Create SIP transport. Error handling sample is shown
-                TransportConfig sipTpConfig = new();
-                sipTpConfig.port = 5060;
-                ep.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
-                // Start the library
-                ep.libStart();
+                try
+                {
+                    // Initialize endpoint
+                    EpConfig epConfig = new();
+                    ep.libInit(epConfig);
+                    // Create SIP transport. Error handling sample is shown
+                    TransportConfig sipTpConfig = new();
+                    sipTpConfig.port = 5060;
+                    ep.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
+                    // Start the library
+                    ep.libStart();
 
-                AccountConfig acfg = new();
-                acfg.idUri = "sip:test@pjsip.org";
-                acfg.regConfig.registrarUri = "sip:pjsip.org";
-                AuthCredInfo cred = new("digest", "*", "test", 0, "secret");
-                acfg.sipConfig.authCreds.Add(cred);
-                // Create the account
-                MyAccount acc = new();
-                acc.create(acfg);
+                    AccountConfig acfg = new();
+                    acfg.idUri = "sip:test@pjsip.org";
+                    acfg.regConfig.registrarUri = "sip:pjsip.org";
+                    AuthCredInfo cred = new("digest", "*", "test", 0, "secret");
+                    acfg.sipConfig.authCreds.Add(cred);
 
-                // Here we don't have anything else to do..
-                Thread.Sleep(10000);
+                    // Create the account
+                    using MyAccount acc = new();
 
-                /* Explicitly delete the account.
-                 * This is to avoid GC to delete the endpoint first before deleting
-                 * the account.
-                 */
-                acc.Dispose();
+                    // Here we don't have anything else to do..
+                    Thread.Sleep(10000);
 
-                // Explicitly destroy and delete endpoint
-                ep.libDestroy();
-                ep.Dispose();
-
+                }
+                finally
+                {
+                    // Explicitly destroy and delete endpoint
+                    ep.libDestroy();
+                }
             }
             catch (Exception e)
             {
