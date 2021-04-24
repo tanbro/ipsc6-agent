@@ -1,4 +1,4 @@
-@startuml
+@startuml "Classes Diagram"
 
 skinparam DefaultFontSize 14
 
