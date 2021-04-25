@@ -59,8 +59,9 @@ namespace ipsc6.agent.client
             get { return connector.Connected; }
         }
 
-        public delegate void ServerSendEventHandler(object sender, AgentMessageReceivedEventArgs e);
         public event ServerSendEventHandler OnServerSendEventReceived;
+        public event DisconnectedEventHandler OnDisconnected;
+        public event ConnectionLostEventHandler OnConnectionLost;
 
         private void Connector_OnAgentMessageReceived(object sender, AgentMessageReceivedEventArgs e)
         {
@@ -92,7 +93,6 @@ namespace ipsc6.agent.client
             else
             {
                 /// server->client event
-                // TODO: EVENT!
                 Task.Run(() => OnServerSendEventReceived?.Invoke(this, e));
             }
         }
@@ -109,6 +109,11 @@ namespace ipsc6.agent.client
                         tcsConnect.SetException(new AgentConnectFailedException("ConnectionLost"));
                     });
                 }
+            }
+            else
+            {
+                /// 连接丢失事件
+                Task.Run(() => OnConnectionLost?.Invoke(this));
             }
         }
 
@@ -127,7 +132,8 @@ namespace ipsc6.agent.client
             }
             else
             {
-                /// TODO: 连接断开事件
+                /// 连接断开事件
+                Task.Run(() => OnDisconnected?.Invoke(this));
             }
         }
 

@@ -31,6 +31,18 @@ namespace SampleWinFormsApp
             conn2 = new();
 
             conn1.OnServerSendEventReceived += Conn_OnServerSendEventReceived;
+            conn1.OnDisconnected += Conn1_OnDisconnected;
+            conn1.OnConnectionLost += Conn1_OnConnectionLost;
+        }
+
+        private void Conn1_OnConnectionLost(object sender)
+        {
+            label_ConnectStatus1.Text = "ConnectionLost";
+        }
+
+        private void Conn1_OnDisconnected(object sender)
+        {
+            label_ConnectStatus1.Text = "Disconnected";
         }
 
         private void Conn_OnServerSendEventReceived(object sender, AgentMessageReceivedEventArgs e)
@@ -50,15 +62,17 @@ namespace SampleWinFormsApp
 
         private async void button_Connect1_Click(object sender, EventArgs e)
         {
+            bool ok = false;
             label_ConnectStatus1.Text = "Connecting ...";
             try
             {
                 await conn1.Connect(textBox_Server1.Text);
+                ok = true;
             }
-            catch(Exception err)
+            catch (AgentConnectException err)
             {
                 label_ConnectStatus1.Text = string.Format("Connect failed: {0}", err.Message);
-                throw;
+                return;
             }
             label_ConnectStatus1.Text = "Connected.";
         }
@@ -81,6 +95,14 @@ namespace SampleWinFormsApp
         private async void button_LogOut_Click(object sender, EventArgs e)
         {
             await conn1.Request(new AgentRequestArgs(AgentMessageEnum.REMOTE_MSG_RELEASE));
+        }
+
+        private async void button_Req1_Click(object sender, EventArgs e)
+        {
+            var t = (AgentMessageEnum)numericUpDown_ReqType1.Value;
+            var n = (int)numericUpDown_ReqNum1.Value;
+            var s = textBox_ReqContent1.Text.Trim();
+            await conn1.Request(new AgentRequestArgs(t, n, s));
         }
     }
 }

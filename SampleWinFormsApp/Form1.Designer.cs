@@ -35,17 +35,26 @@ namespace SampleWinFormsApp
             this.textBox_Server2 = new System.Windows.Forms.TextBox();
             this.button_Connect1 = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.button_LogOut = new System.Windows.Forms.Button();
+            this.textBox_Psw1 = new System.Windows.Forms.TextBox();
+            this.textBox_User1 = new System.Windows.Forms.TextBox();
+            this.button_LogIn1 = new System.Windows.Forms.Button();
             this.label_ConnectStatus1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.label_ConnectStatus2 = new System.Windows.Forms.Label();
             this.button_Connect2 = new System.Windows.Forms.Button();
             this.textBox_Log1 = new System.Windows.Forms.TextBox();
-            this.button_LogIn1 = new System.Windows.Forms.Button();
-            this.textBox_User1 = new System.Windows.Forms.TextBox();
-            this.textBox_Psw1 = new System.Windows.Forms.TextBox();
-            this.button_LogOut = new System.Windows.Forms.Button();
+            this.numericUpDown_ReqType1 = new System.Windows.Forms.NumericUpDown();
+            this.textBox_ReqContent1 = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.button_Req1 = new System.Windows.Forms.Button();
+            this.numericUpDown_ReqNum1 = new System.Windows.Forms.NumericUpDown();
+            this.label5 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum1)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -94,6 +103,13 @@ namespace SampleWinFormsApp
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.numericUpDown_ReqNum1);
+            this.groupBox1.Controls.Add(this.button_Req1);
+            this.groupBox1.Controls.Add(this.label5);
+            this.groupBox1.Controls.Add(this.label4);
+            this.groupBox1.Controls.Add(this.label3);
+            this.groupBox1.Controls.Add(this.textBox_ReqContent1);
+            this.groupBox1.Controls.Add(this.numericUpDown_ReqType1);
             this.groupBox1.Controls.Add(this.button_LogOut);
             this.groupBox1.Controls.Add(this.textBox_Psw1);
             this.groupBox1.Controls.Add(this.textBox_User1);
@@ -108,6 +124,42 @@ namespace SampleWinFormsApp
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "groupBox1";
+            // 
+            // button_LogOut
+            // 
+            this.button_LogOut.Location = new System.Drawing.Point(319, 134);
+            this.button_LogOut.Name = "button_LogOut";
+            this.button_LogOut.Size = new System.Drawing.Size(75, 23);
+            this.button_LogOut.TabIndex = 9;
+            this.button_LogOut.Text = "Log Out";
+            this.button_LogOut.UseVisualStyleBackColor = true;
+            this.button_LogOut.Click += new System.EventHandler(this.button_LogOut_Click);
+            // 
+            // textBox_Psw1
+            // 
+            this.textBox_Psw1.Location = new System.Drawing.Point(131, 134);
+            this.textBox_Psw1.Name = "textBox_Psw1";
+            this.textBox_Psw1.Size = new System.Drawing.Size(100, 23);
+            this.textBox_Psw1.TabIndex = 8;
+            this.textBox_Psw1.Text = "1001";
+            // 
+            // textBox_User1
+            // 
+            this.textBox_User1.Location = new System.Drawing.Point(25, 134);
+            this.textBox_User1.Name = "textBox_User1";
+            this.textBox_User1.Size = new System.Drawing.Size(100, 23);
+            this.textBox_User1.TabIndex = 7;
+            this.textBox_User1.Text = "1001";
+            // 
+            // button_LogIn1
+            // 
+            this.button_LogIn1.Location = new System.Drawing.Point(238, 134);
+            this.button_LogIn1.Name = "button_LogIn1";
+            this.button_LogIn1.Size = new System.Drawing.Size(75, 23);
+            this.button_LogIn1.TabIndex = 6;
+            this.button_LogIn1.Text = "Log In";
+            this.button_LogIn1.UseVisualStyleBackColor = true;
+            this.button_LogIn1.Click += new System.EventHandler(this.button_LogIn1_Click);
             // 
             // label_ConnectStatus1
             // 
@@ -161,41 +213,63 @@ namespace SampleWinFormsApp
             this.textBox_Log1.TabIndex = 7;
             this.textBox_Log1.WordWrap = false;
             // 
-            // button_LogIn1
+            // numericUpDown_ReqType1
             // 
-            this.button_LogIn1.Location = new System.Drawing.Point(238, 134);
-            this.button_LogIn1.Name = "button_LogIn1";
-            this.button_LogIn1.Size = new System.Drawing.Size(75, 23);
-            this.button_LogIn1.TabIndex = 6;
-            this.button_LogIn1.Text = "Log In";
-            this.button_LogIn1.UseVisualStyleBackColor = true;
-            this.button_LogIn1.Click += new System.EventHandler(this.button_LogIn1_Click);
+            this.numericUpDown_ReqType1.Location = new System.Drawing.Point(27, 234);
+            this.numericUpDown_ReqType1.Name = "numericUpDown_ReqType1";
+            this.numericUpDown_ReqType1.Size = new System.Drawing.Size(60, 23);
+            this.numericUpDown_ReqType1.TabIndex = 10;
             // 
-            // textBox_User1
+            // textBox_ReqContent1
             // 
-            this.textBox_User1.Location = new System.Drawing.Point(25, 134);
-            this.textBox_User1.Name = "textBox_User1";
-            this.textBox_User1.Size = new System.Drawing.Size(100, 23);
-            this.textBox_User1.TabIndex = 7;
-            this.textBox_User1.Text = "1001";
+            this.textBox_ReqContent1.Location = new System.Drawing.Point(158, 233);
+            this.textBox_ReqContent1.Name = "textBox_ReqContent1";
+            this.textBox_ReqContent1.Size = new System.Drawing.Size(155, 23);
+            this.textBox_ReqContent1.TabIndex = 11;
             // 
-            // textBox_Psw1
+            // label3
             // 
-            this.textBox_Psw1.Location = new System.Drawing.Point(131, 134);
-            this.textBox_Psw1.Name = "textBox_Psw1";
-            this.textBox_Psw1.Size = new System.Drawing.Size(100, 23);
-            this.textBox_Psw1.TabIndex = 8;
-            this.textBox_Psw1.Text = "1001";
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(25, 214);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(62, 17);
+            this.label3.TabIndex = 12;
+            this.label3.Text = "MsgType";
             // 
-            // button_LogOut
+            // label4
             // 
-            this.button_LogOut.Location = new System.Drawing.Point(319, 134);
-            this.button_LogOut.Name = "button_LogOut";
-            this.button_LogOut.Size = new System.Drawing.Size(75, 23);
-            this.button_LogOut.TabIndex = 9;
-            this.button_LogOut.Text = "Log Out";
-            this.button_LogOut.UseVisualStyleBackColor = true;
-            this.button_LogOut.Click += new System.EventHandler(this.button_LogOut_Click);
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(158, 213);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(79, 17);
+            this.label4.TabIndex = 13;
+            this.label4.Text = "MsgContent";
+            // 
+            // button_Req1
+            // 
+            this.button_Req1.Location = new System.Drawing.Point(319, 234);
+            this.button_Req1.Name = "button_Req1";
+            this.button_Req1.Size = new System.Drawing.Size(75, 23);
+            this.button_Req1.TabIndex = 14;
+            this.button_Req1.Text = "Send Request";
+            this.button_Req1.UseVisualStyleBackColor = true;
+            this.button_Req1.Click += new System.EventHandler(this.button_Req1_Click);
+            // 
+            // numericUpDown_ReqNum1
+            // 
+            this.numericUpDown_ReqNum1.Location = new System.Drawing.Point(92, 233);
+            this.numericUpDown_ReqNum1.Name = "numericUpDown_ReqNum1";
+            this.numericUpDown_ReqNum1.Size = new System.Drawing.Size(60, 23);
+            this.numericUpDown_ReqNum1.TabIndex = 15;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(92, 213);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(62, 17);
+            this.label5.TabIndex = 13;
+            this.label5.Text = "MsgNum";
             // 
             // Form1
             // 
@@ -213,6 +287,8 @@ namespace SampleWinFormsApp
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -235,6 +311,13 @@ namespace SampleWinFormsApp
         private System.Windows.Forms.TextBox textBox_Psw1;
         private System.Windows.Forms.TextBox textBox_User1;
         private System.Windows.Forms.Button button_LogOut;
+        private System.Windows.Forms.NumericUpDown numericUpDown_ReqType1;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox textBox_ReqContent1;
+        private System.Windows.Forms.Button button_Req1;
+        private System.Windows.Forms.NumericUpDown numericUpDown_ReqNum1;
+        private System.Windows.Forms.Label label5;
     }
 }
 
