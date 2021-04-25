@@ -18,11 +18,7 @@ delegate void ConnectionLostEventHandler(Object ^ sender);
 public
 ref class ConnectedEventArgs : EventArgs {
    public:
-    property int AgentId;
     ConnectedEventArgs() : EventArgs(){};
-    ConnectedEventArgs(int agentId) : EventArgs() {
-        AgentId = agentId;
-    };
 };
 
 public

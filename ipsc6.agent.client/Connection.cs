@@ -8,7 +8,6 @@ using ipsc6.agent.network;
 
 namespace ipsc6.agent.client
 {
-
     public class Connection : IDisposable
     {
         // Flag: Has Dispose already been called?
@@ -17,7 +16,7 @@ namespace ipsc6.agent.client
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Connection));
 
         private Connector connector;
-        private TaskCompletionSource<int> tcsConnect;
+        private TaskCompletionSource tcsConnect;
         private AgentMessageEnum msgtypRequest;
         private TaskCompletionSource<AgentMessageReceivedEventArgs> tcsRequest;
 
@@ -53,11 +52,6 @@ namespace ipsc6.agent.client
                     disposed = true;
                 }
             }
-        }
-
-        public int AgentId
-        {
-            get { return connector.AgentId; }
         }
 
         public bool Connected
@@ -140,7 +134,7 @@ namespace ipsc6.agent.client
         private void Connector_OnConnected(object sender, ConnectedEventArgs e)
         {
             logger.InfoFormat("{0} OnConnected", connector.BoundAddress);
-            Task.Run(() => tcsConnect.SetResult(e.AgentId));
+            Task.Run(() => tcsConnect.SetResult());
         }
 
         private void Connector_OnConnectAttemptFailed(object sender)
@@ -163,7 +157,7 @@ namespace ipsc6.agent.client
 
         private static readonly object connectLock = new();
 
-        public async Task<int> Connect(string host, ushort port = 0)
+        public async Task Connect(string host, ushort port = 0)
         {
             port = port > 0 ? port : Connector.DEFAULT_REMOTE_PORT;
             logger.InfoFormat("Connect(host={0}, port={1}) ...", host, port);
@@ -181,7 +175,7 @@ namespace ipsc6.agent.client
                 {
                     connector.Connect(host, port);
                 }
-                return await tcsConnect.Task;
+                await tcsConnect.Task;
             }
             finally
             {
@@ -209,7 +203,7 @@ namespace ipsc6.agent.client
                 lock (requestLock)
                 {
                     msgtypRequest = args.Type;
-                    connector.SendAgentMessage(connector.AgentId, (int)args.Type, args.N, args.S);
+                    connector.SendAgentMessage((int)args.Type, args.N, args.S);
                 }
                 var task = await Task.WhenAny(tcsRequest.Task, Task.Delay(millisecondsTimeout));
                 if (task != tcsRequest.Task)

@@ -72,11 +72,10 @@ namespace SampleWinFormsApp
         private async void button_LogIn1_Click(object sender, EventArgs e)
         {
             var s = string.Format("{0}|{1}|1|0|{0}", textBox_User1.Text, textBox_Psw1.Text);
-            await conn1.Request(new AgentRequestArgs(
-                AgentMessageEnum.REMOTE_MSG_LOGIN,
-                0,
-                s
+            var res = await conn1.Request(new AgentRequestArgs(
+                AgentMessageEnum.REMOTE_MSG_LOGIN, s
             ));
+            MessageBox.Show(string.Format("登录成功。AgentID={0}", res.N2));
         }
 
         private async void button_LogOut_Click(object sender, EventArgs e)

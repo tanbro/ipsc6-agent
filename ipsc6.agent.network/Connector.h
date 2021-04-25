@@ -37,7 +37,6 @@ ref class Connector {
     unsigned short _localPort;
     String ^ _boundAddress;
     int _remoteAddrIndex;
-    int _agentId;
     long long _msecConnectionRequestAccepted;
     RakNet::RakPeerInterface* _peer;
     RakNet::BitStream* _sendStream;
@@ -65,7 +64,7 @@ ref class Connector {
     void Connect(String ^ host, unsigned short remotePort);
     void Connect(String ^ host);
     void SendRawData(array<Byte> ^ data);
-    void SendAgentMessage(int agentId, int commandType, int n, String ^ s);
+    void SendAgentMessage(int commandType, int n, String ^ s);
 
     event ConnectAttemptFailedEventHandler ^ OnConnectAttemptFailed;
     event DisconnectedEventHandler ^ OnDisconnected;
@@ -73,15 +72,13 @@ ref class Connector {
     event ConnectedEventHandler ^ OnConnected;
     event AgentMessageReceivedEventHandler ^ OnAgentMessageReceived;
 
-    property int AgentId {
-        int get() { return _agentId; }
-    }
-
-    property bool Connected {
-        bool get() { return _agentId > 0; }
-    }
-
+    // clang-format off
     property String ^ BoundAddress { String ^ get() { return _boundAddress; } }
+        // clang-format on
+
+        // clang-format off
+    property bool Connected { bool get() { return _remoteAddrIndex>=0; } }
+    // clang-format on
 
 };  // ref class Connector
 

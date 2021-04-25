@@ -2,9 +2,9 @@
 #include <RakNet/BitStream.h>
 #include <RakNet/GetTime.h>
 #include <RakNet/MessageIdentifiers.h>
-#include <msclr\lock.h>
-#include <msclr\marshal.h>
-#include <msclr\marshal_cppstd.h>
+#include <msclr/lock.h>
+#include <msclr/marshal.h>
+#include <msclr/marshal_cppstd.h>
 #include <stdexcept>
 
 using namespace msclr;
@@ -19,7 +19,6 @@ Connector::Connector(unsigned short localPort, String ^ address) {
     _localPort = localPort;
     _peer = RakNet::RakPeerInterface::GetInstance();
     _sendStream = RakNet::BitStream::GetInstance();
-    _agentId = 0;
     _remoteAddrIndex = -1;
     _msecConnectionRequestAccepted = 0;
 }
@@ -166,24 +165,11 @@ void Connector::Shutdown() {
         _peer->Shutdown(1000);
     }
     _boundAddress = "";
-    _agentId = 0;
     _remoteAddrIndex = -1;
     _msecConnectionRequestAccepted = 0;
 }
 
 int Connector::Receive() {
-    // 检查: 等待 connection Id 是否超时
-    if ((_remoteAddrIndex >= 0) && (_agentId <= 0)) {
-        auto nowMsec = DateTimeOffset::UtcNow.ToUnixTimeMilliseconds();
-        if (nowMsec - _msecConnectionRequestAccepted > 5000) {
-            Shutdown();
-            try {
-                OnConnectAttemptFailed(this);
-            } catch (NullReferenceException ^) {
-            }
-        }
-    }
-
     RakNet::Packet* packet = _peer->Receive();
 
     if (nullptr == packet) {
@@ -194,7 +180,6 @@ int Connector::Receive() {
     switch (msgId) {
         case ID_DISCONNECTION_NOTIFICATION: {
             _remoteAddrIndex = -1;
-            _agentId = 0;
             try {
                 OnDisconnected(this);
             } catch (NullReferenceException ^) {
@@ -203,7 +188,6 @@ int Connector::Receive() {
 
         case ID_CONNECTION_ATTEMPT_FAILED: {
             _remoteAddrIndex = -1;
-            _agentId = 0;
             try {
                 OnConnectAttemptFailed(this);
             } catch (NullReferenceException ^) {
@@ -212,7 +196,6 @@ int Connector::Receive() {
 
         case ID_INVALID_PASSWORD: {
             _remoteAddrIndex = -1;
-            _agentId = 0;
             try {
                 OnConnectAttemptFailed(this);
             } catch (NullReferenceException ^) {
@@ -221,7 +204,6 @@ int Connector::Receive() {
 
         case ID_CONNECTION_LOST: {
             _remoteAddrIndex = -1;
-            _agentId = 0;
             try {
                 OnConnectionLost(this);
             } catch (NullReferenceException ^) {
@@ -231,7 +213,6 @@ int Connector::Receive() {
         case ID_CONNECTION_REQUEST_ACCEPTED: {
             _remoteAddrIndex =
                 _peer->GetIndexFromSystemAddress(packet->systemAddress);
-            _agentId = 0;
             DoOnConnectionRequestAccepted(packet);
         } break;
 
@@ -278,10 +259,7 @@ void Connector::SendRawData(array<Byte> ^ data) {
     SendRawData(result, data->Length);
 }
 
-void Connector::SendAgentMessage(int agentId,
-                                 int commandType,
-                                 int n,
-                                 String ^ s) {
+void Connector::SendAgentMessage(int commandType, int n, String ^ s) {
     size_t data_sz = sizeof(MsgType) + sizeof(int) + sizeof(int) + sizeof(int) +
                      s->Length + 1;
     BYTE* data_buf = (BYTE*)calloc(data_sz, sizeof(BYTE));
@@ -290,8 +268,8 @@ void Connector::SendAgentMessage(int agentId,
         //
         *(MsgType*)ptr = mtAppData;
         ptr += sizeof(MsgType);
-        //
-        *(int*)ptr = agentId;
+        // 不再需要指定AgentID了
+        *(int*)ptr = 0;
         ptr += sizeof(int);
         //
         *(int*)ptr = commandType;
@@ -318,25 +296,11 @@ static size_t SZ_ASK_DYNAMIC_SIP_AGENT_ID =
     sizeof(MsgType) + sizeof(BYTE) + sizeof(int32_t);
 
 void Connector::DoOnConnectionRequestAccepted(RakNet::Packet* packet) {
-    // 发送  AgentID 请求
-    size_t length = SZ_ASK_DYNAMIC_SIP_AGENT_ID;
-    BYTE* data = (BYTE*)calloc(length, sizeof(BYTE));
+    /// 连接成功事件
+    auto e = gcnew ConnectedEventArgs();
     try {
-        BYTE* ptr = data;
-        // mtAskDynamicSIPAgentId/mtAskDynamicRemoteAgentId
-        *(MsgType*)ptr = mtAskDynamicSIPAgentId;
-        ptr += sizeof(MsgType);
-        //是否指定想要请求的AgentId，0表示否，任凭服务器分配（实际上没用，一律自动分配）
-        *(BYTE*)ptr = 0;
-        ptr += sizeof(BYTE);
-        //空的 int，存放 agentid（实际上没用，一律自动分配）
-        *(int*)ptr = 0;
-        //
-        SendRawData(data, length);
-        _msecConnectionRequestAccepted =
-            DateTimeOffset::UtcNow.ToUnixTimeMilliseconds();
-    } finally {
-        free(data);
+        OnConnected(this, e);
+    } catch (NullReferenceException ^) {
     }
 }
 
@@ -365,16 +329,6 @@ void Connector::DoOnUserPacketReceived(RakNet::Packet* packet) {
     MsgType msgType = *(MsgType*)(user_data);
     BYTE* ptr = user_data + sizeof(MsgType);
     switch (msgType) {
-        case mtTellAgentId: {
-            _agentId = *(int*)ptr;
-            /// 连接成功事件
-            auto e = gcnew ConnectedEventArgs(_agentId);
-            try {
-                OnConnected(this, e);
-            } catch (NullReferenceException ^) {
-            }
-        } break;
-
         case mtAppData: {
             /*
             内存块数据如下：MsgType msgType, long command_type, long param1,
