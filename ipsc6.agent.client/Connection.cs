@@ -79,14 +79,14 @@ namespace ipsc6.agent.client
                     }
                     else
                     {
-                        var errMsg = string.Format("Code: {0}", e.CommandType);
+                        var errMsg = string.Format("ErrorResponse. Code: {0}", e.N1);
                         Task.Run(() => tcsRequest.SetException(new ErrorResponseException(errMsg)));
                     }
 
                 }
                 else if (e.CommandType < 1)
                 {
-                    var errMsg = string.Format("ServerSendError Code: {0}", e.CommandType);
+                    var errMsg = string.Format("ServerSendError. Code: {0}", e.N1);
                     Task.Run(() => tcsRequest.SetException(new ServerSendError(errMsg)));
                 }
             }
@@ -163,10 +163,10 @@ namespace ipsc6.agent.client
 
         private static readonly object connectLock = new();
 
-        public async Task Connect(string host, ushort port = 0)
+        public async Task Open(string host, ushort port = 0)
         {
             port = port > 0 ? port : Connector.DEFAULT_REMOTE_PORT;
-            logger.InfoFormat("Connect(host={0}, port={1}) ...", host, port);
+            logger.InfoFormat("Open(host={0}, port={1}) ...", host, port);
             lock (connectLock)
             {
                 if (tcsConnect != null)
@@ -190,6 +190,11 @@ namespace ipsc6.agent.client
                     tcsConnect = null;
                 }
             }
+        }
+
+        public void Close()
+        {
+            connector.Disconnect();
         }
 
         private static readonly object requestLock = new();
@@ -239,7 +244,7 @@ namespace ipsc6.agent.client
 
         public async Task LogOut()
         {
-            await Request(new AgentRequestArgs(AgentMessageEnum.REMOTE_MSG_LOGIN));
+            await Request(new AgentRequestArgs(AgentMessageEnum.REMOTE_MSG_RELEASE));
         }
 
         public async Task SignOn(string groupId)

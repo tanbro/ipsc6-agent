@@ -116,6 +116,12 @@ void Connector::Connect(String ^ host) {
     Connect(host, DEFAULT_REMOTE_PORT);
 }
 
+void Connector::Disconnect() {
+    auto sysAddr = _peer->GetSystemAddressFromIndex(_remoteAddrIndex);
+    _peer->CloseConnection(sysAddr, true);
+    _remoteAddrIndex = -1;
+}
+
 void Connector::ReceiveThreadProc() {
     bool stopping = false;
     receiveThreadStarted->Set();
