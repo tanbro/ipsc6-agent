@@ -22,6 +22,7 @@ namespace ipsc6.agent.client
 
         private void Initialize(Connector connector)
         {
+            logger.InfoFormat("Initialize: BoundAddress={0}", connector.BoundAddress);
             this.connector = connector;
             this.connector.OnConnectAttemptFailed += Connector_OnConnectAttemptFailed;
             this.connector.OnConnected += Connector_OnConnected;
@@ -39,7 +40,7 @@ namespace ipsc6.agent.client
 
         protected virtual void Dispose(bool disposing)
         {
-            logger.Info("Dispose");
+            logger.InfoFormat("Dispose: BoundAddress={0}", connector.BoundAddress);
             if (disposing)
             {
                 // Check to see if Dispose has already been called.
@@ -65,10 +66,10 @@ namespace ipsc6.agent.client
         private void Connector_OnAgentMessageReceived(object sender, AgentMessageReceivedEventArgs e)
         {
             logger.DebugFormat("{0} AgentMessageReceived: {1} {2} {3} {4}", connector.BoundAddress, e.CommandType, e.N1, e.N2, e.S);
+            var utfBytes = Console.OutputEncoding.GetBytes(e.S);
+            e.S = Encoding.UTF8.GetString(utfBytes, 0, utfBytes.Length);
             if (null != tcsRequest)
             {
-                //var utfBytes = Console.OutputEncoding.GetBytes(e.S);
-                //e.S = Encoding.UTF8.GetString(utfBytes, 0, utfBytes.Length);
                 if (e.CommandType == (int)msgtypRequest)
                 {
                     /// response
@@ -171,7 +172,6 @@ namespace ipsc6.agent.client
 
         public Connection(ushort localPort = 0, string address = "")
         {
-            logger.InfoFormat("{0} CreateInstance(localPort={1}, address={2})", typeof(Connector), localPort, address);
             var connector = Connector.CreateInstance(localPort, address);
             Initialize(connector);
         }

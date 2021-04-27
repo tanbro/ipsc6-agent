@@ -17,13 +17,7 @@ namespace NetFrameworkWindowsFormsSampleApp
         public Form1()
         {
             InitializeComponent();
-        }
 
-        private static Connection conn1;
-        private static Connection conn2;
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
             conn1 = new Connection();
             conn2 = new Connection();
 
@@ -34,6 +28,19 @@ namespace NetFrameworkWindowsFormsSampleApp
             conn2.OnServerSendEventReceived += Conn_OnServerSendEventReceived;
             conn2.OnDisconnected += Conn1_OnDisconnected;
             conn2.OnConnectionLost += Conn1_OnConnectionLost;
+        }
+
+        ~Form1()
+        {
+
+        }
+
+        private static Connection conn1;
+        private static Connection conn2;
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
 
         private void Conn1_OnConnectionLost(object sender)
@@ -71,21 +78,21 @@ namespace NetFrameworkWindowsFormsSampleApp
 
             Invoke(new Action(() =>
             {
+                var msg = string.Format("event: {0} - [{1}] [{2}] \"{3}\"\r\n", e.CommandType, e.N1, e.N2, e.S);
                 if (sender == conn1)
                 {
-                    textBox_Log1.AppendText(string.Format("event: {0} {1} {2}\r\n", e.N1, e.N2, e.S));
+                    textBox_Log1.AppendText(msg);
                 }
                 else if (sender == conn2)
                 {
-                    textBox_Log2.AppendText(string.Format("event: {0} {1} {2}\r\n", e.N1, e.N2, e.S));
+                    textBox_Log2.AppendText(msg);
                 }
             }));
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            conn1.Dispose();
-            conn2.Dispose();
+
         }
 
         private async void button_Connect1_Click(object sender, EventArgs e)
@@ -179,6 +186,12 @@ namespace NetFrameworkWindowsFormsSampleApp
         {
             textBox_Log1.Clear();
             textBox_Log2.Clear();
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            conn1.Dispose();
+            conn2.Dispose();
         }
     }
 }
