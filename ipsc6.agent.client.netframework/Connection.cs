@@ -22,7 +22,6 @@ namespace ipsc6.agent.client
 
         private void Initialize(Connector connector)
         {
-            //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             this.connector = connector;
             this.connector.OnConnectAttemptFailed += Connector_OnConnectAttemptFailed;
             this.connector.OnConnected += Connector_OnConnected;
@@ -65,8 +64,8 @@ namespace ipsc6.agent.client
 
         private void Connector_OnAgentMessageReceived(object sender, AgentMessageReceivedEventArgs e)
         {
-            //var utfBytes = Console.OutputEncoding.GetBytes(e.S);
-            //e.S = Encoding.Default.GetString(utfBytes, 0, utfBytes.Length);
+            var utfBytes = Console.OutputEncoding.GetBytes(e.S);
+            e.S = Encoding.UTF8.GetString(utfBytes, 0, utfBytes.Length);
             if (null != tcsRequest)
             {
                 logger.DebugFormat("{0} OnServerSendResponse: {1} {2} {3} {4}", connector.BoundAddress, e.CommandType, e.N1, e.N2, e.S);

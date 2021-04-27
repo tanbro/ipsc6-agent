@@ -22,7 +22,7 @@ ref class Connector {
     ~Connector();
 
    private:
-    static SortedSet<Connector ^> ^ connectors;
+    static HashSet<Connector ^> ^ connectors;
 
     static EventWaitHandle ^ receiveThreadStarted;
     static Thread ^ receiveThread;
