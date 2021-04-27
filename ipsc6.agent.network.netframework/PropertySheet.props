@@ -16,6 +16,10 @@
       <AdditionalDependencies>ws2_32.lib;RakNet$(RAKNET_LIB_SUFFIX).lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(RAKNET_ROOT)\build\Lib\$(RAKNET_LIB_SUFFIX)\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /y "$(RAKNET_ROOT)\build\Lib\DLL\$(ConfigurationName)\RakNetDLL.dll" "$(OutDir)"</Command>
+      <Message>Copy native libraries to output directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="RAKNET_ROOT">
