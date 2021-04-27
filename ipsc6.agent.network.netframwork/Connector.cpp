@@ -33,7 +33,7 @@ Connector::~Connector() {
 }
 
 void Connector::Initial() {
-    connectors = gcnew List<Connector ^>();
+    connectors = gcnew SortedSet<Connector ^>();
     receiveThreadStarted =
         gcnew EventWaitHandle(false, EventResetMode::AutoReset);
     receiveThread = gcnew Thread(gcnew ThreadStart(ReceiveThreadProc));
