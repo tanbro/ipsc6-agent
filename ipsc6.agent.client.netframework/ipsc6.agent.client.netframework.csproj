@@ -49,21 +49,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AgentMessageEnum.cs" />
-    <Compile Include="AgentRequestArgs.cs" />
-    <Compile Include="Connection.cs" />
-    <Compile Include="Errors.cs" />
-    <Compile Include="Events.cs" />
-    <Compile Include="Exceptions.cs" />
+    <Compile Include="..\src\ipsc6.agent.client\AgentMessageEnum.cs">
+      <Link>AgentMessageEnum.cs</Link>
+    </Compile>
+    <Compile Include="..\src\ipsc6.agent.client\AgentRequestArgs.cs">
+      <Link>AgentRequestArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\src\ipsc6.agent.client\Connection.cs">
+      <Link>Connection.cs</Link>
+    </Compile>
+    <Compile Include="..\src\ipsc6.agent.client\Errors.cs">
+      <Link>Errors.cs</Link>
+    </Compile>
+    <Compile Include="..\src\ipsc6.agent.client\Events.cs">
+      <Link>Events.cs</Link>
+    </Compile>
+    <Compile Include="..\src\ipsc6.agent.client\Exceptions.cs">
+      <Link>Exceptions.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ipsc6.agent.network.netframwork\ipsc6.agent.network.netframwork.vcxproj">
+    <ProjectReference Include="..\ipsc6.agent.network.netframework\ipsc6.agent.network.netframework.vcxproj">
       <Project>{f3a6ceaa-81ea-4f7e-978e-10639c21186b}</Project>
-      <Name>ipsc6.agent.network.netframwork</Name>
+      <Name>ipsc6.agent.network.netframework</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

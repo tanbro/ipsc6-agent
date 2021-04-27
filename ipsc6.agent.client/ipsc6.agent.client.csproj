@@ -13,6 +13,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\src\ipsc6.agent.client\AgentMessageEnum.cs" Link="AgentMessageEnum.cs" />
+    <Compile Include="..\src\ipsc6.agent.client\AgentRequestArgs.cs" Link="AgentRequestArgs.cs" />
+    <Compile Include="..\src\ipsc6.agent.client\Connection.cs" Link="Connection.cs" />
+    <Compile Include="..\src\ipsc6.agent.client\Errors.cs" Link="Errors.cs" />
+    <Compile Include="..\src\ipsc6.agent.client\Events.cs" Link="Events.cs" />
+    <Compile Include="..\src\ipsc6.agent.client\Exceptions.cs" Link="Exceptions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.12" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
   </ItemGroup>

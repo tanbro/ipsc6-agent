@@ -64,11 +64,11 @@ namespace ipsc6.agent.client
 
         private void Connector_OnAgentMessageReceived(object sender, AgentMessageReceivedEventArgs e)
         {
-            var utfBytes = Console.OutputEncoding.GetBytes(e.S);
-            e.S = Encoding.UTF8.GetString(utfBytes, 0, utfBytes.Length);
+            logger.DebugFormat("{0} AgentMessageReceived: {1} {2} {3} {4}", connector.BoundAddress, e.CommandType, e.N1, e.N2, e.S);
             if (null != tcsRequest)
             {
-                logger.DebugFormat("{0} OnServerSendResponse: {1} {2} {3} {4}", connector.BoundAddress, e.CommandType, e.N1, e.N2, e.S);
+                //var utfBytes = Console.OutputEncoding.GetBytes(e.S);
+                //e.S = Encoding.UTF8.GetString(utfBytes, 0, utfBytes.Length);
                 if (e.CommandType == (int)msgtypRequest)
                 {
                     /// response
@@ -92,7 +92,6 @@ namespace ipsc6.agent.client
             else
             {
                 /// server->client event
-                logger.DebugFormat("{0} OnServerSendEventReceived: {1} {2} {3} {4}", connector.BoundAddress, e.CommandType, e.N1, e.N2, e.S);
                 Task.Run(() => OnServerSendEventReceived?.Invoke(this, e));
             }
         }
@@ -112,6 +111,14 @@ namespace ipsc6.agent.client
             }
             else
             {
+                if (tcsRequest != null)
+                {
+                    // request 期间断线
+                    Task.Run(() =>
+                    {
+                        tcsConnect.SetException(new AgentDisconnectedException());
+                    });
+                }
                 /// 连接丢失事件
                 Task.Run(() => OnConnectionLost?.Invoke(this));
             }
@@ -132,7 +139,15 @@ namespace ipsc6.agent.client
             }
             else
             {
-                /// 连接断开事件
+                if (tcsRequest != null)
+                {
+                    // request 期间被断开断线
+                    Task.Run(() =>
+                    {
+                        tcsConnect.SetException(new AgentDisconnectedException());
+                    });
+                }
+                /// 连接丢失事件
                 Task.Run(() => OnDisconnected?.Invoke(this));
             }
         }
