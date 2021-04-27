@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>56b2fbca-189d-403c-909e-b22093122e2c</ProjectGuid>
+    <ProjectGuid>{56B2FBCA-189D-403C-909E-B22093122E2C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>org.pjsip.pjsua2.netframework</RootNamespace>
@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,26 +30,822 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System"/>
-    
-    <Reference Include="System.Core"/>
-    <Reference Include="System.Xml.Linq"/>
-    <Reference Include="System.Data.DataSetExtensions"/>
-    
-    
-    <Reference Include="Microsoft.CSharp"/>
-    
-    <Reference Include="System.Data"/>
-    
-    <Reference Include="System.Net.Http"/>
-    
-    <Reference Include="System.Xml"/>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="..\src\org.pjsip.pjsua2\Account.cs">
+      <Link>src\Account.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AccountCallConfig.cs">
+      <Link>src\AccountCallConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AccountConfig.cs">
+      <Link>src\AccountConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AccountInfo.cs">
+      <Link>src\AccountInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AccountIpChangeConfig.cs">
+      <Link>src\AccountIpChangeConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AccountMediaConfig.cs">
+      <Link>src\AccountMediaConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AccountMwiConfig.cs">
+      <Link>src\AccountMwiConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AccountNatConfig.cs">
+      <Link>src\AccountNatConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AccountPresConfig.cs">
+      <Link>src\AccountPresConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AccountRegConfig.cs">
+      <Link>src\AccountRegConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AccountSipConfig.cs">
+      <Link>src\AccountSipConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AccountVideoConfig.cs">
+      <Link>src\AccountVideoConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AudDevErrorEvent.cs">
+      <Link>src\AudDevErrorEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AudDevManager.cs">
+      <Link>src\AudDevManager.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AudioDevInfo.cs">
+      <Link>src\AudioDevInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AudioDevInfoVector.cs">
+      <Link>src\AudioDevInfoVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AudioDevInfoVector2.cs">
+      <Link>src\AudioDevInfoVector2.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AudioMedia.cs">
+      <Link>src\AudioMedia.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AudioMediaPlayer.cs">
+      <Link>src\AudioMediaPlayer.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AudioMediaPlayerInfo.cs">
+      <Link>src\AudioMediaPlayerInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AudioMediaRecorder.cs">
+      <Link>src\AudioMediaRecorder.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AudioMediaTransmitParam.cs">
+      <Link>src\AudioMediaTransmitParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AudioMediaVector.cs">
+      <Link>src\AudioMediaVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AudioMediaVector2.cs">
+      <Link>src\AudioMediaVector2.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AuthCredInfo.cs">
+      <Link>src\AuthCredInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\AuthCredInfoVector.cs">
+      <Link>src\AuthCredInfoVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\Buddy.cs">
+      <Link>src\Buddy.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\BuddyConfig.cs">
+      <Link>src\BuddyConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\BuddyInfo.cs">
+      <Link>src\BuddyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\BuddyVector.cs">
+      <Link>src\BuddyVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\BuddyVector2.cs">
+      <Link>src\BuddyVector2.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\Call.cs">
+      <Link>src\Call.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CallInfo.cs">
+      <Link>src\CallInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CallMediaInfo.cs">
+      <Link>src\CallMediaInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CallMediaInfoVector.cs">
+      <Link>src\CallMediaInfoVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CallOpParam.cs">
+      <Link>src\CallOpParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CallSendDtmfParam.cs">
+      <Link>src\CallSendDtmfParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CallSendRequestParam.cs">
+      <Link>src\CallSendRequestParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CallSetting.cs">
+      <Link>src\CallSetting.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CallVidSetStreamParam.cs">
+      <Link>src\CallVidSetStreamParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CodecFmtp.cs">
+      <Link>src\CodecFmtp.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CodecFmtpVector.cs">
+      <Link>src\CodecFmtpVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CodecInfo.cs">
+      <Link>src\CodecInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CodecInfoVector.cs">
+      <Link>src\CodecInfoVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CodecInfoVector2.cs">
+      <Link>src\CodecInfoVector2.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CodecOpusConfig.cs">
+      <Link>src\CodecOpusConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CodecParam.cs">
+      <Link>src\CodecParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CodecParamInfo.cs">
+      <Link>src\CodecParamInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\CodecParamSetting.cs">
+      <Link>src\CodecParamSetting.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\ConfPortInfo.cs">
+      <Link>src\ConfPortInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\ContainerNode.cs">
+      <Link>src\ContainerNode.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\Endpoint.cs">
+      <Link>src\Endpoint.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\EpConfig.cs">
+      <Link>src\EpConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\Error.cs">
+      <Link>src\Error.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\ExtraAudioDevice.cs">
+      <Link>src\ExtraAudioDevice.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\FindBuddyMatch.cs">
+      <Link>src\FindBuddyMatch.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\IntVector.cs">
+      <Link>src\IntVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\IpChangeParam.cs">
+      <Link>src\IpChangeParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\JbufState.cs">
+      <Link>src\JbufState.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\JsonDocument.cs">
+      <Link>src\JsonDocument.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\LogConfig.cs">
+      <Link>src\LogConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\LogEntry.cs">
+      <Link>src\LogEntry.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\LogWriter.cs">
+      <Link>src\LogWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\LossType.cs">
+      <Link>src\LossType.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\MathStat.cs">
+      <Link>src\MathStat.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\Media.cs">
+      <Link>src\Media.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\MediaConfig.cs">
+      <Link>src\MediaConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\MediaCoordinate.cs">
+      <Link>src\MediaCoordinate.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\MediaEvent.cs">
+      <Link>src\MediaEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\MediaEventData.cs">
+      <Link>src\MediaEventData.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\MediaFmtChangedEvent.cs">
+      <Link>src\MediaFmtChangedEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\MediaFormat.cs">
+      <Link>src\MediaFormat.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\MediaFormatAudio.cs">
+      <Link>src\MediaFormatAudio.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\MediaFormatAudioVector.cs">
+      <Link>src\MediaFormatAudioVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\MediaFormatVideo.cs">
+      <Link>src\MediaFormatVideo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\MediaFormatVideoVector.cs">
+      <Link>src\MediaFormatVideoVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\MediaSize.cs">
+      <Link>src\MediaSize.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\MediaTransportInfo.cs">
+      <Link>src\MediaTransportInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnBuddyEvSubStateParam.cs">
+      <Link>src\OnBuddyEvSubStateParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallMediaEventParam.cs">
+      <Link>src\OnCallMediaEventParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallMediaStateParam.cs">
+      <Link>src\OnCallMediaStateParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallMediaTransportStateParam.cs">
+      <Link>src\OnCallMediaTransportStateParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallRedirectedParam.cs">
+      <Link>src\OnCallRedirectedParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallReplacedParam.cs">
+      <Link>src\OnCallReplacedParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallReplaceRequestParam.cs">
+      <Link>src\OnCallReplaceRequestParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallRxOfferParam.cs">
+      <Link>src\OnCallRxOfferParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallRxReinviteParam.cs">
+      <Link>src\OnCallRxReinviteParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallSdpCreatedParam.cs">
+      <Link>src\OnCallSdpCreatedParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallStateParam.cs">
+      <Link>src\OnCallStateParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallTransferRequestParam.cs">
+      <Link>src\OnCallTransferRequestParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallTransferStatusParam.cs">
+      <Link>src\OnCallTransferStatusParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallTsxStateParam.cs">
+      <Link>src\OnCallTsxStateParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCallTxOfferParam.cs">
+      <Link>src\OnCallTxOfferParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCreateMediaTransportParam.cs">
+      <Link>src\OnCreateMediaTransportParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnCreateMediaTransportSrtpParam.cs">
+      <Link>src\OnCreateMediaTransportSrtpParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnDtmfDigitParam.cs">
+      <Link>src\OnDtmfDigitParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnDtmfEventParam.cs">
+      <Link>src\OnDtmfEventParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnIncomingCallParam.cs">
+      <Link>src\OnIncomingCallParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnIncomingSubscribeParam.cs">
+      <Link>src\OnIncomingSubscribeParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnInstantMessageParam.cs">
+      <Link>src\OnInstantMessageParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnInstantMessageStatusParam.cs">
+      <Link>src\OnInstantMessageStatusParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnIpChangeProgressParam.cs">
+      <Link>src\OnIpChangeProgressParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnMediaEventParam.cs">
+      <Link>src\OnMediaEventParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnMwiInfoParam.cs">
+      <Link>src\OnMwiInfoParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnNatCheckStunServersCompleteParam.cs">
+      <Link>src\OnNatCheckStunServersCompleteParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnNatDetectionCompleteParam.cs">
+      <Link>src\OnNatDetectionCompleteParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnRegStartedParam.cs">
+      <Link>src\OnRegStartedParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnRegStateParam.cs">
+      <Link>src\OnRegStateParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnSelectAccountParam.cs">
+      <Link>src\OnSelectAccountParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnStreamCreatedParam.cs">
+      <Link>src\OnStreamCreatedParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnStreamDestroyedParam.cs">
+      <Link>src\OnStreamDestroyedParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnStreamPreCreateParam.cs">
+      <Link>src\OnStreamPreCreateParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnTimerParam.cs">
+      <Link>src\OnTimerParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnTransportStateParam.cs">
+      <Link>src\OnTransportStateParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\OnTypingIndicationParam.cs">
+      <Link>src\OnTypingIndicationParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\PendingJob.cs">
+      <Link>src\PendingJob.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\PersistentDocument.cs">
+      <Link>src\PersistentDocument.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\PersistentObject.cs">
+      <Link>src\PersistentObject.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_aud_dev_cap.cs">
+      <Link>src\pjmedia_aud_dev_cap.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_aud_dev_route.cs">
+      <Link>src\pjmedia_aud_dev_route.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_dir.cs">
+      <Link>src\pjmedia_dir.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_echo_flag.cs">
+      <Link>src\pjmedia_echo_flag.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_event_type.cs">
+      <Link>src\pjmedia_event_type.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_file_player_option.cs">
+      <Link>src\pjmedia_file_player_option.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_file_writer_option.cs">
+      <Link>src\pjmedia_file_writer_option.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_format_id.cs">
+      <Link>src\pjmedia_format_id.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_orient.cs">
+      <Link>src\pjmedia_orient.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_rtcp_fb_type.cs">
+      <Link>src\pjmedia_rtcp_fb_type.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_srtp_crypto_option.cs">
+      <Link>src\pjmedia_srtp_crypto_option.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_srtp_keying_method.cs">
+      <Link>src\pjmedia_srtp_keying_method.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_srtp_use.cs">
+      <Link>src\pjmedia_srtp_use.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_tone_desc.cs">
+      <Link>src\pjmedia_tone_desc.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_tone_digit.cs">
+      <Link>src\pjmedia_tone_digit.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_tone_digit_map.cs">
+      <Link>src\pjmedia_tone_digit_map.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_tp_proto.cs">
+      <Link>src\pjmedia_tp_proto.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_type.cs">
+      <Link>src\pjmedia_type.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_vid_dev_cap.cs">
+      <Link>src\pjmedia_vid_dev_cap.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_vid_dev_std_index.cs">
+      <Link>src\pjmedia_vid_dev_std_index.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_vid_packing.cs">
+      <Link>src\pjmedia_vid_packing.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjmedia_vid_stream_rc_method.cs">
+      <Link>src\pjmedia_vid_stream_rc_method.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjrpid_activity.cs">
+      <Link>src\pjrpid_activity.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_cred_data_type.cs">
+      <Link>src\pjsip_cred_data_type.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_dialog_cap_status.cs">
+      <Link>src\pjsip_dialog_cap_status.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_event_id_e.cs">
+      <Link>src\pjsip_event_id_e.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_evsub_state.cs">
+      <Link>src\pjsip_evsub_state.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_hdr_e.cs">
+      <Link>src\pjsip_hdr_e.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_inv_state.cs">
+      <Link>src\pjsip_inv_state.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_redirect_op.cs">
+      <Link>src\pjsip_redirect_op.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_role_e.cs">
+      <Link>src\pjsip_role_e.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_ssl_method.cs">
+      <Link>src\pjsip_ssl_method.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_status_code.cs">
+      <Link>src\pjsip_status_code.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_transport_flags_e.cs">
+      <Link>src\pjsip_transport_flags_e.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_transport_state.cs">
+      <Link>src\pjsip_transport_state.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_transport_type_e.cs">
+      <Link>src\pjsip_transport_type_e.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsip_tsx_state_e.cs">
+      <Link>src\pjsip_tsx_state_e.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua2.cs">
+      <Link>src\pjsua2.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua2PINVOKE.cs">
+      <Link>src\pjsua2PINVOKE.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_100rel_use.cs">
+      <Link>src\pjsua_100rel_use.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_buddy_status.cs">
+      <Link>src\pjsua_buddy_status.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_call_flag.cs">
+      <Link>src\pjsua_call_flag.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_call_hold_type.cs">
+      <Link>src\pjsua_call_hold_type.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_call_media_status.cs">
+      <Link>src\pjsua_call_media_status.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_call_vid_strm_op.cs">
+      <Link>src\pjsua_call_vid_strm_op.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_create_media_transport_flag.cs">
+      <Link>src\pjsua_create_media_transport_flag.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_destroy_flag.cs">
+      <Link>src\pjsua_destroy_flag.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_dtmf_method.cs">
+      <Link>src\pjsua_dtmf_method.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_invalid_id_const_.cs">
+      <Link>src\pjsua_invalid_id_const_.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_ipv6_use.cs">
+      <Link>src\pjsua_ipv6_use.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_ip_change_op.cs">
+      <Link>src\pjsua_ip_change_op.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_med_tp_st.cs">
+      <Link>src\pjsua_med_tp_st.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_nat64_opt.cs">
+      <Link>src\pjsua_nat64_opt.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_sip_timer_use.cs">
+      <Link>src\pjsua_sip_timer_use.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_snd_dev_id.cs">
+      <Link>src\pjsua_snd_dev_id.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_snd_dev_mode.cs">
+      <Link>src\pjsua_snd_dev_mode.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_state.cs">
+      <Link>src\pjsua_state.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_stun_use.cs">
+      <Link>src\pjsua_stun_use.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pjsua_vid_req_keyframe_method.cs">
+      <Link>src\pjsua_vid_req_keyframe_method.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_constants_.cs">
+      <Link>src\pj_constants_.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_file_access.cs">
+      <Link>src\pj_file_access.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_ice_sess_trickle.cs">
+      <Link>src\pj_ice_sess_trickle.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_log_decoration.cs">
+      <Link>src\pj_log_decoration.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_qos_flag.cs">
+      <Link>src\pj_qos_flag.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_qos_params.cs">
+      <Link>src\pj_qos_params.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_qos_type.cs">
+      <Link>src\pj_qos_type.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_qos_wmm_prio.cs">
+      <Link>src\pj_qos_wmm_prio.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_ssl_cert_name_type.cs">
+      <Link>src\pj_ssl_cert_name_type.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_ssl_cert_verify_flag_t.cs">
+      <Link>src\pj_ssl_cert_verify_flag_t.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_ssl_cipher.cs">
+      <Link>src\pj_ssl_cipher.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_ssl_sock_proto.cs">
+      <Link>src\pj_ssl_sock_proto.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_stun_nat_type.cs">
+      <Link>src\pj_stun_nat_type.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\pj_turn_tp_type.cs">
+      <Link>src\pj_turn_tp_type.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\PresenceStatus.cs">
+      <Link>src\PresenceStatus.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\PresNotifyParam.cs">
+      <Link>src\PresNotifyParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\RegProgressParam.cs">
+      <Link>src\RegProgressParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\RtcpFbCap.cs">
+      <Link>src\RtcpFbCap.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\RtcpFbCapVector.cs">
+      <Link>src\RtcpFbCapVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\RtcpFbConfig.cs">
+      <Link>src\RtcpFbConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\RtcpSdes.cs">
+      <Link>src\RtcpSdes.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\RtcpStat.cs">
+      <Link>src\RtcpStat.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\RtcpStreamStat.cs">
+      <Link>src\RtcpStreamStat.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\RxMsgEvent.cs">
+      <Link>src\RxMsgEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SdpSession.cs">
+      <Link>src\SdpSession.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SendInstantMessageParam.cs">
+      <Link>src\SendInstantMessageParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SendTypingIndicationParam.cs">
+      <Link>src\SendTypingIndicationParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SipEvent.cs">
+      <Link>src\SipEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SipEventBody.cs">
+      <Link>src\SipEventBody.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SipHeader.cs">
+      <Link>src\SipHeader.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SipHeaderVector.cs">
+      <Link>src\SipHeaderVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SipMediaType.cs">
+      <Link>src\SipMediaType.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SipMultipartPart.cs">
+      <Link>src\SipMultipartPart.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SipMultipartPartVector.cs">
+      <Link>src\SipMultipartPartVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SipRxData.cs">
+      <Link>src\SipRxData.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SipTransaction.cs">
+      <Link>src\SipTransaction.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SipTxData.cs">
+      <Link>src\SipTxData.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SipTxOption.cs">
+      <Link>src\SipTxOption.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SrtpCrypto.cs">
+      <Link>src\SrtpCrypto.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SrtpCryptoVector.cs">
+      <Link>src\SrtpCryptoVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SrtpOpt.cs">
+      <Link>src\SrtpOpt.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SslCertInfo.cs">
+      <Link>src\SslCertInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SslCertName.cs">
+      <Link>src\SslCertName.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SslCertNameVector.cs">
+      <Link>src\SslCertNameVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\StreamInfo.cs">
+      <Link>src\StreamInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\StreamStat.cs">
+      <Link>src\StreamStat.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\StringVector.cs">
+      <Link>src\StringVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SWIGTYPE_p_pjmedia_jb_discard_algo.cs">
+      <Link>src\SWIGTYPE_p_pjmedia_jb_discard_algo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SWIGTYPE_p_pjmedia_vid_dev_hwnd_type.cs">
+      <Link>src\SWIGTYPE_p_pjmedia_vid_dev_hwnd_type.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SWIGTYPE_p_p_void.cs">
+      <Link>src\SWIGTYPE_p_p_void.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SWIGTYPE_p_unsigned_char.cs">
+      <Link>src\SWIGTYPE_p_unsigned_char.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\SWIGTYPE_p_void.cs">
+      <Link>src\SWIGTYPE_p_void.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\TimerEvent.cs">
+      <Link>src\TimerEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\TimeVal.cs">
+      <Link>src\TimeVal.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\TlsConfig.cs">
+      <Link>src\TlsConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\TlsInfo.cs">
+      <Link>src\TlsInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\ToneDesc.cs">
+      <Link>src\ToneDesc.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\ToneDescVector.cs">
+      <Link>src\ToneDescVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\ToneDigit.cs">
+      <Link>src\ToneDigit.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\ToneDigitMapDigit.cs">
+      <Link>src\ToneDigitMapDigit.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\ToneDigitMapVector.cs">
+      <Link>src\ToneDigitMapVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\ToneDigitVector.cs">
+      <Link>src\ToneDigitVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\ToneGenerator.cs">
+      <Link>src\ToneGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\TransportConfig.cs">
+      <Link>src\TransportConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\TransportInfo.cs">
+      <Link>src\TransportInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\TsxStateEvent.cs">
+      <Link>src\TsxStateEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\TsxStateEventSrc.cs">
+      <Link>src\TsxStateEventSrc.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\TxErrorEvent.cs">
+      <Link>src\TxErrorEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\TxMsgEvent.cs">
+      <Link>src\TxMsgEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\UaConfig.cs">
+      <Link>src\UaConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\UserEvent.cs">
+      <Link>src\UserEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\Version.cs">
+      <Link>src\Version.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VidCodecParam.cs">
+      <Link>src\VidCodecParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VidConfPortInfo.cs">
+      <Link>src\VidConfPortInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VidDevManager.cs">
+      <Link>src\VidDevManager.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VideoDevInfo.cs">
+      <Link>src\VideoDevInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VideoDevInfoVector.cs">
+      <Link>src\VideoDevInfoVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VideoDevInfoVector2.cs">
+      <Link>src\VideoDevInfoVector2.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VideoMedia.cs">
+      <Link>src\VideoMedia.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VideoMediaTransmitParam.cs">
+      <Link>src\VideoMediaTransmitParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VideoMediaVector.cs">
+      <Link>src\VideoMediaVector.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VideoPreview.cs">
+      <Link>src\VideoPreview.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VideoPreviewOpParam.cs">
+      <Link>src\VideoPreviewOpParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VideoSwitchParam.cs">
+      <Link>src\VideoSwitchParam.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VideoWindow.cs">
+      <Link>src\VideoWindow.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VideoWindowHandle.cs">
+      <Link>src\VideoWindowHandle.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\VideoWindowInfo.cs">
+      <Link>src\VideoWindowInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\src\org.pjsip.pjsua2\WindowHandle.cs">
+      <Link>src\WindowHandle.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include=".gitignore" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="LICENSE" />
+    <None Include="README.md" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
- </Project>
+</Project>
