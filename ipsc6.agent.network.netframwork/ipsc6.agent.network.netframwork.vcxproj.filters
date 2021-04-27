@@ -18,16 +18,19 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\ipsc6.agent.network\Connector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ipsc6.agent.network\Events.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ipsc6.agent.network\framework.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Connector.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="errors.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Events.h">
+    <ClInclude Include="..\src\ipsc6.agent.network\errors.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,13 +38,13 @@
     <ClCompile Include="AssemblyInfo.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ipsc6.agent.network\Connector.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ipsc6.agent.network\Events.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="pch.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Connector.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Events.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

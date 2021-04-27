@@ -16,13 +16,12 @@ namespace ipsc6.agent.client
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Connection));
 
         private Connector connector;
-        private TaskCompletionSource tcsConnect;
+        private TaskCompletionSource<object> tcsConnect;
         private AgentMessageEnum msgtypRequest;
         private TaskCompletionSource<AgentMessageReceivedEventArgs> tcsRequest;
 
         private void Initialize(Connector connector)
         {
-            //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             this.connector = connector;
             this.connector.OnConnectAttemptFailed += Connector_OnConnectAttemptFailed;
             this.connector.OnConnected += Connector_OnConnected;
@@ -65,11 +64,11 @@ namespace ipsc6.agent.client
 
         private void Connector_OnAgentMessageReceived(object sender, AgentMessageReceivedEventArgs e)
         {
-            //var utfBytes = Console.OutputEncoding.GetBytes(e.S);
-            //e.S = Encoding.Default.GetString(utfBytes, 0, utfBytes.Length);
-            logger.DebugFormat("{0} OnAgentMessageReceived: {1} {2} {3} {4}", connector.BoundAddress, e.CommandType, e.N1, e.N2, e.S);
+            var utfBytes = Console.OutputEncoding.GetBytes(e.S);
+            e.S = Encoding.UTF8.GetString(utfBytes, 0, utfBytes.Length);
             if (null != tcsRequest)
             {
+                logger.DebugFormat("{0} OnServerSendResponse: {1} {2} {3} {4}", connector.BoundAddress, e.CommandType, e.N1, e.N2, e.S);
                 if (e.CommandType == (int)msgtypRequest)
                 {
                     /// response
@@ -93,6 +92,7 @@ namespace ipsc6.agent.client
             else
             {
                 /// server->client event
+                logger.DebugFormat("{0} OnServerSendEventReceived: {1} {2} {3} {4}", connector.BoundAddress, e.CommandType, e.N1, e.N2, e.S);
                 Task.Run(() => OnServerSendEventReceived?.Invoke(this, e));
             }
         }
@@ -140,7 +140,7 @@ namespace ipsc6.agent.client
         private void Connector_OnConnected(object sender, ConnectedEventArgs e)
         {
             logger.InfoFormat("{0} OnConnected", connector.BoundAddress);
-            Task.Run(() => tcsConnect.SetResult());
+            Task.Run(() => tcsConnect.SetResult(null));
         }
 
         private void Connector_OnConnectAttemptFailed(object sender)
@@ -161,7 +161,7 @@ namespace ipsc6.agent.client
             Initialize(connector);
         }
 
-        private static readonly object connectLock = new();
+        private static readonly object connectLock = new object();
 
         public async Task Open(string host, ushort port = 0)
         {
@@ -173,7 +173,7 @@ namespace ipsc6.agent.client
                 {
                     throw new InvalidOperationException(string.Format("{0}", tcsConnect.Task.Status));
                 }
-                tcsConnect = new();
+                tcsConnect = new TaskCompletionSource<object>();
             }
             try
             {
@@ -197,7 +197,7 @@ namespace ipsc6.agent.client
             connector.Disconnect();
         }
 
-        private static readonly object requestLock = new();
+        private static readonly object requestLock = new object();
 
         public async Task<AgentMessageReceivedEventArgs> Request(AgentRequestArgs args, int millisecondsTimeout = 5000)
         {
