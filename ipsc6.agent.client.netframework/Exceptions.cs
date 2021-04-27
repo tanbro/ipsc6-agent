@@ -23,7 +23,28 @@ namespace ipsc6.agent.client
         public AgentConnectFailedException(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class AgentRequestTimeoutException : AgentConnectException
+    public class AgentConnectLostException : AgentConnectException
+    {
+        public AgentConnectLostException() { }
+        public AgentConnectLostException(string message) : base(message) { }
+        public AgentConnectLostException(string message, Exception inner) : base(message, inner) { }
+    }
+
+    public class AgentDisconnectedException : AgentConnectException
+    {
+        public AgentDisconnectedException() { }
+        public AgentDisconnectedException(string message) : base(message) { }
+        public AgentDisconnectedException(string message, Exception inner) : base(message, inner) { }
+    }
+
+    public class AgentRequestException : BaseAgentException
+    {
+        public AgentRequestException() { }
+        public AgentRequestException(string message) : base(message) { }
+        public AgentRequestException(string message, Exception inner) : base(message, inner) { }
+    }
+
+    public class AgentRequestTimeoutException : AgentRequestException
     {
         public AgentRequestTimeoutException() { }
         public AgentRequestTimeoutException(string message) : base(message) { }

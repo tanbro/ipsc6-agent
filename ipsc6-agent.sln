@@ -22,8 +22,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ipsc6.agent.client", "ipsc6
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ipsc6-agent-app", "ipsc6-agent-app\ipsc6-agent-app.csproj", "{89D2E6FF-6917-4D85-979A-33330BC68619}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleWinFormsApp", "SampleWinFormsApp\SampleWinFormsApp.csproj", "{5C734C3F-1F07-40B7-9D70-872C024EBC87}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ipsc6.agent.network.netframwork", "ipsc6.agent.network.netframwork\ipsc6.agent.network.netframwork.vcxproj", "{F3A6CEAA-81EA-4F7E-978E-10639C21186B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ipsc6.agent.client.netframework", "ipsc6.agent.client.netframework\ipsc6.agent.client.netframework.csproj", "{62D33297-C37D-44A8-8A97-13425E0D54D5}"
@@ -120,18 +118,6 @@ Global
 		{89D2E6FF-6917-4D85-979A-33330BC68619}.Release|x64.Build.0 = Release|Any CPU
 		{89D2E6FF-6917-4D85-979A-33330BC68619}.Release|x86.ActiveCfg = Release|Any CPU
 		{89D2E6FF-6917-4D85-979A-33330BC68619}.Release|x86.Build.0 = Release|Any CPU
-		{5C734C3F-1F07-40B7-9D70-872C024EBC87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5C734C3F-1F07-40B7-9D70-872C024EBC87}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5C734C3F-1F07-40B7-9D70-872C024EBC87}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{5C734C3F-1F07-40B7-9D70-872C024EBC87}.Debug|x64.Build.0 = Debug|Any CPU
-		{5C734C3F-1F07-40B7-9D70-872C024EBC87}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{5C734C3F-1F07-40B7-9D70-872C024EBC87}.Debug|x86.Build.0 = Debug|Any CPU
-		{5C734C3F-1F07-40B7-9D70-872C024EBC87}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5C734C3F-1F07-40B7-9D70-872C024EBC87}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5C734C3F-1F07-40B7-9D70-872C024EBC87}.Release|x64.ActiveCfg = Release|Any CPU
-		{5C734C3F-1F07-40B7-9D70-872C024EBC87}.Release|x64.Build.0 = Release|Any CPU
-		{5C734C3F-1F07-40B7-9D70-872C024EBC87}.Release|x86.ActiveCfg = Release|Any CPU
-		{5C734C3F-1F07-40B7-9D70-872C024EBC87}.Release|x86.Build.0 = Release|Any CPU
 		{F3A6CEAA-81EA-4F7E-978E-10639C21186B}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{F3A6CEAA-81EA-4F7E-978E-10639C21186B}.Debug|x64.ActiveCfg = Debug|x64
 		{F3A6CEAA-81EA-4F7E-978E-10639C21186B}.Debug|x64.Build.0 = Debug|x64
