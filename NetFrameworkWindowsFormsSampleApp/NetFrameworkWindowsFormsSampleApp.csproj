@@ -59,6 +59,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SipClient.cs" />
+    <Compile Include="SipLogWriter.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -94,6 +96,10 @@
     <ProjectReference Include="..\ipsc6.agent.network.netframework\ipsc6.agent.network.netframework.vcxproj">
       <Project>{f3a6ceaa-81ea-4f7e-978e-10639c21186b}</Project>
       <Name>ipsc6.agent.network.netframework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\org.pjsip.pjsua2.netframework\org.pjsip.pjsua2.netframework.csproj">
+      <Project>{56b2fbca-189d-403c-909e-b22093122e2c}</Project>
+      <Name>org.pjsip.pjsua2.netframework</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

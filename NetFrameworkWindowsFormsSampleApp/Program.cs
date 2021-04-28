@@ -23,11 +23,31 @@ namespace NetFrameworkWindowsFormsSampleApp
             Connector.Initial();
             try
             {
-                Application.Run(new Form1());
+                SipClient.endpoint.libCreate();
+                try
+                {
+                    var epCfg = new org.pjsip.pjsua2.EpConfig();
+                    epCfg.logConfig.level = 6;
+                    epCfg.logConfig.writer = new SipLogWriter();
+                    SipClient.endpoint.libInit(epCfg);
+
+                    var sipTpConfig = new org.pjsip.pjsua2.TransportConfig
+                    {
+                        port = 5060
+                    };
+                    SipClient.endpoint.transportCreate(org.pjsip.pjsua2.pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
+                    SipClient.endpoint.libStart();
+
+                    Application.Run(new Form1());
+                }
+                finally
+                {
+                    SipClient.endpoint.libDestroy();
+                }
             }
             finally
             {
-                Connector.Release();
+                Connector.Release(); 
             }
         }
     }

@@ -22,8 +22,7 @@ ref class ConnectedEventArgs : EventArgs {
 };
 
 public
-delegate void ConnectedEventHandler(Object ^ sender,
-                                    ConnectedEventArgs^ e);
+delegate void ConnectedEventHandler(Object ^ sender, ConnectedEventArgs ^ e);
 
 public
 ref class AgentMessageReceivedEventArgs : EventArgs {

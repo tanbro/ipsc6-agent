@@ -66,6 +66,14 @@ namespace NetFrameworkWindowsFormsSampleApp
             this.textBox_Log1 = new System.Windows.Forms.TextBox();
             this.textBox_Log2 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
+            this.label_SipReg1 = new System.Windows.Forms.Label();
+            this.label_SipReg2 = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
+            this.checkedListBox_AudCapture = new System.Windows.Forms.CheckedListBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.checkedListBox_AudPlayback = new System.Windows.Forms.CheckedListBox();
+            this.button3 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType1)).BeginInit();
@@ -108,7 +116,7 @@ namespace NetFrameworkWindowsFormsSampleApp
             this.textBox_Server2.Name = "textBox_Server2";
             this.textBox_Server2.Size = new System.Drawing.Size(151, 21);
             this.textBox_Server2.TabIndex = 3;
-            this.textBox_Server2.Text = "192.168.2.109";
+            this.textBox_Server2.Text = "192.168.2.107";
             // 
             // button_Connect1
             // 
@@ -431,7 +439,7 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // textBox_Log1
             // 
-            this.textBox_Log1.Location = new System.Drawing.Point(23, 236);
+            this.textBox_Log1.Location = new System.Drawing.Point(23, 337);
             this.textBox_Log1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox_Log1.Multiline = true;
             this.textBox_Log1.Name = "textBox_Log1";
@@ -443,7 +451,7 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // textBox_Log2
             // 
-            this.textBox_Log2.Location = new System.Drawing.Point(394, 236);
+            this.textBox_Log2.Location = new System.Drawing.Point(394, 337);
             this.textBox_Log2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox_Log2.Multiline = true;
             this.textBox_Log2.Name = "textBox_Log2";
@@ -464,11 +472,95 @@ namespace NetFrameworkWindowsFormsSampleApp
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // label_SipReg1
+            // 
+            this.label_SipReg1.AutoSize = true;
+            this.label_SipReg1.Location = new System.Drawing.Point(21, 252);
+            this.label_SipReg1.Name = "label_SipReg1";
+            this.label_SipReg1.Size = new System.Drawing.Size(53, 12);
+            this.label_SipReg1.TabIndex = 10;
+            this.label_SipReg1.Text = "Register";
+            // 
+            // label_SipReg2
+            // 
+            this.label_SipReg2.AutoSize = true;
+            this.label_SipReg2.Location = new System.Drawing.Point(392, 252);
+            this.label_SipReg2.Name = "label_SipReg2";
+            this.label_SipReg2.Size = new System.Drawing.Size(53, 12);
+            this.label_SipReg2.TabIndex = 11;
+            this.label_SipReg2.Text = "Register";
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(23, 267);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(107, 23);
+            this.button2.TabIndex = 12;
+            this.button2.Text = "Accept SIP Call";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // checkedListBox_AudCapture
+            // 
+            this.checkedListBox_AudCapture.FormattingEnabled = true;
+            this.checkedListBox_AudCapture.HorizontalScrollbar = true;
+            this.checkedListBox_AudCapture.Location = new System.Drawing.Point(804, 44);
+            this.checkedListBox_AudCapture.Name = "checkedListBox_AudCapture";
+            this.checkedListBox_AudCapture.Size = new System.Drawing.Size(129, 180);
+            this.checkedListBox_AudCapture.TabIndex = 13;
+            this.checkedListBox_AudCapture.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox_AudCapture_ItemCheck);
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(802, 25);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(131, 12);
+            this.label9.TabIndex = 14;
+            this.label9.Text = "Audio Capture Devices";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(937, 25);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(137, 12);
+            this.label10.TabIndex = 14;
+            this.label10.Text = "Audio Playback Devices";
+            // 
+            // checkedListBox_AudPlayback
+            // 
+            this.checkedListBox_AudPlayback.FormattingEnabled = true;
+            this.checkedListBox_AudPlayback.HorizontalScrollbar = true;
+            this.checkedListBox_AudPlayback.Location = new System.Drawing.Point(939, 44);
+            this.checkedListBox_AudPlayback.Name = "checkedListBox_AudPlayback";
+            this.checkedListBox_AudPlayback.Size = new System.Drawing.Size(135, 180);
+            this.checkedListBox_AudPlayback.TabIndex = 15;
+            this.checkedListBox_AudPlayback.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox_AudPlayback_ItemCheck);
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(136, 267);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(107, 23);
+            this.button3.TabIndex = 16;
+            this.button3.Text = "Dismiss SIP Call";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(787, 481);
+            this.ClientSize = new System.Drawing.Size(1144, 586);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.checkedListBox_AudPlayback);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.checkedListBox_AudCapture);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.label_SipReg2);
+            this.Controls.Add(this.label_SipReg1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox_Log2);
             this.Controls.Add(this.textBox_Log1);
@@ -532,6 +624,14 @@ namespace NetFrameworkWindowsFormsSampleApp
         private System.Windows.Forms.NumericUpDown numericUpDown_ReqType2;
         private System.Windows.Forms.TextBox textBox_Log2;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label label_SipReg1;
+        private System.Windows.Forms.Label label_SipReg2;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.CheckedListBox checkedListBox_AudCapture;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.CheckedListBox checkedListBox_AudPlayback;
+        private System.Windows.Forms.Button button3;
     }
 }
 

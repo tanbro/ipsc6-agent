@@ -355,12 +355,13 @@ void Connector::DoOnUserPacketReceived(RakNet::Packet* packet) {
             ptr += sizeof(int);
             //
             auto s = marshal_as<String ^>((char*)ptr);
-            auto utfBytes = System::Console::OutputEncoding->GetBytes(s);
-            auto encodedString = System::Text::Encoding::Default->GetString(
-                utfBytes, 0, utfBytes->Length);
+            // auto utfBytes = System::Console::OutputEncoding->GetBytes(s);
+            // auto encodedString =
+            // System::Text::Encoding::Default->GetString(utfBytes, 0,
+            // utfBytes->Length);
             /// 抛出事件：坐席收到来自服务器端的数据
-            auto e = gcnew AgentMessageReceivedEventArgs(command_type, n1, n2,
-                                                         encodedString);
+            auto e =
+                gcnew AgentMessageReceivedEventArgs(command_type, n1, n2, s);
             try {
                 OnAgentMessageReceived(this, e);
             } catch (NullReferenceException ^) {
