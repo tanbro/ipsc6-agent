@@ -175,10 +175,31 @@ namespace NetFrameworkWindowsFormsSampleApp
             conn1.OnServerSend += Conn_OnServerSendEventReceived;
             conn1.OnClosed += Conn_OnDisconnected;
             conn1.OnLost += Conn_OnConnectionLost;
+            conn1.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
 
             conn2.OnServerSend += Conn_OnServerSendEventReceived;
             conn2.OnClosed += Conn_OnDisconnected;
             conn2.OnLost += Conn_OnConnectionLost;
+            conn2.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
+        }
+
+        private void Conn_OnConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
+        {
+            Connection conn = (Connection)sender;
+            var text = string.Format("{0}", e.NewState);
+            if (conn == conn1)
+            {
+                label_ConnectStatus1.Text = text;
+            }
+            else if (conn == conn2)
+            {
+                label_ConnectStatus2.Text = text;
+
+            }
+            else
+            {
+                throw new Exception("Connection 1 or 2?");
+            }
         }
 
         ~Form1()
@@ -197,6 +218,8 @@ namespace NetFrameworkWindowsFormsSampleApp
         private void Form1_Load(object sender, EventArgs e)
         {
             EnumAudioDevices();
+            label_ConnectStatus1.Text = string.Format("{0}", conn1.State);
+            label_ConnectStatus2.Text = string.Format("{0}", conn2.State);
         }
 
         public class PjAudioDeviceInfoAndIndex
@@ -251,12 +274,10 @@ namespace NetFrameworkWindowsFormsSampleApp
             {
                 if (sender == conn1)
                 {
-                    label_ConnectStatus1.Text = "ConnectionLost";
                     sipAcc1?.shutdown();
                 }
                 else if (sender == conn2)
                 {
-                    label_ConnectStatus2.Text = "ConnectionLost";
                     sipAcc2?.shutdown();
                 }
             }));
@@ -268,12 +289,10 @@ namespace NetFrameworkWindowsFormsSampleApp
             {
                 if (sender == conn1)
                 {
-                    label_ConnectStatus1.Text = "Disconnected";
                     sipAcc1?.shutdown();
                 }
                 else if (sender == conn2)
                 {
-                    label_ConnectStatus2.Text = "Disconnected";
                     sipAcc2?.shutdown();
                 }
             }));
@@ -364,17 +383,7 @@ namespace NetFrameworkWindowsFormsSampleApp
 
         private async void button_Connect1_Click(object sender, EventArgs e)
         {
-            label_ConnectStatus1.Text = "Connecting ...";
-            try
-            {
-                await conn1.Open(textBox_Server1.Text);
-            }
-            catch (ConnectionException err)
-            {
-                label_ConnectStatus1.Text = string.Format("Connect failed: {0}", err.Message);
-                return;
-            }
-            label_ConnectStatus1.Text = "Connected.";
+            await conn1.Open(textBox_Server1.Text);
         }
 
         private async void button_Connect2_Click(object sender, EventArgs e)

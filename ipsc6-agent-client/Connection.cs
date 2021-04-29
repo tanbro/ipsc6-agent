@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Threading;
@@ -33,16 +35,17 @@ namespace ipsc6.agent.client
         private readonly Connector connector;
 
         private ConnectionState state = ConnectionState.Init;
-        private void SetState(ConnectionState val)
+        private void SetState(ConnectionState newState)
         {
-            state = val;
+            var e = new ConnectionStateChangedEventArgs(state, newState);
+            state = newState;
+            Task.Run(()=>OnConnectionStateChanged?.Invoke(this, e));
         }
 
         public ConnectionState State
         {
             get { return state; }
         }
-
 
         private TaskCompletionSource<object> openTcs;
         private AgentMessage hangingReqType = AgentMessage.UNKNOWN;
@@ -65,7 +68,7 @@ namespace ipsc6.agent.client
                 // Check to see if Dispose has already been called.
                 if (this.disposed)
                 {
-                    logger.WarnFormat("{0} Dispose has already been called.", connector.BoundAddress);
+                    logger.ErrorFormat("{0} Dispose has already been called.", connector.BoundAddress);
                 }
                 else
                 {
@@ -90,6 +93,7 @@ namespace ipsc6.agent.client
         public event ServerSendEventHandler OnServerSend;
         public event ClosedEventHandler OnClosed;
         public event LostEventHandler OnLost;
+        public event ConnectionStateChangedEventHandler OnConnectionStateChanged;
 
         private void AgentMsgRcvTrdStarter(object obj)
         {
@@ -110,7 +114,7 @@ namespace ipsc6.agent.client
                             }
                             if (isResponse)
                             {
-                                if (e.N1 < 1)
+                                if ((int)e.N1 < 1)
                                 {
                                     var err = new ErrorResponse(e);
                                     logger.ErrorFormat("{0}", err);
@@ -189,6 +193,10 @@ namespace ipsc6.agent.client
         private void Connector_OnConnected(object sender, ConnectedEventArgs e)
         {
             logger.InfoFormat("{0} OnConnected", connector.BoundAddress);
+            lock(connectLock)
+            {
+                SetState(ConnectionState.Ok);
+            }
             Task.Run(() => openTcs.SetResult(null));
         }
 
@@ -223,15 +231,22 @@ namespace ipsc6.agent.client
         public async Task Open(string remoteHost, ushort remotePort = 0)
         {
             remotePort = remotePort > 0 ? remotePort : Connector.DEFAULT_REMOTE_PORT;
-            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2})", connector.BoundAddress, remoteHost, remoteHost);
             try
             {
                 lock (connectLock)
                 {
+                    ConnectionState[] states = {
+                        ConnectionState.Init, ConnectionState.Closed, ConnectionState.Failed, ConnectionState.Lost
+                    };
+                    if (!states.Any(p => p == State))
+                    {
+                        throw new InvalidOperationException(string.Format("ConnectionState is {0}", State));
+                    }
                     if (openTcs != null)
                     {
                         throw new InvalidOperationException(string.Format("{0}", openTcs.Task.Status));
                     }
+                    logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ...", connector.BoundAddress, remoteHost, remoteHost);
                     openTcs = new TaskCompletionSource<object>();
                     SetState(ConnectionState.Opening);
                     connector.Connect(remoteHost, remotePort);
@@ -249,9 +264,14 @@ namespace ipsc6.agent.client
 
         public void Close()
         {
-            logger.InfoFormat("{0} Close", connector.BoundAddress);
             lock (connectLock)
             {
+                ConnectionState[] states = { ConnectionState.Opening, ConnectionState.Ok };
+                if (!states.Any(m => m == State))
+                {
+                    throw new InvalidOperationException(string.Format("ConnectionState is {0}", State));
+                }
+                logger.InfoFormat("{0} Close ...", connector.BoundAddress);
                 SetState(ConnectionState.Closing);
                 connector.Disconnect();
             }
@@ -306,16 +326,12 @@ namespace ipsc6.agent.client
 
         public async Task LogOut()
         {
-            await Request(new AgentRequestArgs(AgentMessage.REMOTE_MSG_RELEASE));
-        }
-
-        public async Task SignOn(string groupId)
-        {
-            await Request(new AgentRequestArgs(
-                AgentMessage.REMOTE_MSG_SIGNON,
-                0,
-                groupId
-            ));
+            var data = new AgentRequestArgs(AgentMessage.REMOTE_MSG_RELEASE);
+            try
+            {
+                await Request(data, 100);
+            }
+            catch (RequestTimeoutError) { }
         }
 
     }

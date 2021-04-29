@@ -2,7 +2,7 @@
 #include "pch.h"
 /* clang-format on */
 
-#include "AgentMessage.h"
+#include "ErrorCode.h"
 
 namespace ipsc6 {
 namespace agent {
