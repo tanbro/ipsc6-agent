@@ -49,27 +49,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\src\ipsc6.agent.client\AgentMessageEnum.cs">
-      <Link>AgentMessageEnum.cs</Link>
-    </Compile>
-    <Compile Include="..\src\ipsc6.agent.client\AgentRequestArgs.cs">
-      <Link>AgentRequestArgs.cs</Link>
-    </Compile>
-    <Compile Include="..\src\ipsc6.agent.client\Connection.cs">
-      <Link>Connection.cs</Link>
-    </Compile>
-    <Compile Include="..\src\ipsc6.agent.client\Errors.cs">
-      <Link>Errors.cs</Link>
-    </Compile>
-    <Compile Include="..\src\ipsc6.agent.client\Events.cs">
-      <Link>Events.cs</Link>
-    </Compile>
-    <Compile Include="..\src\ipsc6.agent.client\Exceptions.cs">
-      <Link>Exceptions.cs</Link>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".editorconfig" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -78,5 +61,6 @@
       <Name>ipsc6.agent.network.netframework</Name>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="..\ipsc6-agent-client\ipsc6-agent-client.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

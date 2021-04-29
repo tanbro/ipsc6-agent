@@ -26,7 +26,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "org.pjsip.pjsua2.netframewo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ipsc6.agent.network.netframework", "ipsc6.agent.network.netframework\ipsc6.agent.network.netframework.vcxproj", "{F3A6CEAA-81EA-4F7E-978E-10639C21186B}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ipsc6-agent-client", "ipsc6-agent-client\ipsc6-agent-client.shproj", "{01E42CD4-E152-4513-A66F-7D75B3B70BFC}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "pjsua2_csharp", "pjsua2_csharp\pjsua2_csharp.shproj", "{18D2F11F-5340-4F31-9736-F4247F199251}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ipsc6-agent-client\ipsc6-agent-client.projitems*{01e42cd4-e152-4513-a66f-7d75b3b70bfc}*SharedItemsImports = 13
+		pjsua2_csharp\pjsua2_csharp.projitems*{18d2f11f-5340-4f31-9736-f4247f199251}*SharedItemsImports = 13
+		pjsua2_csharp\pjsua2_csharp.projitems*{56b2fbca-189d-403c-909e-b22093122e2c}*SharedItemsImports = 4
+		ipsc6-agent-client\ipsc6-agent-client.projitems*{62d33297-c37d-44a8-8a97-13425e0d54d5}*SharedItemsImports = 4
+		pjsua2_csharp\pjsua2_csharp.projitems*{8c33211b-00b7-414f-af11-1262899195fb}*SharedItemsImports = 5
+		ipsc6-agent-client\ipsc6-agent-client.projitems*{c0c4df43-fda0-4da8-92c5-71cd62f7c47b}*SharedItemsImports = 5
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64

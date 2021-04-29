@@ -13,15 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\src\ipsc6.agent.client\AgentMessageEnum.cs" Link="AgentMessageEnum.cs" />
-    <Compile Include="..\src\ipsc6.agent.client\AgentRequestArgs.cs" Link="AgentRequestArgs.cs" />
-    <Compile Include="..\src\ipsc6.agent.client\Connection.cs" Link="Connection.cs" />
-    <Compile Include="..\src\ipsc6.agent.client\Errors.cs" Link="Errors.cs" />
-    <Compile Include="..\src\ipsc6.agent.client\Events.cs" Link="Events.cs" />
-    <Compile Include="..\src\ipsc6.agent.client\Exceptions.cs" Link="Exceptions.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.12" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
   </ItemGroup>
@@ -29,5 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ipsc6.agent.network\ipsc6.agent.network.vcxproj" />
   </ItemGroup>
+
+  <Import Project="..\ipsc6-agent-client\ipsc6-agent-client.projitems" Label="Shared" />
 
 </Project>
