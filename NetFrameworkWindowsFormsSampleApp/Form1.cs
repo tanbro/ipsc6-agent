@@ -172,13 +172,13 @@ namespace NetFrameworkWindowsFormsSampleApp
             conn1 = new Connection();
             conn2 = new Connection();
 
-            conn1.OnServerSendEventReceived += Conn_OnServerSendEventReceived;
-            conn1.OnDisconnected += Conn_OnDisconnected;
-            conn1.OnConnectionLost += Conn_OnConnectionLost;
+            conn1.OnServerSend += Conn_OnServerSendEventReceived;
+            conn1.OnClosed += Conn_OnDisconnected;
+            conn1.OnLost += Conn_OnConnectionLost;
 
-            conn2.OnServerSendEventReceived += Conn_OnServerSendEventReceived;
-            conn2.OnDisconnected += Conn_OnDisconnected;
-            conn2.OnConnectionLost += Conn_OnConnectionLost;
+            conn2.OnServerSend += Conn_OnServerSendEventReceived;
+            conn2.OnClosed += Conn_OnDisconnected;
+            conn2.OnLost += Conn_OnConnectionLost;
         }
 
         ~Form1()
@@ -297,7 +297,7 @@ namespace NetFrameworkWindowsFormsSampleApp
                     textBox_Log2.AppendText(msg);
                 }
                 // server-send data
-                if (e.CommandType == 55)
+                if (e.CommandType == AgentMessage.REMOTE_MSG_SENDDATA)
                 {
                     // SIP 注册地址
                     if (e.N1 == 13)
@@ -341,10 +341,12 @@ namespace NetFrameworkWindowsFormsSampleApp
                 switch (id)
                 {
                     case 1:
+                        sipAcc1?.Dispose();
                         sipAcc1 = new SipAccount(this, 1);
                         sipAcc1.create(sipAccountCfg);
                         break;
                     case 2:
+                        sipAcc2?.Dispose();
                         sipAcc2 = new SipAccount(this, 2);
                         sipAcc2.create(sipAccountCfg);
                         break;
@@ -367,7 +369,7 @@ namespace NetFrameworkWindowsFormsSampleApp
             {
                 await conn1.Open(textBox_Server1.Text);
             }
-            catch (AgentConnectException err)
+            catch (ConnectionException err)
             {
                 label_ConnectStatus1.Text = string.Format("Connect failed: {0}", err.Message);
                 return;
@@ -382,7 +384,7 @@ namespace NetFrameworkWindowsFormsSampleApp
             {
                 await conn2.Open(textBox_Server2.Text);
             }
-            catch (AgentConnectException err)
+            catch (ConnectionException err)
             {
                 label_ConnectStatus2.Text = string.Format("Connect failed: {0}", err.Message);
                 return;
@@ -394,7 +396,7 @@ namespace NetFrameworkWindowsFormsSampleApp
         {
             var s = string.Format("{0}|{1}|1|0|{0}", textBox_User1.Text, textBox_Psw1.Text);
             var r = await conn1.Request(new AgentRequestArgs(
-                AgentMessageEnum.REMOTE_MSG_LOGIN, s
+                AgentMessage.REMOTE_MSG_LOGIN, s
             ));
             textBox_Log1.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.CommandType, r.N1, r.N2, r.S));
         }
@@ -403,14 +405,14 @@ namespace NetFrameworkWindowsFormsSampleApp
         {
             try
             {
-                await conn1.Request(new AgentRequestArgs(AgentMessageEnum.REMOTE_MSG_RELEASE), 0);
+                await conn1.Request(new AgentRequestArgs(AgentMessage.REMOTE_MSG_RELEASE), 0);
             }
-            catch (AgentRequestTimeoutException) { }
+            catch (RequestTimeoutError) { }
         }
 
         private async void button_Req1_Click(object sender, EventArgs e)
         {
-            var t = (AgentMessageEnum)numericUpDown_ReqType1.Value;
+            var t = (AgentMessage)numericUpDown_ReqType1.Value;
             var n = (int)numericUpDown_ReqNum1.Value;
             var s = textBox_ReqContent1.Text.Trim();
             var r = await conn1.Request(new AgentRequestArgs(t, n, s));
@@ -420,27 +422,25 @@ namespace NetFrameworkWindowsFormsSampleApp
         private void button_Disconnect1_Click(object sender, EventArgs e)
         {
             conn1.Close();
-            label_ConnectStatus1.Text = "Closed";
         }
 
         private void button_Disconnect2_Click(object sender, EventArgs e)
         {
             conn2.Close();
-            label_ConnectStatus2.Text = "Closed";
         }
 
         private async void button_LogIn2_Click(object sender, EventArgs e)
         {
             var s = string.Format("{0}|{1}|1|0|{0}", textBox_User2.Text, textBox_Psw2.Text);
             var r = await conn2.Request(new AgentRequestArgs(
-                AgentMessageEnum.REMOTE_MSG_LOGIN, s
+                AgentMessage.REMOTE_MSG_LOGIN, s
             ));
             textBox_Log2.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.CommandType, r.N1, r.N2, r.S));
         }
 
         private async void button_Req2_Click(object sender, EventArgs e)
         {
-            var t = (AgentMessageEnum)numericUpDown_ReqType2.Value;
+            var t = (AgentMessage)numericUpDown_ReqType2.Value;
             var n = (int)numericUpDown_ReqNum2.Value;
             var s = textBox_ReqContent2.Text.Trim();
             var r = await conn2.Request(new AgentRequestArgs(t, n, s));

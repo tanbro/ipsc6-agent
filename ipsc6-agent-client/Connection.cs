@@ -1,42 +1,55 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using ipsc6.agent.network;
 
+using ipsc6.agent.network;
 
 namespace ipsc6.agent.client
 {
     public class Connection : IDisposable
     {
+        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Connection));
+
+        public Connection(Connector connector, Encoding encoding = null)
+        {
+            this.connector = connector;
+            Encoding = encoding ?? Encoding.Default;
+            Initialize();
+        }
+
+        public Connection(ushort localPort = 0, string address = "", Encoding encoding = null)
+        {
+            connector = Connector.CreateInstance(localPort, address);
+            Encoding = encoding ?? Encoding.Default;
+            Initialize();
+        }
+
         // Flag: Has Dispose already been called?
         private bool disposed = false;
 
-        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Connection));
 
         private readonly Connector connector;
-        private TaskCompletionSource<object> tcsConnect;
-        private AgentMessageEnum msgtypRequest;
-        private TaskCompletionSource<AgentMessageReceivedEventArgs> tcsRequest;
-        private ConcurrentQueue<object> agentMessageQueue;
-        private Thread agentMessageThread;
 
-        private void Initialize()
+        private ConnectionState state = ConnectionState.Init;
+        private void SetState(ConnectionState val)
         {
-            logger.InfoFormat("Initialize: BoundAddress={0}", connector.BoundAddress);
-            connector.OnConnectAttemptFailed += Connector_OnConnectAttemptFailed;
-            connector.OnConnected += Connector_OnConnected;
-            connector.OnDisconnected += Connector_OnDisconnected;
-            connector.OnConnectionLost += Connector_OnConnectionLost;
-            connector.OnAgentMessageReceived += Connector_OnAgentMessageReceived;
-            msgtypRequest = AgentMessageEnum.UNKNOWN;
-            agentMessageQueue = new ConcurrentQueue<object>();
-            agentMessageThread = new Thread(AgentMessageReceiveThreadStarter);
-            agentMessageThread.Start();
+            state = val;
         }
+
+        public ConnectionState State
+        {
+            get { return state; }
+        }
+
+
+        private TaskCompletionSource<object> openTcs;
+        private AgentMessage hangingReqType = AgentMessage.UNKNOWN;
+        private TaskCompletionSource<AgentMessageReceivedEventArgs> reqTcs;
+        private ConcurrentQueue<object> agentMsgQueue;
+        private Thread agentMsgTrd;
+        private readonly CancellationTokenSource agentMsgTrdCts = new CancellationTokenSource();
 
         public void Dispose()
         {
@@ -46,17 +59,25 @@ namespace ipsc6.agent.client
 
         protected virtual void Dispose(bool disposing)
         {
-            logger.InfoFormat("Dispose: BoundAddress={0}", connector.BoundAddress);
             if (disposing)
             {
+                logger.InfoFormat("{0} Dispose", connector.BoundAddress);
                 // Check to see if Dispose has already been called.
-                if (!this.disposed)
+                if (this.disposed)
                 {
-                    agentMessageThread.Abort();
-                    agentMessageThread.Join();
+                    logger.WarnFormat("{0} Dispose has already been called.", connector.BoundAddress);
+                }
+                else
+                {
+                    logger.DebugFormat("{0} Dispose - Cancel agent msg thred", connector.BoundAddress);
+                    agentMsgTrdCts.Cancel();
+                    agentMsgTrd.Join();
+                    agentMsgTrdCts.Dispose();
+                    logger.DebugFormat("{0} Dispose - Deallocate connector", connector.BoundAddress);
                     Connector.DeallocateInstance(connector);
                     // Note disposing has been done.
                     disposed = true;
+                    logger.DebugFormat("{0} Dispose - disposed", connector.BoundAddress);
                 }
             }
         }
@@ -66,53 +87,44 @@ namespace ipsc6.agent.client
             get { return connector.Connected; }
         }
 
-        public event ServerSendEventHandler OnServerSendEventReceived;
-        public event DisconnectedEventHandler OnDisconnected;
-        public event ConnectionLostEventHandler OnConnectionLost;
+        public event ServerSendEventHandler OnServerSend;
+        public event ClosedEventHandler OnClosed;
+        public event LostEventHandler OnLost;
 
-        private void AgentMessageReceiveThreadStarter(object _)
+        private void AgentMsgRcvTrdStarter(object obj)
         {
+            var token = (CancellationToken)obj;
+            bool isResponse;  // 是否 Response ?
             try
             {
-                while (true)
+                while (!token.IsCancellationRequested)
                 {
-                    while (agentMessageQueue.TryDequeue(out object msg))
+                    while (agentMsgQueue.TryDequeue(out object msg))
                     {
                         if (msg is AgentMessageReceivedEventArgs)
                         {
                             var e = msg as AgentMessageReceivedEventArgs;
-                            /// 是否 Response ?
-                            var isResponse = false;
                             lock (requestLock)
                             {
-                                isResponse = (int)msgtypRequest == e.CommandType;
+                                isResponse = (hangingReqType == e.CommandType);
                             }
                             if (isResponse)
                             {
-                                if (e.CommandType == (int)msgtypRequest)
+                                if (e.N1 < 1)
                                 {
-                                    /// response
-                                    if (e.N1 == 1)
-                                    {
-                                        tcsRequest.SetResult(e);
-                                    }
-                                    else
-                                    {
-                                        var errMsg = string.Format("ErrorResponse. Code: {0}", e.N1);
-                                        tcsRequest.SetException(new ErrorResponseException(errMsg));
-                                    }
-
+                                    var err = new ErrorResponse(e);
+                                    logger.ErrorFormat("{0}", err);
+                                    reqTcs.SetException(new ErrorResponse(e));
                                 }
-                                else if (e.CommandType < 1)
+                                else
                                 {
-                                    var errMsg = string.Format("ServerSendError. Code: {0}", e.N1);
-                                    tcsRequest.SetException(new ServerSendError(errMsg));
+                                    reqTcs.SetResult(e);
                                 }
                             }
                             else
                             {
                                 /// server->client event
-                                OnServerSendEventReceived?.Invoke(this, e);
+                                OnServerSend?.Invoke(this, e);
                             }
                         }
                     }
@@ -125,114 +137,124 @@ namespace ipsc6.agent.client
         private void Connector_OnAgentMessageReceived(object sender, AgentMessageReceivedEventArgs e)
         {
             /* UTF-8 转当前编码 */
-            var utfBytes = Encoding.Default.GetBytes(e.S);
+            var utfBytes = Encoding.GetBytes(e.S);
             e.S = Encoding.UTF8.GetString(utfBytes, 0, utfBytes.Length);
-            logger.DebugFormat("{0} AgentMessageReceived: {1} {2} {3} {4}", connector.BoundAddress, e.CommandType, e.N1, e.N2, e.S);
-            agentMessageQueue.Enqueue(e);
+            logger.DebugFormat("{0} AgentMessageReceived: {1}", connector.BoundAddress, e);
+            agentMsgQueue.Enqueue(e);
         }
 
         private void Connector_OnConnectionLost(object sender)
         {
-            logger.WarnFormat("{0} OnConnectionLost", connector.BoundAddress);
-            if (tcsConnect != null)
+            logger.ErrorFormat("{0} OnConnectionLost", connector.BoundAddress);
+            lock (connectLock)
             {
-                if (tcsConnect.Task.Status == TaskStatus.Running)
+                SetState(ConnectionState.Lost);
+            }
+            if (openTcs?.Task.Status == TaskStatus.Running)
+            {
+                Task.Run(() =>
                 {
-                    Task.Run(() =>
-                    {
-                        tcsConnect.SetException(new AgentConnectFailedException("ConnectionLost"));
-                    });
-                }
+                    openTcs.SetException(new ConnectLostException());
+                });
             }
             else
             {
                 /// 连接丢失事件
-                Task.Run(() => OnConnectionLost?.Invoke(this));
+                Task.Run(() => OnLost?.Invoke(this));
             }
         }
 
         private void Connector_OnDisconnected(object sender)
         {
-            logger.InfoFormat("{0} OnDisconnected", connector.BoundAddress);
-            if (tcsConnect != null)
+            logger.WarnFormat("{0} OnDisconnected", connector.BoundAddress);
+            lock (connectLock)
             {
-                if (tcsConnect.Task.Status == TaskStatus.Running)
+                SetState(ConnectionState.Closed);
+            }
+
+            if (openTcs?.Task.Status == TaskStatus.Running)
+            {
+                Task.Run(() =>
                 {
-                    Task.Run(() =>
-                    {
-                        tcsConnect.SetException(new AgentConnectFailedException("Disconnected"));
-                    });
-                }
+                    openTcs.SetException(new ConnectionClosedException());
+                });
             }
             else
             {
                 /// 连接丢失事件
-                Task.Run(() => OnDisconnected?.Invoke(this));
+                Task.Run(() => OnClosed?.Invoke(this));
             }
         }
 
         private void Connector_OnConnected(object sender, ConnectedEventArgs e)
         {
             logger.InfoFormat("{0} OnConnected", connector.BoundAddress);
-            Task.Run(() => tcsConnect.SetResult(null));
+            Task.Run(() => openTcs.SetResult(null));
         }
 
         private void Connector_OnConnectAttemptFailed(object sender)
         {
-            logger.InfoFormat("{0} OnConnectAttemptFailed", connector.BoundAddress);
-            Task.Run(() => tcsConnect.SetException(new AgentConnectFailedException("ConnectAttemptFailed")));
+            logger.ErrorFormat("{0} OnConnectAttemptFailed", connector.BoundAddress);
+            lock (connectLock)
+            {
+                SetState(ConnectionState.Failed);
+            }
+            Task.Run(() => openTcs.SetException(new ConnectionFailedException()));
         }
 
-        private readonly Encoding encoding;
+        public readonly Encoding Encoding;
 
-        public Connection(Connector connector, Encoding encoding=null)
+        private void Initialize()
         {
-            this.connector = connector;
-            this.encoding = encoding ?? Encoding.Default;
-            Initialize();
-        }
-
-        public Connection(ushort localPort = 0, string address = "", Encoding encoding=null)
-        {
-            connector = Connector.CreateInstance(localPort, address);
-            this.encoding = encoding ?? Encoding.Default;
-            Initialize();
+            logger.InfoFormat("{0} Initialize", connector.BoundAddress);
+            connector.OnConnectAttemptFailed += Connector_OnConnectAttemptFailed;
+            connector.OnConnected += Connector_OnConnected;
+            connector.OnDisconnected += Connector_OnDisconnected;
+            connector.OnConnectionLost += Connector_OnConnectionLost;
+            connector.OnAgentMessageReceived += Connector_OnAgentMessageReceived;
+            hangingReqType = AgentMessage.UNKNOWN;
+            agentMsgQueue = new ConcurrentQueue<object>();
+            agentMsgTrd = new Thread(new ParameterizedThreadStart(AgentMsgRcvTrdStarter));
+            agentMsgTrd.Start(agentMsgTrdCts.Token);
         }
 
         private readonly object connectLock = new object();
 
-        public async Task Open(string host, ushort port = 0)
+        public async Task Open(string remoteHost, ushort remotePort = 0)
         {
-            port = port > 0 ? port : Connector.DEFAULT_REMOTE_PORT;
-            logger.InfoFormat("Open(host={0}, port={1}) ...", host, port);
-            lock (connectLock)
-            {
-                if (tcsConnect != null)
-                {
-                    throw new InvalidOperationException(string.Format("{0}", tcsConnect.Task.Status));
-                }
-                tcsConnect = new TaskCompletionSource<object>();
-            }
+            remotePort = remotePort > 0 ? remotePort : Connector.DEFAULT_REMOTE_PORT;
+            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2})", connector.BoundAddress, remoteHost, remoteHost);
             try
             {
                 lock (connectLock)
                 {
-                    connector.Connect(host, port);
+                    if (openTcs != null)
+                    {
+                        throw new InvalidOperationException(string.Format("{0}", openTcs.Task.Status));
+                    }
+                    openTcs = new TaskCompletionSource<object>();
+                    SetState(ConnectionState.Opening);
+                    connector.Connect(remoteHost, remotePort);
                 }
-                await tcsConnect.Task;
+                await openTcs.Task;
             }
             finally
             {
                 lock (connectLock)
                 {
-                    tcsConnect = null;
+                    openTcs = null;
                 }
             }
         }
 
         public void Close()
         {
-            connector.Disconnect();
+            logger.InfoFormat("{0} Close", connector.BoundAddress);
+            lock (connectLock)
+            {
+                SetState(ConnectionState.Closing);
+                connector.Disconnect();
+            }
         }
 
         private static readonly object requestLock = new object();
@@ -241,32 +263,34 @@ namespace ipsc6.agent.client
         {
             lock (requestLock)
             {
-                if (tcsRequest != null)
+                if (reqTcs != null)
                 {
-                    throw new InvalidOperationException(string.Format("{0}", tcsRequest.Task.Status));
+                    throw new InvalidOperationException(string.Format("Invalide request state: {0}", reqTcs.Task.Status));
                 }
-                tcsRequest = new TaskCompletionSource<AgentMessageReceivedEventArgs>();
+                if (hangingReqType != AgentMessage.UNKNOWN)
+                {
+                    throw new InvalidOperationException(string.Format("Invalide hanging request type: {0}", hangingReqType));
+                }
+                reqTcs = new TaskCompletionSource<AgentMessageReceivedEventArgs>();
+                hangingReqType = args.Type;
+                logger.InfoFormat("{0} Request({1})", connector.BoundAddress, args);
+                connector.SendAgentMessage((int)args.Type, args.N, args.S);
             }
             try
             {
-                lock (requestLock)
+                var task = await Task.WhenAny(reqTcs.Task, Task.Delay(millisecondsTimeout));
+                if (task != reqTcs.Task)
                 {
-                    msgtypRequest = args.Type;
-                    connector.SendAgentMessage((int)args.Type, args.N, args.S);
+                    throw new RequestTimeoutError();
                 }
-                var task = await Task.WhenAny(tcsRequest.Task, Task.Delay(millisecondsTimeout));
-                if (task != tcsRequest.Task)
-                {
-                    throw new AgentRequestTimeoutException();
-                }
-                return await tcsRequest.Task;
+                return await reqTcs.Task;
             }
             finally
             {
                 lock (requestLock)
                 {
-                    msgtypRequest = AgentMessageEnum.UNKNOWN;
-                    tcsRequest = null;
+                    hangingReqType = AgentMessage.UNKNOWN;
+                    reqTcs = null;
                 }
             }
         }
@@ -274,7 +298,7 @@ namespace ipsc6.agent.client
         public async Task LogIn(string username, string password)
         {
             await Request(new AgentRequestArgs(
-                AgentMessageEnum.REMOTE_MSG_LOGIN,
+                AgentMessage.REMOTE_MSG_LOGIN,
                 0,
                 string.Format("{0}|{1}|1|0|{0}", username, password)
             ));
@@ -282,13 +306,13 @@ namespace ipsc6.agent.client
 
         public async Task LogOut()
         {
-            await Request(new AgentRequestArgs(AgentMessageEnum.REMOTE_MSG_RELEASE));
+            await Request(new AgentRequestArgs(AgentMessage.REMOTE_MSG_RELEASE));
         }
 
         public async Task SignOn(string groupId)
         {
             await Request(new AgentRequestArgs(
-                AgentMessageEnum.REMOTE_MSG_SIGNON,
+                AgentMessage.REMOTE_MSG_SIGNON,
                 0,
                 groupId
             ));

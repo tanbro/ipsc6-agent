@@ -9,10 +9,10 @@
     <Import_RootNamespace>ipsc6_agent_client</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)AgentMessageEnum.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AgentRequestArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Connection.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Errors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConnectionState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ServerSendErrorCode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Exceptions.cs" />
   </ItemGroup>

@@ -127,6 +127,7 @@
     <Link />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\ipsc6.agent.network\AgentMessage.h" />
     <ClInclude Include="..\src\ipsc6.agent.network\Connector.h" />
     <ClInclude Include="..\src\ipsc6.agent.network\errors.h" />
     <ClInclude Include="..\src\ipsc6.agent.network\Events.h" />
@@ -135,6 +136,7 @@
     <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\ipsc6.agent.network\AgentMessage.cpp" />
     <ClCompile Include="..\src\ipsc6.agent.network\Connector.cpp" />
     <ClCompile Include="..\src\ipsc6.agent.network\Events.cpp" />
     <ClCompile Include="AssemblyInfo.cpp" />

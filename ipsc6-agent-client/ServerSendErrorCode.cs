@@ -180,18 +180,4 @@ namespace ipsc6.agent.client
         //从服务器端获取的座席组ID集合与座席组名称集合尺寸不相等
         ERR_AGENT_GROUPSIZENOTEQUAL = -553
     }
-
-    public class ServerSendError : BaseAgentException
-    {
-        public ServerSendError() { }
-        public ServerSendError(string message) : base(message) { }
-        public ServerSendError(string message, Exception inner) : base(message, inner) { }
-    }
-
-    public class ErrorResponseException : BaseAgentException
-    {
-        public ErrorResponseException() { }
-        public ErrorResponseException(string message) : base(message) { }
-        public ErrorResponseException(string message, Exception inner) : base(message, inner) { }
-    }
 }

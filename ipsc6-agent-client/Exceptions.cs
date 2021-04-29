@@ -1,54 +1,82 @@
 using System;
+using ipsc6.agent.network;
 
 namespace ipsc6.agent.client
 {
-    public class BaseAgentException : Exception
+    public class BaseException : Exception
     {
-        public BaseAgentException() { }
-        public BaseAgentException(string message) : base(message) { }
-        public BaseAgentException(string message, Exception inner) : base(message, inner) { }
+        public BaseException() { }
+        public BaseException(string message) : base(message) { }
+        public BaseException(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class AgentConnectException : BaseAgentException
+    public class ConnectionException : BaseException
     {
-        public AgentConnectException() { }
-        public AgentConnectException(string message) : base(message) { }
-        public AgentConnectException(string message, Exception inner) : base(message, inner) { }
+        public ConnectionException() { }
+        public ConnectionException(string message) : base(message) { }
+        public ConnectionException(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class AgentConnectFailedException : AgentConnectException
+    public class ConnectionFailedException : ConnectionException
     {
-        public AgentConnectFailedException() { }
-        public AgentConnectFailedException(string message) : base(message) { }
-        public AgentConnectFailedException(string message, Exception inner) : base(message, inner) { }
+        public ConnectionFailedException() { }
+        public ConnectionFailedException(string message) : base(message) { }
+        public ConnectionFailedException(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class AgentConnectLostException : AgentConnectException
+    public class ConnectLostException : ConnectionException
     {
-        public AgentConnectLostException() { }
-        public AgentConnectLostException(string message) : base(message) { }
-        public AgentConnectLostException(string message, Exception inner) : base(message, inner) { }
+        public ConnectLostException() { }
+        public ConnectLostException(string message) : base(message) { }
+        public ConnectLostException(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class AgentDisconnectedException : AgentConnectException
+    public class ConnectionClosedException : ConnectionException
     {
-        public AgentDisconnectedException() { }
-        public AgentDisconnectedException(string message) : base(message) { }
-        public AgentDisconnectedException(string message, Exception inner) : base(message, inner) { }
+        public ConnectionClosedException() { }
+        public ConnectionClosedException(string message) : base(message) { }
+        public ConnectionClosedException(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class AgentRequestException : BaseAgentException
+    public class BaseRequestError : BaseException
     {
-        public AgentRequestException() { }
-        public AgentRequestException(string message) : base(message) { }
-        public AgentRequestException(string message, Exception inner) : base(message, inner) { }
+        public BaseRequestError() { }
+        public BaseRequestError(string message) : base(message) { }
+        public BaseRequestError(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class AgentRequestTimeoutException : AgentRequestException
+    public class RequestTimeoutError : BaseRequestError
     {
-        public AgentRequestTimeoutException() { }
-        public AgentRequestTimeoutException(string message) : base(message) { }
-        public AgentRequestTimeoutException(string message, Exception inner) : base(message, inner) { }
+        public RequestTimeoutError() { }
+        public RequestTimeoutError(string message) : base(message) { }
+        public RequestTimeoutError(string message, Exception inner) : base(message, inner) { }
+    }
+
+    public class ServerSendError : BaseException
+    {
+        public ServerSendError() { }
+        public ServerSendError(string message) : base(message) { }
+        public ServerSendError(string message, Exception inner) : base(message, inner) { }
+    }
+
+    public class ErrorResponse : BaseRequestError
+    {
+        public readonly AgentMessageReceivedEventArgs Arg;
+
+        static string MakeMessage(AgentMessageReceivedEventArgs arg)
+        {
+            return string.Format("ErrorResponse: {0}", arg);
+        }
+
+        public ErrorResponse(AgentMessageReceivedEventArgs arg) : base(MakeMessage(arg))
+        {
+            Arg = arg;
+        }
+
+        public ErrorResponse(AgentMessageReceivedEventArgs arg, Exception inner) : base(MakeMessage(arg), inner)
+        {
+            Arg = arg;
+        }
     }
 
 }
