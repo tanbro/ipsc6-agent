@@ -1,7 +1,5 @@
 #pragma once
 
-#include "AgentMessage.h"
-
 using namespace System;
 
 namespace ipsc6 {
@@ -29,12 +27,12 @@ delegate void ConnectedEventHandler(Object ^ sender, ConnectedEventArgs ^ e);
 public
 ref class AgentMessageReceivedEventArgs : EventArgs {
    public:
-    property AgentMessage CommandType;
+    property int CommandType;
     property int N1;
     property int N2;
     property String ^ S;
     AgentMessageReceivedEventArgs() : EventArgs(){};
-    AgentMessageReceivedEventArgs(AgentMessage commandType,
+    AgentMessageReceivedEventArgs(int commandType,
                                   int n1,
                                   int n2,
                                   String ^ s)

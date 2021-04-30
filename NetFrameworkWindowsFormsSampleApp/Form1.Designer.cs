@@ -43,20 +43,16 @@ namespace NetFrameworkWindowsFormsSampleApp
             this.label3 = new System.Windows.Forms.Label();
             this.textBox_ReqContent1 = new System.Windows.Forms.TextBox();
             this.numericUpDown_ReqType1 = new System.Windows.Forms.NumericUpDown();
-            this.button_LogOut1 = new System.Windows.Forms.Button();
             this.textBox_Psw1 = new System.Windows.Forms.TextBox();
             this.textBox_User1 = new System.Windows.Forms.TextBox();
-            this.button_LogIn1 = new System.Windows.Forms.Button();
             this.label_ConnectStatus1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.button_LogOut2 = new System.Windows.Forms.Button();
             this.numericUpDown_ReqNum2 = new System.Windows.Forms.NumericUpDown();
             this.textBox_Psw2 = new System.Windows.Forms.TextBox();
             this.button_Req2 = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
             this.textBox_User2 = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.button_LogIn2 = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.button_Disconnect2 = new System.Windows.Forms.Button();
             this.textBox_ReqContent2 = new System.Windows.Forms.TextBox();
@@ -120,10 +116,10 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // button_Connect1
             // 
-            this.button_Connect1.Location = new System.Drawing.Point(66, 49);
+            this.button_Connect1.Location = new System.Drawing.Point(204, 61);
             this.button_Connect1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_Connect1.Name = "button_Connect1";
-            this.button_Connect1.Size = new System.Drawing.Size(64, 16);
+            this.button_Connect1.Size = new System.Drawing.Size(64, 24);
             this.button_Connect1.TabIndex = 4;
             this.button_Connect1.Text = "Connect";
             this.button_Connect1.UseVisualStyleBackColor = true;
@@ -139,10 +135,8 @@ namespace NetFrameworkWindowsFormsSampleApp
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.textBox_ReqContent1);
             this.groupBox1.Controls.Add(this.numericUpDown_ReqType1);
-            this.groupBox1.Controls.Add(this.button_LogOut1);
             this.groupBox1.Controls.Add(this.textBox_Psw1);
             this.groupBox1.Controls.Add(this.textBox_User1);
-            this.groupBox1.Controls.Add(this.button_LogIn1);
             this.groupBox1.Controls.Add(this.label_ConnectStatus1);
             this.groupBox1.Controls.Add(this.textBox_Server1);
             this.groupBox1.Controls.Add(this.label1);
@@ -158,12 +152,12 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // button_Disconnect1
             // 
-            this.button_Disconnect1.Location = new System.Drawing.Point(139, 49);
+            this.button_Disconnect1.Location = new System.Drawing.Point(273, 61);
             this.button_Disconnect1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_Disconnect1.Name = "button_Disconnect1";
-            this.button_Disconnect1.Size = new System.Drawing.Size(64, 16);
+            this.button_Disconnect1.Size = new System.Drawing.Size(64, 24);
             this.button_Disconnect1.TabIndex = 16;
-            this.button_Disconnect1.Text = "Disconnect";
+            this.button_Disconnect1.Text = "Close";
             this.button_Disconnect1.UseVisualStyleBackColor = true;
             this.button_Disconnect1.Click += new System.EventHandler(this.button_Disconnect1_Click);
             // 
@@ -229,20 +223,9 @@ namespace NetFrameworkWindowsFormsSampleApp
             this.numericUpDown_ReqType1.Size = new System.Drawing.Size(52, 21);
             this.numericUpDown_ReqType1.TabIndex = 10;
             // 
-            // button_LogOut1
-            // 
-            this.button_LogOut1.Location = new System.Drawing.Point(273, 95);
-            this.button_LogOut1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button_LogOut1.Name = "button_LogOut1";
-            this.button_LogOut1.Size = new System.Drawing.Size(64, 16);
-            this.button_LogOut1.TabIndex = 9;
-            this.button_LogOut1.Text = "Log Out";
-            this.button_LogOut1.UseVisualStyleBackColor = true;
-            this.button_LogOut1.Click += new System.EventHandler(this.button_LogOut_Click);
-            // 
             // textBox_Psw1
             // 
-            this.textBox_Psw1.Location = new System.Drawing.Point(112, 95);
+            this.textBox_Psw1.Location = new System.Drawing.Point(115, 64);
             this.textBox_Psw1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox_Psw1.Name = "textBox_Psw1";
             this.textBox_Psw1.Size = new System.Drawing.Size(86, 21);
@@ -251,23 +234,12 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // textBox_User1
             // 
-            this.textBox_User1.Location = new System.Drawing.Point(21, 95);
+            this.textBox_User1.Location = new System.Drawing.Point(23, 64);
             this.textBox_User1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox_User1.Name = "textBox_User1";
             this.textBox_User1.Size = new System.Drawing.Size(86, 21);
             this.textBox_User1.TabIndex = 7;
             this.textBox_User1.Text = "1001";
-            // 
-            // button_LogIn1
-            // 
-            this.button_LogIn1.Location = new System.Drawing.Point(204, 95);
-            this.button_LogIn1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button_LogIn1.Name = "button_LogIn1";
-            this.button_LogIn1.Size = new System.Drawing.Size(64, 16);
-            this.button_LogIn1.TabIndex = 6;
-            this.button_LogIn1.Text = "Log In";
-            this.button_LogIn1.UseVisualStyleBackColor = true;
-            this.button_LogIn1.Click += new System.EventHandler(this.button_LogIn1_Click);
             // 
             // label_ConnectStatus1
             // 
@@ -280,14 +252,12 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.button_LogOut2);
             this.groupBox2.Controls.Add(this.numericUpDown_ReqNum2);
             this.groupBox2.Controls.Add(this.textBox_Psw2);
             this.groupBox2.Controls.Add(this.button_Req2);
             this.groupBox2.Controls.Add(this.label8);
             this.groupBox2.Controls.Add(this.textBox_User2);
             this.groupBox2.Controls.Add(this.label7);
-            this.groupBox2.Controls.Add(this.button_LogIn2);
             this.groupBox2.Controls.Add(this.label6);
             this.groupBox2.Controls.Add(this.button_Disconnect2);
             this.groupBox2.Controls.Add(this.textBox_ReqContent2);
@@ -305,16 +275,6 @@ namespace NetFrameworkWindowsFormsSampleApp
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "groupBox2";
             // 
-            // button_LogOut2
-            // 
-            this.button_LogOut2.Location = new System.Drawing.Point(272, 92);
-            this.button_LogOut2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button_LogOut2.Name = "button_LogOut2";
-            this.button_LogOut2.Size = new System.Drawing.Size(64, 16);
-            this.button_LogOut2.TabIndex = 13;
-            this.button_LogOut2.Text = "Log Out";
-            this.button_LogOut2.UseVisualStyleBackColor = true;
-            // 
             // numericUpDown_ReqNum2
             // 
             this.numericUpDown_ReqNum2.Location = new System.Drawing.Point(77, 162);
@@ -325,7 +285,7 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // textBox_Psw2
             // 
-            this.textBox_Psw2.Location = new System.Drawing.Point(111, 92);
+            this.textBox_Psw2.Location = new System.Drawing.Point(110, 59);
             this.textBox_Psw2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox_Psw2.Name = "textBox_Psw2";
             this.textBox_Psw2.Size = new System.Drawing.Size(86, 21);
@@ -354,7 +314,7 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // textBox_User2
             // 
-            this.textBox_User2.Location = new System.Drawing.Point(20, 92);
+            this.textBox_User2.Location = new System.Drawing.Point(18, 59);
             this.textBox_User2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox_User2.Name = "textBox_User2";
             this.textBox_User2.Size = new System.Drawing.Size(86, 21);
@@ -370,17 +330,6 @@ namespace NetFrameworkWindowsFormsSampleApp
             this.label7.TabIndex = 13;
             this.label7.Text = "MsgContent";
             // 
-            // button_LogIn2
-            // 
-            this.button_LogIn2.Location = new System.Drawing.Point(202, 92);
-            this.button_LogIn2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button_LogIn2.Name = "button_LogIn2";
-            this.button_LogIn2.Size = new System.Drawing.Size(64, 16);
-            this.button_LogIn2.TabIndex = 10;
-            this.button_LogIn2.Text = "Log In";
-            this.button_LogIn2.UseVisualStyleBackColor = true;
-            this.button_LogIn2.Click += new System.EventHandler(this.button_LogIn2_Click);
-            // 
             // label6
             // 
             this.label6.AutoSize = true;
@@ -392,12 +341,12 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // button_Disconnect2
             // 
-            this.button_Disconnect2.Location = new System.Drawing.Point(148, 47);
+            this.button_Disconnect2.Location = new System.Drawing.Point(272, 56);
             this.button_Disconnect2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_Disconnect2.Name = "button_Disconnect2";
-            this.button_Disconnect2.Size = new System.Drawing.Size(64, 16);
+            this.button_Disconnect2.Size = new System.Drawing.Size(64, 24);
             this.button_Disconnect2.TabIndex = 7;
-            this.button_Disconnect2.Text = "Disconnect";
+            this.button_Disconnect2.Text = "Close";
             this.button_Disconnect2.UseVisualStyleBackColor = true;
             this.button_Disconnect2.Click += new System.EventHandler(this.button_Disconnect2_Click);
             // 
@@ -428,10 +377,10 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // button_Connect2
             // 
-            this.button_Connect2.Location = new System.Drawing.Point(69, 47);
+            this.button_Connect2.Location = new System.Drawing.Point(202, 56);
             this.button_Connect2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_Connect2.Name = "button_Connect2";
-            this.button_Connect2.Size = new System.Drawing.Size(64, 16);
+            this.button_Connect2.Size = new System.Drawing.Size(64, 24);
             this.button_Connect2.TabIndex = 5;
             this.button_Connect2.Text = "Connect";
             this.button_Connect2.UseVisualStyleBackColor = true;
@@ -598,10 +547,8 @@ namespace NetFrameworkWindowsFormsSampleApp
         private System.Windows.Forms.Label label_ConnectStatus1;
         private System.Windows.Forms.Label label_ConnectStatus2;
         private System.Windows.Forms.TextBox textBox_Log1;
-        private System.Windows.Forms.Button button_LogIn1;
         private System.Windows.Forms.TextBox textBox_Psw1;
         private System.Windows.Forms.TextBox textBox_User1;
-        private System.Windows.Forms.Button button_LogOut1;
         private System.Windows.Forms.NumericUpDown numericUpDown_ReqType1;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
@@ -611,10 +558,8 @@ namespace NetFrameworkWindowsFormsSampleApp
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button button_Disconnect1;
         private System.Windows.Forms.Button button_Disconnect2;
-        private System.Windows.Forms.Button button_LogOut2;
         private System.Windows.Forms.TextBox textBox_Psw2;
         private System.Windows.Forms.TextBox textBox_User2;
-        private System.Windows.Forms.Button button_LogIn2;
         private System.Windows.Forms.NumericUpDown numericUpDown_ReqNum2;
         private System.Windows.Forms.Button button_Req2;
         private System.Windows.Forms.Label label8;

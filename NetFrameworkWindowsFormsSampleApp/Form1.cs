@@ -172,12 +172,12 @@ namespace NetFrameworkWindowsFormsSampleApp
             conn1 = new Connection();
             conn2 = new Connection();
 
-            conn1.OnServerSend += Conn_OnServerSendEventReceived;
+            conn1.OnServerSentEvent += Conn_OnServerSendEventReceived;
             conn1.OnClosed += Conn_OnDisconnected;
             conn1.OnLost += Conn_OnConnectionLost;
             conn1.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
 
-            conn2.OnServerSend += Conn_OnServerSendEventReceived;
+            conn2.OnServerSentEvent += Conn_OnServerSendEventReceived;
             conn2.OnClosed += Conn_OnDisconnected;
             conn2.OnLost += Conn_OnConnectionLost;
             conn2.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
@@ -189,11 +189,11 @@ namespace NetFrameworkWindowsFormsSampleApp
             var text = string.Format("{0}", e.NewState);
             if (conn == conn1)
             {
-                label_ConnectStatus1.Text = text;
+                Invoke(new Action(() => label_ConnectStatus1.Text = text));
             }
             else if (conn == conn2)
             {
-                label_ConnectStatus2.Text = text;
+                Invoke(new Action(() => label_ConnectStatus2.Text = text));
 
             }
             else
@@ -298,12 +298,12 @@ namespace NetFrameworkWindowsFormsSampleApp
             }));
         }
 
-        private void Conn_OnServerSendEventReceived(object sender, AgentMessageReceivedEventArgs e)
+        private void Conn_OnServerSendEventReceived(object sender, ServerSentEventArgs e)
         {
 
             Invoke(new Action(() =>
             {
-                var msg = string.Format("event: {0} - [{1}] [{2}] \"{3}\"\r\n", e.CommandType, e.N1, e.N2, e.S);
+                var msg = string.Format("event: {0} - [{1}] [{2}] \"{3}\"\r\n", e.Message.Type, e.Message.N1, e.Message.N2, e.Message.S);
                 int id = 0;
                 if (sender == conn1)
                 {
@@ -316,12 +316,12 @@ namespace NetFrameworkWindowsFormsSampleApp
                     textBox_Log2.AppendText(msg);
                 }
                 // server-send data
-                if (e.CommandType == AgentMessage.REMOTE_MSG_SENDDATA)
+                if (e.Message.Type == MessageType.REMOTE_MSG_SENDDATA)
                 {
                     // SIP 注册地址
-                    if (e.N1 == 13)
+                    if (e.Message.N1 == 13)
                     {
-                        var sipRegistrar = e.S.Trim();
+                        var sipRegistrar = e.Message.S.Trim();
                         if (!string.IsNullOrWhiteSpace(sipRegistrar))
                         {
                             CreateSipAccount(id, sipRegistrar);
@@ -383,49 +383,21 @@ namespace NetFrameworkWindowsFormsSampleApp
 
         private async void button_Connect1_Click(object sender, EventArgs e)
         {
-            await conn1.Open(textBox_Server1.Text);
+            await conn1.Open(textBox_Server1.Text, textBox_User1.Text, textBox_Psw1.Text);
         }
 
         private async void button_Connect2_Click(object sender, EventArgs e)
         {
-            label_ConnectStatus2.Text = "Connecting ...";
-            try
-            {
-                await conn2.Open(textBox_Server2.Text);
-            }
-            catch (ConnectionException err)
-            {
-                label_ConnectStatus2.Text = string.Format("Connect failed: {0}", err.Message);
-                return;
-            }
-            label_ConnectStatus2.Text = "Connected.";
-        }
-
-        private async void button_LogIn1_Click(object sender, EventArgs e)
-        {
-            var s = string.Format("{0}|{1}|1|0|{0}", textBox_User1.Text, textBox_Psw1.Text);
-            var r = await conn1.Request(new AgentRequestArgs(
-                AgentMessage.REMOTE_MSG_LOGIN, s
-            ));
-            textBox_Log1.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.CommandType, r.N1, r.N2, r.S));
-        }
-
-        private async void button_LogOut_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                await conn1.Request(new AgentRequestArgs(AgentMessage.REMOTE_MSG_RELEASE), 0);
-            }
-            catch (RequestTimeoutError) { }
+            await conn2.Open(textBox_Server2.Text, textBox_User2.Text, textBox_Psw2.Text);
         }
 
         private async void button_Req1_Click(object sender, EventArgs e)
         {
-            var t = (AgentMessage)numericUpDown_ReqType1.Value;
+            var t = (MessageType)numericUpDown_ReqType1.Value;
             var n = (int)numericUpDown_ReqNum1.Value;
             var s = textBox_ReqContent1.Text.Trim();
-            var r = await conn1.Request(new AgentRequestArgs(t, n, s));
-            textBox_Log1.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.CommandType, r.N1, r.N2, r.S));
+            var r = await conn1.Request(new AgentRequestMessage(t, n, s));
+            textBox_Log1.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.Type, r.N1, r.N2, r.S));
         }
 
         private void button_Disconnect1_Click(object sender, EventArgs e)
@@ -441,19 +413,19 @@ namespace NetFrameworkWindowsFormsSampleApp
         private async void button_LogIn2_Click(object sender, EventArgs e)
         {
             var s = string.Format("{0}|{1}|1|0|{0}", textBox_User2.Text, textBox_Psw2.Text);
-            var r = await conn2.Request(new AgentRequestArgs(
-                AgentMessage.REMOTE_MSG_LOGIN, s
+            var r = await conn2.Request(new AgentRequestMessage(
+                MessageType.REMOTE_MSG_LOGIN, s
             ));
-            textBox_Log2.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.CommandType, r.N1, r.N2, r.S));
+            textBox_Log2.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.Type, r.N1, r.N2, r.S));
         }
 
         private async void button_Req2_Click(object sender, EventArgs e)
         {
-            var t = (AgentMessage)numericUpDown_ReqType2.Value;
+            var t = (MessageType)numericUpDown_ReqType2.Value;
             var n = (int)numericUpDown_ReqNum2.Value;
             var s = textBox_ReqContent2.Text.Trim();
-            var r = await conn2.Request(new AgentRequestArgs(t, n, s));
-            textBox_Log2.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.CommandType, r.N1, r.N2, r.S));
+            var r = await conn2.Request(new AgentRequestMessage(t, n, s));
+            textBox_Log2.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.Type, r.N1, r.N2, r.S));
         }
 
         private void button1_Click(object sender, EventArgs e)

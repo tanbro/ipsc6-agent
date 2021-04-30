@@ -24,11 +24,11 @@ namespace ipsc6.agent.client
         public ConnectionFailedException(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class ConnectLostException : ConnectionException
+    public class ConnecttionLostException : ConnectionException
     {
-        public ConnectLostException() { }
-        public ConnectLostException(string message) : base(message) { }
-        public ConnectLostException(string message, Exception inner) : base(message, inner) { }
+        public ConnecttionLostException() { }
+        public ConnecttionLostException(string message) : base(message) { }
+        public ConnecttionLostException(string message, Exception inner) : base(message, inner) { }
     }
 
     public class ConnectionClosedException : ConnectionException
@@ -36,6 +36,13 @@ namespace ipsc6.agent.client
         public ConnectionClosedException() { }
         public ConnectionClosedException(string message) : base(message) { }
         public ConnectionClosedException(string message, Exception inner) : base(message, inner) { }
+    }
+
+    public class ConnectionTimeoutException : ConnectionException
+    {
+        public ConnectionTimeoutException() { }
+        public ConnectionTimeoutException(string message) : base(message) { }
+        public ConnectionTimeoutException(string message, Exception inner) : base(message, inner) { }
     }
 
     public class BaseRequestError : BaseException
@@ -61,19 +68,19 @@ namespace ipsc6.agent.client
 
     public class ErrorResponse : BaseRequestError
     {
-        public readonly AgentMessageReceivedEventArgs Arg;
+        public readonly ServerSentMessage Arg;
 
-        static string MakeMessage(AgentMessageReceivedEventArgs arg)
+        static string MakeMessage(ServerSentMessage arg)
         {
             return string.Format("ErrorResponse: {0}", arg);
         }
 
-        public ErrorResponse(AgentMessageReceivedEventArgs arg) : base(MakeMessage(arg))
+        public ErrorResponse(ServerSentMessage arg) : base(MakeMessage(arg))
         {
             Arg = arg;
         }
 
-        public ErrorResponse(AgentMessageReceivedEventArgs arg, Exception inner) : base(MakeMessage(arg), inner)
+        public ErrorResponse(ServerSentMessage arg, Exception inner) : base(MakeMessage(arg), inner)
         {
             Arg = arg;
         }

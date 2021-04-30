@@ -360,8 +360,8 @@ void Connector::DoOnUserPacketReceived(RakNet::Packet* packet) {
             // System::Text::Encoding::Default->GetString(utfBytes, 0,
             // utfBytes->Length);
             /// 抛出事件：坐席收到来自服务器端的数据
-            auto e = gcnew AgentMessageReceivedEventArgs(
-                (AgentMessage)command_type, n1, n2, s);
+            auto e =
+                gcnew AgentMessageReceivedEventArgs(command_type, n1, n2, s);
             try {
                 OnAgentMessageReceived(this, e);
             } catch (NullReferenceException ^) {

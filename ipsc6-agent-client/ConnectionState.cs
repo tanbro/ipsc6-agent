@@ -24,6 +24,9 @@ namespace ipsc6.agent.client
         /// <summary>
         /// 连接成功
         /// </summary>
+        /// <remarks>
+        /// 登录完毕后方认为连接成功
+        /// </remarks>
         Ok,
         /// <summary>
         /// 正在关闭连接

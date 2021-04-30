@@ -2,27 +2,27 @@ using ipsc6.agent.network;
 
 namespace ipsc6.agent.client
 {
-    public class AgentRequestArgs
+    public class AgentRequestMessage
     {
-        public readonly AgentMessage Type;
+        public readonly MessageType Type;
         public readonly int N;
         public readonly string S;
 
-        public AgentRequestArgs(AgentMessage type, int n = 0, string s = "")
+        public AgentRequestMessage(MessageType type, int n = 0, string s = "")
         {
             Type = type;
             N = n;
             S = s;
         }
 
-        public AgentRequestArgs(AgentMessage type, string s)
+        public AgentRequestMessage(MessageType type, string s)
         {
             Type = type;
             N = 0;
             S = s;
         }
 
-        public AgentRequestArgs(AgentMessage type, int n)
+        public AgentRequestMessage(MessageType type, int n)
         {
             Type = type;
             N = n;

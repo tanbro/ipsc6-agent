@@ -10,12 +10,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Agent.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AgentRequestArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AgentRequestMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Connection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConnectionInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ConnectionState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Exceptions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ServerAddress.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ServerSentErrorCode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ServerSentMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MessageType.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory).editorconfig" />
