@@ -183,7 +183,8 @@ namespace NetFrameworkWindowsFormsSampleApp
             conn2.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
         }
 
-        private void Conn_OnConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
+
+        private void Conn_OnConnectionStateChanged(object sender, ConnectionStateChangedEventArgs<ipsc6.agent.client.ConnectionState> e)
         {
             Connection conn = (Connection)sender;
             var text = string.Format("{0}", e.NewState);

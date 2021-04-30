@@ -32,12 +32,40 @@ namespace ipsc6.agent.client
             }
         }
 
+        public event AgentStateChangedEventHandler OnAgentStateChanged;
+
+        private readonly object lck = new object();
+
+        private AgentState agentState = AgentState.NotExist;
+        public AgentState AgentState
+        {
+            get { return agentState; }
+        }
+
         private void Conn_OnServerSend(object sender, ServerSentEventArgs e)
         {
-            switch (e.Message.Type)
+            var msg = e.Message;
+            switch (msg.Type)
             {
                 case MessageType.REMOTE_MSG_SETSTATE:
                     /// 状态改变
+                    {
+                        AgentState currState;
+                        AgentState newState = (AgentState)msg.N1;
+                        AgentStateChangedEventArgs<AgentState> ev = null;
+                        lock (lck)
+                        {
+                            currState = agentState;
+                            if (currState != newState)
+                            {
+                                ev = new AgentStateChangedEventArgs<AgentState>(currState, newState);
+                            }
+                        }
+                        if (ev != null)
+                        {
+                            OnAgentStateChanged?.Invoke(this, ev);
+                        }
+                    }
                     break;
                 case MessageType.REMOTE_MSG_SETTELESTATE:
                     /// 电话状态改变
@@ -59,12 +87,12 @@ namespace ipsc6.agent.client
             }
         }
 
-        private void Conn_OnConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
+        private void Conn_OnConnectionStateChanged(object sender, ConnectionStateChangedEventArgs<ConnectionState> e)
         {
             var conn = sender as Connection;
             var index = internalConnections.IndexOf(conn);
             var connInfo = connectionList[index];
-            var e_ = new ConnectionInfoStateChangedEventArgs(index, connInfo, e.CurrState, e.NewState);
+            var e_ = new ConnectionInfoStateChangedEventArgs<ConnectionState>(index, connInfo, e.CurrState, e.NewState);
             OnConnectionStateChanged?.Invoke(this, e_);
         }
 

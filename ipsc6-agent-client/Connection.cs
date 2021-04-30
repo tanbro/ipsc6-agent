@@ -35,7 +35,7 @@ namespace ipsc6.agent.client
         private ConnectionState state = ConnectionState.Init;
         private void SetState(ConnectionState newState)
         {
-            var e = new ConnectionStateChangedEventArgs(state, newState);
+            var e = new ConnectionStateChangedEventArgs<ConnectionState>(state, newState);
             state = newState;
             Task.Run(() => OnConnectionStateChanged?.Invoke(this, e));
         }
