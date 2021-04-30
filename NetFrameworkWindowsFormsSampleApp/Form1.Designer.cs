@@ -1,4 +1,4 @@
-﻿
+
 namespace NetFrameworkWindowsFormsSampleApp
 {
     partial class Form1
@@ -70,6 +70,8 @@ namespace NetFrameworkWindowsFormsSampleApp
             this.label10 = new System.Windows.Forms.Label();
             this.checkedListBox_AudPlayback = new System.Windows.Forms.CheckedListBox();
             this.button3 = new System.Windows.Forms.Button();
+            this.label11 = new System.Windows.Forms.Label();
+            this.SIP2 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType1)).BeginInit();
@@ -222,6 +224,11 @@ namespace NetFrameworkWindowsFormsSampleApp
             this.numericUpDown_ReqType1.Name = "numericUpDown_ReqType1";
             this.numericUpDown_ReqType1.Size = new System.Drawing.Size(52, 21);
             this.numericUpDown_ReqType1.TabIndex = 10;
+            this.numericUpDown_ReqType1.Value = new decimal(new int[] {
+            4,
+            0,
+            0,
+            0});
             // 
             // textBox_Psw1
             // 
@@ -374,6 +381,11 @@ namespace NetFrameworkWindowsFormsSampleApp
             this.numericUpDown_ReqType2.Name = "numericUpDown_ReqType2";
             this.numericUpDown_ReqType2.Size = new System.Drawing.Size(52, 21);
             this.numericUpDown_ReqType2.TabIndex = 10;
+            this.numericUpDown_ReqType2.Value = new decimal(new int[] {
+            4,
+            0,
+            0,
+            0});
             // 
             // button_Connect2
             // 
@@ -424,7 +436,7 @@ namespace NetFrameworkWindowsFormsSampleApp
             // label_SipReg1
             // 
             this.label_SipReg1.AutoSize = true;
-            this.label_SipReg1.Location = new System.Drawing.Point(21, 252);
+            this.label_SipReg1.Location = new System.Drawing.Point(839, 254);
             this.label_SipReg1.Name = "label_SipReg1";
             this.label_SipReg1.Size = new System.Drawing.Size(53, 12);
             this.label_SipReg1.TabIndex = 10;
@@ -433,7 +445,7 @@ namespace NetFrameworkWindowsFormsSampleApp
             // label_SipReg2
             // 
             this.label_SipReg2.AutoSize = true;
-            this.label_SipReg2.Location = new System.Drawing.Point(392, 252);
+            this.label_SipReg2.Location = new System.Drawing.Point(839, 276);
             this.label_SipReg2.Name = "label_SipReg2";
             this.label_SipReg2.Size = new System.Drawing.Size(53, 12);
             this.label_SipReg2.TabIndex = 11;
@@ -441,7 +453,7 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(23, 267);
+            this.button2.Location = new System.Drawing.Point(792, 320);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(107, 23);
             this.button2.TabIndex = 12;
@@ -489,7 +501,7 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(136, 267);
+            this.button3.Location = new System.Drawing.Point(905, 320);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(107, 23);
             this.button3.TabIndex = 16;
@@ -497,11 +509,31 @@ namespace NetFrameworkWindowsFormsSampleApp
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(804, 254);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(29, 12);
+            this.label11.TabIndex = 17;
+            this.label11.Text = "SIP1";
+            // 
+            // SIP2
+            // 
+            this.SIP2.AutoSize = true;
+            this.SIP2.Location = new System.Drawing.Point(806, 276);
+            this.SIP2.Name = "SIP2";
+            this.SIP2.Size = new System.Drawing.Size(29, 12);
+            this.SIP2.TabIndex = 18;
+            this.SIP2.Text = "SIP2";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1144, 586);
+            this.Controls.Add(this.SIP2);
+            this.Controls.Add(this.label11);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.checkedListBox_AudPlayback);
             this.Controls.Add(this.label10);
@@ -577,6 +609,8 @@ namespace NetFrameworkWindowsFormsSampleApp
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.CheckedListBox checkedListBox_AudPlayback;
         private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label SIP2;
     }
 }
 

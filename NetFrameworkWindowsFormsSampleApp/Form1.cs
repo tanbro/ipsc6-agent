@@ -35,24 +35,23 @@ namespace NetFrameworkWindowsFormsSampleApp
             {
                 var msg = string.Format("{0} Register {1} {2}", getInfo().uri, (int)prm.code, prm.reason);
                 logger.InfoFormat(msg);
-                switch (connId)
+                if (this == form.sipAcc1)
                 {
-                    case 1:
-                        form.Invoke(new Action(() =>
-                        {
-                            form.textBox_Log1.AppendText(string.Format("{0}\r\n", msg));
-                            form.label_SipReg1.Text = msg;
-                        }));
-                        break;
-                    case 2:
-                        form.Invoke(new Action(() =>
-                        {
-                            form.textBox_Log2.AppendText(string.Format("{0}\r\n", msg));
-                            form.label_SipReg2.Text = msg;
-                        }));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    form.Invoke(new Action(() =>
+                    {
+                        form.label_SipReg1.Text = msg;
+                    }));
+                }
+                else if (this == form.sipAcc2)
+                {
+                    form.Invoke(new Action(() =>
+                    {
+                        form.label_SipReg2.Text = msg;
+                    }));
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException();
                 }
             }
 
@@ -67,25 +66,25 @@ namespace NetFrameworkWindowsFormsSampleApp
                     var call = currentSipCall = new SipCall(this, prm.callId);
                     var ci = call.getInfo();
                     var msg = string.Format("IncomingCall {0} {1} \t\n", ci.remoteUri, ci.state);
-                    switch (connId)
+                    if (this == form.sipAcc1)
                     {
-                        case 1:
-                            form.Invoke(new Action(() =>
-                            {
-                                form.textBox_Log1.AppendText(string.Format("{0}\r\n", msg));
-                                form.label_SipReg1.Text = msg;
-                            }));
-                            break;
-                        case 2:
-                            form.Invoke(new Action(() =>
-                            {
-                                form.textBox_Log2.AppendText(string.Format("{0}\r\n", msg));
-                                form.label_SipReg2.Text = msg;
-                            }));
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
+                        form.Invoke(new Action(() =>
+                        {
+                            form.label_SipReg1.Text = msg;
+                        }));
                     }
+                    else if (this == form.sipAcc2)
+                    {
+                        form.Invoke(new Action(() =>
+                        {
+                            form.label_SipReg2.Text = msg;
+                        }));
+                    }
+                    else
+                    {
+                        throw new ArgumentOutOfRangeException();
+                    }
+
                 }
             }
         }
@@ -111,24 +110,23 @@ namespace NetFrameworkWindowsFormsSampleApp
                 }
 
                 var msg = string.Format("Call {0} {1} \t\n", ci.remoteUri, ci.state);
-                switch (acc.connId)
+                if (acc == acc.form.sipAcc1)
                 {
-                    case 1:
-                        acc.form.Invoke(new Action(() =>
-                        {
-                            acc.form.textBox_Log1.AppendText(string.Format("{0}\r\n", msg));
-                            acc.form.label_SipReg1.Text = msg;
-                        }));
-                        break;
-                    case 2:
-                        acc.form.Invoke(new Action(() =>
-                        {
-                            acc.form.textBox_Log2.AppendText(string.Format("{0}\r\n", msg));
-                            acc.form.label_SipReg2.Text = msg;
-                        }));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    acc.form.Invoke(new Action(() =>
+                    {
+                        acc.form.label_SipReg1.Text = msg;
+                    }));
+                }
+                else if (acc == acc.form.sipAcc2)
+                {
+                    acc.form.Invoke(new Action(() =>
+                    {
+                        acc.form.label_SipReg2.Text = msg;
+                    }));
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException();
                 }
 
                 switch (ci.state)
@@ -523,5 +521,6 @@ namespace NetFrameworkWindowsFormsSampleApp
                 currentSipCall.hangup(prm);
             }
         }
+
     }
 }

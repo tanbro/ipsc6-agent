@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -32,15 +33,52 @@ namespace ipsc6.agent.client
             }
         }
 
-        public event AgentStateChangedEventHandler OnAgentStateChanged;
-
         private readonly object lck = new object();
 
+
         private AgentState agentState = AgentState.NotExist;
+        private WorkType workType = WorkType.Unknown;
         public AgentState AgentState
         {
             get { return agentState; }
         }
+        public WorkType WorkType
+        {
+            get { return workType; }
+        }
+        private void SetAgentStateWorkType(AgentStateWorkType value)
+        {
+            agentState = value.AgentState;
+            workType = value.WorkType;
+        }
+        public AgentStateWorkType AgentStateWorkType
+        {
+            get { return new AgentStateWorkType(agentState, workType); }
+        }
+        public event AgentStateChangedEventHandler OnAgentStateChanged;
+
+
+        private TeleState teleState = TeleState.HangUp;
+        public TeleState TeleState
+        {
+            get { return teleState; }
+        }
+        public event TeleStateChangedEventHandler OnTeleStateChanged;
+
+
+        private HashSet<QueueInfo> queueList = new HashSet<QueueInfo>();
+        public IReadOnlyCollection<QueueInfo> QueueList
+        {
+            get { return queueList; }
+        }
+        public event QueueInfoEventHandler OnQueueInfo;
+
+        private HashSet<HoldInfo> holdList = new HashSet<HoldInfo>();
+        public IReadOnlyCollection<HoldInfo> HoldList
+        {
+            get { return holdList; }
+        }
+        public event HoldInfoEventHandler OnHoldInfo;
 
         private void Conn_OnServerSend(object sender, ServerSentEventArgs e)
         {
@@ -50,15 +88,16 @@ namespace ipsc6.agent.client
                 case MessageType.REMOTE_MSG_SETSTATE:
                     /// 状态改变
                     {
-                        AgentState currState;
-                        AgentState newState = (AgentState)msg.N1;
-                        AgentStateChangedEventArgs<AgentState> ev = null;
+                        AgentStateWorkType oldState;
+                        AgentStateChangedEventArgs<AgentStateWorkType> ev = null;
+                        var newState = new AgentStateWorkType((AgentState)msg.N1, (WorkType)msg.N2);
                         lock (lck)
                         {
-                            currState = agentState;
-                            if (currState != newState)
+                            oldState = AgentStateWorkType.Clone() as AgentStateWorkType;
+                            if (oldState != newState)
                             {
-                                ev = new AgentStateChangedEventArgs<AgentState>(currState, newState);
+                                SetAgentStateWorkType(newState);
+                                ev = new AgentStateChangedEventArgs<AgentStateWorkType>(oldState, newState);
                             }
                         }
                         if (ev != null)
@@ -69,15 +108,56 @@ namespace ipsc6.agent.client
                     break;
                 case MessageType.REMOTE_MSG_SETTELESTATE:
                     /// 电话状态改变
-                    break;
-                case MessageType.REMOTE_MSG_SETTELEMODE:
-                    /// 话机模式改变
+                    {
+                        TeleState oldState;
+                        TeleState newState = (TeleState)msg.N1;
+                        TeleStateChangedEventArgs<TeleState> ev = null;
+                        lock (lck)
+                        {
+                            oldState = teleState;
+                            if (oldState != newState)
+                            {
+                                teleState = newState;
+                                ev = new TeleStateChangedEventArgs<TeleState>(oldState, newState);
+                            }
+                        }
+                        if (ev != null)
+                        {
+                            OnTeleStateChanged?.Invoke(this, ev);
+                        }
+                    }
                     break;
                 case MessageType.REMOTE_MSG_QUEUEINFO:
                     /// 排队信息
+                    {
+                        var info = new QueueInfo(msg);
+                        var ev = new QueueInfoEventArgs(info);
+                        // 记录 QueueInfo
+                        // 修改之前,一律先删除
+                        queueList.RemoveWhere((m) => m == info);
+                        if (info.EventType != QueueEventType.Cancel)
+                        {
+                            queueList.Add(info);
+                        }
+                        /// 
+                        OnQueueInfo?.Invoke(this, ev);
+                    }
                     break;
                 case MessageType.REMOTE_MSG_HOLDINFO:
                     /// 保持信息
+                    {
+                        var info = new HoldInfo(msg);
+                        var ev = new HoldInfoEventArgs(info);
+                        // 记录 HoldInfo
+                        // 修改之前,一律先删除
+                        holdList.RemoveWhere((m) => m == info);
+                        if (info.EventType != HoldEventType.Cancel)
+                        {
+                            holdList.Add(info);
+                        }
+                        //
+                        OnHoldInfo?.Invoke(this, ev);
+                    }
                     break;
                 case MessageType.REMOTE_MSG_SENDDATA:
                     /// 其他各种数据
@@ -92,7 +172,7 @@ namespace ipsc6.agent.client
             var conn = sender as Connection;
             var index = internalConnections.IndexOf(conn);
             var connInfo = connectionList[index];
-            var e_ = new ConnectionInfoStateChangedEventArgs<ConnectionState>(index, connInfo, e.CurrState, e.NewState);
+            var e_ = new ConnectionInfoStateChangedEventArgs<ConnectionState>(index, connInfo, e.OldState, e.NewState);
             OnConnectionStateChanged?.Invoke(this, e_);
         }
 

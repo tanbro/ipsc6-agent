@@ -59,11 +59,11 @@ namespace ipsc6.agent.client
         public RequestTimeoutError(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class ServerSendError : BaseException
+    public class ServerSentError : BaseException
     {
-        public ServerSendError() { }
-        public ServerSendError(string message) : base(message) { }
-        public ServerSendError(string message, Exception inner) : base(message, inner) { }
+        public ServerSentError() { }
+        public ServerSentError(string message) : base(message) { }
+        public ServerSentError(string message, Exception inner) : base(message, inner) { }
     }
 
     public class ErrorResponse : BaseRequestError
