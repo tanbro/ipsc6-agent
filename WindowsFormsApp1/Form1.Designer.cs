@@ -1,4 +1,4 @@
-﻿
+
 namespace WindowsFormsApp1
 {
     partial class Form1
@@ -37,6 +37,8 @@ namespace WindowsFormsApp1
             this.label3 = new System.Windows.Forms.Label();
             this.textBox_password = new System.Windows.Forms.TextBox();
             this.button_open = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.textBox_eventLog = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // textBox_ServerAddressList
@@ -106,14 +108,38 @@ namespace WindowsFormsApp1
             this.button_open.Name = "button_open";
             this.button_open.Size = new System.Drawing.Size(75, 23);
             this.button_open.TabIndex = 6;
-            this.button_open.Text = "打开连接";
+            this.button_open.Text = "打开";
             this.button_open.UseVisualStyleBackColor = true;
+            this.button_open.Click += new System.EventHandler(this.button_open_Click);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(17, 76);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(77, 12);
+            this.label4.TabIndex = 7;
+            this.label4.Text = "作息事件记录";
+            // 
+            // textBox_eventLog
+            // 
+            this.textBox_eventLog.Location = new System.Drawing.Point(12, 90);
+            this.textBox_eventLog.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.textBox_eventLog.Multiline = true;
+            this.textBox_eventLog.Name = "textBox_eventLog";
+            this.textBox_eventLog.ReadOnly = true;
+            this.textBox_eventLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBox_eventLog.Size = new System.Drawing.Size(1030, 349);
+            this.textBox_eventLog.TabIndex = 8;
+            this.textBox_eventLog.WordWrap = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1054, 450);
+            this.Controls.Add(this.textBox_eventLog);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.button_open);
             this.Controls.Add(this.textBox_password);
             this.Controls.Add(this.label3);
@@ -141,6 +167,8 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBox_password;
         private System.Windows.Forms.Button button_open;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox textBox_eventLog;
     }
 }
 

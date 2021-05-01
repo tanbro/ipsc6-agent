@@ -19,5 +19,12 @@ namespace ipsc6.agent.client
         {
             return Host == other.Host && Port == other.Port;
         }
+
+        public override string ToString()
+        {
+            return string.Format(
+                "<{0} at 0x{1:x8} Host={2}, Port={3}>",
+                GetType().Name, GetHashCode(), Host, Port);
+        }
     }
 }

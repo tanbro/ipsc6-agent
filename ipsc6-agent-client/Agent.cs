@@ -10,9 +10,8 @@ namespace ipsc6.agent.client
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Agent));
         // Flag: Has Dispose already been called?
         private bool disposed = false;
-        public Agent(string workerNumber, IEnumerable<ConnectionInfo> connections)
+        public Agent(IEnumerable<ConnectionInfo> connections)
         {
-            WorkerNumber = workerNumber;
             foreach (var m in connections)
             {
                 var conn = new Connection();
@@ -45,7 +44,7 @@ namespace ipsc6.agent.client
                 }
                 else
                 {
-                    foreach(var conn in internalConnections)
+                    foreach (var conn in internalConnections)
                     {
                         conn.Dispose();
                     }
@@ -300,6 +299,7 @@ namespace ipsc6.agent.client
         public event SipRegistrarListReceivedEventHandler OnSipRegistrarListReceived;
         private void DoOnSipRegistrarList(ConnectionInfo _, ServerSentMessage msg)
         {
+            if (string.IsNullOrWhiteSpace(msg.S)) return;
             var val = msg.S.Split(new char[] { '|' });
             var evt = new SipRegistrarListReceivedEventArgs(val);
             OnSipRegistrarListReceived?.Invoke(this, evt);
@@ -365,6 +365,7 @@ namespace ipsc6.agent.client
         public event EventHandler OnPrivilegeSetReceived;
         private void DoOnPrivilegeList(ConnectionInfo connInfo, ServerSentMessage msg)
         {
+            if (string.IsNullOrWhiteSpace(msg.S)) return;
             var parts = msg.S.Split(new char[] { '|' });
             lock (lck)
             {
@@ -384,6 +385,7 @@ namespace ipsc6.agent.client
         public event EventHandler OnPrivilegeExternSetReceived;
         private void DoOnPrivilegeExternList(ConnectionInfo connInfo, ServerSentMessage msg)
         {
+            if (string.IsNullOrWhiteSpace(msg.S)) return;
             var parts = msg.S.Split(new char[] { '|' });
             lock (lck)
             {
@@ -403,6 +405,7 @@ namespace ipsc6.agent.client
         public event EventHandler OnGroupListReceived;
         void DoOnGroupIdList(ConnectionInfo _, ServerSentMessage msg)
         {
+            if (string.IsNullOrWhiteSpace(msg.S)) return;
             var parts = msg.S.Split(new char[] { '|' });
             lock (lck)
             {
@@ -449,6 +452,8 @@ namespace ipsc6.agent.client
             OnAgentDisplayNameReceived?.Invoke(this, evt);
         }
 
+
+        public event ConnectionInfoStateChangedEventHandler OnConnectionStateChanged;
         void Conn_OnConnectionStateChanged(object sender, ConnectionStateChangedEventArgs<ConnectionState> e)
         {
             var conn = sender as Connection;
@@ -459,7 +464,23 @@ namespace ipsc6.agent.client
             OnConnectionStateChanged?.Invoke(this, e_);
         }
 
-        public event ConnectionInfoStateChangedEventHandler OnConnectionStateChanged;
+
+        public async Task Startup(string workerNumber, string password)
+        {
+            var it = connectionList.Zip(
+                internalConnections,
+                (info, conn) => new { info, conn }
+            );
+            var tasks = new List<Task>();
+            foreach (var pair in it)
+            {
+                var conn = pair.conn;
+                var info = pair.info;
+                var task = conn.Open(info.Host, info.Port, workerNumber, password);
+                tasks.Add(task);
+            }
+            await Task.WhenAll(tasks);
+        }
 
     }
 }

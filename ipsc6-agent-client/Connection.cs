@@ -386,5 +386,12 @@ namespace ipsc6.agent.client
             }
         }
 
+        public override string ToString()
+        {
+            return string.Format(
+                "<{0} at 0x{1:x8} BoundAddress={2} State={3}>",
+                GetType().Name, GetHashCode(), connector.BoundAddress, State);
+        }
+
     }
 }

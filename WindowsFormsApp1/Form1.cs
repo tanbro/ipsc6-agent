@@ -14,14 +14,15 @@ namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
+        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Form1));
         public Form1()
         {
             InitializeComponent();
         }
 
-        static Agent agent = null;
+        Agent agent = null;
 
-        static void ReallocAgent(string workerNum, IEnumerable<string> serverAddreses)
+        void ReallocAgent(IEnumerable<string> serverAddreses)
         {
             if (agent != null)
             {
@@ -33,7 +34,14 @@ namespace WindowsFormsApp1
             {
                 addrList.Add(new ConnectionInfo(s));
             }
-            agent = new Agent(workerNum, addrList);
+            agent = new Agent(addrList);
+            agent.OnConnectionStateChanged += Agent_OnConnectionStateChanged;
+        }
+
+        private void Agent_OnConnectionStateChanged(object sender, ConnectionInfoStateChangedEventArgs<ipsc6.agent.client.ConnectionState> e)
+        {
+            var s = string.Format("ConnectionState: {0}: {1}==>{2}", e.ConnectionInfo.Host, e.OldState, e.NewState);
+            textBox_eventLog.AppendText(string.Format("{0}\r\n", s));
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -45,10 +53,8 @@ namespace WindowsFormsApp1
         {
             var s = textBox_ServerAddressList.Text.Trim();
             var addresses = s.Split(new char[] { ',' });
-            var workNum = textBox_workerNum.Text.Trim();
-            var _ = textBox_password.Text.Trim();
 
-            ReallocAgent(workNum, addresses);
+            ReallocAgent(addresses);
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -57,6 +63,13 @@ namespace WindowsFormsApp1
             {
                 agent.Dispose();
             }
+        }
+
+        private async void button_open_Click(object sender, EventArgs e)
+        {
+            var workNum = textBox_workerNum.Text.Trim();
+            var password = textBox_password.Text.Trim();
+            await agent.Startup(workNum, password);
         }
     }
 }
