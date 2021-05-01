@@ -212,6 +212,38 @@ int Connector::Receive() {
             }
         } break;
 
+        case ID_NO_FREE_INCOMING_CONNECTIONS: {
+            _remoteAddrIndex = -1;
+            try {
+                OnConnectAttemptFailed(this);
+            } catch (NullReferenceException ^) {
+            }
+        } break;
+
+        case ID_CONNECTION_BANNED: {
+            _remoteAddrIndex = -1;
+            try {
+                OnConnectAttemptFailed(this);
+            } catch (NullReferenceException ^) {
+            }
+        } break;
+
+        case ID_INCOMPATIBLE_PROTOCOL_VERSION: {
+            _remoteAddrIndex = -1;
+            try {
+                OnConnectAttemptFailed(this);
+            } catch (NullReferenceException ^) {
+            }
+        } break;
+
+        case ID_IP_RECENTLY_CONNECTED: {
+            _remoteAddrIndex = -1;
+            try {
+                OnConnectAttemptFailed(this);
+            } catch (NullReferenceException ^) {
+            }
+        } break;
+
         case ID_CONNECTION_LOST: {
             _remoteAddrIndex = -1;
             try {
