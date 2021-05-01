@@ -25,6 +25,7 @@ namespace WindowsFormsApp1
         {
             if (agent != null)
             {
+                agent.Dispose();
                 agent = null;
             }
             var addrList = new List<ConnectionInfo>();

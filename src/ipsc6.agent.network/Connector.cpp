@@ -37,7 +37,12 @@ void Connector::Initial() {
     receiveThreadStarted =
         gcnew EventWaitHandle(false, EventResetMode::AutoReset);
     receiveThread = gcnew Thread(gcnew ThreadStart(ReceiveThreadProc));
-    receiveThreadStopping = false;
+    do {
+        lock l(connectors);
+        receiveThreadStopping = false;
+        receiveThread->Start();
+        receiveThreadStarted->WaitOne();
+    } while (0);
 }
 
 void Connector::Release() {
@@ -65,11 +70,6 @@ Connector ^
     do {
         lock l(connectors);
         connectors->Add(connector);
-        if (!receiveThread->IsAlive) {
-            receiveThreadStopping = false;
-            receiveThread->Start();
-            receiveThreadStarted->WaitOne();
-        }
     } while (0);
     return connector;
 }
@@ -90,13 +90,7 @@ void Connector::DeallocateInstance(Connector ^ connector) {
     do {
         lock l(connectors);
         connectors->Remove(connector);
-        if (connectors->Count == 0) {
-            receiveThreadStopping = true;
-        }
     } while (0);
-    if (receiveThreadStopping) {
-        receiveThread->Join();
-    }
     connector->Shutdown();
 }
 
