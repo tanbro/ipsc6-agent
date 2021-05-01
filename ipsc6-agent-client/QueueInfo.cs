@@ -7,7 +7,7 @@ namespace ipsc6.agent.client
 {
     //ref: EventManager.cpp, EventQueueInfo.cpp
 
-    public class QueueInfo: IEquatable<QueueInfo>
+    public class QueueInfo: ServerSideData, IEquatable<QueueInfo>
     {
         public readonly int Channel;
         public readonly string GroupId;
@@ -19,12 +19,11 @@ namespace ipsc6.agent.client
         public readonly string Username;
         public readonly string CustomeString;
 
-        public QueueInfo(ServerSentMessage msg)
+        public QueueInfo(ConnectionInfo connectionInfo, ServerSentMessage msg): base(connectionInfo)
         {
             Channel = msg.N1;
             Type = (QueueInfoType)msg.N2;
-            char[] sep = { '|' };
-            var parts = msg.S.Split(sep);
+            var parts = msg.S.Split(new char[] { '|' });
             var it = parts.Select((v, i) => new { v, i });
             foreach (var m in it)
             {
@@ -59,7 +58,7 @@ namespace ipsc6.agent.client
 
         public bool Equals(QueueInfo other)
         {
-            return Channel == other.Channel;
+            return ConnectionInfo==other.ConnectionInfo && Channel == other.Channel;
         }
 
     }

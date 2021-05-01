@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Agent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AgentGroup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AgentRequestMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AgentState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AgentStateWorkType.cs" />
@@ -20,13 +21,22 @@
     <Compile Include="$(MSBuildThisFileDirectory)Exceptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HoldInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HoldEventType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IvrData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IvrInvokeType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Privilege.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueueInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueueEventType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueueInfoType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RingInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ServerSentCustomString.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ServerSentErrorCode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ServerSentMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MessageType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ServerSentMessageSubType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ServerSideData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TeleMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TeleState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WorkingChannelInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WorkType.cs" />
   </ItemGroup>
   <ItemGroup>

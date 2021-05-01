@@ -29,8 +29,20 @@ namespace ipsc6.agent.client
         // Flag: Has Dispose already been called?
         private bool disposed = false;
 
-
         private readonly network.Connector connector;
+
+        int agentId;
+        public int AgentId
+        {
+            get
+            {
+                if (state != ConnectionState.Ok)
+                {
+                    throw new InvalidOperationException(string.Format("{0}", state));
+                }
+                return agentId;
+            }
+        }
 
         private ConnectionState state = ConnectionState.Init;
         private void SetState(ConnectionState newState)
@@ -46,7 +58,7 @@ namespace ipsc6.agent.client
         }
 
         private TaskCompletionSource<object> connectTcs;
-        private TaskCompletionSource<object> logInTcs;
+        private TaskCompletionSource<int> logInTcs;
         private MessageType hangingReqType = MessageType.NONE;
         private TaskCompletionSource<ServerSentMessage> reqTcs;
         private ConcurrentQueue<object> eventQueue;
@@ -97,126 +109,128 @@ namespace ipsc6.agent.client
         private void EventThreadStarter(object obj)
         {
             var token = (CancellationToken)obj;
-            bool isResponse;  // 是否 Response ?
-            try
+            while (!token.IsCancellationRequested)
             {
-                while (!token.IsCancellationRequested)
+                while (eventQueue.TryDequeue(out object msg))
                 {
-                    while (eventQueue.TryDequeue(out object msg))
-                    {
-                        if (msg is ConnectorConnectedEventArgs)
-                        {
-                            connectTcs.SetResult(msg);
-                        }
-                        else if (msg is ConnectorConnectAttemptFailedEventArgs)
-                        {
-                            lock (connectLock)
-                            {
-                                SetState(ConnectionState.Failed);
-                            }
-                            connectTcs.SetException(new ConnectionFailedException());
-                        }
-                        else if ((msg is ConnectorDisconnectedEventArgs) || (msg is ConnectorConnectionLostEventArgs))
-                        {
-                            ConnectionState prevState;
-                            lock (connectLock)
-                            {
-                                prevState = state;
-                                if (msg is ConnectorDisconnectedEventArgs)
-                                {
-                                    SetState(ConnectionState.Closed);
-                                    OnClosed?.Invoke(this);
-                                }
-                                else if (msg is ConnectorConnectionLostEventArgs)
-                                {
-                                    SetState(ConnectionState.Lost);
-                                    OnLost?.Invoke(this);
-                                }
-                            }
-                            if (prevState == ConnectionState.Opening)
-                            {
-                                if (msg is ConnectorDisconnectedEventArgs)
-                                {
-                                    try
-                                    {
-                                        connectTcs.SetException(new ConnectionClosedException());
-                                    }
-                                    catch (InvalidOperationException)
-                                    {
-                                        logInTcs.SetException(new ConnectionClosedException());
-                                    }
-                                }
-                                else if (msg is ConnectorConnectionLostEventArgs)
-                                {
-                                    try
-                                    {
-                                        connectTcs.SetException(new ConnecttionLostException());
-                                    }
-                                    catch (InvalidOperationException)
-                                    {
-                                        logInTcs.SetException(new ConnecttionLostException());
-                                    }
-                                }
-                            }
-                        }
-                        else if (msg is ServerSentMessage)
-                        {
-                            var msg_ = msg as ServerSentMessage;
+                    ProcessEventMessage(msg);
+                }
+                Thread.Sleep(50);
+            }
+        }
 
-                            if (msg_.Type == MessageType.REMOTE_MSG_LOGIN)
-                            {
-                                if ((int)msg_.N1 < 1)
-                                {
-                                    var err = new ErrorResponse(msg_);
-                                    logger.ErrorFormat("Login failed: {0}. Connector will be closed.", err);
-                                    logInTcs.SetException(new ErrorResponse(msg_));
-                                    connector.Disconnect();
-                                    // 登录失败算一种连接失败
-                                    lock (connectLock)
-                                    {
-                                        SetState(ConnectionState.Failed);
-                                    }
-                                }
-                                else
-                                {
-                                    lock (connectLock)
-                                    {
-                                        SetState(ConnectionState.Ok);
-                                    }
-                                    logInTcs.SetResult(msg_);
-                                }
-                            }
-                            else
-                            {
-                                lock (requestLock)
-                                {
-                                    isResponse = (hangingReqType == msg_.Type);
-                                }
-                                if (isResponse)
-                                {
-                                    if ((int)msg_.N1 < 1)
-                                    {
-                                        var err = new ErrorResponse(msg_);
-                                        logger.ErrorFormat("{0}", err);
-                                        reqTcs.SetException(new ErrorResponse(msg_));
-                                    }
-                                    else
-                                    {
-                                        reqTcs.SetResult(msg_);
-                                    }
-                                }
-                                else
-                                {
-                                    /// server->client event
-                                    OnServerSentEvent?.Invoke(this, new ServerSentEventArgs(msg_));
-                                }
-                            }
+        private void ProcessEventMessage(object msg)
+        {
+            bool isResponse;  // 是否 Response ?
+            if (msg is ConnectorConnectedEventArgs)
+            {
+                connectTcs.SetResult(msg);
+            }
+            else if (msg is ConnectorConnectAttemptFailedEventArgs)
+            {
+                lock (connectLock)
+                {
+                    SetState(ConnectionState.Failed);
+                }
+                connectTcs.SetException(new ConnectionFailedException());
+            }
+            else if ((msg is ConnectorDisconnectedEventArgs) || (msg is ConnectorConnectionLostEventArgs))
+            {
+                ConnectionState prevState;
+                lock (connectLock)
+                {
+                    prevState = state;
+                    if (msg is ConnectorDisconnectedEventArgs)
+                    {
+                        SetState(ConnectionState.Closed);
+                        OnClosed?.Invoke(this);
+                    }
+                    else if (msg is ConnectorConnectionLostEventArgs)
+                    {
+                        SetState(ConnectionState.Lost);
+                        OnLost?.Invoke(this);
+                    }
+                }
+                if (prevState == ConnectionState.Opening)
+                {
+                    if (msg is ConnectorDisconnectedEventArgs)
+                    {
+                        try
+                        {
+                            connectTcs.SetException(new ConnectionClosedException());
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            logInTcs.SetException(new ConnectionClosedException());
                         }
                     }
-                    Thread.Sleep(50);
+                    else if (msg is ConnectorConnectionLostEventArgs)
+                    {
+                        try
+                        {
+                            connectTcs.SetException(new ConnecttionLostException());
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            logInTcs.SetException(new ConnecttionLostException());
+                        }
+                    }
                 }
             }
-            catch (ThreadAbortException) { }
+            else if (msg is ServerSentMessage)
+            {
+                var msg_ = msg as ServerSentMessage;
+
+                if (msg_.Type == MessageType.REMOTE_MSG_LOGIN)
+                {
+                    if ((int)msg_.N1 < 1)
+                    {
+                        var err = new ErrorResponse(msg_);
+                        logger.ErrorFormat("Login failed: {0}. Connector will be closed.", err);
+                        logInTcs.SetException(new ErrorResponse(msg_));
+                        connector.Disconnect();
+                        // 登录失败算一种连接失败
+                        lock (connectLock)
+                        {
+                            SetState(ConnectionState.Failed);
+                        }
+                    }
+                    else
+                    {
+                        lock (connectLock)
+                        {
+                            agentId = msg_.N2;
+                            SetState(ConnectionState.Ok);
+                        }
+                        logInTcs.SetResult(msg_.N2);
+                    }
+                }
+                else
+                {
+                    lock (requestLock)
+                    {
+                        isResponse = (hangingReqType == msg_.Type);
+                    }
+                    if (isResponse)
+                    {
+                        if ((int)msg_.N1 < 1)
+                        {
+                            var err = new ErrorResponse(msg_);
+                            logger.ErrorFormat("{0}", err);
+                            reqTcs.SetException(new ErrorResponse(msg_));
+                        }
+                        else
+                        {
+                            reqTcs.SetResult(msg_);
+                        }
+                    }
+                    else
+                    {
+                        /// server->client event
+                        OnServerSentEvent?.Invoke(this, new ServerSentEventArgs(msg_));
+                    }
+                }
+            }
         }
 
         private void Connector_OnAgentMessageReceived(object sender, network.AgentMessageReceivedEventArgs e)
@@ -275,7 +289,7 @@ namespace ipsc6.agent.client
 
         public const int DefaultTimeoutMilliseconds = 5000;
 
-        public async Task Open(string remoteHost, ushort remotePort, string username, string password, int millisecondsTimeout = DefaultTimeoutMilliseconds)
+        public async Task<int> Open(string remoteHost, ushort remotePort, string workerNumber, string password, int millisecondsTimeout = DefaultTimeoutMilliseconds)
         {
             ConnectionState[] allowStates = { ConnectionState.Init, ConnectionState.Closed, ConnectionState.Failed, ConnectionState.Lost };
             lock (connectLock)
@@ -302,9 +316,9 @@ namespace ipsc6.agent.client
             await connectTcs.Task;
             ///
             /// 登录
-            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Log in as user \"{3}\"", connector.BoundAddress, remoteHost, remoteHost, username);
-            var reqData = new AgentRequestMessage(MessageType.REMOTE_MSG_LOGIN, string.Format("{0}|{1}|1|0|{0}", username, password));
-            logInTcs = new TaskCompletionSource<object>();
+            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Log in workerNumber \"{3}\"", connector.BoundAddress, remoteHost, remoteHost, workerNumber);
+            var reqData = new AgentRequestMessage(MessageType.REMOTE_MSG_LOGIN, string.Format("{0}|{1}|1|0|{0}", workerNumber, password));
+            logInTcs = new TaskCompletionSource<int>();
             Send(reqData);
             var task = await Task.WhenAny(logInTcs.Task, Task.Delay(millisecondsTimeout));
             if (task != logInTcs.Task)
@@ -313,15 +327,16 @@ namespace ipsc6.agent.client
                 connector.Disconnect();
                 throw new ConnectionTimeoutException();
             }
-            logger.Info("Log in succeed");
-            await logInTcs.Task;
+            
+            var agentid = await logInTcs.Task;
+            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Succeed: workerNumber=\"{3}\", AgentId={4}", connector.BoundAddress, remoteHost, remoteHost, workerNumber, agentid);
+            return agentid;
         }
 
-        public async Task Open(string remoteHost, string username, string password, int millisecondsTimeout = DefaultTimeoutMilliseconds)
+        public async Task<int> Open(string remoteHost, string workerNumber, string password, int millisecondsTimeout = DefaultTimeoutMilliseconds)
         {
-            await Open(remoteHost, 0, username, password, millisecondsTimeout);
+            return await Open(remoteHost, 0, workerNumber, password, millisecondsTimeout);
         }
-
 
         public void Close()
         {

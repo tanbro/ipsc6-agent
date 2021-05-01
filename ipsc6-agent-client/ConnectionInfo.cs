@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ipsc6.agent.client
 {
-    public class ConnectionInfo
+    public class ConnectionInfo: IEquatable<ConnectionInfo>
     {
         public readonly string Host;
         public readonly ushort Port;
@@ -13,6 +13,11 @@ namespace ipsc6.agent.client
         {
             Host = host;
             Port = port;
+        }
+
+        public bool Equals(ConnectionInfo other)
+        {
+            return Host == other.Host && Port == other.Port;
         }
     }
 }

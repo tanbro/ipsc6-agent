@@ -6,13 +6,13 @@ using System.Text;
 
 namespace ipsc6.agent.client
 {
-    public class HoldInfo: IEquatable<HoldInfo>
+    public class HoldInfo: ServerSideData, IEquatable<HoldInfo>
     {
         public readonly int Channel;
         public readonly HoldEventType EventType;
         public readonly string SessionId;
 
-        public HoldInfo(ServerSentMessage msg)
+        public HoldInfo(ConnectionInfo connectionInfo, ServerSentMessage msg):base(connectionInfo)
         {
             Channel = msg.N1;
             EventType = (HoldEventType)msg.N2;
@@ -21,7 +21,7 @@ namespace ipsc6.agent.client
 
         public bool Equals(HoldInfo other)
         {
-            return Channel == other.Channel;
+            return ConnectionInfo==other.ConnectionInfo && Channel == other.Channel;
         }
     }
 }

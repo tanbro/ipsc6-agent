@@ -18,6 +18,15 @@ namespace ipsc6.agent.client
     public delegate void QueueInfoEventHandler(object sender, QueueInfoEventArgs e);
     public delegate void HoldInfoEventHandler(object sender, HoldInfoEventArgs e);
 
+    public delegate void AgentIdAssignedEventHandler(object sender, AgentIdAssignedEventArgs e);
+    public delegate void AgentDisplayNameReceivedEventHandler(object sender, AgentDisplayNameReceivedEventArgs e);
+    public delegate void ChannelAssignedEventHandler(object sender, ChannelAssignedEventArgs e);
+    public delegate void WorkingChannelInfoReceivedEventHandler(object sender, WorkingChannelInfoReceivedEventArgs e);
+    public delegate void RingInfoReceivedEventHandler(object sender, RingInfoReceivedEventArgs e);
+    public delegate void IvrDataReceivedEventHandler(object sender, IvrDataReceivedEventArgs e);
+    public delegate void CustomStringReceivedEventArgsReceivedEventHandler(object sender, CustomStringReceivedEventArgs e);
+    public delegate void SipRegistrarListReceivedEventHandler(object sender, SipRegistrarListReceivedEventArgs e);
+
     public class ServerSentEventArgs : EventArgs
     {
         public readonly ServerSentMessage Message;
@@ -39,11 +48,6 @@ namespace ipsc6.agent.client
         }
     }
 
-    public class MyStateChangeEvent<T> : StateChangedEventArgs<int>
-    {
-        public MyStateChangeEvent(int oldState, int newState) : base(oldState, newState) { }
-    }
-
     public class ConnectionStateChangedEventArgs<T> : StateChangedEventArgs<ConnectionState>
     {
         public ConnectionStateChangedEventArgs(ConnectionState oldState, ConnectionState newState) : base(oldState, newState) { }
@@ -51,15 +55,13 @@ namespace ipsc6.agent.client
 
     public class ConnectionInfoStateChangedEventArgs<T> : StateChangedEventArgs<ConnectionState>
     {
-        public readonly int Index;
         public readonly ConnectionInfo ConnectionInfo;
 
         public ConnectionInfoStateChangedEventArgs(
-            int index, ConnectionInfo connectionInfo,
+            ConnectionInfo connectionInfo,
             ConnectionState oldState, ConnectionState newState
         ) : base(oldState, newState)
         {
-            Index = index;
             ConnectionInfo = connectionInfo;
         }
     }
@@ -99,4 +101,79 @@ namespace ipsc6.agent.client
         }
     }
 
+    public class AgentIdAssignedEventArgs: EventArgs
+    {
+        public readonly int Id;
+        public readonly string DisplayName;
+
+        public AgentIdAssignedEventArgs(int id, string displayName)
+        {
+            Id = id;
+            DisplayName = displayName;
+        }
+    }
+
+    public class AgentDisplayNameReceivedEventArgs : EventArgs
+    {
+        public readonly string Value;
+
+        public AgentDisplayNameReceivedEventArgs(string value)
+        {
+            Value = value;
+        }
+    }
+    
+    public class ChannelAssignedEventArgs: EventArgs
+    {
+        public readonly int Channel;
+        public ChannelAssignedEventArgs(int channel)
+        {
+            Channel = channel;
+        }
+    }
+
+    public class WorkingChannelInfoReceivedEventArgs: EventArgs
+    {
+        public readonly WorkingChannelInfo Value;
+        public WorkingChannelInfoReceivedEventArgs(WorkingChannelInfo value) :base()
+        {
+            Value = value;
+        }
+    }
+
+    public class RingInfoReceivedEventArgs : EventArgs
+    {
+        public readonly RingInfo Value;
+        public RingInfoReceivedEventArgs(RingInfo value) : base()
+        {
+            Value = value;
+        }
+    }
+
+    public class IvrDataReceivedEventArgs : EventArgs
+    {
+        public readonly IvrData Value;
+        public IvrDataReceivedEventArgs(IvrData value) : base()
+        {
+            Value = value;
+        }
+    }
+
+    public class CustomStringReceivedEventArgs : EventArgs
+    {
+        public readonly ServerSentCustomString Value;
+        public CustomStringReceivedEventArgs(ServerSentCustomString value) : base()
+        {
+            Value = value;
+        }
+    }
+
+    public class SipRegistrarListReceivedEventArgs : EventArgs
+    {
+        public readonly string[] Value;
+        public SipRegistrarListReceivedEventArgs(string[] value) : base()
+        {
+            Value = value;
+        }
+    }
 }
