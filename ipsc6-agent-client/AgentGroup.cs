@@ -8,10 +8,10 @@ namespace ipsc6.agent.client
     {
         public readonly string Id;
         public string Name;
-        public AgentGroup(string id , string name="")
+        public bool Signed = false;
+        public AgentGroup(string id)
         {
             Id = id;
-            Name = name;
         }
 
         public bool Equals(AgentGroup other)

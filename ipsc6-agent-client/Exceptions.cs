@@ -45,6 +45,13 @@ namespace ipsc6.agent.client
         public ConnectionTimeoutException(string message, Exception inner) : base(message, inner) { }
     }
 
+    public class DisconnectionTimeoutException : ConnectionException
+    {
+        public DisconnectionTimeoutException() { }
+        public DisconnectionTimeoutException(string message) : base(message) { }
+        public DisconnectionTimeoutException(string message, Exception inner) : base(message, inner) { }
+    }
+
     public class BaseRequestError : BaseException
     {
         public BaseRequestError() { }

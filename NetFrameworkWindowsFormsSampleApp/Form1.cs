@@ -521,6 +521,5 @@ namespace NetFrameworkWindowsFormsSampleApp
                 currentSipCall.hangup(prm);
             }
         }
-
     }
 }

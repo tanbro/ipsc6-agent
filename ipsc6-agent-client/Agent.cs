@@ -66,14 +66,14 @@ namespace ipsc6.agent.client
         readonly List<Connection> internalConnections = new List<Connection>();
         readonly List<Connection> shuffledConnections = new List<Connection>();
         int owershipIndex = 0;
-        public int MainConnectionIndex
-        {
-            get
-            {
-                var conn = shuffledConnections[owershipIndex];
-                return internalConnections.IndexOf(conn);
-            }
-        }
+        public int MainConnectionIndex = 0;
+        //{
+        //    get
+        //    {
+        //        var conn = shuffledConnections[owershipIndex];
+        //        return internalConnections.IndexOf(conn);
+        //    }
+        //}
         public ConnectionInfo MainConnectionInfo
         {
             get { return connectionList[MainConnectionIndex]; }
@@ -130,17 +130,17 @@ namespace ipsc6.agent.client
         public event TeleStateChangedEventHandler OnTeleStateChanged;
 
 
-        HashSet<QueueInfo> queueList = new HashSet<QueueInfo>();
-        public IReadOnlyCollection<QueueInfo> QueueList
+        HashSet<QueueInfo> queueInfoCollection = new HashSet<QueueInfo>();
+        public IReadOnlyCollection<QueueInfo> QueueInfoCollection
         {
-            get { return queueList; }
+            get { return queueInfoCollection; }
         }
         public event QueueInfoEventHandler OnQueueInfo;
 
-        HashSet<HoldInfo> holdList = new HashSet<HoldInfo>();
-        public IReadOnlyCollection<HoldInfo> HoldList
+        HashSet<HoldInfo> holdInfoCollection = new HashSet<HoldInfo>();
+        public IReadOnlyCollection<HoldInfo> HoldInfoCollection
         {
-            get { return holdList; }
+            get { return holdInfoCollection; }
         }
         public event HoldInfoEventHandler OnHoldInfo;
 
@@ -220,15 +220,15 @@ namespace ipsc6.agent.client
         void ProcessQueueInfoMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             var info = new QueueInfo(connInfo, msg);
-            var ev = new QueueInfoEventArgs(info);
+            var ev = new QueueInfoEventArgs(connInfo, info);
             // 记录 QueueInfo
             lock (lck)
             {
                 // 修改之前,一律先删除
-                queueList.RemoveWhere((m) => m == info);
+                queueInfoCollection.RemoveWhere((m) => m == info);
                 if (info.EventType != QueueEventType.Cancel)
                 {
-                    queueList.Add(info);
+                    queueInfoCollection.Add(info);
                 }
             }
             /// 
@@ -238,15 +238,15 @@ namespace ipsc6.agent.client
         void ProcessHoldInfoMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             var info = new HoldInfo(connInfo, msg);
-            var ev = new HoldInfoEventArgs(info);
+            var ev = new HoldInfoEventArgs(connInfo, info);
             // 记录 HoldInfo
             lock (lck)
             {
                 // 修改之前,一律先删除
-                holdList.RemoveWhere((m) => m == info);
+                holdInfoCollection.RemoveWhere((m) => m == info);
                 if (info.EventType != HoldEventType.Cancel)
                 {
-                    holdList.Add(info);
+                    holdInfoCollection.Add(info);
                 }
             }
             //
@@ -279,6 +279,9 @@ namespace ipsc6.agent.client
                 case ServerSentMessageSubType.PrivilegeExternList:
                     DoOnPrivilegeExternList(connInfo, msg);
                     break;
+                case ServerSentMessageSubType.SignedGroupIdList:
+                    DoOnSignedGroupIdList(connInfo, msg);
+                    break;
                 case ServerSentMessageSubType.WorkingChannel:
                     DoOnWorkingChannel(connInfo, msg);
                     break;
@@ -296,6 +299,22 @@ namespace ipsc6.agent.client
             }
         }
 
+        public event EventHandler OnSignedGroupsChanged;
+        private void DoOnSignedGroupIdList(ConnectionInfo connInfo, ServerSentMessage msg)
+        {
+            var signed = Convert.ToBoolean(msg.N2);
+            var ids = msg.S.Split(new char[] { '|' });
+            lock (lck)
+            {
+                foreach(var id in ids)
+                {
+                    groupCollection.First(m => m.Id == id)
+                        .Signed = signed;
+                }
+            }
+            OnSignedGroupsChanged?.Invoke(this, new EventArgs());
+        }
+
         public event SipRegistrarListReceivedEventHandler OnSipRegistrarListReceived;
         private void DoOnSipRegistrarList(ConnectionInfo _, ServerSentMessage msg)
         {
@@ -309,7 +328,7 @@ namespace ipsc6.agent.client
         private void DoOnCustomString(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             var val = new ServerSentCustomString(connInfo, msg.N2, msg.S);
-            var evt = new CustomStringReceivedEventArgs(val);
+            var evt = new CustomStringReceivedEventArgs(connInfo, val);
             OnCustomStringReceived?.Invoke(this, evt);
         }
 
@@ -317,7 +336,7 @@ namespace ipsc6.agent.client
         private void DoOnIvrData(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             var val = new IvrData(connInfo, msg.N2, msg.S);
-            var evt = new IvrDataReceivedEventArgs(val);
+            var evt = new IvrDataReceivedEventArgs(connInfo, val);
             OnIvrDataReceived?.Invoke(this, evt);
         }
 
@@ -331,7 +350,7 @@ namespace ipsc6.agent.client
         {
             var _ringInfo = new RingInfo(connInfo, msg.N2, msg.S);
             var _workChInfo = new WorkingChannelInfo(_ringInfo.WorkingChannel);
-            var evt = new RingInfoReceivedEventArgs(_ringInfo);
+            var evt = new RingInfoReceivedEventArgs(connInfo, _ringInfo);
             lock (lck)
             {
                 workingChannelInfo = _workChInfo;
@@ -349,7 +368,7 @@ namespace ipsc6.agent.client
         private void DoOnWorkingChannel(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             var info = new WorkingChannelInfo(msg.N2, msg.S);
-            var evt = new WorkingChannelInfoReceivedEventArgs(info);
+            var evt = new WorkingChannelInfoReceivedEventArgs(connInfo, info);
             lock (lck)
             {
                 workingChannelInfo = info;
@@ -357,12 +376,12 @@ namespace ipsc6.agent.client
             OnWorkingChannelInfoReceived?.Invoke(this, evt);
         }
 
-        private HashSet<Privilege> privilegeSet = new HashSet<Privilege>();
-        public IReadOnlyCollection<Privilege> PrivilegeSet
+        private HashSet<Privilege> privilegeCollection = new HashSet<Privilege>();
+        public IReadOnlyCollection<Privilege> PrivilegeCollection
         {
-            get { return privilegeSet; }
+            get { return privilegeCollection; }
         }
-        public event EventHandler OnPrivilegeSetReceived;
+        public event EventHandler OnPrivilegeCollectionReceived;
         private void DoOnPrivilegeList(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
@@ -371,18 +390,18 @@ namespace ipsc6.agent.client
             {
                 foreach (var s in parts)
                 {
-                    privilegeSet.Add((Privilege)Convert.ToInt32(s));
+                    privilegeCollection.Add((Privilege)Convert.ToInt32(s));
                 }
             }
-            OnPrivilegeSetReceived?.Invoke(this, new EventArgs());
+            OnPrivilegeCollectionReceived?.Invoke(this, new EventArgs());
         }
 
-        private HashSet<int> privilegeExternSet = new HashSet<int>();
-        public IReadOnlyCollection<int> PrivilegeExternSet
+        private HashSet<int> privilegeExternCollection = new HashSet<int>();
+        public IReadOnlyCollection<int> PrivilegeExternCollection
         {
-            get { return privilegeExternSet; }
+            get { return privilegeExternCollection; }
         }
-        public event EventHandler OnPrivilegeExternSetReceived;
+        public event EventHandler OnPrivilegeExternCollectionReceived;
         private void DoOnPrivilegeExternList(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
@@ -391,60 +410,63 @@ namespace ipsc6.agent.client
             {
                 foreach (var s in parts)
                 {
-                    privilegeExternSet.Add(Convert.ToInt32(s));
+                    privilegeExternCollection.Add(Convert.ToInt32(s));
                 }
             }
-            OnPrivilegeExternSetReceived?.Invoke(this, new EventArgs());
+            OnPrivilegeExternCollectionReceived?.Invoke(this, new EventArgs());
         }
 
-        List<AgentGroup> groupList = new List<AgentGroup>();
-        public IReadOnlyCollection<AgentGroup> GroupSet
+        HashSet<AgentGroup> groupCollection = new HashSet<AgentGroup>();
+        public IReadOnlyCollection<AgentGroup> GroupCollection
         {
-            get { return groupList; }
+            get { return groupCollection; }
         }
-        public event EventHandler OnGroupListReceived;
+        public event EventHandler OnGroupCollectionReceived;
         void DoOnGroupIdList(ConnectionInfo _, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var parts = msg.S.Split(new char[] { '|' });
+            var ids = msg.S.Split(new char[] { '|' });
             lock (lck)
             {
-                foreach (var s in parts)
+                foreach (var id in ids)
                 {
-                    groupList.Add(new AgentGroup(s));
+                    if (!groupCollection.Any(m => m.Id == id))
+                    {
+                        groupCollection.Add(new AgentGroup(id));
+                    }
                 }
             }
         }
 
         void DoOnGroupNameList(ConnectionInfo _, ServerSentMessage msg)
         {
-            var parts = msg.S.Split(new char[] { '|' });
+            var names = msg.S.Split(new char[] { '|' });
             lock (lck)
             {
-                var it = groupList.Zip(parts, (first, second) => new { first, second });
+                var it = groupCollection.Zip(names, (first, second) => new { first, second });
                 foreach (var m in it)
                 {
                     m.first.Name = m.second;
                 }
             }
-            OnGroupListReceived?.Invoke(this, new EventArgs());
+            OnGroupCollectionReceived?.Invoke(this, new EventArgs());
         }
 
         public event ChannelAssignedEventHandler OnChannelAssigned;
-        void DoOnChannel(ConnectionInfo _, ServerSentMessage msg)
+        void DoOnChannel(ConnectionInfo connInfo, ServerSentMessage msg)
         {
-            var evt = new ChannelAssignedEventArgs(msg.N2);
+            var evt = new ChannelAssignedEventArgs(connInfo, msg.N2);
             lock (lck)
             {
-                channel = evt.Channel;
+                channel = evt.Value;
             }
             OnChannelAssigned?.Invoke(this, evt);
         }
 
         public event AgentDisplayNameReceivedEventHandler OnAgentDisplayNameReceived;
-        void DoOnAgentId(ConnectionInfo _, ServerSentMessage msg)
+        void DoOnAgentId(ConnectionInfo connInfo, ServerSentMessage msg)
         {
-            var evt = new AgentDisplayNameReceivedEventArgs(msg.S);
+            var evt = new AgentDisplayNameReceivedEventArgs(connInfo, msg.S);
             lock (lck)
             {
                 displayName = evt.Value;
@@ -481,12 +503,60 @@ namespace ipsc6.agent.client
             await Task.WhenAll(tasks);
         }
 
-        public void ShutDown()
+        public async Task ShutDown()
         {
-            foreach(var conn in internalConnections)
+            var tasks = from m in internalConnections select m.Close();
+            await Task.WhenAll(tasks);
+        }
+
+        public async Task SignIn()
+        {
+            var ids = from m in groupCollection select m.Id;
+            await SignIn(ids);
+        }
+        public async Task SignIn(string id)
+        {
+            var ids = new string[] { id };
+            await SignIn(ids);
+        }
+        public async Task SignIn(IEnumerable<string> ids)
+        {
+            var s = string.Join("|", ids);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNON, s);
+            await MainConnection.Request(req);
+        }
+
+        public async Task SignOut()
+        {
+            var ids = from m in groupCollection select m.Id;
+            await SignOut(ids);
+        }
+        public async Task SignOut(string id)
+        {
+            var ids = new string[] { id };
+            await SignOut(ids);
+        }
+        public async Task SignOut(IEnumerable<string> ids)
+        {
+            var s = string.Join("|", ids);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNOFF, s);
+            await MainConnection.Request(req);
+        }
+
+        public async Task SetIdle()
+        {
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONTINUE);
+            await MainConnection.Request(req);
+        }
+
+        public async Task SetBusy(WorkType workType=WorkType.PauseBusy)
+        {
+            if(workType<WorkType.PauseBusy)
             {
-                conn.Close();
+                throw new ArgumentOutOfRangeException(string.Format("{0}", workType));
             }
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_PAUSE, (int)workType);
+            await MainConnection.Request(req);
         }
 
     }

@@ -23,26 +23,8 @@ namespace WindowsFormsApp1
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new Form1());
 
-            ipsc6.agent.network.Connector.Initial();
-            try
-            {
-                logger.Info("Application.Run() >>>");
-                try
-                {
-                    Application.Run(new Form1());
-                }
-                finally
-                {
-                    logger.Info("Application.Run() <<<");
-                }
-            }
-            finally
-            {
-                logger.Info("ipsc6.agent.network.Connector.Release() >>>");
-                ipsc6.agent.network.Connector.Release();
-                logger.Info("ipsc6.agent.network.Connector.Release() <<<");
-            }
             logger.Info("=============== shutdown ===============");
         }
     }

@@ -73,6 +73,17 @@ namespace ipsc6.agent.client
     public class ConnectorDisconnectedEventArgs : BaseConnectorEventArgs { }
     public class ConnectorConnectionLostEventArgs : BaseConnectorEventArgs { }
 
+    public class BaseCtiEventArgs<T> : EventArgs
+    {
+        public readonly ConnectionInfo ConnectionInfo;
+        public readonly T Value;
+        public BaseCtiEventArgs(ConnectionInfo connectionInfo, T value)
+        {
+            ConnectionInfo = connectionInfo;
+            Value = value;
+        }
+    }
+
     public class AgentStateChangedEventArgs<T> : StateChangedEventArgs<AgentStateWorkType>
     {
         public AgentStateChangedEventArgs(AgentStateWorkType oldState, AgentStateWorkType newState) : base(oldState, newState) { }
@@ -83,89 +94,56 @@ namespace ipsc6.agent.client
         public TeleStateChangedEventArgs(TeleState oldState, TeleState newState) : base(oldState, newState) { }
     }
 
-    public class QueueInfoEventArgs: EventArgs
+
+    public class QueueInfoEventArgs : BaseCtiEventArgs<QueueInfo>
     {
-        public readonly QueueInfo Info;
-        public QueueInfoEventArgs(QueueInfo info) : base()
-        {
-            Info = info;
-        }
+        public QueueInfoEventArgs(ConnectionInfo connectionInfo, QueueInfo value) : base(connectionInfo, value) { }
     }
 
-    public class HoldInfoEventArgs : EventArgs
+    public class HoldInfoEventArgs : BaseCtiEventArgs<HoldInfo>
     {
-        public readonly HoldInfo Info;
-        public HoldInfoEventArgs(HoldInfo info) : base()
-        {
-            Info = info;
-        }
+        public HoldInfoEventArgs(ConnectionInfo connectionInfo, HoldInfo value) : base(connectionInfo, value) { }
     }
 
-    public class AgentIdAssignedEventArgs: EventArgs
+    public struct AgentIdName
     {
         public readonly int Id;
         public readonly string DisplayName;
-
-        public AgentIdAssignedEventArgs(int id, string displayName)
-        {
-            Id = id;
-            DisplayName = displayName;
-        }
     }
 
-    public class AgentDisplayNameReceivedEventArgs : EventArgs
+    public class AgentIdAssignedEventArgs : BaseCtiEventArgs<AgentIdName>
     {
-        public readonly string Value;
-
-        public AgentDisplayNameReceivedEventArgs(string value)
-        {
-            Value = value;
-        }
-    }
-    
-    public class ChannelAssignedEventArgs: EventArgs
-    {
-        public readonly int Channel;
-        public ChannelAssignedEventArgs(int channel)
-        {
-            Channel = channel;
-        }
+        public AgentIdAssignedEventArgs(ConnectionInfo connectionInfo, AgentIdName value) : base(connectionInfo, value) { }
     }
 
-    public class WorkingChannelInfoReceivedEventArgs: EventArgs
+    public class AgentDisplayNameReceivedEventArgs : BaseCtiEventArgs<string>
     {
-        public readonly WorkingChannelInfo Value;
-        public WorkingChannelInfoReceivedEventArgs(WorkingChannelInfo value) :base()
-        {
-            Value = value;
-        }
+        public AgentDisplayNameReceivedEventArgs(ConnectionInfo connectionInfo, string value) : base(connectionInfo, value) { }
     }
 
-    public class RingInfoReceivedEventArgs : EventArgs
+    public class ChannelAssignedEventArgs : BaseCtiEventArgs<int>
     {
-        public readonly RingInfo Value;
-        public RingInfoReceivedEventArgs(RingInfo value) : base()
-        {
-            Value = value;
-        }
+        public ChannelAssignedEventArgs(ConnectionInfo connectionInfo, int value) : base(connectionInfo, value) { }
     }
 
-    public class IvrDataReceivedEventArgs : EventArgs
+    public class WorkingChannelInfoReceivedEventArgs : BaseCtiEventArgs<WorkingChannelInfo>
     {
-        public readonly IvrData Value;
-        public IvrDataReceivedEventArgs(IvrData value) : base()
-        {
-            Value = value;
-        }
+        public WorkingChannelInfoReceivedEventArgs(ConnectionInfo connectionInfo, WorkingChannelInfo value) : base(connectionInfo, value) { }
     }
 
-    public class CustomStringReceivedEventArgs : EventArgs
+    public class RingInfoReceivedEventArgs : BaseCtiEventArgs<RingInfo>
     {
-        public readonly ServerSentCustomString Value;
-        public CustomStringReceivedEventArgs(ServerSentCustomString value) : base()
-        {
-            Value = value;
-        }
+        public RingInfoReceivedEventArgs(ConnectionInfo connectionInfo, RingInfo value) : base(connectionInfo, value) { }
+    }
+
+    public class IvrDataReceivedEventArgs : BaseCtiEventArgs<IvrData>
+    {
+        public IvrDataReceivedEventArgs(ConnectionInfo connectionInfo, IvrData value) : base(connectionInfo, value) { }
+    }
+
+    public class CustomStringReceivedEventArgs : BaseCtiEventArgs<ServerSentCustomString>
+    {
+        public CustomStringReceivedEventArgs(ConnectionInfo connectionInfo, ServerSentCustomString value) : base(connectionInfo, value) { }
     }
 
     public class SipRegistrarListReceivedEventArgs : EventArgs
@@ -176,4 +154,5 @@ namespace ipsc6.agent.client
             Value = value;
         }
     }
+
 }

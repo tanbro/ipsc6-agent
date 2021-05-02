@@ -165,18 +165,23 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // numericUpDown_ReqNum1
             // 
-            this.numericUpDown_ReqNum1.Location = new System.Drawing.Point(79, 164);
+            this.numericUpDown_ReqNum1.Location = new System.Drawing.Point(98, 164);
             this.numericUpDown_ReqNum1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.numericUpDown_ReqNum1.Maximum = new decimal(new int[] {
+            0,
+            1,
+            0,
+            0});
             this.numericUpDown_ReqNum1.Name = "numericUpDown_ReqNum1";
-            this.numericUpDown_ReqNum1.Size = new System.Drawing.Size(52, 21);
+            this.numericUpDown_ReqNum1.Size = new System.Drawing.Size(70, 21);
             this.numericUpDown_ReqNum1.TabIndex = 15;
             // 
             // button_Req1
             // 
-            this.button_Req1.Location = new System.Drawing.Point(273, 165);
+            this.button_Req1.Location = new System.Drawing.Point(299, 164);
             this.button_Req1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_Req1.Name = "button_Req1";
-            this.button_Req1.Size = new System.Drawing.Size(64, 16);
+            this.button_Req1.Size = new System.Drawing.Size(49, 22);
             this.button_Req1.TabIndex = 14;
             this.button_Req1.Text = "Send Request";
             this.button_Req1.UseVisualStyleBackColor = true;
@@ -185,7 +190,7 @@ namespace NetFrameworkWindowsFormsSampleApp
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(79, 150);
+            this.label5.Location = new System.Drawing.Point(96, 151);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(41, 12);
             this.label5.TabIndex = 13;
@@ -194,7 +199,7 @@ namespace NetFrameworkWindowsFormsSampleApp
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(135, 150);
+            this.label4.Location = new System.Drawing.Point(187, 150);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(65, 12);
             this.label4.TabIndex = 13;
@@ -211,18 +216,23 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             // textBox_ReqContent1
             // 
-            this.textBox_ReqContent1.Location = new System.Drawing.Point(135, 164);
+            this.textBox_ReqContent1.Location = new System.Drawing.Point(174, 164);
             this.textBox_ReqContent1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox_ReqContent1.Name = "textBox_ReqContent1";
-            this.textBox_ReqContent1.Size = new System.Drawing.Size(133, 21);
+            this.textBox_ReqContent1.Size = new System.Drawing.Size(119, 21);
             this.textBox_ReqContent1.TabIndex = 11;
             // 
             // numericUpDown_ReqType1
             // 
             this.numericUpDown_ReqType1.Location = new System.Drawing.Point(23, 165);
             this.numericUpDown_ReqType1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.numericUpDown_ReqType1.Maximum = new decimal(new int[] {
+            0,
+            1,
+            0,
+            0});
             this.numericUpDown_ReqType1.Name = "numericUpDown_ReqType1";
-            this.numericUpDown_ReqType1.Size = new System.Drawing.Size(52, 21);
+            this.numericUpDown_ReqType1.Size = new System.Drawing.Size(69, 21);
             this.numericUpDown_ReqType1.TabIndex = 10;
             this.numericUpDown_ReqType1.Value = new decimal(new int[] {
             4,
@@ -286,6 +296,11 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             this.numericUpDown_ReqNum2.Location = new System.Drawing.Point(77, 162);
             this.numericUpDown_ReqNum2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.numericUpDown_ReqNum2.Maximum = new decimal(new int[] {
+            0,
+            1,
+            0,
+            0});
             this.numericUpDown_ReqNum2.Name = "numericUpDown_ReqNum2";
             this.numericUpDown_ReqNum2.Size = new System.Drawing.Size(52, 21);
             this.numericUpDown_ReqNum2.TabIndex = 15;
@@ -378,6 +393,11 @@ namespace NetFrameworkWindowsFormsSampleApp
             // 
             this.numericUpDown_ReqType2.Location = new System.Drawing.Point(21, 163);
             this.numericUpDown_ReqType2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.numericUpDown_ReqType2.Maximum = new decimal(new int[] {
+            0,
+            1,
+            0,
+            0});
             this.numericUpDown_ReqType2.Name = "numericUpDown_ReqType2";
             this.numericUpDown_ReqType2.Size = new System.Drawing.Size(52, 21);
             this.numericUpDown_ReqType2.TabIndex = 10;

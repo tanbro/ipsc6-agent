@@ -58,6 +58,7 @@ namespace ipsc6.agent.client
         }
 
         private TaskCompletionSource<object> connectTcs;
+        private TaskCompletionSource<object> disconnectTcs;
         private TaskCompletionSource<int> logInTcs;
         private MessageType hangingReqType = MessageType.NONE;
         private TaskCompletionSource<ServerSentMessage> reqTcs;
@@ -75,26 +76,33 @@ namespace ipsc6.agent.client
         {
             if (disposing)
             {
-                logger.InfoFormat("{0} Dispose", connector.BoundAddress);
+                logger.InfoFormat("{0} Dispose", this);
                 // Check to see if Dispose has already been called.
                 if (this.disposed)
                 {
-                    logger.ErrorFormat("{0} Dispose has already been called.", connector.BoundAddress);
+                    logger.ErrorFormat("{0} Dispose has already been called.", this);
                 }
                 else
                 {
-                    logger.DebugFormat("{0} Dispose - Stop event thread", connector.BoundAddress);
+                    logger.DebugFormat("{0} Dispose - Stop event thread", this);
                     eventThreadCancelSource.Cancel();
                     eventThread.Join();
                     eventThreadCancelSource.Dispose();
-                    logger.DebugFormat("{0} Dispose - Deallocate connector", connector.BoundAddress);
+                    logger.DebugFormat("{0} Dispose - Deallocate connector", this);
                     network.Connector.DeallocateInstance(connector);
                     // Note disposing has been done.
                     disposed = true;
-                    logger.DebugFormat("{0} Dispose - disposed", connector.BoundAddress);
+                    logger.DebugFormat("{0} Dispose - disposed", this);
                 }
             }
         }
+
+        string remoteHost;
+        public string RemoteHost
+        { get { return remoteHost; } }
+        ushort remotePort;
+        public ushort RemotePort
+        { get { return remotePort; } }
 
         public bool Connected
         {
@@ -149,6 +157,10 @@ namespace ipsc6.agent.client
                     {
                         SetState(ConnectionState.Lost);
                         OnLost?.Invoke(this);
+                    }
+                    if (prevState == ConnectionState.Closing)
+                    {
+                        disconnectTcs.SetResult(null);
                     }
                 }
                 if (prevState == ConnectionState.Opening)
@@ -237,31 +249,31 @@ namespace ipsc6.agent.client
         {
             /* UTF-8 转当前编码 */
             var data = new ServerSentMessage(e);
-            logger.DebugFormat("{0} AgentMessageReceived: {1}", connector.BoundAddress, data);
+            logger.DebugFormat("{0} AgentMessageReceived: {1}", this, data);
             eventQueue.Enqueue(data);
         }
 
         private void Connector_OnConnectionLost(object sender)
         {
-            logger.ErrorFormat("{0} OnConnectionLost", connector.BoundAddress);
+            logger.ErrorFormat("{0} OnConnectionLost", this);
             eventQueue.Enqueue(new ConnectorConnectionLostEventArgs());
         }
 
         private void Connector_OnDisconnected(object sender)
         {
-            logger.WarnFormat("{0} OnDisconnected", connector.BoundAddress);
+            logger.WarnFormat("{0} OnDisconnected", this);
             eventQueue.Enqueue(new ConnectorDisconnectedEventArgs());
         }
 
         private void Connector_OnConnected(object sender, network.ConnectedEventArgs e)
         {
-            logger.InfoFormat("{0} OnConnected", connector.BoundAddress);
+            logger.InfoFormat("{0} OnConnected", this);
             eventQueue.Enqueue(new ConnectorConnectedEventArgs());
         }
 
         private void Connector_OnConnectAttemptFailed(object sender)
         {
-            logger.ErrorFormat("{0} OnConnectAttemptFailed", connector.BoundAddress);
+            logger.ErrorFormat("{0} OnConnectAttemptFailed", this);
             eventQueue.Enqueue(new ConnectorConnectAttemptFailedEventArgs());
         }
 
@@ -269,7 +281,7 @@ namespace ipsc6.agent.client
 
         private void Initialize()
         {
-            logger.InfoFormat("{0} Initialize", connector.BoundAddress);
+            logger.InfoFormat("{0} Initialize", this);
             connector.OnConnectAttemptFailed += Connector_OnConnectAttemptFailed;
             connector.OnConnected += Connector_OnConnected;
             connector.OnDisconnected += Connector_OnDisconnected;
@@ -287,7 +299,7 @@ namespace ipsc6.agent.client
             connector.SendAgentMessage((int)value.Type, value.N, value.S);
         }
 
-        public const int DefaultTimeoutMilliseconds = 5000;
+        public const int DefaultTimeoutMilliseconds = 15000;
 
         public async Task<int> Open(string remoteHost, ushort remotePort, string workerNumber, string password, int millisecondsTimeout = DefaultTimeoutMilliseconds)
         {
@@ -303,7 +315,7 @@ namespace ipsc6.agent.client
                     throw new InvalidOperationException(string.Format("{0}", State));
                 }
             }
-            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ...", connector.BoundAddress, remoteHost, remoteHost);
+            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ...", this, remoteHost, remoteHost);
             connectTcs = new TaskCompletionSource<object>();
             if (remotePort > 0)
             {
@@ -313,23 +325,25 @@ namespace ipsc6.agent.client
             {
                 connector.Connect(remoteHost);
             }
+            this.remoteHost = remoteHost;
+            this.remotePort = remotePort;
             await connectTcs.Task;
             ///
             /// 登录
-            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Log in workerNumber \"{3}\"", connector.BoundAddress, remoteHost, remoteHost, workerNumber);
+            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Log in workerNumber \"{3}\"", this, remoteHost, remoteHost, workerNumber);
             var reqData = new AgentRequestMessage(MessageType.REMOTE_MSG_LOGIN, string.Format("{0}|{1}|1|0|{0}", workerNumber, password));
             logInTcs = new TaskCompletionSource<int>();
             Send(reqData);
             var task = await Task.WhenAny(logInTcs.Task, Task.Delay(millisecondsTimeout));
             if (task != logInTcs.Task)
             {
-                logger.ErrorFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Log in timeout. Closing the connector", connector.BoundAddress, remoteHost, remoteHost);
+                logger.ErrorFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Log in timeout. Closing the connector", this, remoteHost, remoteHost);
                 connector.Disconnect();
                 throw new ConnectionTimeoutException();
             }
-            
+
             var agentid = await logInTcs.Task;
-            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Succeed: workerNumber=\"{3}\", AgentId={4}", connector.BoundAddress, remoteHost, remoteHost, workerNumber, agentid);
+            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Succeed: workerNumber=\"{3}\", AgentId={4}", this, remoteHost, remoteHost, workerNumber, agentid);
             return agentid;
         }
 
@@ -338,7 +352,7 @@ namespace ipsc6.agent.client
             return await Open(remoteHost, 0, workerNumber, password, millisecondsTimeout);
         }
 
-        public void Close()
+        public async Task Close(int millisecondsTimeout = DefaultTimeoutMilliseconds)
         {
             ConnectionState[] allowedStates = { ConnectionState.Opening, ConnectionState.Ok };
             lock (connectLock)
@@ -347,9 +361,16 @@ namespace ipsc6.agent.client
                 {
                     throw new InvalidOperationException(string.Format("{0}", State));
                 }
-                logger.InfoFormat("{0} Close ...", connector.BoundAddress);
+                logger.InfoFormat("{0} Close ...", this);
+                disconnectTcs = new TaskCompletionSource<object>();
                 SetState(ConnectionState.Closing);
                 connector.Disconnect();
+            }
+            var task = await Task.WhenAny(disconnectTcs.Task, Task.Delay(millisecondsTimeout));
+            if (task != disconnectTcs.Task)
+            {
+                connector.Disconnect();
+                throw new ConnectionTimeoutException();
             }
         }
 
@@ -365,7 +386,7 @@ namespace ipsc6.agent.client
                 }
                 hangingReqType = args.Type;
             }
-            logger.InfoFormat("{0} Request({1})", connector.BoundAddress, args);
+            logger.InfoFormat("{0} Request({1})", this, args);
             reqTcs = new TaskCompletionSource<ServerSentMessage>();
             try
             {
@@ -389,8 +410,8 @@ namespace ipsc6.agent.client
         public override string ToString()
         {
             return string.Format(
-                "<{0} at 0x{1:x8} BoundAddress={2} State={3}>",
-                GetType().Name, GetHashCode(), connector.BoundAddress, State);
+                "<{0} at 0x{1:x8} Local={2}, Remote={3}:{4}, State={4}>",
+                GetType().Name, GetHashCode(), connector.BoundAddress, RemoteHost, RemotePort, State);
         }
 
     }
