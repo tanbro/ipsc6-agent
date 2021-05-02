@@ -306,7 +306,7 @@ namespace ipsc6.agent.client
             var ids = msg.S.Split(new char[] { '|' });
             lock (lck)
             {
-                foreach(var id in ids)
+                foreach (var id in ids)
                 {
                     groupCollection.First(m => m.Id == id)
                         .Signed = signed;
@@ -503,10 +503,15 @@ namespace ipsc6.agent.client
             await Task.WhenAll(tasks);
         }
 
-        public async Task ShutDown()
+        public async Task ShutDown(bool force = false)
         {
-            var tasks = from m in internalConnections select m.Close();
+            var tasks = from m in internalConnections select m.Close(!force);
             await Task.WhenAll(tasks);
+        }
+
+        public async Task<ServerSentMessage> Request(AgentRequestMessage args, int millisecondsTimeout = Connection.DefaultTimeoutMilliseconds)
+        {
+            return await MainConnection.Request(args, millisecondsTimeout);
         }
 
         public async Task SignIn()
@@ -549,9 +554,9 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task SetBusy(WorkType workType=WorkType.PauseBusy)
+        public async Task SetBusy(WorkType workType = WorkType.PauseBusy)
         {
-            if(workType<WorkType.PauseBusy)
+            if (workType < WorkType.PauseBusy)
             {
                 throw new ArgumentOutOfRangeException(string.Format("{0}", workType));
             }

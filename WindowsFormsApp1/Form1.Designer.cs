@@ -70,8 +70,19 @@ namespace WindowsFormsApp1
             this.button8 = new System.Windows.Forms.Button();
             this.textBox_ringInfo = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
+            this.numericUpDown_ReqNum2 = new System.Windows.Forms.NumericUpDown();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.textBox_ReqContent2 = new System.Windows.Forms.TextBox();
+            this.numericUpDown_ReqType2 = new System.Windows.Forms.NumericUpDown();
+            this.button9 = new System.Windows.Forms.Button();
+            this.textBox_reqRes = new System.Windows.Forms.TextBox();
+            this.checkBox_forceClose = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_mainServerIndex)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType2)).BeginInit();
             this.SuspendLayout();
             // 
             // textBox_ServerAddressList
@@ -138,7 +149,7 @@ namespace WindowsFormsApp1
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 139);
+            this.label4.Location = new System.Drawing.Point(12, 261);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(41, 12);
             this.label4.TabIndex = 7;
@@ -273,7 +284,7 @@ namespace WindowsFormsApp1
             this.listView_Groups.ContextMenuStrip = this.contextMenuStrip1;
             this.listView_Groups.FullRowSelect = true;
             this.listView_Groups.HideSelection = false;
-            this.listView_Groups.Location = new System.Drawing.Point(7, 154);
+            this.listView_Groups.Location = new System.Drawing.Point(7, 276);
             this.listView_Groups.Name = "listView_Groups";
             this.listView_Groups.Size = new System.Drawing.Size(256, 110);
             this.listView_Groups.TabIndex = 22;
@@ -363,20 +374,20 @@ namespace WindowsFormsApp1
             this.columnHeader4,
             this.columnHeader5});
             this.listView_sipAccounts.HideSelection = false;
-            this.listView_sipAccounts.Location = new System.Drawing.Point(7, 270);
+            this.listView_sipAccounts.Location = new System.Drawing.Point(269, 276);
             this.listView_sipAccounts.Name = "listView_sipAccounts";
-            this.listView_sipAccounts.Size = new System.Drawing.Size(420, 124);
+            this.listView_sipAccounts.Size = new System.Drawing.Size(726, 110);
             this.listView_sipAccounts.TabIndex = 28;
             this.listView_sipAccounts.UseCompatibleStateImageBehavior = false;
             this.listView_sipAccounts.View = System.Windows.Forms.View.Details;
             // 
             // columnHeader4
             // 
-            this.columnHeader4.Width = 184;
+            this.columnHeader4.Width = 217;
             // 
             // columnHeader5
             // 
-            this.columnHeader5.Width = 192;
+            this.columnHeader5.Width = 466;
             // 
             // button7
             // 
@@ -415,11 +426,115 @@ namespace WindowsFormsApp1
             this.label11.TabIndex = 32;
             this.label11.Text = "振铃信息";
             // 
+            // numericUpDown_ReqNum2
+            // 
+            this.numericUpDown_ReqNum2.Location = new System.Drawing.Point(64, 167);
+            this.numericUpDown_ReqNum2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.numericUpDown_ReqNum2.Maximum = new decimal(new int[] {
+            0,
+            1,
+            0,
+            0});
+            this.numericUpDown_ReqNum2.Name = "numericUpDown_ReqNum2";
+            this.numericUpDown_ReqNum2.Size = new System.Drawing.Size(52, 21);
+            this.numericUpDown_ReqNum2.TabIndex = 38;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(64, 153);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(41, 12);
+            this.label12.TabIndex = 36;
+            this.label12.Text = "MsgNum";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(121, 153);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(65, 12);
+            this.label13.TabIndex = 37;
+            this.label13.Text = "MsgContent";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(7, 154);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(47, 12);
+            this.label14.TabIndex = 35;
+            this.label14.Text = "MsgType";
+            // 
+            // textBox_ReqContent2
+            // 
+            this.textBox_ReqContent2.Location = new System.Drawing.Point(121, 167);
+            this.textBox_ReqContent2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.textBox_ReqContent2.Name = "textBox_ReqContent2";
+            this.textBox_ReqContent2.Size = new System.Drawing.Size(133, 21);
+            this.textBox_ReqContent2.TabIndex = 34;
+            // 
+            // numericUpDown_ReqType2
+            // 
+            this.numericUpDown_ReqType2.Location = new System.Drawing.Point(8, 168);
+            this.numericUpDown_ReqType2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.numericUpDown_ReqType2.Maximum = new decimal(new int[] {
+            0,
+            1,
+            0,
+            0});
+            this.numericUpDown_ReqType2.Name = "numericUpDown_ReqType2";
+            this.numericUpDown_ReqType2.Size = new System.Drawing.Size(52, 21);
+            this.numericUpDown_ReqType2.TabIndex = 33;
+            this.numericUpDown_ReqType2.Value = new decimal(new int[] {
+            4,
+            0,
+            0,
+            0});
+            // 
+            // button9
+            // 
+            this.button9.Location = new System.Drawing.Point(260, 165);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(117, 23);
+            this.button9.TabIndex = 39;
+            this.button9.Text = "Send Request";
+            this.button9.UseVisualStyleBackColor = true;
+            this.button9.Click += new System.EventHandler(this.button9_Click);
+            // 
+            // textBox_reqRes
+            // 
+            this.textBox_reqRes.Location = new System.Drawing.Point(7, 193);
+            this.textBox_reqRes.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.textBox_reqRes.Name = "textBox_reqRes";
+            this.textBox_reqRes.ReadOnly = true;
+            this.textBox_reqRes.Size = new System.Drawing.Size(370, 21);
+            this.textBox_reqRes.TabIndex = 40;
+            // 
+            // checkBox_forceClose
+            // 
+            this.checkBox_forceClose.AutoSize = true;
+            this.checkBox_forceClose.Location = new System.Drawing.Point(471, 40);
+            this.checkBox_forceClose.Name = "checkBox_forceClose";
+            this.checkBox_forceClose.Size = new System.Drawing.Size(90, 16);
+            this.checkBox_forceClose.TabIndex = 41;
+            this.checkBox_forceClose.Text = "force close";
+            this.checkBox_forceClose.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1054, 450);
+            this.Controls.Add(this.checkBox_forceClose);
+            this.Controls.Add(this.textBox_reqRes);
+            this.Controls.Add(this.button9);
+            this.Controls.Add(this.numericUpDown_ReqNum2);
+            this.Controls.Add(this.label12);
+            this.Controls.Add(this.label13);
+            this.Controls.Add(this.label14);
+            this.Controls.Add(this.textBox_ReqContent2);
+            this.Controls.Add(this.numericUpDown_ReqType2);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.textBox_ringInfo);
             this.Controls.Add(this.button8);
@@ -458,6 +573,8 @@ namespace WindowsFormsApp1
             this.Load += new System.EventHandler(this.Form1_Load);
             this.contextMenuStrip1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_mainServerIndex)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -505,6 +622,15 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.Button button8;
         private System.Windows.Forms.TextBox textBox_ringInfo;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.NumericUpDown numericUpDown_ReqNum2;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.TextBox textBox_ReqContent2;
+        private System.Windows.Forms.NumericUpDown numericUpDown_ReqType2;
+        private System.Windows.Forms.Button button9;
+        private System.Windows.Forms.TextBox textBox_reqRes;
+        private System.Windows.Forms.CheckBox checkBox_forceClose;
     }
 }
 

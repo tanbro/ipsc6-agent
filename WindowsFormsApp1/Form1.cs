@@ -49,7 +49,7 @@ namespace WindowsFormsApp1
         {
             var info = e.Value;
             var s = string.Format(
-                "{0}: [{1}] {2}", 
+                "{0}: [{1}] {2}",
                 e.ConnectionInfo.Host,
                 info.WorkingChannel,
                 info.CustomString
@@ -99,7 +99,6 @@ namespace WindowsFormsApp1
                             }
                             acc.create(cfg);
                         }
-
                     }
                 }
             }));
@@ -126,11 +125,11 @@ namespace WindowsFormsApp1
 
         public void SetSipAccountMessage(string uri, string msg)
         {
-            lock(listView_sipAccounts)
+            lock (listView_sipAccounts)
             {
                 foreach (ListViewItem item in listView_sipAccounts.Items)
                 {
-                    if ((string)item.Tag== uri)
+                    if ((string)item.Tag == uri)
                     {
                         item.SubItems[1].Text = msg;
                         break;
@@ -244,9 +243,7 @@ namespace WindowsFormsApp1
             {
                 if (agent != null)
                 {
-                    await agent.ShutDown();
-                    agent.Dispose();
-                    agent = null;
+                    await agent.ShutDown(checkBox_forceClose.Checked);
                 }
             }
         }
@@ -348,7 +345,7 @@ namespace WindowsFormsApp1
 
         private void button7_Click(object sender, EventArgs e)
         {
-            if(currSipCall!=null)
+            if (currSipCall != null)
             {
                 using (var cop = new CallOpParam
                 {
@@ -372,6 +369,15 @@ namespace WindowsFormsApp1
                     currSipCall.hangup(cop);
                 }
             }
+        }
+
+        private async void button9_Click(object sender, EventArgs e)
+        {
+            var t = (MessageType)numericUpDown_ReqType2.Value;
+            var n = (int)numericUpDown_ReqNum2.Value;
+            var s = textBox_ReqContent2.Text.Trim();
+            var r = await agent.Request(new AgentRequestMessage(t, n, s));
+            textBox_reqRes.Text = string.Format("[{0}] [{1}] [{2}] \"{3}\"", r.Type, r.N1, r.N2, r.S);
         }
     }
 }
