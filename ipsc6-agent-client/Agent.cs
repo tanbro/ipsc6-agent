@@ -464,8 +464,7 @@ namespace ipsc6.agent.client
             OnConnectionStateChanged?.Invoke(this, e_);
         }
 
-
-        public async Task Startup(string workerNumber, string password)
+        public async Task StartUp(string workerNumber, string password)
         {
             var it = connectionList.Zip(
                 internalConnections,
@@ -480,6 +479,14 @@ namespace ipsc6.agent.client
                 tasks.Add(task);
             }
             await Task.WhenAll(tasks);
+        }
+
+        public void ShutDown()
+        {
+            foreach(var conn in internalConnections)
+            {
+                conn.Close();
+            }
         }
 
     }

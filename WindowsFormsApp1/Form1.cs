@@ -69,7 +69,12 @@ namespace WindowsFormsApp1
         {
             var workNum = textBox_workerNum.Text.Trim();
             var password = textBox_password.Text.Trim();
-            await agent.Startup(workNum, password);
+            await agent.StartUp(workNum, password);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            agent.ShutDown();
         }
     }
 }
