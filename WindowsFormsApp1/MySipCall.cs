@@ -16,11 +16,13 @@ namespace WindowsFormsApp1
 
         public MySipCall(Account account, int callId) : base(account, callId)
         {
+            logger.DebugFormat("ctor - {0}", getId());
             Account = account as MySipAccount;
         }
 
         public override void onCallState(OnCallStateParam param)
         {
+            logger.DebugFormat("dtor - {0}", getId());
             var ci = getInfo();
             if (Account.getId() != ci.accId)
             {

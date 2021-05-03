@@ -195,30 +195,38 @@ namespace WindowsFormsApp1
             ipsc6.agent.network.Connector.Initial();
 
             endpoint.libCreate();
-            var epCfg = new org.pjsip.pjsua2.EpConfig();
+            var epCfg = new EpConfig();
             epCfg.logConfig.level = 6;
             epCfg.logConfig.writer = new SipLogWriter();
             endpoint.libInit(epCfg);
 
-            var sipTpConfig = new org.pjsip.pjsua2.TransportConfig
+            var sipTpConfig = new TransportConfig
             {
                 port = 5060
             };
-            endpoint.transportCreate(org.pjsip.pjsua2.pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
+            endpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
             endpoint.libStart();
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
+            logger.Info("FormClosed");
             if (agent != null)
             {
+                logger.Debug("agent.Dispose() ...");
                 agent.Dispose();
                 agent = null;
             }
+            logger.Debug("ipsc6.agent.network.Connector.Release() ...");
             ipsc6.agent.network.Connector.Release();
 
+            logger.Debug("sipAccounts.Clear() ...");
             sipAccounts.Clear();
+
+            logger.Debug("endpoint.libDestroy() ...");
             endpoint.libDestroy();
+
+            logger.Info("FormClosed Ok");
         }
 
         private async void button_open_Click(object sender, EventArgs e)
@@ -245,6 +253,15 @@ namespace WindowsFormsApp1
                 {
                     await agent.ShutDown(checkBox_forceClose.Checked);
                 }
+
+                foreach(var acc in sipAccounts)
+                {
+                    logger.DebugFormat("shutdown SIP account {0}", acc.getId());
+                    acc.shutdown();
+                    logger.DebugFormat("dispose SIP account {0}", acc.getId());
+                    acc.Dispose();
+                }
+                sipAccounts.Clear();
             }
         }
 

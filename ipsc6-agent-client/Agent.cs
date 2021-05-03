@@ -27,6 +27,11 @@ namespace ipsc6.agent.client
             }
         }
 
+        ~Agent()
+        {
+            Dispose(false);
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -308,8 +313,15 @@ namespace ipsc6.agent.client
             {
                 foreach (var id in ids)
                 {
-                    groupCollection.First(m => m.Id == id)
-                        .Signed = signed;
+                    try
+                    {
+                        groupCollection.First(m => m.Id == id)
+                            .Signed = signed;
+                    }
+                    catch (InvalidOperationException exc)
+                    {
+                        logger.ErrorFormat("DoOnSignedGroupIdList - {0} (id=\"{1})\"", exc, id);
+                    }
                 }
             }
             OnSignedGroupsChanged?.Invoke(this, new EventArgs());
@@ -516,7 +528,7 @@ namespace ipsc6.agent.client
 
         public async Task SignIn()
         {
-            var ids = from m in groupCollection select m.Id;
+            var ids = new string[] { };
             await SignIn(ids);
         }
         public async Task SignIn(string id)
@@ -533,7 +545,7 @@ namespace ipsc6.agent.client
 
         public async Task SignOut()
         {
-            var ids = from m in groupCollection select m.Id;
+            var ids = new string[] { };
             await SignOut(ids);
         }
         public async Task SignOut(string id)

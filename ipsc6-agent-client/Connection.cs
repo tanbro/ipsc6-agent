@@ -26,45 +26,13 @@ namespace ipsc6.agent.client
             Initialize();
         }
 
+        ~Connection()
+        {
+            Dispose(false);
+        }
+
         // Flag: Has Dispose already been called?
         private bool disposed = false;
-
-        private readonly network.Connector connector;
-
-        int agentId;
-        public int AgentId
-        {
-            get
-            {
-                if (state != ConnectionState.Ok)
-                {
-                    throw new InvalidOperationException(string.Format("{0}", state));
-                }
-                return agentId;
-            }
-        }
-
-        private ConnectionState state = ConnectionState.Init;
-        private void SetState(ConnectionState newState)
-        {
-            var e = new ConnectionStateChangedEventArgs<ConnectionState>(state, newState);
-            state = newState;
-            Task.Run(() => OnConnectionStateChanged?.Invoke(this, e));
-        }
-
-        public ConnectionState State
-        {
-            get { return state; }
-        }
-
-        private TaskCompletionSource<object> connectTcs;
-        private TaskCompletionSource<object> disconnectTcs;
-        private TaskCompletionSource<int> logInTcs;
-        private MessageType hangingReqType = MessageType.NONE;
-        private TaskCompletionSource<ServerSentMessage> reqTcs;
-        private ConcurrentQueue<object> eventQueue;
-        private Thread eventThread;
-        private readonly CancellationTokenSource eventThreadCancelSource = new CancellationTokenSource();
 
         public void Dispose()
         {
@@ -96,6 +64,45 @@ namespace ipsc6.agent.client
                 }
             }
         }
+
+
+        private readonly network.Connector connector;
+
+        int agentId = -1;
+        public int AgentId
+        {
+            get
+            {
+                if (state != ConnectionState.Ok)
+                {
+                    throw new InvalidOperationException(string.Format("{0}", state));
+                }
+                return agentId;
+            }
+        }
+
+        private ConnectionState state = ConnectionState.Init;
+        private void SetState(ConnectionState newState)
+        {
+            var e = new ConnectionStateChangedEventArgs<ConnectionState>(state, newState);
+            state = newState;
+            Task.Run(() => OnConnectionStateChanged?.Invoke(this, e));
+        }
+
+        public ConnectionState State
+        {
+            get { return state; }
+        }
+
+        private TaskCompletionSource<object> connectTcs;
+        private TaskCompletionSource<object> disconnectTcs;
+        private TaskCompletionSource<int> logInTcs;
+        private TaskCompletionSource<object> logOutTcs;
+        private MessageType hangingReqType = MessageType.NONE;
+        private TaskCompletionSource<ServerSentMessage> reqTcs;
+        private ConcurrentQueue<object> eventQueue;
+        private Thread eventThread;
+        private readonly CancellationTokenSource eventThreadCancelSource = new CancellationTokenSource();
 
         string remoteHost;
         public string RemoteHost
@@ -151,19 +158,25 @@ namespace ipsc6.agent.client
                     if (msg is ConnectorDisconnectedEventArgs)
                     {
                         SetState(ConnectionState.Closed);
-                        OnClosed?.Invoke(this);
                     }
-                    else if (msg is ConnectorConnectionLostEventArgs)
+                    else
                     {
                         SetState(ConnectionState.Lost);
-                        OnLost?.Invoke(this);
-                    }
-                    if (gracefulClosing || (prevState == ConnectionState.Closing))
-                    {
-                        disconnectTcs.SetResult(null);
                     }
                 }
-                if (prevState == ConnectionState.Opening)
+                if (msg is ConnectorDisconnectedEventArgs)
+                {
+                    OnClosed?.Invoke(this);
+                }
+                else
+                {
+                    OnLost?.Invoke(this);
+                }
+                if (prevState == ConnectionState.Closing)
+                {
+                    disconnectTcs.SetResult(null);
+                }
+                else if (prevState == ConnectionState.Opening)
                 {
                     if (msg is ConnectorDisconnectedEventArgs)
                     {
@@ -195,7 +208,7 @@ namespace ipsc6.agent.client
 
                 if (msg_.Type == MessageType.REMOTE_MSG_LOGIN)
                 {
-                    if ((int)msg_.N1 < 1)
+                    if (msg_.N1 < 1)
                     {
                         var err = new ErrorResponse(msg_);
                         logger.ErrorFormat("Login failed: {0}. Connector will be closed.", err);
@@ -217,6 +230,25 @@ namespace ipsc6.agent.client
                         logInTcs.SetResult(msg_.N2);
                     }
                 }
+                else if (msg_.Type == MessageType.REMOTE_MSG_RELEASE)
+                {
+                    if (msg_.N1 < 1)
+                    {
+                        // 注销失败
+                        ConnectionState prevState;
+                        lock (connectLock)
+                        {
+                            prevState = state;
+                            SetState(ConnectionState.Ok);
+                        }
+                        logOutTcs.SetException(new ErrorResponse(msg_));
+                    }
+                    else
+                    {
+                        // 注销成功实际上并不会发生，因为服务器会直接断开
+                        logOutTcs.SetResult(null);
+                    }
+                }
                 else
                 {
                     lock (requestLock)
@@ -225,7 +257,7 @@ namespace ipsc6.agent.client
                     }
                     if (isResponse)
                     {
-                        if ((int)msg_.N1 < 1)
+                        if (msg_.N1 < 1)
                         {
                             var err = new ErrorResponse(msg_);
                             logger.ErrorFormat("{0}", err);
@@ -352,52 +384,50 @@ namespace ipsc6.agent.client
             return await Open(remoteHost, 0, workerNumber, password, millisecondsTimeout);
         }
 
-        bool gracefulClosing = false;
 
         public async Task Close(bool graceful = true, int millisecondsTimeout = DefaultTimeoutMilliseconds)
         {
             ConnectionState[] allowedStates = { ConnectionState.Opening, ConnectionState.Ok };
             Task task;
-            disconnectTcs = new TaskCompletionSource<object>();
-            try
+            lock (connectLock)
             {
-                lock (connectLock)
+                if (!allowedStates.Any(m => m == State))
                 {
-                    gracefulClosing = graceful;
-                    if (!allowedStates.Any(m => m == State))
-                    {
-                        throw new InvalidOperationException(string.Format("{0}", State));
-                    }
-                    logger.InfoFormat("{0} Close ...", this);
-                    SetState(ConnectionState.Closing);
-                    if (!graceful)
-                    {
-                        connector.Disconnect();
-                    }
+                    throw new InvalidOperationException(string.Format("{0}", State));
                 }
-
-                if (graceful)
+                SetState(ConnectionState.Closing);
+                disconnectTcs = new TaskCompletionSource<object>();
+            }
+            
+            if (graceful)
+            {
+                logOutTcs = new TaskCompletionSource<object>();
+                var timeoutTask = Task.Delay(millisecondsTimeout);
+                logger.InfoFormat("{0} Close(graceful) ...", this);
+                Send(new AgentRequestMessage(MessageType.REMOTE_MSG_RELEASE));
+                task = await Task.WhenAny(logOutTcs.Task, disconnectTcs.Task, timeoutTask);
+                if (task == timeoutTask)
                 {
-                    logInTcs = new TaskCompletionSource<int>();
-                    Send(new AgentRequestMessage(MessageType.REMOTE_MSG_RELEASE));
-                    var resTask = Request(new AgentRequestMessage(MessageType.REMOTE_MSG_RELEASE), millisecondsTimeout);
-                    task = await Task.WhenAny(disconnectTcs.Task, resTask);
+                    throw new DisconnectionTimeoutException();
                 }
                 else
                 {
-                    task = await Task.WhenAny(disconnectTcs.Task, Task.Delay(millisecondsTimeout));
-                    if (task != disconnectTcs.Task)
-                    {
-                        connector.Disconnect();
-                        throw new ConnectionTimeoutException();
-                    }
+                    await task;
                 }
             }
-            finally
+            else
             {
-                lock (connectLock)
+                var timeoutTask = Task.Delay(millisecondsTimeout);
+                logger.InfoFormat("{0} Close(force) ...", this);
+                connector.Disconnect();
+                task = await Task.WhenAny(disconnectTcs.Task, timeoutTask);
+                if (task == timeoutTask)
+                {   
+                    throw new ConnectionTimeoutException();
+                }
+                else
                 {
-                    gracefulClosing = false;
+                    await task;
                 }
             }
         }

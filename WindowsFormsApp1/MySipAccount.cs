@@ -15,11 +15,13 @@ namespace WindowsFormsApp1
         public readonly Form1 Form;
         public MySipAccount(Form1 form) : base()
         {
+            logger.DebugFormat("ctor - {0}", getId());
             Form = form;
         }
 
         ~MySipAccount()
         {
+            logger.DebugFormat("dtor - {0}", getId());
             shutdown();
         }
 
