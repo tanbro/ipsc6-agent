@@ -168,7 +168,7 @@ namespace WindowsFormsApp1
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(577, 76);
+            this.label5.Location = new System.Drawing.Point(246, 69);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(71, 12);
             this.label5.TabIndex = 10;
@@ -177,7 +177,7 @@ namespace WindowsFormsApp1
             // label_agentState
             // 
             this.label_agentState.AutoSize = true;
-            this.label_agentState.Location = new System.Drawing.Point(654, 76);
+            this.label_agentState.Location = new System.Drawing.Point(323, 69);
             this.label_agentState.Name = "label_agentState";
             this.label_agentState.Size = new System.Drawing.Size(29, 12);
             this.label_agentState.TabIndex = 11;
@@ -195,7 +195,7 @@ namespace WindowsFormsApp1
             // label_agentName
             // 
             this.label_agentName.AutoSize = true;
-            this.label_agentName.Location = new System.Drawing.Point(648, 59);
+            this.label_agentName.Location = new System.Drawing.Point(317, 81);
             this.label_agentName.Name = "label_agentName";
             this.label_agentName.Size = new System.Drawing.Size(29, 12);
             this.label_agentName.TabIndex = 13;
@@ -224,7 +224,7 @@ namespace WindowsFormsApp1
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(577, 59);
+            this.label9.Location = new System.Drawing.Point(246, 81);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(65, 12);
             this.label9.TabIndex = 20;
@@ -375,7 +375,7 @@ namespace WindowsFormsApp1
             // 
             // textBox_ringInfo
             // 
-            this.textBox_ringInfo.Location = new System.Drawing.Point(308, 67);
+            this.textBox_ringInfo.Location = new System.Drawing.Point(64, 219);
             this.textBox_ringInfo.Name = "textBox_ringInfo";
             this.textBox_ringInfo.ReadOnly = true;
             this.textBox_ringInfo.Size = new System.Drawing.Size(263, 21);
@@ -384,7 +384,7 @@ namespace WindowsFormsApp1
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(253, 69);
+            this.label11.Location = new System.Drawing.Point(9, 221);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(53, 12);
             this.label11.TabIndex = 32;
@@ -492,9 +492,9 @@ namespace WindowsFormsApp1
             this.columnHeader7,
             this.columnHeader8});
             this.listView_connections.HideSelection = false;
-            this.listView_connections.Location = new System.Drawing.Point(727, 11);
+            this.listView_connections.Location = new System.Drawing.Point(689, 11);
             this.listView_connections.Name = "listView_connections";
-            this.listView_connections.Size = new System.Drawing.Size(286, 97);
+            this.listView_connections.Size = new System.Drawing.Size(291, 121);
             this.listView_connections.TabIndex = 42;
             this.listView_connections.UseCompatibleStateImageBehavior = false;
             this.listView_connections.View = System.Windows.Forms.View.Details;

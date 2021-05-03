@@ -70,11 +70,11 @@ namespace WindowsFormsApp1
             // Iterate all the call medias
             for (int i = 0; i < ci.media.Count(); i++)
             {
-                if (ci.media[i].type == org.pjsip.pjsua2.pjmedia_type.PJMEDIA_TYPE_AUDIO)
+                if (ci.media[i].type == pjmedia_type.PJMEDIA_TYPE_AUDIO)
                 {
                     var audMed = getAudioMedia(i);
                     // Connect the call audio media to sound device
-                    var mgr = Form1.endpoint.audDevManager();
+                    var mgr = Account.Form.Endpoint.audDevManager();
                     audMed.startTransmit(mgr.getPlaybackDevMedia());
                     mgr.getCaptureDevMedia().startTransmit(audMed);
                 }

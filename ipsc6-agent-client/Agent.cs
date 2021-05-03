@@ -177,14 +177,23 @@ namespace ipsc6.agent.client
             }
         }
 
-        void ProcessStateChangedMessage(ConnectionInfo connectionInfo, ServerSentMessage msg)
+        void ProcessStateChangedMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             AgentStateWorkType oldState;
             AgentStateChangedEventArgs<AgentStateWorkType> ev = null;
             var newState = new AgentStateWorkType((AgentState)msg.N1, (WorkType)msg.N2);
             lock (lck)
             {
+                var index = connectionList.FindIndex(x => x == connInfo);
                 oldState = AgentStateWorkType.Clone() as AgentStateWorkType;
+                var connObj = internalConnections[index];
+                if (
+                    (newState.AgentState == AgentState.Ring) ||
+                    (newState.AgentState == AgentState.Work)
+                )
+                {
+                    TakeOverMaster(index);
+                }
                 if (oldState != newState)
                 {
                     SetAgentStateWorkType(newState);
@@ -197,7 +206,13 @@ namespace ipsc6.agent.client
             }
         }
 
-        void ProcessTeleStateChangedMessage(ConnectionInfo connectionInfo, ServerSentMessage msg)
+        private void TakeOverMaster(int index)
+        {
+            mainConnectionIndex = index;
+            OnMainConnectionChanged?.Invoke(this, new EventArgs());
+        }
+
+        void ProcessTeleStateChangedMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             TeleState oldState;
             TeleState newState = (TeleState)msg.N1;
@@ -567,8 +582,7 @@ namespace ipsc6.agent.client
 
         public async Task SignIn()
         {
-            var ids = new string[] { };
-            await SignIn(ids);
+            await SignIn(new string[] { });
         }
         public async Task SignIn(string id)
         {
@@ -584,8 +598,7 @@ namespace ipsc6.agent.client
 
         public async Task SignOut()
         {
-            var ids = new string[] { };
-            await SignOut(ids);
+            await SignOut(new string[] { });
         }
         public async Task SignOut(string id)
         {
@@ -615,5 +628,30 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
+        public async Task Intercept(ConnectionInfo connInfo, int agentId)
+        {
+            throw new NotImplementedException();
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_INTERCEPT, agentId);
+            await MainConnection.Request(req);
+        }
+
+        public void Dial()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task Xfer(int agentId, int channel, string groupId, string customString)
+        {
+            var s = string.Format("{0}|{1}|{2}", channel, groupId, customString);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER, agentId, s);
+            await MainConnection.Request(req);
+        }
+
+        //public async Task XferExt()
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //public async Task Consult(int agentId, int channel, string groupId, string customString)
     }
 }

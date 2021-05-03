@@ -384,7 +384,6 @@ namespace ipsc6.agent.client
             return await Open(remoteHost, 0, workerNumber, password, millisecondsTimeout, flag);
         }
 
-
         public async Task Close(bool graceful = true, int millisecondsTimeout = DefaultTimeoutMilliseconds, int flag=0)
         {
             ConnectionState[] allowedStates = { ConnectionState.Opening, ConnectionState.Ok };

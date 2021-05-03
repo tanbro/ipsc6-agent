@@ -23,13 +23,8 @@ namespace WindowsFormsApp1
 
         Agent agent = null;
 
-        void ReallocAgent(IEnumerable<string> serverAddreses)
+        void CreateAgent(IEnumerable<string> serverAddreses)
         {
-            if (agent != null)
-            {
-                agent.Dispose();
-                agent = null;
-            }
             var addrList = new List<ConnectionInfo>();
             foreach (var s in serverAddreses)
             {
@@ -44,6 +39,18 @@ namespace WindowsFormsApp1
             agent.OnSignedGroupsChanged += Agent_OnSignedGroupsChanged;
             agent.OnSipRegistrarListReceived += Agent_OnSipRegistrarListReceived;
             agent.OnRingInfoReceived += Agent_OnRingInfoReceived;
+            agent.OnMainConnectionChanged += Agent_OnMainConnectionChanged;
+        }
+
+        private void Agent_OnMainConnectionChanged(object sender, EventArgs e)
+        {
+            var index = agent.MainConnectionIndex;
+            int i = 0;
+            foreach (ListViewItem item in listView_connections.Items)
+            {
+                item.SubItems[2].Text = (i == index) ? "*" : "";
+                i++;
+            }
         }
 
         private void Agent_OnRingInfoReceived(object sender, RingInfoReceivedEventArgs e)
@@ -181,29 +188,30 @@ namespace WindowsFormsApp1
 
 
         List<string> serverList;
-        public static Endpoint endpoint;
+        public Endpoint Endpoint;
 
         private void Form1_Load(object sender, EventArgs e)
         {
             ipsc6.agent.network.Connector.Initial();
 
-            endpoint = new Endpoint();
-            endpoint.libCreate();
+            Endpoint.libCreate();
+            Endpoint = new Endpoint();
             using (var epCfg = new EpConfig())
             using (var sipTpConfig = new TransportConfig { port = 5060 })
             {
                 epCfg.logConfig.level = 6;
                 epCfg.logConfig.writer = new SipLogWriter();
-                endpoint.libInit(epCfg);
-                endpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
-                endpoint.libStart();
+                Endpoint.libInit(epCfg);
+                Endpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
+                Endpoint.libStart();
             }
         }
 
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        private async void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             logger.Info("FormClosed");
-            button1_Click(this, new EventArgs());
+            await ReleaseAgent();
+
             //if (agent != null)
             //{
             //    logger.Debug("agent.Dispose() ...");
@@ -217,8 +225,8 @@ namespace WindowsFormsApp1
             sipAccounts.Clear();
 
             logger.Debug("endpoint.libDestroy() ...");
-            endpoint.libDestroy();
-            endpoint.Dispose();
+            Endpoint.libDestroy();
+            Endpoint.Dispose();
 
             logger.Info("FormClosed Ok");
         }
@@ -230,25 +238,49 @@ namespace WindowsFormsApp1
                 throw new InvalidOperationException();
             }
 
-            var s = textBox_ServerAddressList.Text.Trim();
-            var addresses = s.Split(new char[] { ',' });
-            ReallocAgent(addresses);
-            serverList = addresses.ToList();
-
-            listView_connections.Items.Clear();
-            foreach (var ci in agent.ConnectionList)
-            {
-                string[] row = { ci.Host, "", "" };
-                var item = new ListViewItem(row);
-                listView_connections.Items.Add(item);
-            }
-
-            var workerNumber = textBox_workerNum.Text;
-            var password = textBox_password.Text;
             using (new Processing(this))
             {
+                var s = textBox_ServerAddressList.Text.Trim();
+                var addresses = s.Split(new char[] { ',' });
+                CreateAgent(addresses);
+                serverList = addresses.ToList();
+
+                listView_connections.Items.Clear();
+                foreach (var x in agent.ConnectionList.Select((value, index) => new { value, index }))
+                {
+                    bool isMaster = x.index == agent.MainConnectionIndex;
+                    string[] row = { x.value.Host, "", isMaster ? "*" : "" };
+                    var item = new ListViewItem(row);
+                    listView_connections.Items.Add(item);
+                }
+
+                var workerNumber = textBox_workerNum.Text;
+                var password = textBox_password.Text;
+
+                logger.InfoFormat("agent.StartUp ... ");
                 await agent.StartUp(workerNumber, password);
+                logger.InfoFormat("agent.StartUp Ok. ");
                 label_agentId.Text = string.Format("{0}", agent.AgentId);
+            }
+        }
+
+        async Task ReleaseAgent()
+        {
+            if (agent != null)
+            {
+                await agent.ShutDown(checkBox_forceClose.Checked);
+                listView_Groups.Items.Clear();
+
+                foreach (var acc in sipAccounts)
+                {
+                    logger.DebugFormat("shutdown SIP account {0}", acc.getId());
+                    acc.shutdown();
+                    logger.DebugFormat("dispose SIP account {0}", acc.getId());
+                    acc.Dispose();
+                }
+                sipAccounts.Clear();
+                listView_sipAccounts.Items.Clear();
+                listView_connections.Items.Clear();
             }
         }
 
@@ -256,21 +288,7 @@ namespace WindowsFormsApp1
         {
             using (new Processing(this))
             {
-                if (agent != null)
-                {
-                    await agent.ShutDown(checkBox_forceClose.Checked);
-                    listView_Groups.Items.Clear();
-
-                    foreach (var acc in sipAccounts)
-                    {
-                        logger.DebugFormat("shutdown SIP account {0}", acc.getId());
-                        acc.shutdown();
-                        logger.DebugFormat("dispose SIP account {0}", acc.getId());
-                        acc.Dispose();
-                    }
-                    sipAccounts.Clear();
-                    listView_sipAccounts.Items.Clear();
-                }
+                await ReleaseAgent();
             }
         }
 
@@ -323,7 +341,12 @@ namespace WindowsFormsApp1
                 Form = form;
                 Form.Enabled = false;
                 savedCursor = Cursor.Current;
-                Cursor.Current = Cursors.WaitCursor;
+                Form.Cursor = Cursors.WaitCursor;
+            }
+
+            ~Processing()
+            {
+                Dispose(false);
             }
 
             private bool disposed = false;
@@ -340,7 +363,7 @@ namespace WindowsFormsApp1
                     if (!disposed)
                     {
                         Form.Enabled = true;
-                        Cursor.Current = savedCursor;
+                        Form.Cursor = savedCursor;
                         // Note disposing has been done.
                         disposed = true;
                     }
@@ -387,10 +410,7 @@ namespace WindowsFormsApp1
         {
             if (currSipCall != null)
             {
-                using (var cop = new CallOpParam
-                {
-                    statusCode = pjsip_status_code.PJSIP_SC_OK
-                })
+                using (var cop = new CallOpParam())
                 {
                     currSipCall.hangup(cop);
                 }
