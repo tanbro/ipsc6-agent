@@ -44,26 +44,31 @@ namespace WindowsFormsApp1
 
         private void Agent_OnMainConnectionChanged(object sender, EventArgs e)
         {
-            var index = agent.MainConnectionIndex;
-            int i = 0;
-            foreach (ListViewItem item in listView_connections.Items)
+            
+            Invoke(new Action(() =>
             {
-                item.SubItems[2].Text = (i == index) ? "*" : "";
-                i++;
-            }
+                var index = agent.MainConnectionIndex;
+                int i = 0;
+                foreach (ListViewItem item in listView_connections.Items)
+                {
+                    item.SubItems[2].Text = (i == index) ? "*" : "";
+                    i++;
+                }
+            }));
         }
 
         private void Agent_OnRingInfoReceived(object sender, RingInfoReceivedEventArgs e)
         {
-            var info = e.Value;
-            var s = string.Format(
-                "{0}: [{1}] {2}",
-                e.ConnectionInfo.Host,
-                info.WorkingChannel,
-                info.CustomString
-            );
+            
             Invoke(new Action(() =>
             {
+                var info = e.Value;
+                var s = string.Format(
+                    "{0}: [{1}] {2}",
+                    e.ConnectionInfo.Host,
+                    info.WorkingChannel,
+                    info.CustomString
+                );
                 textBox_ringInfo.Text = s;
             }));
         }
@@ -71,19 +76,18 @@ namespace WindowsFormsApp1
         List<MySipAccount> sipAccounts = new List<MySipAccount>();
         private void Agent_OnSipRegistrarListReceived(object sender, SipRegistrarListReceivedEventArgs e)
         {
+            
             Invoke(new Action(() =>
             {
                 var listView = listView_sipAccounts;
                 var user = textBox_workerNum.Text;
                 lock (sipAccounts)
                 {
-                    foreach (var addr in e.Value)
+                    foreach (var m in e.Value.Select((addr, index) => new { addr, index }))
                     {
+                        var addr = m.addr;
+                        var index = m.index;
                         var uri = string.Format("sip:{0}@{1}", user, addr);
-                        if (sipAccounts.Any(x => x.getInfo().uri == uri)) continue;
-
-                        var acc = new MySipAccount(this);
-                        sipAccounts.Add(acc);
 
                         string[] row = { uri, "" };
                         var item = new ListViewItem(row)
@@ -101,11 +105,19 @@ namespace WindowsFormsApp1
                         })
                         {
                             cfg.regConfig.registrarUri = string.Format("sip:{0}", addr);
-                            using (var sipAuthCred = new org.pjsip.pjsua2.AuthCredInfo("digest", "*", user, 0, "hesong"))
+                            using (var sipAuthCred = new AuthCredInfo("digest", "*", user, 0, "hesong"))
                             {
                                 cfg.sipConfig.authCreds.Add(sipAuthCred);
                             }
-                            acc.create(cfg);
+                            var acc = sipAccounts[index];
+                            if (acc.isValid())
+                            {
+                                acc.modify(cfg);
+                            }
+                            else
+                            {
+                                acc.create(cfg);
+                            }
                         }
                     }
                 }
@@ -133,6 +145,7 @@ namespace WindowsFormsApp1
 
         public void SetSipAccountMessage(string uri, string msg)
         {
+            
             lock (listView_sipAccounts)
             {
                 foreach (ListViewItem item in listView_sipAccounts.Items)
@@ -148,16 +161,19 @@ namespace WindowsFormsApp1
 
         private void Agent_OnSignedGroupsChanged(object sender, EventArgs e)
         {
+            
             Invoke(new Action(() => RefreshGroupListView()));
         }
 
         private void Agent_OnGroupCollectionReceived(object sender, EventArgs e)
         {
+            
             Invoke(new Action(() => RefreshGroupListView()));
         }
 
         private void Agent_OnAgentStateChanged(object sender, AgentStateChangedEventArgs<AgentStateWorkType> e)
         {
+            
             Invoke(new Action(() =>
             {
                 var s = string.Format("{0}({1}) ==> {2}({3})", e.OldState.AgentState, e.OldState.WorkType, e.NewState.AgentState, e.NewState.WorkType);
@@ -167,6 +183,7 @@ namespace WindowsFormsApp1
 
         private void Agent_OnAgentDisplayNameReceived(object sender, AgentDisplayNameReceivedEventArgs e)
         {
+            
             Invoke(new Action(() =>
             {
                 var s = string.Format("{0}", e.Value);
@@ -177,7 +194,7 @@ namespace WindowsFormsApp1
         private void Agent_OnConnectionStateChanged(object sender, ConnectionInfoStateChangedEventArgs<ipsc6.agent.client.ConnectionState> e)
         {
             Invoke(new Action(() =>
-            {
+            {                
                 var s = string.Format("{1}", e.OldState, e.NewState);
                 var i = serverList.IndexOf(e.ConnectionInfo.Host);
                 var listView = listView_connections;
@@ -186,7 +203,6 @@ namespace WindowsFormsApp1
             }));
         }
 
-
         List<string> serverList;
         public Endpoint Endpoint;
 
@@ -194,8 +210,8 @@ namespace WindowsFormsApp1
         {
             ipsc6.agent.network.Connector.Initial();
 
-            Endpoint.libCreate();
             Endpoint = new Endpoint();
+            Endpoint.libCreate();
             using (var epCfg = new EpConfig())
             using (var sipTpConfig = new TransportConfig { port = 5060 })
             {
@@ -205,25 +221,27 @@ namespace WindowsFormsApp1
                 Endpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
                 Endpoint.libStart();
             }
+
+            /// 固定4个 Sip Account
+            for (var i = 0; i < 4; i++)
+            {
+                var acc = new MySipAccount(this);
+                sipAccounts.Add(acc);
+            }
         }
 
-        private async void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             logger.Info("FormClosed");
-            await ReleaseAgent();
 
-            //if (agent != null)
-            //{
-            //    logger.Debug("agent.Dispose() ...");
-            //    agent.Dispose();
-            //    agent = null;
-            //}
             logger.Debug("ipsc6.agent.network.Connector.Release() ...");
             ipsc6.agent.network.Connector.Release();
 
-            logger.Debug("sipAccounts.Clear() ...");
-            sipAccounts.Clear();
-
+            foreach(var acc in sipAccounts)
+            {
+                logger.DebugFormat("Dispose SipAccount {0}", acc.getId());
+                acc.Dispose();
+            }
             logger.Debug("endpoint.libDestroy() ...");
             Endpoint.libDestroy();
             Endpoint.Dispose();
@@ -237,6 +255,10 @@ namespace WindowsFormsApp1
             {
                 throw new InvalidOperationException();
             }
+
+            listView_Groups.Items.Clear();
+            listView_sipAccounts.Items.Clear();
+            listView_connections.Items.Clear();
 
             using (new Processing(this))
             {
@@ -264,31 +286,24 @@ namespace WindowsFormsApp1
             }
         }
 
-        async Task ReleaseAgent()
-        {
-            if (agent != null)
-            {
-                await agent.ShutDown(checkBox_forceClose.Checked);
-                listView_Groups.Items.Clear();
-
-                foreach (var acc in sipAccounts)
-                {
-                    logger.DebugFormat("shutdown SIP account {0}", acc.getId());
-                    acc.shutdown();
-                    logger.DebugFormat("dispose SIP account {0}", acc.getId());
-                    acc.Dispose();
-                }
-                sipAccounts.Clear();
-                listView_sipAccounts.Items.Clear();
-                listView_connections.Items.Clear();
-            }
-        }
-
         private async void button1_Click(object sender, EventArgs e)
         {
             using (new Processing(this))
             {
-                await ReleaseAgent();
+                if (agent == null) return;
+                await agent.ShutDown(checkBox_forceClose.Checked);
+
+                foreach (var acc in sipAccounts)
+                {
+                    if (acc.isValid())
+                    {
+                        logger.DebugFormat("shutdown SIP account {0}", acc.getId());
+                        acc.shutdown();
+                    }
+                }
+
+                agent.Dispose();
+                agent = null;
             }
         }
 
@@ -396,13 +411,11 @@ namespace WindowsFormsApp1
         {
             if (currSipCall != null)
             {
-                using (var cop = new CallOpParam
+                var cop = new CallOpParam
                 {
                     statusCode = pjsip_status_code.PJSIP_SC_OK
-                })
-                {
-                    currSipCall.answer(cop);
-                }
+                };
+                currSipCall.answer(cop);
             }
         }
 
@@ -410,10 +423,8 @@ namespace WindowsFormsApp1
         {
             if (currSipCall != null)
             {
-                using (var cop = new CallOpParam())
-                {
-                    currSipCall.hangup(cop);
-                }
+                var cop = new CallOpParam();
+                currSipCall.hangup(cop);
             }
         }
 
@@ -424,6 +435,15 @@ namespace WindowsFormsApp1
             var s = textBox_ReqContent2.Text.Trim();
             var r = await agent.Request(new AgentRequestMessage(t, n, s));
             textBox_reqRes.Text = string.Format("[{0}] [{1}] [{2}] \"{3}\"", r.Type, r.N1, r.N2, r.S);
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (agent != null)
+            {
+                e.Cancel = true;
+                MessageBox.Show("没有下线，不可以关闭");
+            }
         }
     }
 }

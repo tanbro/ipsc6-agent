@@ -40,7 +40,7 @@ namespace ipsc6.agent.client
             if (disposing)
             {
                 // Check to see if Dispose has already been called.
-                if (this.disposed)
+                if (disposed)
                 {
                     logger.Error("Dispose has already been called.");
                 }
@@ -48,6 +48,7 @@ namespace ipsc6.agent.client
                 {
                     foreach (var conn in internalConnections)
                     {
+                        logger.DebugFormat("{0} Dispose {1}", this, conn);
                         conn.Dispose();
                     }
                     // Note disposing has been done.
@@ -535,7 +536,9 @@ namespace ipsc6.agent.client
         {
             var graceful = !force;
             // 首先，主节点
+            logger.DebugFormat("{0} close(master) {1} ...", this, MainConnection);
             await MainConnection.Close(graceful, flag: 1);
+            logger.DebugFormat("{0} close(master) {1} Ok.", this, MainConnection);
             // 然后其他节点
             var itConnObj =
                 from x in internalConnections.Select((value, index) => new { value, index })
@@ -549,7 +552,9 @@ namespace ipsc6.agent.client
                     {
                         try
                         {
+                            logger.DebugFormat("{0} close(slaver) {1} ...", this, conn);
                             await conn.Close(graceful, flag: 0);
+                            logger.DebugFormat("{0} close(slaver) {1} Ok.", this, conn);
                         }
                         catch (Exception ex)
                         {
@@ -630,9 +635,9 @@ namespace ipsc6.agent.client
 
         public async Task Intercept(ConnectionInfo connInfo, int agentId)
         {
-            throw new NotImplementedException();
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_INTERCEPT, agentId);
             await MainConnection.Request(req);
+            throw new NotImplementedException();
         }
 
         public void Dial()
@@ -640,18 +645,72 @@ namespace ipsc6.agent.client
             throw new NotImplementedException();
         }
 
-        public async Task Xfer(int agentId, int channel, string groupId, string customString)
+        public async Task Xfer(int agentId, int channel, string groupId, string customString = "", bool consultative = false)
         {
             var s = string.Format("{0}|{1}|{2}", channel, groupId, customString);
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER, agentId, s);
+            var mt = consultative ? MessageType.REMOTE_MSG_TRANSFER_EX : MessageType.REMOTE_MSG_TRANSFER;
+            var req = new AgentRequestMessage(mt, agentId, s);
             await MainConnection.Request(req);
         }
 
-        //public async Task XferExt()
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public void XferExt()
+        {
+            throw new NotImplementedException();
+        }
 
-        //public async Task Consult(int agentId, int channel, string groupId, string customString)
+        public async Task Hold()
+        {
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HOLD);
+            await MainConnection.Request(req);
+        }
+
+        public async Task UnHold(int channel = -1)
+        {
+            if (channel < 0)
+            {
+                if (workingChannelInfo.Channel < 0)
+                {
+                    throw new InvalidOperationException();
+                }
+                channel = workingChannelInfo.Channel;
+            }
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_RETRIEVE, channel);
+            await MainConnection.Request(req);
+        }
+
+        public async Task Break(int channel = -1, string customString = "")
+        {
+            if (channel < 0)
+            {
+                if (workingChannelInfo.Channel < 0)
+                {
+                    throw new InvalidOperationException();
+                }
+                channel = workingChannelInfo.Channel;
+            }
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_BREAK_SESS, channel, customString);
+            await MainConnection.Request(req);
+        }
+
+        public async Task HangUp()
+        {
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HANGUP);
+            await MainConnection.Request(req);
+        }
+
+        public async Task OffHook(int channel)
+        {
+            if (channel < 0)
+            {
+                if (workingChannelInfo.Channel < 0)
+                {
+                    throw new InvalidOperationException();
+                }
+                channel = workingChannelInfo.Channel;
+            }
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK, channel);
+            await MainConnection.Request(req);
+        }
+
     }
 }

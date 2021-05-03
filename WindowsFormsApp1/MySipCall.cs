@@ -20,9 +20,16 @@ namespace WindowsFormsApp1
             Account = account as MySipAccount;
         }
 
-        public override void onCallState(OnCallStateParam param)
+        ~MySipCall()
         {
             logger.DebugFormat("dtor - {0}", getId());
+        }
+
+        public override void onCallState(OnCallStateParam param)
+        {
+            
+            if (Account.Form.IsDisposed) return;
+
             var ci = getInfo();
             if (Account.getId() != ci.accId)
             {
@@ -66,6 +73,8 @@ namespace WindowsFormsApp1
 
         public override void onCallMediaState(OnCallMediaStateParam prm)
         {
+            if (Account.Form.IsDisposed) return;
+
             var ci = getInfo();
             // Iterate all the call medias
             for (int i = 0; i < ci.media.Count(); i++)

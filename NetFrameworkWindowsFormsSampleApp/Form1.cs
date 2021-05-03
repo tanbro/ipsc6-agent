@@ -382,12 +382,12 @@ namespace NetFrameworkWindowsFormsSampleApp
 
         private async void button_Connect1_Click(object sender, EventArgs e)
         {
-            await conn1.Open(textBox_Server1.Text, textBox_User1.Text, textBox_Psw1.Text);
+            await conn1.Open(textBox_Server1.Text, textBox_User1.Text, textBox_Psw1.Text, flag: 1);
         }
 
         private async void button_Connect2_Click(object sender, EventArgs e)
         {
-            await conn2.Open(textBox_Server2.Text, textBox_User2.Text, textBox_Psw2.Text);
+            await conn2.Open(textBox_Server2.Text, textBox_User2.Text, textBox_Psw2.Text, flag: 1);
         }
 
         private async void button_Req1_Click(object sender, EventArgs e)

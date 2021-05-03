@@ -27,6 +27,7 @@ namespace WindowsFormsApp1
 
         public override void onRegState(OnRegStateParam param)
         {
+            if (Form.IsDisposed) return;
             var accInfo = getInfo();
             var msg = string.Format("{0}", accInfo.regStatusText);
             var uri = accInfo.uri;
@@ -39,6 +40,7 @@ namespace WindowsFormsApp1
 
         public override void onIncomingCall(OnIncomingCallParam param)
         {
+            if (Form.IsDisposed) return;
             var call = new MySipCall(this, param.callId);
             if (Form1.currSipCall !=null)
             {
