@@ -21,10 +21,7 @@ namespace ipsc6.agent.client
                 connectionList.Add(m);
             }
             var rand = new Random();
-            foreach (var conn in internalConnections.OrderBy(_ => rand.Next()))
-            {
-                shuffledConnections.Add(conn);
-            }
+            mainConnectionIndex = rand.Next(0, connectionList.Count);
         }
 
         ~Agent()
@@ -69,24 +66,22 @@ namespace ipsc6.agent.client
             get { return connectionList; }
         }
         readonly List<Connection> internalConnections = new List<Connection>();
-        readonly List<Connection> shuffledConnections = new List<Connection>();
-        int owershipIndex = 0;
-        public int MainConnectionIndex = 0;
-        //{
-        //    get
-        //    {
-        //        var conn = shuffledConnections[owershipIndex];
-        //        return internalConnections.IndexOf(conn);
-        //    }
-        //}
+
+        int mainConnectionIndex;
+        public int MainConnectionIndex
+        {
+            get { return mainConnectionIndex; }
+        }
+        public event EventHandler OnMainConnectionChanged;
+
         public ConnectionInfo MainConnectionInfo
         {
-            get { return connectionList[MainConnectionIndex]; }
+            get { return connectionList[mainConnectionIndex]; }
         }
 
         Connection MainConnection
         {
-            get { return internalConnections[MainConnectionIndex]; }
+            get { return internalConnections[mainConnectionIndex]; }
         }
         public int AgentId
         {
@@ -500,25 +495,69 @@ namespace ipsc6.agent.client
 
         public async Task StartUp(string workerNumber, string password)
         {
-            var it = connectionList.Zip(
-                internalConnections,
+            // 首先，主节点
+            await MainConnection.Open(MainConnectionInfo.Host, MainConnectionInfo.Port, workerNumber, password, flag: 1);
+            // 然后其他节点
+            var itConnInfo =
+                from x in connectionList.Select((value, index) => new { value, index })
+                where x.index != mainConnectionIndex
+                select x.value;
+            var itConnObj =
+                from x in internalConnections.Select((value, index) => new { value, index })
+                where x.index != mainConnectionIndex
+                select x.value;
+            var itZipped = itConnInfo.Zip(
+                itConnObj,
                 (info, conn) => new { info, conn }
             );
-            var tasks = new List<Task>();
-            foreach (var pair in it)
-            {
-                var conn = pair.conn;
-                var info = pair.info;
-                var task = conn.Open(info.Host, info.Port, workerNumber, password);
-                tasks.Add(task);
-            }
+            var tasks =
+                from x in itZipped
+                select x.conn.Open(x.info.Host, x.info.Port, workerNumber, password, flag: 0);
             await Task.WhenAll(tasks);
         }
 
         public async Task ShutDown(bool force = false)
         {
-            var tasks = from m in internalConnections select m.Close(!force);
-            await Task.WhenAll(tasks);
+            var graceful = !force;
+            // 首先，主节点
+            await MainConnection.Close(graceful, flag: 1);
+            // 然后其他节点
+            var itConnObj =
+                from x in internalConnections.Select((value, index) => new { value, index })
+                where x.index != mainConnectionIndex
+                select x.value;
+            await Task.WhenAll(
+                from conn in itConnObj
+                select Task.Run(async () =>
+                {
+                    if (graceful)
+                    {
+                        try
+                        {
+                            await conn.Close(graceful, flag: 0);
+                        }
+                        catch (Exception ex)
+                        {
+                            if (
+                                (ex is DisconnectionTimeoutException) ||
+                                (ex is ErrorResponse) ||
+                                (ex is InvalidOperationException)
+                            )
+                            {
+                                await conn.Close(graceful: false, flag: 0);
+                            }
+                            else
+                            {
+                                throw;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        await conn.Close(graceful: false, flag: 0);
+                    }
+                })
+            );
         }
 
         public async Task<ServerSentMessage> Request(AgentRequestMessage args, int millisecondsTimeout = Connection.DefaultTimeoutMilliseconds)

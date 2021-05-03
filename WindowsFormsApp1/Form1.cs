@@ -36,6 +36,7 @@ namespace WindowsFormsApp1
                 addrList.Add(new ConnectionInfo(s));
             }
             agent = new Agent(addrList);
+            numericUpDown_mainServerIndex.Value = agent.MainConnectionIndex;
             agent.OnConnectionStateChanged += Agent_OnConnectionStateChanged;
             agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
             agent.OnAgentStateChanged += Agent_OnAgentStateChanged;
@@ -170,53 +171,45 @@ namespace WindowsFormsApp1
         {
             Invoke(new Action(() =>
             {
-                var s = string.Format("{0}==>{1}", e.OldState, e.NewState);
+                var s = string.Format("{1}", e.OldState, e.NewState);
                 var i = serverList.IndexOf(e.ConnectionInfo.Host);
-                switch (i)
-                {
-                    case 0:
-                        label_conn1State.Text = s;
-                        break;
-                    case 1:
-                        label_conn2State.Text = s;
-                        break;
-                    default:
-                        throw new IndexOutOfRangeException(string.Format("{0}", i));
-                }
+                var listView = listView_connections;
+                var item = listView.Items[i];
+                item.SubItems[1].Text = s;
             }));
         }
 
 
         List<string> serverList;
-        public static Endpoint endpoint = new Endpoint();
+        public static Endpoint endpoint;
 
         private void Form1_Load(object sender, EventArgs e)
         {
             ipsc6.agent.network.Connector.Initial();
 
+            endpoint = new Endpoint();
             endpoint.libCreate();
-            var epCfg = new EpConfig();
-            epCfg.logConfig.level = 6;
-            epCfg.logConfig.writer = new SipLogWriter();
-            endpoint.libInit(epCfg);
-
-            var sipTpConfig = new TransportConfig
+            using (var epCfg = new EpConfig())
+            using (var sipTpConfig = new TransportConfig { port = 5060 })
             {
-                port = 5060
-            };
-            endpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
-            endpoint.libStart();
+                epCfg.logConfig.level = 6;
+                epCfg.logConfig.writer = new SipLogWriter();
+                endpoint.libInit(epCfg);
+                endpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
+                endpoint.libStart();
+            }
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             logger.Info("FormClosed");
-            if (agent != null)
-            {
-                logger.Debug("agent.Dispose() ...");
-                agent.Dispose();
-                agent = null;
-            }
+            button1_Click(this, new EventArgs());
+            //if (agent != null)
+            //{
+            //    logger.Debug("agent.Dispose() ...");
+            //    agent.Dispose();
+            //    agent = null;
+            //}
             logger.Debug("ipsc6.agent.network.Connector.Release() ...");
             ipsc6.agent.network.Connector.Release();
 
@@ -225,16 +218,30 @@ namespace WindowsFormsApp1
 
             logger.Debug("endpoint.libDestroy() ...");
             endpoint.libDestroy();
+            endpoint.Dispose();
 
             logger.Info("FormClosed Ok");
         }
 
         private async void button_open_Click(object sender, EventArgs e)
         {
+            if (agent != null)
+            {
+                throw new InvalidOperationException();
+            }
+
             var s = textBox_ServerAddressList.Text.Trim();
             var addresses = s.Split(new char[] { ',' });
             ReallocAgent(addresses);
             serverList = addresses.ToList();
+
+            listView_connections.Items.Clear();
+            foreach (var ci in agent.ConnectionList)
+            {
+                string[] row = { ci.Host, "", "" };
+                var item = new ListViewItem(row);
+                listView_connections.Items.Add(item);
+            }
 
             var workerNumber = textBox_workerNum.Text;
             var password = textBox_password.Text;
@@ -252,16 +259,18 @@ namespace WindowsFormsApp1
                 if (agent != null)
                 {
                     await agent.ShutDown(checkBox_forceClose.Checked);
-                }
+                    listView_Groups.Items.Clear();
 
-                foreach(var acc in sipAccounts)
-                {
-                    logger.DebugFormat("shutdown SIP account {0}", acc.getId());
-                    acc.shutdown();
-                    logger.DebugFormat("dispose SIP account {0}", acc.getId());
-                    acc.Dispose();
+                    foreach (var acc in sipAccounts)
+                    {
+                        logger.DebugFormat("shutdown SIP account {0}", acc.getId());
+                        acc.shutdown();
+                        logger.DebugFormat("dispose SIP account {0}", acc.getId());
+                        acc.Dispose();
+                    }
+                    sipAccounts.Clear();
+                    listView_sipAccounts.Items.Clear();
                 }
-                sipAccounts.Clear();
             }
         }
 
@@ -357,7 +366,7 @@ namespace WindowsFormsApp1
 
         private void button6_Click(object sender, EventArgs e)
         {
-            agent.MainConnectionIndex = (int)numericUpDown_mainServerIndex.Value;
+
         }
 
         private void button7_Click(object sender, EventArgs e)

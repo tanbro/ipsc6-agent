@@ -43,10 +43,6 @@ namespace WindowsFormsApp1
             this.label_agentState = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label_agentName = new System.Windows.Forms.Label();
-            this.label_conn1State = new System.Windows.Forms.Label();
-            this.label_conn2State = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
@@ -79,6 +75,10 @@ namespace WindowsFormsApp1
             this.button9 = new System.Windows.Forms.Button();
             this.textBox_reqRes = new System.Windows.Forms.TextBox();
             this.checkBox_forceClose = new System.Windows.Forms.CheckBox();
+            this.listView_connections = new System.Windows.Forms.ListView();
+            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_mainServerIndex)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum2)).BeginInit();
@@ -89,7 +89,7 @@ namespace WindowsFormsApp1
             // 
             this.textBox_ServerAddressList.Location = new System.Drawing.Point(142, 11);
             this.textBox_ServerAddressList.Name = "textBox_ServerAddressList";
-            this.textBox_ServerAddressList.Size = new System.Drawing.Size(635, 21);
+            this.textBox_ServerAddressList.Size = new System.Drawing.Size(541, 21);
             this.textBox_ServerAddressList.TabIndex = 0;
             this.textBox_ServerAddressList.Text = "192.168.2.107,192.168.2.108";
             // 
@@ -168,7 +168,7 @@ namespace WindowsFormsApp1
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(706, 62);
+            this.label5.Location = new System.Drawing.Point(577, 76);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(71, 12);
             this.label5.TabIndex = 10;
@@ -177,7 +177,7 @@ namespace WindowsFormsApp1
             // label_agentState
             // 
             this.label_agentState.AutoSize = true;
-            this.label_agentState.Location = new System.Drawing.Point(783, 62);
+            this.label_agentState.Location = new System.Drawing.Point(654, 76);
             this.label_agentState.Name = "label_agentState";
             this.label_agentState.Size = new System.Drawing.Size(29, 12);
             this.label_agentState.TabIndex = 11;
@@ -200,42 +200,6 @@ namespace WindowsFormsApp1
             this.label_agentName.Size = new System.Drawing.Size(29, 12);
             this.label_agentName.TabIndex = 13;
             this.label_agentName.Text = "....";
-            // 
-            // label_conn1State
-            // 
-            this.label_conn1State.AutoSize = true;
-            this.label_conn1State.Location = new System.Drawing.Point(893, 9);
-            this.label_conn1State.Name = "label_conn1State";
-            this.label_conn1State.Size = new System.Drawing.Size(23, 12);
-            this.label_conn1State.TabIndex = 14;
-            this.label_conn1State.Text = "???";
-            // 
-            // label_conn2State
-            // 
-            this.label_conn2State.AutoSize = true;
-            this.label_conn2State.Location = new System.Drawing.Point(893, 21);
-            this.label_conn2State.Name = "label_conn2State";
-            this.label_conn2State.Size = new System.Drawing.Size(23, 12);
-            this.label_conn2State.TabIndex = 15;
-            this.label_conn2State.Text = "???";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(829, 8);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(59, 12);
-            this.label7.TabIndex = 16;
-            this.label7.Text = "Server #1";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(828, 21);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(59, 12);
-            this.label8.TabIndex = 17;
-            this.label8.Text = "Server #2";
             // 
             // button2
             // 
@@ -521,11 +485,34 @@ namespace WindowsFormsApp1
             this.checkBox_forceClose.Text = "force close";
             this.checkBox_forceClose.UseVisualStyleBackColor = true;
             // 
+            // listView_connections
+            // 
+            this.listView_connections.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader6,
+            this.columnHeader7,
+            this.columnHeader8});
+            this.listView_connections.HideSelection = false;
+            this.listView_connections.Location = new System.Drawing.Point(727, 11);
+            this.listView_connections.Name = "listView_connections";
+            this.listView_connections.Size = new System.Drawing.Size(286, 97);
+            this.listView_connections.TabIndex = 42;
+            this.listView_connections.UseCompatibleStateImageBehavior = false;
+            this.listView_connections.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader6
+            // 
+            this.columnHeader6.Width = 107;
+            // 
+            // columnHeader7
+            // 
+            this.columnHeader7.Width = 76;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1054, 450);
+            this.Controls.Add(this.listView_connections);
             this.Controls.Add(this.checkBox_forceClose);
             this.Controls.Add(this.textBox_reqRes);
             this.Controls.Add(this.button9);
@@ -550,10 +537,6 @@ namespace WindowsFormsApp1
             this.Controls.Add(this.label9);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.button2);
-            this.Controls.Add(this.label8);
-            this.Controls.Add(this.label7);
-            this.Controls.Add(this.label_conn2State);
-            this.Controls.Add(this.label_conn1State);
             this.Controls.Add(this.label_agentName);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label_agentState);
@@ -595,10 +578,6 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.Label label_agentState;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label_agentName;
-        private System.Windows.Forms.Label label_conn1State;
-        private System.Windows.Forms.Label label_conn2State;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Label label9;
@@ -631,6 +610,10 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.Button button9;
         private System.Windows.Forms.TextBox textBox_reqRes;
         private System.Windows.Forms.CheckBox checkBox_forceClose;
+        private System.Windows.Forms.ListView listView_connections;
+        private System.Windows.Forms.ColumnHeader columnHeader6;
+        private System.Windows.Forms.ColumnHeader columnHeader7;
+        private System.Windows.Forms.ColumnHeader columnHeader8;
     }
 }
 
