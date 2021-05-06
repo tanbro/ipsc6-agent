@@ -186,7 +186,7 @@ namespace WindowsFormsApp1
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(577, 38);
+            this.label6.Location = new System.Drawing.Point(474, 59);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(53, 12);
             this.label6.TabIndex = 12;
@@ -233,7 +233,7 @@ namespace WindowsFormsApp1
             // label_agentId
             // 
             this.label_agentId.AutoSize = true;
-            this.label_agentId.Location = new System.Drawing.Point(648, 35);
+            this.label_agentId.Location = new System.Drawing.Point(533, 59);
             this.label_agentId.Name = "label_agentId";
             this.label_agentId.Size = new System.Drawing.Size(29, 12);
             this.label_agentId.TabIndex = 21;
