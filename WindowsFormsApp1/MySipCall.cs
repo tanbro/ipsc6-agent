@@ -8,7 +8,7 @@ using org.pjsip.pjsua2;
 
 namespace WindowsFormsApp1
 {
-    public class MySipCall: Call
+    public class MySipCall : Call
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MySipCall));
 
@@ -27,7 +27,7 @@ namespace WindowsFormsApp1
 
         public override void onCallState(OnCallStateParam param)
         {
-            
+
             if (Account.Form.IsDisposed) return;
 
             var ci = getInfo();
@@ -38,13 +38,11 @@ namespace WindowsFormsApp1
 
             var msg = string.Format("{0} {1}", ci.remoteUri, ci.state);
             //logger.InfoFormat(msg);
-            var uri = Account.getInfo().uri;
-
             Account.Form.Invoke(new Action(() =>
             {
-                Account.Form.SetSipAccountMessage(uri, msg);
+                Account.Form.SetSipAccountMessage(Account.Index, msg);
             }));
-            
+
             switch (ci.state)
             {
                 case pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED:
@@ -57,7 +55,10 @@ namespace WindowsFormsApp1
                             if (getId() == Form1.currSipCall.getId())
                             {
                                 Dispose();
-                                Form1.currSipCall = null;
+                                Account.Form.Invoke(new Action(() =>
+                                {
+                                    Form1.currSipCall = null;
+                                }));
                             }
                             else
                             {

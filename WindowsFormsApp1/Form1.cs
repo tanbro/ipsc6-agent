@@ -79,7 +79,6 @@ namespace WindowsFormsApp1
             
             Invoke(new Action(() =>
             {
-                var listView = listView_sipAccounts;
                 var user = textBox_workerNum.Text;
                 lock (sipAccounts)
                 {
@@ -89,15 +88,11 @@ namespace WindowsFormsApp1
                         var index = m.index;
                         var uri = string.Format("sip:{0}@{1}", user, addr);
 
-                        string[] row = { uri, "" };
-                        var item = new ListViewItem(row)
-                        {
-                            Tag = uri
-                        };
-                        lock (listView)
-                        {
-                            listView.Items.Add(item);
-                        }
+                        // 这个地址是不是已经注册了?
+                        if (sipAccounts.Any(acc => acc.isValid() && acc.getInfo()?.uri == uri))
+                            continue;
+
+                        listView_sipAccounts.Items[index].SubItems[0].Text = uri;
 
                         using (var cfg = new AccountConfig()
                         {
@@ -143,19 +138,12 @@ namespace WindowsFormsApp1
 
         public static MySipCall currSipCall = null;
 
-        public void SetSipAccountMessage(string uri, string msg)
+        public void SetSipAccountMessage(int index, string msg)
         {
             
             lock (listView_sipAccounts)
             {
-                foreach (ListViewItem item in listView_sipAccounts.Items)
-                {
-                    if ((string)item.Tag == uri)
-                    {
-                        item.SubItems[1].Text = msg;
-                        break;
-                    }
-                }
+                listView_sipAccounts.Items[index].SubItems[1].Text = msg;
             }
         }
 
@@ -215,18 +203,26 @@ namespace WindowsFormsApp1
             using (var epCfg = new EpConfig())
             using (var sipTpConfig = new TransportConfig { port = 5060 })
             {
-                epCfg.logConfig.level = 6;
-                epCfg.logConfig.writer = new SipLogWriter();
+                //epCfg.logConfig.level = 6;
+                //epCfg.logConfig.writer = new SipLogWriter();
                 Endpoint.libInit(epCfg);
                 Endpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
                 Endpoint.libStart();
             }
 
             /// 固定4个 Sip Account
+            /// 
+            listView_sipAccounts.Items.Clear();
             for (var i = 0; i < 4; i++)
             {
-                var acc = new MySipAccount(this);
+                var acc = new MySipAccount(i, this);
                 sipAccounts.Add(acc);
+                string[] row = { string.Format("sip acc[{0}]", i), "" };
+                var item = new ListViewItem(row)
+                {
+                    Tag = i
+                };
+                listView_sipAccounts.Items.Add(item);
             }
         }
 
@@ -257,7 +253,6 @@ namespace WindowsFormsApp1
             }
 
             listView_Groups.Items.Clear();
-            listView_sipAccounts.Items.Clear();
             listView_connections.Items.Clear();
 
             using (new Processing(this))
@@ -293,12 +288,20 @@ namespace WindowsFormsApp1
                 if (agent == null) return;
                 await agent.ShutDown(checkBox_forceClose.Checked);
 
-                foreach (var acc in sipAccounts)
+                foreach (var pair in sipAccounts.Select((value, index)=>new { value, index }))
                 {
+                    var acc = pair.value;
+                    var index = pair.index;
+                    System.Diagnostics.Debug.Assert(acc.Index == index);
                     if (acc.isValid())
                     {
-                        logger.DebugFormat("shutdown SIP account {0}", acc.getId());
+                        logger.DebugFormat("shutdown SIP account [{0}] {1}", acc.Index, acc.getId());
                         acc.shutdown();
+                        lock (listView_sipAccounts)
+                        {
+                            listView_sipAccounts.Items[index].SubItems[0].Text = string.Format("sip acc[{0}]", index);
+                            listView_sipAccounts.Items[index].SubItems[1].Text = "";
+                        }
                     }
                 }
 

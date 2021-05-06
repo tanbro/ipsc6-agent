@@ -13,28 +13,28 @@ namespace WindowsFormsApp1
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MySipAccount));
         public readonly Form1 Form;
-        public MySipAccount(Form1 form) : base()
+        public readonly int Index;
+        public MySipAccount(int index, Form1 form) : base()
         {
-            logger.DebugFormat("ctor - {0}", getId());
+            Index = index;
             Form = form;
+            logger.DebugFormat("ctor - [{0}] {1}", Index, getId());
         }
 
         ~MySipAccount()
         {
-            logger.DebugFormat("dtor - {0}", getId());
+            logger.DebugFormat("dtor - [{0}] {1}", Index, getId());
             shutdown();
         }
 
         public override void onRegState(OnRegStateParam param)
         {
             if (Form.IsDisposed) return;
-            var accInfo = getInfo();
-            var msg = string.Format("{0}", accInfo.regStatusText);
-            var uri = accInfo.uri;
+            var msg = string.Format("RegState {0} {1}", (int)param.code, param.reason);
             //logger.InfoFormat(msg);
             Form.Invoke(new Action(() =>
             {
-                Form.SetSipAccountMessage(uri, msg);
+                Form.SetSipAccountMessage(Index, msg);
             }));
         }
 
@@ -57,12 +57,11 @@ namespace WindowsFormsApp1
             {
                 Form1.currSipCall = call;
                 var ci = call.getInfo();
-                var uri = getInfo().uri;
                 var msg = string.Format("{0} {1}", ci.remoteUri, ci.state);
                 //logger.InfoFormat(msg);
                 Form.Invoke(new Action(() =>
                 {
-                    Form.SetSipAccountMessage(uri, msg);
+                    Form.SetSipAccountMessage(Index, msg);
                 }));
             }
         }
