@@ -3,9 +3,32 @@ using org.pjsip.pjsua2;
 
 namespace WindowsFormsApp1
 {
-    public class SipLogWriter: LogWriter
+    public class SipLogWriter : LogWriter
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger("org.pjsip.pjsua2");
+
+        static object lck = new object();
+
+        private static SipLogWriter instance = null;
+        public static SipLogWriter Instance
+        {
+            get
+            {
+                lock (lck)
+                {
+                    if (instance == null)
+                    {
+                        instance = new SipLogWriter();
+                        return instance;
+                    }
+                    else
+                    {
+                        return instance;
+                    }
+                }
+            }
+
+        }
         public override void write(LogEntry entry)
         {
             var message = entry.msg.TrimEnd();

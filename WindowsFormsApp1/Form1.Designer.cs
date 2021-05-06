@@ -56,9 +56,6 @@ namespace WindowsFormsApp1
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
-            this.numericUpDown_mainServerIndex = new System.Windows.Forms.NumericUpDown();
-            this.label10 = new System.Windows.Forms.Label();
-            this.button6 = new System.Windows.Forms.Button();
             this.listView_sipAccounts = new System.Windows.Forms.ListView();
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -79,17 +76,25 @@ namespace WindowsFormsApp1
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.btn_hold = new System.Windows.Forms.Button();
+            this.btn_unhold = new System.Windows.Forms.Button();
+            this.label_workChannel = new System.Windows.Forms.Label();
+            this.numericUpDown_channel = new System.Windows.Forms.NumericUpDown();
+            this.button_offhook = new System.Windows.Forms.Button();
+            this.button_hangup = new System.Windows.Forms.Button();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label_teleState = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_mainServerIndex)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_channel)).BeginInit();
             this.SuspendLayout();
             // 
             // textBox_ServerAddressList
             // 
             this.textBox_ServerAddressList.Location = new System.Drawing.Point(142, 11);
             this.textBox_ServerAddressList.Name = "textBox_ServerAddressList";
-            this.textBox_ServerAddressList.Size = new System.Drawing.Size(541, 21);
+            this.textBox_ServerAddressList.Size = new System.Drawing.Size(420, 21);
             this.textBox_ServerAddressList.TabIndex = 0;
             this.textBox_ServerAddressList.Text = "192.168.2.107,192.168.2.108";
             // 
@@ -168,7 +173,7 @@ namespace WindowsFormsApp1
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(246, 69);
+            this.label5.Location = new System.Drawing.Point(171, 69);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(71, 12);
             this.label5.TabIndex = 10;
@@ -177,16 +182,16 @@ namespace WindowsFormsApp1
             // label_agentState
             // 
             this.label_agentState.AutoSize = true;
-            this.label_agentState.Location = new System.Drawing.Point(323, 69);
+            this.label_agentState.Location = new System.Drawing.Point(248, 69);
             this.label_agentState.Name = "label_agentState";
-            this.label_agentState.Size = new System.Drawing.Size(29, 12);
+            this.label_agentState.Size = new System.Drawing.Size(41, 12);
             this.label_agentState.TabIndex = 11;
-            this.label_agentState.Text = "....";
+            this.label_agentState.Text = "State?";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(474, 59);
+            this.label6.Location = new System.Drawing.Point(17, 64);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(53, 12);
             this.label6.TabIndex = 12;
@@ -195,11 +200,11 @@ namespace WindowsFormsApp1
             // label_agentName
             // 
             this.label_agentName.AutoSize = true;
-            this.label_agentName.Location = new System.Drawing.Point(317, 81);
+            this.label_agentName.Location = new System.Drawing.Point(87, 81);
             this.label_agentName.Name = "label_agentName";
-            this.label_agentName.Size = new System.Drawing.Size(29, 12);
+            this.label_agentName.Size = new System.Drawing.Size(35, 12);
             this.label_agentName.TabIndex = 13;
-            this.label_agentName.Text = "....";
+            this.label_agentName.Text = "Name?";
             // 
             // button2
             // 
@@ -224,7 +229,7 @@ namespace WindowsFormsApp1
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(246, 81);
+            this.label9.Location = new System.Drawing.Point(17, 81);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(65, 12);
             this.label9.TabIndex = 20;
@@ -233,11 +238,11 @@ namespace WindowsFormsApp1
             // label_agentId
             // 
             this.label_agentId.AutoSize = true;
-            this.label_agentId.Location = new System.Drawing.Point(533, 59);
+            this.label_agentId.Location = new System.Drawing.Point(76, 64);
             this.label_agentId.Name = "label_agentId";
-            this.label_agentId.Size = new System.Drawing.Size(29, 12);
+            this.label_agentId.Size = new System.Drawing.Size(23, 12);
             this.label_agentId.TabIndex = 21;
-            this.label_agentId.Text = "....";
+            this.label_agentId.Text = "ID?";
             // 
             // listView_Groups
             // 
@@ -306,32 +311,6 @@ namespace WindowsFormsApp1
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
-            // numericUpDown_mainServerIndex
-            // 
-            this.numericUpDown_mainServerIndex.Location = new System.Drawing.Point(122, 67);
-            this.numericUpDown_mainServerIndex.Name = "numericUpDown_mainServerIndex";
-            this.numericUpDown_mainServerIndex.Size = new System.Drawing.Size(57, 21);
-            this.numericUpDown_mainServerIndex.TabIndex = 25;
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(21, 73);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(95, 12);
-            this.label10.TabIndex = 26;
-            this.label10.Text = "MainServerIndex";
-            // 
-            // button6
-            // 
-            this.button6.Location = new System.Drawing.Point(185, 64);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(42, 23);
-            this.button6.TabIndex = 27;
-            this.button6.Text = "Set";
-            this.button6.UseVisualStyleBackColor = true;
-            this.button6.Click += new System.EventHandler(this.button6_Click);
-            // 
             // listView_sipAccounts
             // 
             this.listView_sipAccounts.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -340,7 +319,7 @@ namespace WindowsFormsApp1
             this.listView_sipAccounts.HideSelection = false;
             this.listView_sipAccounts.Location = new System.Drawing.Point(269, 276);
             this.listView_sipAccounts.Name = "listView_sipAccounts";
-            this.listView_sipAccounts.Size = new System.Drawing.Size(726, 110);
+            this.listView_sipAccounts.Size = new System.Drawing.Size(618, 110);
             this.listView_sipAccounts.TabIndex = 28;
             this.listView_sipAccounts.UseCompatibleStateImageBehavior = false;
             this.listView_sipAccounts.View = System.Windows.Forms.View.Details;
@@ -355,7 +334,7 @@ namespace WindowsFormsApp1
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(393, 109);
+            this.button7.Location = new System.Drawing.Point(269, 392);
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(75, 23);
             this.button7.TabIndex = 29;
@@ -365,7 +344,7 @@ namespace WindowsFormsApp1
             // 
             // button8
             // 
-            this.button8.Location = new System.Drawing.Point(474, 109);
+            this.button8.Location = new System.Drawing.Point(350, 392);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(75, 23);
             this.button8.TabIndex = 30;
@@ -378,7 +357,7 @@ namespace WindowsFormsApp1
             this.textBox_ringInfo.Location = new System.Drawing.Point(64, 219);
             this.textBox_ringInfo.Name = "textBox_ringInfo";
             this.textBox_ringInfo.ReadOnly = true;
-            this.textBox_ringInfo.Size = new System.Drawing.Size(263, 21);
+            this.textBox_ringInfo.Size = new System.Drawing.Size(823, 21);
             this.textBox_ringInfo.TabIndex = 31;
             // 
             // label11
@@ -492,7 +471,7 @@ namespace WindowsFormsApp1
             this.columnHeader7,
             this.columnHeader8});
             this.listView_connections.HideSelection = false;
-            this.listView_connections.Location = new System.Drawing.Point(689, 11);
+            this.listView_connections.Location = new System.Drawing.Point(596, 11);
             this.listView_connections.Name = "listView_connections";
             this.listView_connections.Size = new System.Drawing.Size(291, 121);
             this.listView_connections.TabIndex = 42;
@@ -507,11 +486,108 @@ namespace WindowsFormsApp1
             // 
             this.columnHeader7.Width = 76;
             // 
+            // btn_hold
+            // 
+            this.btn_hold.Location = new System.Drawing.Point(405, 164);
+            this.btn_hold.Name = "btn_hold";
+            this.btn_hold.Size = new System.Drawing.Size(75, 23);
+            this.btn_hold.TabIndex = 43;
+            this.btn_hold.Text = "Hold";
+            this.btn_hold.UseVisualStyleBackColor = true;
+            this.btn_hold.Click += new System.EventHandler(this.btn_hold_Click);
+            // 
+            // btn_unhold
+            // 
+            this.btn_unhold.Location = new System.Drawing.Point(487, 164);
+            this.btn_unhold.Name = "btn_unhold";
+            this.btn_unhold.Size = new System.Drawing.Size(75, 23);
+            this.btn_unhold.TabIndex = 44;
+            this.btn_unhold.Text = "Un-Hold";
+            this.btn_unhold.UseVisualStyleBackColor = true;
+            this.btn_unhold.Click += new System.EventHandler(this.btn_unhold_Click);
+            // 
+            // label_workChannel
+            // 
+            this.label_workChannel.AutoSize = true;
+            this.label_workChannel.Location = new System.Drawing.Point(541, 80);
+            this.label_workChannel.Name = "label_workChannel";
+            this.label_workChannel.Size = new System.Drawing.Size(17, 12);
+            this.label_workChannel.TabIndex = 45;
+            this.label_workChannel.Text = "-1";
+            // 
+            // numericUpDown_channel
+            // 
+            this.numericUpDown_channel.Location = new System.Drawing.Point(568, 164);
+            this.numericUpDown_channel.Maximum = new decimal(new int[] {
+            32768,
+            0,
+            0,
+            0});
+            this.numericUpDown_channel.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147483648});
+            this.numericUpDown_channel.Name = "numericUpDown_channel";
+            this.numericUpDown_channel.Size = new System.Drawing.Size(48, 21);
+            this.numericUpDown_channel.TabIndex = 46;
+            this.numericUpDown_channel.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147483648});
+            // 
+            // button_offhook
+            // 
+            this.button_offhook.Location = new System.Drawing.Point(405, 193);
+            this.button_offhook.Name = "button_offhook";
+            this.button_offhook.Size = new System.Drawing.Size(75, 23);
+            this.button_offhook.TabIndex = 47;
+            this.button_offhook.Text = "Offhook";
+            this.button_offhook.UseVisualStyleBackColor = true;
+            this.button_offhook.Click += new System.EventHandler(this.button_offhook_Click);
+            // 
+            // button_hangup
+            // 
+            this.button_hangup.Location = new System.Drawing.Point(487, 193);
+            this.button_hangup.Name = "button_hangup";
+            this.button_hangup.Size = new System.Drawing.Size(75, 23);
+            this.button_hangup.TabIndex = 48;
+            this.button_hangup.Text = "Hangup";
+            this.button_hangup.UseVisualStyleBackColor = true;
+            this.button_hangup.Click += new System.EventHandler(this.button_hangup_Click);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(171, 81);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(65, 12);
+            this.label7.TabIndex = 49;
+            this.label7.Text = "TeleState:";
+            // 
+            // label_teleState
+            // 
+            this.label_teleState.AutoSize = true;
+            this.label_teleState.Location = new System.Drawing.Point(242, 81);
+            this.label_teleState.Name = "label_teleState";
+            this.label_teleState.Size = new System.Drawing.Size(65, 12);
+            this.label_teleState.TabIndex = 50;
+            this.label_teleState.Text = "TeleState?";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1054, 450);
+            this.ClientSize = new System.Drawing.Size(892, 450);
+            this.Controls.Add(this.label_teleState);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.button_hangup);
+            this.Controls.Add(this.button_offhook);
+            this.Controls.Add(this.numericUpDown_channel);
+            this.Controls.Add(this.label_workChannel);
+            this.Controls.Add(this.btn_unhold);
+            this.Controls.Add(this.btn_hold);
             this.Controls.Add(this.listView_connections);
             this.Controls.Add(this.checkBox_forceClose);
             this.Controls.Add(this.textBox_reqRes);
@@ -527,9 +603,6 @@ namespace WindowsFormsApp1
             this.Controls.Add(this.button8);
             this.Controls.Add(this.button7);
             this.Controls.Add(this.listView_sipAccounts);
-            this.Controls.Add(this.button6);
-            this.Controls.Add(this.label10);
-            this.Controls.Add(this.numericUpDown_mainServerIndex);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.listView_Groups);
@@ -556,9 +629,9 @@ namespace WindowsFormsApp1
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.contextMenuStrip1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_mainServerIndex)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_channel)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -592,9 +665,6 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button5;
-        private System.Windows.Forms.NumericUpDown numericUpDown_mainServerIndex;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Button button6;
         private System.Windows.Forms.ListView listView_sipAccounts;
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.ColumnHeader columnHeader5;
@@ -615,6 +685,14 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.ColumnHeader columnHeader6;
         private System.Windows.Forms.ColumnHeader columnHeader7;
         private System.Windows.Forms.ColumnHeader columnHeader8;
+        private System.Windows.Forms.Button btn_hold;
+        private System.Windows.Forms.Button btn_unhold;
+        private System.Windows.Forms.Label label_workChannel;
+        private System.Windows.Forms.NumericUpDown numericUpDown_channel;
+        private System.Windows.Forms.Button button_offhook;
+        private System.Windows.Forms.Button button_hangup;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label_teleState;
     }
 }
 

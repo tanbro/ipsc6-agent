@@ -57,8 +57,6 @@ namespace ipsc6.agent.client
             }
         }
 
-        readonly object lck = new object();
-
         public string WorkerNumber;
 
         readonly List<ConnectionInfo> connectionList = new List<ConnectionInfo>();
@@ -183,7 +181,7 @@ namespace ipsc6.agent.client
             AgentStateWorkType oldState;
             AgentStateChangedEventArgs<AgentStateWorkType> ev = null;
             var newState = new AgentStateWorkType((AgentState)msg.N1, (WorkType)msg.N2);
-            lock (lck)
+            lock (this)
             {
                 var index = connectionList.FindIndex(x => x == connInfo);
                 oldState = AgentStateWorkType.Clone() as AgentStateWorkType;
@@ -218,7 +216,7 @@ namespace ipsc6.agent.client
             TeleState oldState;
             TeleState newState = (TeleState)msg.N1;
             TeleStateChangedEventArgs<TeleState> ev = null;
-            lock (lck)
+            lock (this)
             {
                 oldState = teleState;
                 if (oldState != newState)
@@ -238,7 +236,7 @@ namespace ipsc6.agent.client
             var info = new QueueInfo(connInfo, msg);
             var ev = new QueueInfoEventArgs(connInfo, info);
             // 记录 QueueInfo
-            lock (lck)
+            lock (this)
             {
                 // 修改之前,一律先删除
                 queueInfoCollection.RemoveWhere((m) => m == info);
@@ -256,7 +254,7 @@ namespace ipsc6.agent.client
             var info = new HoldInfo(connInfo, msg);
             var ev = new HoldInfoEventArgs(connInfo, info);
             // 记录 HoldInfo
-            lock (lck)
+            lock (this)
             {
                 // 修改之前,一律先删除
                 holdInfoCollection.RemoveWhere((m) => m == info);
@@ -320,7 +318,7 @@ namespace ipsc6.agent.client
         {
             var signed = Convert.ToBoolean(msg.N2);
             var ids = msg.S.Split(new char[] { '|' });
-            lock (lck)
+            lock (this)
             {
                 foreach (var id in ids)
                 {
@@ -373,13 +371,15 @@ namespace ipsc6.agent.client
         {
             var _ringInfo = new RingInfo(connInfo, msg.N2, msg.S);
             var _workChInfo = new WorkingChannelInfo(_ringInfo.WorkingChannel);
-            var evt = new RingInfoReceivedEventArgs(connInfo, _ringInfo);
-            lock (lck)
+            var e1 = new WorkingChannelInfoReceivedEventArgs(connInfo, _workChInfo);
+            var e2 = new RingInfoReceivedEventArgs(connInfo, _ringInfo);
+            lock (this)
             {
                 workingChannelInfo = _workChInfo;
                 ringInfo = _ringInfo;
+                OnWorkingChannelInfoReceived?.Invoke(this, e1);
+                OnRingInfoReceived?.Invoke(this, e2);
             }
-            OnRingInfoReceived?.Invoke(this, evt);
         }
 
         WorkingChannelInfo workingChannelInfo;
@@ -392,7 +392,7 @@ namespace ipsc6.agent.client
         {
             var info = new WorkingChannelInfo(msg.N2, msg.S);
             var evt = new WorkingChannelInfoReceivedEventArgs(connInfo, info);
-            lock (lck)
+            lock (this)
             {
                 workingChannelInfo = info;
             }
@@ -409,7 +409,7 @@ namespace ipsc6.agent.client
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var parts = msg.S.Split(new char[] { '|' });
-            lock (lck)
+            lock (this)
             {
                 foreach (var s in parts)
                 {
@@ -429,7 +429,7 @@ namespace ipsc6.agent.client
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var parts = msg.S.Split(new char[] { '|' });
-            lock (lck)
+            lock (this)
             {
                 foreach (var s in parts)
                 {
@@ -449,7 +449,7 @@ namespace ipsc6.agent.client
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var ids = msg.S.Split(new char[] { '|' });
-            lock (lck)
+            lock (this)
             {
                 foreach (var id in ids)
                 {
@@ -464,7 +464,7 @@ namespace ipsc6.agent.client
         void DoOnGroupNameList(ConnectionInfo _, ServerSentMessage msg)
         {
             var names = msg.S.Split(new char[] { '|' });
-            lock (lck)
+            lock (this)
             {
                 var it = groupCollection.Zip(names, (first, second) => new { first, second });
                 foreach (var m in it)
@@ -479,7 +479,7 @@ namespace ipsc6.agent.client
         void DoOnChannel(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             var evt = new ChannelAssignedEventArgs(connInfo, msg.N2);
-            lock (lck)
+            lock (this)
             {
                 channel = evt.Value;
             }
@@ -490,7 +490,7 @@ namespace ipsc6.agent.client
         void DoOnAgentId(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             var evt = new AgentDisplayNameReceivedEventArgs(connInfo, msg.S);
-            lock (lck)
+            lock (this)
             {
                 displayName = evt.Value;
             }
@@ -698,17 +698,9 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task OffHook(int channel)
+        public async Task OffHook()
         {
-            if (channel < 0)
-            {
-                if (workingChannelInfo.Channel < 0)
-                {
-                    throw new InvalidOperationException();
-                }
-                channel = workingChannelInfo.Channel;
-            }
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK, channel);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
             await MainConnection.Request(req);
         }
 
