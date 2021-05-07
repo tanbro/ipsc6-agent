@@ -79,7 +79,6 @@ namespace WindowsFormsApp1
             this.btn_hold = new System.Windows.Forms.Button();
             this.btn_unhold = new System.Windows.Forms.Button();
             this.label_workChannel = new System.Windows.Forms.Label();
-            this.numericUpDown_channel = new System.Windows.Forms.NumericUpDown();
             this.button_offhook = new System.Windows.Forms.Button();
             this.button_hangup = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
@@ -91,10 +90,10 @@ namespace WindowsFormsApp1
             this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuStrip_hold = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.unHoldToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.label10 = new System.Windows.Forms.Label();
             this.contextMenuStrip_group.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_channel)).BeginInit();
             this.contextMenuStrip_hold.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -517,33 +516,11 @@ namespace WindowsFormsApp1
             // label_workChannel
             // 
             this.label_workChannel.AutoSize = true;
-            this.label_workChannel.Location = new System.Drawing.Point(541, 80);
+            this.label_workChannel.Location = new System.Drawing.Point(451, 69);
             this.label_workChannel.Name = "label_workChannel";
             this.label_workChannel.Size = new System.Drawing.Size(17, 12);
             this.label_workChannel.TabIndex = 45;
             this.label_workChannel.Text = "-1";
-            // 
-            // numericUpDown_channel
-            // 
-            this.numericUpDown_channel.Location = new System.Drawing.Point(568, 164);
-            this.numericUpDown_channel.Maximum = new decimal(new int[] {
-            32768,
-            0,
-            0,
-            0});
-            this.numericUpDown_channel.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown_channel.Name = "numericUpDown_channel";
-            this.numericUpDown_channel.Size = new System.Drawing.Size(48, 21);
-            this.numericUpDown_channel.TabIndex = 46;
-            this.numericUpDown_channel.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147483648});
             // 
             // button_offhook
             // 
@@ -568,7 +545,7 @@ namespace WindowsFormsApp1
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(171, 81);
+            this.label7.Location = new System.Drawing.Point(171, 94);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(65, 12);
             this.label7.TabIndex = 49;
@@ -577,7 +554,7 @@ namespace WindowsFormsApp1
             // label_teleState
             // 
             this.label_teleState.AutoSize = true;
-            this.label_teleState.Location = new System.Drawing.Point(242, 81);
+            this.label_teleState.Location = new System.Drawing.Point(242, 94);
             this.label_teleState.Name = "label_teleState";
             this.label_teleState.Size = new System.Drawing.Size(65, 12);
             this.label_teleState.TabIndex = 50;
@@ -621,7 +598,7 @@ namespace WindowsFormsApp1
             this.contextMenuStrip_hold.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.unHoldToolStripMenuItem});
             this.contextMenuStrip_hold.Name = "contextMenuStrip_hold";
-            this.contextMenuStrip_hold.Size = new System.Drawing.Size(181, 48);
+            this.contextMenuStrip_hold.Size = new System.Drawing.Size(121, 26);
             // 
             // unHoldToolStripMenuItem
             // 
@@ -630,18 +607,27 @@ namespace WindowsFormsApp1
             this.unHoldToolStripMenuItem.Text = "UnHold";
             this.unHoldToolStripMenuItem.Click += new System.EventHandler(this.unHoldToolStripMenuItem_Click);
             // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(380, 69);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(53, 12);
+            this.label10.TabIndex = 54;
+            this.label10.Text = "Channel:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1192, 630);
+            this.Controls.Add(this.label10);
             this.Controls.Add(this.listView_hold);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label_teleState);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.button_hangup);
             this.Controls.Add(this.button_offhook);
-            this.Controls.Add(this.numericUpDown_channel);
             this.Controls.Add(this.label_workChannel);
             this.Controls.Add(this.btn_unhold);
             this.Controls.Add(this.btn_hold);
@@ -688,7 +674,6 @@ namespace WindowsFormsApp1
             this.contextMenuStrip_group.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_channel)).EndInit();
             this.contextMenuStrip_hold.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -746,7 +731,6 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.Button btn_hold;
         private System.Windows.Forms.Button btn_unhold;
         private System.Windows.Forms.Label label_workChannel;
-        private System.Windows.Forms.NumericUpDown numericUpDown_channel;
         private System.Windows.Forms.Button button_offhook;
         private System.Windows.Forms.Button button_hangup;
         private System.Windows.Forms.Label label7;
@@ -758,6 +742,7 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.ColumnHeader columnHeader11;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_hold;
         private System.Windows.Forms.ToolStripMenuItem unHoldToolStripMenuItem;
+        private System.Windows.Forms.Label label10;
     }
 }
 

@@ -225,9 +225,11 @@ namespace WindowsFormsApp1
             {
                 var s = string.Format("{1}", e.OldState, e.NewState);
                 var i = serverList.IndexOf(e.ConnectionInfo.Host);
+                var isMain = i == agent.MainConnectionIndex;
                 var listView = listView_connections;
                 var item = listView.Items[i];
                 item.SubItems[1].Text = s;
+                item.SubItems[2].Text = isMain ? "*" : "";
             }));
         }
 
@@ -297,8 +299,7 @@ namespace WindowsFormsApp1
                 listView_connections.Items.Clear();
                 foreach (var x in agent.ConnectionList.Select((value, index) => new { value, index }))
                 {
-                    bool isMaster = x.index == agent.MainConnectionIndex;
-                    string[] row = { x.value.Host, "", isMaster ? "*" : "" };
+                    string[] row = { x.value.Host, "", "" };
                     var item = new ListViewItem(row);
                     listView_connections.Items.Add(item);
                 }

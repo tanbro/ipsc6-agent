@@ -20,8 +20,6 @@ namespace ipsc6.agent.client
                 internalConnections.Add(conn);
                 connectionList.Add(m);
             }
-            var rand = new Random();
-            mainConnectionIndex = rand.Next(0, connectionList.Count);
         }
 
         ~Agent()
@@ -57,47 +55,32 @@ namespace ipsc6.agent.client
             }
         }
 
-        public string WorkerNumber;
+        string workerNumber;
+        public string WorkerNumber => workerNumber;
 
         readonly List<ConnectionInfo> connectionList = new List<ConnectionInfo>();
-        public IReadOnlyCollection<ConnectionInfo> ConnectionList
-        {
-            get { return connectionList; }
-        }
+        public IReadOnlyCollection<ConnectionInfo> ConnectionList => connectionList;
+
         readonly List<Connection> internalConnections = new List<Connection>();
 
-        int mainConnectionIndex;
-        public int MainConnectionIndex
-        {
-            get { return mainConnectionIndex; }
-        }
+        int mainConnectionIndex = -1;
+        public int MainConnectionIndex => mainConnectionIndex;
+
         public event EventHandler OnMainConnectionChanged;
 
-        public ConnectionInfo MainConnectionInfo
-        {
-            get { return connectionList[mainConnectionIndex]; }
-        }
+        public ConnectionInfo MainConnectionInfo => (mainConnectionIndex < 0) ? null : connectionList[mainConnectionIndex];
 
         Connection MainConnection
         {
             get { return internalConnections[mainConnectionIndex]; }
         }
-        public int AgentId
-        {
-            get { return MainConnection.AgentId; }
-        }
+        public int AgentId => MainConnection.AgentId;
 
         string displayName;
-        public string DisplayName
-        {
-            get { return displayName; }
-        }
+        public string DisplayName => displayName;
 
         int channel = -1;
-        public int Channel
-        {
-            get { return channel; }
-        }
+        public int Channel => channel;
 
         AgentState agentState = AgentState.NotExist;
         WorkType workType = WorkType.Unknown;
@@ -508,10 +491,38 @@ namespace ipsc6.agent.client
             OnConnectionStateChanged?.Invoke(this, evt);
         }
 
+        bool starting = false;
+        bool started = false;
+
         public async Task StartUp(string workerNumber, string password)
         {
+            lock (this)
+            {
+                if (starting)
+                    throw new InvalidOperationException("starting");
+                if (started)
+                    throw new InvalidOperationException("started");
+                starting = true;
+                started = false;
+            }
+            this.workerNumber = workerNumber;
             // 首先，主节点
-            await MainConnection.Open(MainConnectionInfo.Host, MainConnectionInfo.Port, workerNumber, password, flag: 1);
+            var rand = new Random();
+            mainConnectionIndex = rand.Next(0, connectionList.Count);
+            bool isMainConnectOk = false;
+            try
+            {
+                await MainConnection.Open(MainConnectionInfo.Host, MainConnectionInfo.Port, workerNumber, password, flag: 1);
+                isMainConnectOk = true;
+            }
+            finally
+            {
+                lock (this)
+                {
+                    starting = false;
+                    started = isMainConnectOk;
+                }
+            }
             // 然后其他节点
             var itConnInfo =
                 from x in connectionList.Select((value, index) => new { value, index })

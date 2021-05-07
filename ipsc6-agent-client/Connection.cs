@@ -333,7 +333,7 @@ namespace ipsc6.agent.client
 
         public const int DefaultTimeoutMilliseconds = 15000;
 
-        public async Task<int> Open(string remoteHost, ushort remotePort, string workerNumber, string password, int millisecondsTimeout = DefaultTimeoutMilliseconds, int flag=0)
+        public async Task<int> Open(string remoteHost, ushort remotePort, string workerNumber, string password, int millisecondsTimeout = DefaultTimeoutMilliseconds, int flag = 0)
         {
             ConnectionState[] allowStates = { ConnectionState.Init, ConnectionState.Closed, ConnectionState.Failed, ConnectionState.Lost };
             lock (connectLock)
@@ -384,7 +384,7 @@ namespace ipsc6.agent.client
             return await Open(remoteHost, 0, workerNumber, password, millisecondsTimeout, flag);
         }
 
-        public async Task Close(bool graceful = true, int millisecondsTimeout = DefaultTimeoutMilliseconds, int flag=0)
+        public async Task Close(bool graceful = true, int millisecondsTimeout = DefaultTimeoutMilliseconds, int flag = 0)
         {
             ConnectionState[] allowedStates = { ConnectionState.Opening, ConnectionState.Ok };
             Task task;
@@ -397,7 +397,7 @@ namespace ipsc6.agent.client
                 SetState(ConnectionState.Closing);
                 disconnectTcs = new TaskCompletionSource<object>();
             }
-            
+
             if (graceful)
             {
                 logOutTcs = new TaskCompletionSource<object>();
@@ -421,7 +421,7 @@ namespace ipsc6.agent.client
                 connector.Disconnect();
                 task = await Task.WhenAny(disconnectTcs.Task, timeoutTask);
                 if (task == timeoutTask)
-                {   
+                {
                     throw new ConnectionTimeoutException();
                 }
                 else
@@ -435,6 +435,13 @@ namespace ipsc6.agent.client
 
         public async Task<ServerSentMessage> Request(AgentRequestMessage args, int millisecondsTimeout = DefaultTimeoutMilliseconds)
         {
+            lock (connectLock)
+            {
+                if (state != ConnectionState.Ok)
+                {
+                    throw new InvalidOperationException(string.Format("Can not send a request when state is {0}", state));
+                }
+            }
             lock (requestLock)
             {
                 if (hangingReqType != MessageType.NONE)
@@ -443,10 +450,10 @@ namespace ipsc6.agent.client
                 }
                 hangingReqType = args.Type;
             }
-            logger.InfoFormat("{0} Request({1})", this, args);
-            reqTcs = new TaskCompletionSource<ServerSentMessage>();
             try
             {
+                logger.InfoFormat("{0} Request({1})", this, args);
+                reqTcs = new TaskCompletionSource<ServerSentMessage>();
                 connector.SendAgentMessage((int)args.Type, args.N, args.S);
                 var task = await Task.WhenAny(reqTcs.Task, Task.Delay(millisecondsTimeout));
                 if (task != reqTcs.Task)
