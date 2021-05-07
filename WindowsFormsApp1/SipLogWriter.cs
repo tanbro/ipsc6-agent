@@ -7,31 +7,26 @@ namespace WindowsFormsApp1
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger("org.pjsip.pjsua2");
 
-        static object lck = new object();
-
+        static readonly object _l = new object();
         private static SipLogWriter instance = null;
         public static SipLogWriter Instance
         {
             get
             {
-                lock (lck)
+                lock (_l)
                 {
                     if (instance == null)
                     {
                         instance = new SipLogWriter();
-                        return instance;
                     }
-                    else
-                    {
-                        return instance;
-                    }
+                    return instance;
                 }
             }
-
         }
+
         public override void write(LogEntry entry)
         {
-            var message = entry.msg.TrimEnd();
+            var message = entry.msg.Trim();
             switch (entry.level)
             {
                 case 1:
@@ -46,14 +41,9 @@ namespace WindowsFormsApp1
                 case 4:
                     logger.Info(message);
                     break;
-                case 5:
-                    logger.Debug(message);
-                    break;
-                case 6:
-                    logger.Debug(message);
-                    break;
                 default:
-                    throw new ArgumentOutOfRangeException(string.Format("Invalide PJ logging level {0}", entry.level));
+                    logger.Debug(message);
+                    break;
             }
         }
     }

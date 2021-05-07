@@ -6,7 +6,7 @@
     <SharedGUID>18d2f11f-5340-4f31-9736-f4247f199251</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>pjsua2_csharp</Import_RootNamespace>
+    <Import_RootNamespace>org.pjsip.pjsua2</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Account.cs" />

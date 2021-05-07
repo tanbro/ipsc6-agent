@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApp1
 {
+ 
     public partial class Form1 : Form
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Form1));
@@ -208,9 +209,9 @@ namespace WindowsFormsApp1
         List<string> serverList;
         public Endpoint Endpoint;
 
+
         private void Form1_Load(object sender, EventArgs e)
         {
-            ipsc6.agent.network.Connector.Initial();
 
             Endpoint = new Endpoint();
             Endpoint.libCreate();
@@ -218,7 +219,7 @@ namespace WindowsFormsApp1
             using (var sipTpConfig = new TransportConfig { port = 5060 })
             {
                 //epCfg.logConfig.level = 6;
-                //epCfg.logConfig.writer = SipLogWriter.Instance;
+                epCfg.logConfig.writer = SipLogWriter.Instance;
                 Endpoint.libInit(epCfg);
                 Endpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
                 Endpoint.libStart();
@@ -235,14 +236,14 @@ namespace WindowsFormsApp1
                 var item = new ListViewItem(row);
                 listView_sipAccounts.Items.Add(item);
             }
+
+            ///
+            ipsc6.agent.network.Connector.Initial();
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             logger.Info("FormClosed");
-
-            logger.Debug("ipsc6.agent.network.Connector.Release() ...");
-            ipsc6.agent.network.Connector.Release();
 
             foreach (var acc in sipAccounts)
             {
@@ -252,7 +253,10 @@ namespace WindowsFormsApp1
             logger.Debug("endpoint.libDestroy() ...");
             Endpoint.libDestroy();
             Endpoint.Dispose();
+            //
 
+            logger.Debug("ipsc6.agent.network.Connector.Release() ...");
+            ipsc6.agent.network.Connector.Release();
             logger.Info("FormClosed Ok");
         }
 

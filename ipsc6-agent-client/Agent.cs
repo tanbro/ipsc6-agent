@@ -698,9 +698,63 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
+        public async Task HangOther(int agentId)
+        {
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEHANGUP, agentId);
+            await MainConnection.Request(req);
+        }
+
         public async Task OffHook()
         {
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
+            await MainConnection.Request(req);
+        }
+
+        public async Task Interrupt(int agentId)
+        {
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEINSERT, agentId);
+            await MainConnection.Request(req);
+        }
+
+        public async Task Monitor(int agentId)
+        {
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_LISTEN, agentId);
+            await MainConnection.Request(req);
+        }
+
+        public async Task UnMonitor(int agentId)
+        {
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_STOPLISTEN, agentId);
+            await MainConnection.Request(req);
+        }
+
+        public async Task DeQueue(int channel)
+        {
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, channel);
+            await MainConnection.Request(req);
+        }
+
+        public async Task Block(int agentId)
+        {
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_BLOCK, agentId);
+            await MainConnection.Request(req);
+        }
+
+        public async Task UnBlock(int agentId)
+        {
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_UNBLOCK, agentId);
+            await MainConnection.Request(req);
+        }
+
+        public async Task Kick(int agentId)
+        {
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_KICKOUT, agentId);
+            await MainConnection.Request(req);
+        }
+
+        public async Task SignOutOther(int agentId, string groupId)
+        {
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCESIGNOFF, agentId, groupId);
             await MainConnection.Request(req);
         }
 
