@@ -51,7 +51,7 @@ namespace WindowsFormsApp1
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.contextMenuStrip_group = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.button4 = new System.Windows.Forms.Button();
@@ -84,10 +84,18 @@ namespace WindowsFormsApp1
             this.button_hangup = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
             this.label_teleState = new System.Windows.Forms.Label();
-            this.contextMenuStrip1.SuspendLayout();
+            this.label8 = new System.Windows.Forms.Label();
+            this.listView_hold = new System.Windows.Forms.ListView();
+            this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.contextMenuStrip_hold = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.unHoldToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuStrip_group.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_channel)).BeginInit();
+            this.contextMenuStrip_hold.SuspendLayout();
             this.SuspendLayout();
             // 
             // textBox_ServerAddressList
@@ -250,7 +258,7 @@ namespace WindowsFormsApp1
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader3});
-            this.listView_Groups.ContextMenuStrip = this.contextMenuStrip1;
+            this.listView_Groups.ContextMenuStrip = this.contextMenuStrip_group;
             this.listView_Groups.FullRowSelect = true;
             this.listView_Groups.HideSelection = false;
             this.listView_Groups.Location = new System.Drawing.Point(7, 276);
@@ -268,14 +276,14 @@ namespace WindowsFormsApp1
             // 
             this.columnHeader2.Width = 88;
             // 
-            // contextMenuStrip1
+            // contextMenuStrip_group
             // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.contextMenuStrip_group.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem1,
             this.toolStripMenuItem2});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(127, 48);
-            this.contextMenuStrip1.Text = "Sign in or out of Agent Group";
+            this.contextMenuStrip_group.Name = "contextMenuStrip1";
+            this.contextMenuStrip_group.Size = new System.Drawing.Size(127, 48);
+            this.contextMenuStrip_group.Text = "Sign in or out of Agent Group";
             // 
             // toolStripMenuItem1
             // 
@@ -317,9 +325,9 @@ namespace WindowsFormsApp1
             this.columnHeader4,
             this.columnHeader5});
             this.listView_sipAccounts.HideSelection = false;
-            this.listView_sipAccounts.Location = new System.Drawing.Point(269, 276);
+            this.listView_sipAccounts.Location = new System.Drawing.Point(7, 392);
             this.listView_sipAccounts.Name = "listView_sipAccounts";
-            this.listView_sipAccounts.Size = new System.Drawing.Size(618, 110);
+            this.listView_sipAccounts.Size = new System.Drawing.Size(423, 110);
             this.listView_sipAccounts.TabIndex = 28;
             this.listView_sipAccounts.UseCompatibleStateImageBehavior = false;
             this.listView_sipAccounts.View = System.Windows.Forms.View.Details;
@@ -334,7 +342,7 @@ namespace WindowsFormsApp1
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(269, 392);
+            this.button7.Location = new System.Drawing.Point(7, 508);
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(75, 23);
             this.button7.TabIndex = 29;
@@ -344,7 +352,7 @@ namespace WindowsFormsApp1
             // 
             // button8
             // 
-            this.button8.Location = new System.Drawing.Point(350, 392);
+            this.button8.Location = new System.Drawing.Point(88, 508);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(75, 23);
             this.button8.TabIndex = 30;
@@ -575,11 +583,60 @@ namespace WindowsFormsApp1
             this.label_teleState.TabIndex = 50;
             this.label_teleState.Text = "TeleState?";
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(267, 261);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(59, 12);
+            this.label8.TabIndex = 51;
+            this.label8.Text = "Hold List";
+            // 
+            // listView_hold
+            // 
+            this.listView_hold.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader9,
+            this.columnHeader10,
+            this.columnHeader11});
+            this.listView_hold.ContextMenuStrip = this.contextMenuStrip_hold;
+            this.listView_hold.FullRowSelect = true;
+            this.listView_hold.HideSelection = false;
+            this.listView_hold.Location = new System.Drawing.Point(269, 276);
+            this.listView_hold.Name = "listView_hold";
+            this.listView_hold.Size = new System.Drawing.Size(256, 110);
+            this.listView_hold.TabIndex = 52;
+            this.listView_hold.UseCompatibleStateImageBehavior = false;
+            this.listView_hold.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader9
+            // 
+            this.columnHeader9.Width = 89;
+            // 
+            // columnHeader10
+            // 
+            this.columnHeader10.Width = 88;
+            // 
+            // contextMenuStrip_hold
+            // 
+            this.contextMenuStrip_hold.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.unHoldToolStripMenuItem});
+            this.contextMenuStrip_hold.Name = "contextMenuStrip_hold";
+            this.contextMenuStrip_hold.Size = new System.Drawing.Size(181, 48);
+            // 
+            // unHoldToolStripMenuItem
+            // 
+            this.unHoldToolStripMenuItem.Name = "unHoldToolStripMenuItem";
+            this.unHoldToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.unHoldToolStripMenuItem.Text = "UnHold";
+            this.unHoldToolStripMenuItem.Click += new System.EventHandler(this.unHoldToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(892, 450);
+            this.ClientSize = new System.Drawing.Size(1192, 630);
+            this.Controls.Add(this.listView_hold);
+            this.Controls.Add(this.label8);
             this.Controls.Add(this.label_teleState);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.button_hangup);
@@ -628,10 +685,11 @@ namespace WindowsFormsApp1
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
-            this.contextMenuStrip1.ResumeLayout(false);
+            this.contextMenuStrip_group.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_channel)).EndInit();
+            this.contextMenuStrip_hold.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -660,7 +718,7 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ColumnHeader columnHeader3;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip_group;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
         private System.Windows.Forms.Button button4;
@@ -693,6 +751,13 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.Button button_hangup;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label_teleState;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.ListView listView_hold;
+        private System.Windows.Forms.ColumnHeader columnHeader9;
+        private System.Windows.Forms.ColumnHeader columnHeader10;
+        private System.Windows.Forms.ColumnHeader columnHeader11;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip_hold;
+        private System.Windows.Forms.ToolStripMenuItem unHoldToolStripMenuItem;
     }
 }
 

@@ -239,7 +239,7 @@ namespace ipsc6.agent.client
             lock (this)
             {
                 // 修改之前,一律先删除
-                queueInfoCollection.RemoveWhere((m) => m == info);
+                queueInfoCollection.RemoveWhere(m => m == info);
                 if (info.EventType != QueueEventType.Cancel)
                 {
                     queueInfoCollection.Add(info);
@@ -251,19 +251,18 @@ namespace ipsc6.agent.client
 
         void ProcessHoldInfoMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
-            var info = new HoldInfo(connInfo, msg);
-            var ev = new HoldInfoEventArgs(connInfo, info);
+            var holdInfo = new HoldInfo(connInfo, msg);
             // 记录 HoldInfo
             lock (this)
             {
                 // 修改之前,一律先删除
-                holdInfoCollection.RemoveWhere((m) => m == info);
-                if (info.EventType != HoldEventType.Cancel)
+                holdInfoCollection.RemoveWhere(m => m == holdInfo);
+                if (holdInfo.EventType != HoldEventType.Cancel)
                 {
-                    holdInfoCollection.Add(info);
+                    holdInfoCollection.Add(holdInfo);
                 }
             }
-            //
+            var ev = new HoldInfoEventArgs(connInfo, holdInfo);
             OnHoldInfo?.Invoke(this, ev);
         }
 
@@ -504,9 +503,9 @@ namespace ipsc6.agent.client
             var conn = sender as Connection;
             var i = internalConnections.IndexOf(conn);
             var connInfo = connectionList[i];
-            var e_ = new ConnectionInfoStateChangedEventArgs<ConnectionState>(connInfo, e.OldState, e.NewState);
+            var evt = new ConnectionInfoStateChangedEventArgs<ConnectionState>(connInfo, e.OldState, e.NewState);
             // TODO: 断线处理???
-            OnConnectionStateChanged?.Invoke(this, e_);
+            OnConnectionStateChanged?.Invoke(this, evt);
         }
 
         public async Task StartUp(string workerNumber, string password)
@@ -698,7 +697,7 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task HangOther(int agentId)
+        public async Task HangUp(int agentId)
         {
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEHANGUP, agentId);
             await MainConnection.Request(req);
@@ -728,7 +727,7 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task DeQueue(int channel)
+        public async Task Dequeue(int channel)
         {
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, channel);
             await MainConnection.Request(req);
@@ -752,9 +751,16 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task SignOutOther(int agentId, string groupId)
+        public async Task SignOut(int agentId, string groupId)
         {
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCESIGNOFF, agentId, groupId);
+            await MainConnection.Request(req);
+        }
+
+        public async Task CallIvr(int channel, string ivrName, IvrInvokeType invokeType, string customString)
+        {
+            var s = string.Format("{0}|{1}|{2}", ivrName, (int)invokeType, customString);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CALLSUBFLOW, channel, s);
             await MainConnection.Request(req);
         }
 

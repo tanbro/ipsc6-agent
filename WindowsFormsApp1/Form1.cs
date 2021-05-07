@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApp1
 {
- 
+
     public partial class Form1 : Form
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Form1));
@@ -37,16 +37,43 @@ namespace WindowsFormsApp1
             agent.OnRingInfoReceived += Agent_OnRingInfoReceived;
             agent.OnMainConnectionChanged += Agent_OnMainConnectionChanged;
             agent.OnWorkingChannelInfoReceived += Agent_OnWorkingChannelInfoReceived;
+            agent.OnHoldInfo += Agent_OnHoldInfo;
+        }
+
+        private void Agent_OnHoldInfo(object sender, HoldInfoEventArgs e)
+        {
+            Invoke(new Action(() =>
+            {
+                lock (listView_hold)
+                {
+                    listView_hold.Items.Clear();
+                    foreach (var hi in agent.HoldInfoCollection)
+                    {
+                        string[] row = { hi.ConnectionInfo.Host, hi.SessionId, string.Format("{0}", hi.Channel) };
+                        var item = new ListViewItem(row)
+                        {
+                            Tag = hi
+                        };
+                        listView_hold.Items.Add(item);
+                    }
+                }
+            }));
         }
 
         private void Agent_OnTeleStateChanged(object sender, TeleStateChangedEventArgs<TeleState> e)
         {
-            label_teleState.Text = string.Format("{0}", agent.TeleState);
+            Invoke(new Action(() =>
+            {
+                label_teleState.Text = string.Format("{0}", agent.TeleState);
+            }));
         }
 
         private void Agent_OnWorkingChannelInfoReceived(object sender, WorkingChannelInfoReceivedEventArgs e)
         {
-            label_workChannel.Text = e.Value.Channel.ToString();
+            Invoke(new Action(() =>
+            {
+                label_workChannel.Text = e.Value.Channel.ToString();
+            }));
         }
 
         private void Agent_OnMainConnectionChanged(object sender, EventArgs e)
@@ -79,6 +106,7 @@ namespace WindowsFormsApp1
         }
 
         List<MySipAccount> sipAccounts = new List<MySipAccount>();
+
         private void Agent_OnSipRegistrarListReceived(object sender, SipRegistrarListReceivedEventArgs e)
         {
 
@@ -95,21 +123,7 @@ namespace WindowsFormsApp1
                         if (sipAccounts.Any(x => x.isValid() && x.getInfo()?.uri == uri))
                             continue;
 
-                        int index = -1;
-                        MySipAccount acc = null;
-                        for (var i = 0; i < listView_sipAccounts.Items.Count; i++)
-                        {
-                            ListViewItem item = listView_sipAccounts.Items[i];
-                            if (item.Tag == null)
-                            {
-                                index = i;
-                                acc = sipAccounts[index];
-                                item.Tag = acc;
-                                item.SubItems[0].Text = uri;
-                                break;
-                            }
-                        }
-
+                        MySipAccount acc;
                         using (var cfg = new AccountConfig()
                         {
                             idUri = uri
@@ -120,14 +134,22 @@ namespace WindowsFormsApp1
                             {
                                 cfg.sipConfig.authCreds.Add(sipAuthCred);
                             }
-                            if (acc.isValid())
+                            acc = new MySipAccount(sipAccounts.Count, this);
+
+                            lock (listView_sipAccounts)
                             {
-                                acc.modify(cfg);
+                                string[] row = { uri, "" };
+                                ListViewItem item = new ListViewItem(row);
+                                listView_sipAccounts.Items.Add(item);
                             }
-                            else
-                            {
-                                acc.create(cfg);
-                            }
+
+                            acc.create(cfg);
+                            sipAccounts.Add(acc);
+                        }
+
+                        if (listView_sipAccounts.Items.Count != sipAccounts.Count)
+                        {
+                            throw new IndexOutOfRangeException("SIP 帐户数据和显示列表数量不一致");
                         }
                     }
                 }
@@ -194,8 +216,11 @@ namespace WindowsFormsApp1
             }));
         }
 
+        bool mainConnected = false;
+
         private void Agent_OnConnectionStateChanged(object sender, ConnectionInfoStateChangedEventArgs<ipsc6.agent.client.ConnectionState> e)
         {
+            mainConnected = (e.ConnectionInfo == agent.MainConnectionInfo) && (e.NewState == ipsc6.agent.client.ConnectionState.Ok);
             Invoke(new Action(() =>
             {
                 var s = string.Format("{1}", e.OldState, e.NewState);
@@ -219,23 +244,22 @@ namespace WindowsFormsApp1
             using (var sipTpConfig = new TransportConfig { port = 5060 })
             {
                 //epCfg.logConfig.level = 6;
-                epCfg.logConfig.writer = SipLogWriter.Instance;
+                //epCfg.logConfig.writer = SipLogWriter.Instance;
                 Endpoint.libInit(epCfg);
                 Endpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
                 Endpoint.libStart();
             }
 
-            /// 固定4个 Sip Account
-            /// 
             listView_sipAccounts.Items.Clear();
-            for (var i = 0; i < 4; i++)
-            {
-                var acc = new MySipAccount(i, this);
-                sipAccounts.Add(acc);
-                string[] row = { string.Format("sip acc[{0}]", i), "" };
-                var item = new ListViewItem(row);
-                listView_sipAccounts.Items.Add(item);
-            }
+            ///// 固定4个 Sip Account
+            //for (var i = 0; i < 4; i++)
+            //{
+            //    var acc = new MySipAccount(i, this);
+            //    sipAccounts.Add(acc);
+            //    string[] row = { string.Format("sip acc[{0}]", i), "" };
+            //    var item = new ListViewItem(row);
+            //    listView_sipAccounts.Items.Add(item);
+            //}
 
             ///
             ipsc6.agent.network.Connector.Initial();
@@ -243,21 +267,14 @@ namespace WindowsFormsApp1
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            logger.Info("FormClosed");
-
             foreach (var acc in sipAccounts)
             {
-                logger.DebugFormat("Dispose SipAccount {0}", acc.getId());
                 acc.Dispose();
             }
-            logger.Debug("endpoint.libDestroy() ...");
             Endpoint.libDestroy();
             Endpoint.Dispose();
             //
-
-            logger.Debug("ipsc6.agent.network.Connector.Release() ...");
             ipsc6.agent.network.Connector.Release();
-            logger.Info("FormClosed Ok");
         }
 
         private async void button_open_Click(object sender, EventArgs e)
@@ -270,7 +287,7 @@ namespace WindowsFormsApp1
             listView_Groups.Items.Clear();
             listView_connections.Items.Clear();
 
-            using (new Processing(this))
+            using (WaitingCursor.Instance)
             {
                 var s = textBox_ServerAddressList.Text.Trim();
                 var addresses = s.Split(new char[] { ',' });
@@ -290,7 +307,19 @@ namespace WindowsFormsApp1
                 var password = textBox_password.Text;
 
                 logger.InfoFormat("agent.StartUp ... ");
-                await agent.StartUp(workerNumber, password);
+                try
+                {
+                    await agent.StartUp(workerNumber, password);
+                }
+                catch (ConnectionException)
+                {
+                    if (!mainConnected)
+                    {
+                        agent.Dispose();
+                        agent = null;
+                        throw;
+                    }
+                }
                 logger.InfoFormat("agent.StartUp Ok. ");
                 label_agentId.Text = string.Format("{0}", agent.AgentId);
             }
@@ -298,7 +327,7 @@ namespace WindowsFormsApp1
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            using (new Processing(this))
+            using (WaitingCursor.Instance)
             {
                 if (agent == null) return;
                 await agent.ShutDown(checkBox_forceClose.Checked);
@@ -322,12 +351,19 @@ namespace WindowsFormsApp1
 
                 agent.Dispose();
                 agent = null;
+
+                foreach (var acc in sipAccounts)
+                {
+                    acc.Dispose();
+                }
+                sipAccounts.Clear();
+                listView_sipAccounts.Items.Clear();
             }
         }
 
         private async void button2_Click(object sender, EventArgs e)
         {
-            using (new Processing(this))
+            using (WaitingCursor.Instance)
             {
                 await agent.SignIn();
             }
@@ -335,7 +371,7 @@ namespace WindowsFormsApp1
 
         private async void button3_Click(object sender, EventArgs e)
         {
-            using (new Processing(this))
+            using (WaitingCursor.Instance)
             {
                 await agent.SignOut();
             }
@@ -346,7 +382,7 @@ namespace WindowsFormsApp1
             if (listView_Groups.SelectedItems.Count > 0)
             {
                 var groupId = listView_Groups.SelectedItems[0].Tag as string;
-                using (new Processing(this))
+                using (WaitingCursor.Instance)
                 {
                     await agent.SignIn(groupId);
                 }
@@ -358,26 +394,39 @@ namespace WindowsFormsApp1
             if (listView_Groups.SelectedItems.Count > 0)
             {
                 var groupId = listView_Groups.SelectedItems[0].Tag as string;
-                using (new Processing(this))
+                using (WaitingCursor.Instance)
                 {
                     await agent.SignOut(groupId);
                 }
             }
         }
 
-        class Processing : IDisposable
+        class WaitingCursor : IDisposable
         {
-            Cursor savedCursor;
-            public readonly Form Form;
-            public Processing(Form form)
+            static readonly object _l = new object();
+            static WaitingCursor instance = null;
+
+            public static WaitingCursor Instance
             {
-                Form = form;
-                Form.Enabled = false;
-                savedCursor = Cursor.Current;
-                Form.Cursor = Cursors.WaitCursor;
+                get
+                {
+                    lock (_l)
+                    {
+                        if (instance == null)
+                        {
+                            instance = new WaitingCursor();
+                        }
+                        return instance;
+                    }
+                }
             }
 
-            ~Processing()
+            WaitingCursor()
+            {
+                Application.UseWaitCursor = true;
+            }
+
+            ~WaitingCursor()
             {
                 Dispose(false);
             }
@@ -395,8 +444,11 @@ namespace WindowsFormsApp1
                     // Check to see if Dispose has already been called.
                     if (!disposed)
                     {
-                        Form.Enabled = true;
-                        Form.Cursor = savedCursor;
+                        Application.UseWaitCursor = false;
+                        lock (_l)
+                        {
+                            instance = null;
+                        }
                         // Note disposing has been done.
                         disposed = true;
                     }
@@ -406,7 +458,7 @@ namespace WindowsFormsApp1
 
         private async void button4_Click(object sender, EventArgs e)
         {
-            using (new Processing(this))
+            using (WaitingCursor.Instance)
             {
                 await agent.SetIdle();
             }
@@ -414,7 +466,7 @@ namespace WindowsFormsApp1
 
         private async void button5_Click(object sender, EventArgs e)
         {
-            using (new Processing(this))
+            using (WaitingCursor.Instance)
             {
                 await agent.SetBusy();
             }
@@ -466,8 +518,15 @@ namespace WindowsFormsApp1
 
         private async void btn_unhold_Click(object sender, EventArgs e)
         {
-            var chan = (int)numericUpDown_channel.Value;
-            await agent.UnHold(chan);
+            if (agent.HoldInfoCollection.Count == 1)
+            {
+                var chan = agent.HoldInfoCollection.First().Channel;
+                await agent.UnHold(chan);
+            }
+            else
+            {
+                MessageBox.Show("保持队列的数量大于1, 应从列表中选择.");
+            }
         }
 
         private async void button_offhook_Click(object sender, EventArgs e)
@@ -478,6 +537,18 @@ namespace WindowsFormsApp1
         private async void button_hangup_Click(object sender, EventArgs e)
         {
             await agent.HangUp();
+        }
+
+        private async void unHoldToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            var holdInfo = listView_hold.SelectedItems[0].Tag as HoldInfo;
+            using (WaitingCursor.Instance)
+            {
+                var chan = holdInfo.Channel;
+                await agent.UnHold(chan);
+            }
+
         }
     }
 }
