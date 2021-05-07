@@ -331,9 +331,10 @@ namespace ipsc6.agent.client
             connector.SendAgentMessage((int)value.Type, value.N, value.S);
         }
 
-        public const int DefaultTimeoutMilliseconds = 15000;
+        public const int DefaultRequestTimeoutMilliseconds = 15000;
+        public const int DefaultKeepAliveTimeoutMilliseconds = 5000;
 
-        public async Task<int> Open(string remoteHost, ushort remotePort, string workerNumber, string password, int millisecondsTimeout = DefaultTimeoutMilliseconds, int flag = 0)
+        public async Task<int> Open(string remoteHost, ushort remotePort, string workerNumber, string password, uint keepAliveTimeout = DefaultKeepAliveTimeoutMilliseconds, int requestTimeout = DefaultRequestTimeoutMilliseconds, int flag = 0)
         {
             ConnectionState[] allowStates = { ConnectionState.Init, ConnectionState.Closed, ConnectionState.Failed, ConnectionState.Lost };
             lock (connectLock)
@@ -351,7 +352,7 @@ namespace ipsc6.agent.client
             connectTcs = new TaskCompletionSource<object>();
             if (remotePort > 0)
             {
-                connector.Connect(remoteHost, remotePort);
+                connector.Connect(remoteHost, remotePort, keepAliveTimeout);
             }
             else
             {
@@ -366,7 +367,7 @@ namespace ipsc6.agent.client
             var reqData = new AgentRequestMessage(MessageType.REMOTE_MSG_LOGIN, flag, string.Format("{0}|{1}|1|0|{0}", workerNumber, password));
             logInTcs = new TaskCompletionSource<int>();
             Send(reqData);
-            var task = await Task.WhenAny(logInTcs.Task, Task.Delay(millisecondsTimeout));
+            var task = await Task.WhenAny(logInTcs.Task, Task.Delay(requestTimeout));
             if (task != logInTcs.Task)
             {
                 logger.ErrorFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Log in timeout. Closing the connector", this, remoteHost, remoteHost);
@@ -379,17 +380,24 @@ namespace ipsc6.agent.client
             return agentid;
         }
 
-        public async Task<int> Open(string remoteHost, string workerNumber, string password, int millisecondsTimeout = DefaultTimeoutMilliseconds, int flag = 0)
+        public async Task<int> Open(string remoteHost, string workerNumber, string password, uint keepAliveTimeout = DefaultKeepAliveTimeoutMilliseconds, int flag = 0)
         {
-            return await Open(remoteHost, 0, workerNumber, password, millisecondsTimeout, flag);
+            return await Open(remoteHost, 0, workerNumber, password, keepAliveTimeout, flag);
         }
 
-        public async Task Close(bool graceful = true, int millisecondsTimeout = DefaultTimeoutMilliseconds, int flag = 0)
+        public async Task Close(bool graceful = true, int requestTimeout = DefaultRequestTimeoutMilliseconds, int flag = 0)
         {
+            ConnectionState[] closedStates = { ConnectionState.Closed, ConnectionState.Failed, ConnectionState.Lost };
             ConnectionState[] allowedStates = { ConnectionState.Opening, ConnectionState.Ok };
             Task task;
+
             lock (connectLock)
             {
+                if (!closedStates.Any(m => m == State))
+                {
+                    logger.DebugFormat("{0} Close(graceful) ... Already closed.", this);
+                    return;
+                }
                 if (!allowedStates.Any(m => m == State))
                 {
                     throw new InvalidOperationException(string.Format("{0}", State));
@@ -401,7 +409,7 @@ namespace ipsc6.agent.client
             if (graceful)
             {
                 logOutTcs = new TaskCompletionSource<object>();
-                var timeoutTask = Task.Delay(millisecondsTimeout);
+                var timeoutTask = Task.Delay(requestTimeout);
                 logger.InfoFormat("{0} Close(graceful) ...", this);
                 Send(new AgentRequestMessage(MessageType.REMOTE_MSG_RELEASE, flag));
                 task = await Task.WhenAny(logOutTcs.Task, disconnectTcs.Task, timeoutTask);
@@ -416,7 +424,7 @@ namespace ipsc6.agent.client
             }
             else
             {
-                var timeoutTask = Task.Delay(millisecondsTimeout);
+                var timeoutTask = Task.Delay(requestTimeout);
                 logger.InfoFormat("{0} Close(force) ...", this);
                 connector.Disconnect();
                 task = await Task.WhenAny(disconnectTcs.Task, timeoutTask);
@@ -433,7 +441,7 @@ namespace ipsc6.agent.client
 
         private static readonly object requestLock = new object();
 
-        public async Task<ServerSentMessage> Request(AgentRequestMessage args, int millisecondsTimeout = DefaultTimeoutMilliseconds)
+        public async Task<ServerSentMessage> Request(AgentRequestMessage args, int millisecondsTimeout = DefaultRequestTimeoutMilliseconds)
         {
             lock (connectLock)
             {

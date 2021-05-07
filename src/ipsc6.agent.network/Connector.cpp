@@ -94,13 +94,16 @@ void Connector::DeallocateInstance(Connector ^ connector) {
     connector->Shutdown();
 }
 
-void Connector::Connect(String ^ host, unsigned short remotePort) {
+void Connector::Connect(String ^ host,
+                        unsigned short remotePort,
+                        unsigned int timeoutMs) {
     static const char CONNECT_PASSWORD[] = "Rumpelstiltskin";
     marshal_context ^ context = gcnew marshal_context();
     try {
         const char* host_cstr = context->marshal_as<const char*>(host);
         RakNet::ConnectionAttemptResult result = _peer->Connect(
-            host_cstr, remotePort, CONNECT_PASSWORD, strlen(CONNECT_PASSWORD));
+            host_cstr, remotePort, CONNECT_PASSWORD, strlen(CONNECT_PASSWORD),
+            0, 0, 12U, 500U, timeoutMs);
         if (RakNet::CONNECTION_ATTEMPT_STARTED != result) {
             throw gcnew InvalidOperationException(
                 String::Format("RakPeer Connect failed ({0})", (int)result));
@@ -108,6 +111,10 @@ void Connector::Connect(String ^ host, unsigned short remotePort) {
     } finally {
         delete context;
     }
+}
+
+void Connector::Connect(String ^ host, unsigned short remotePort) {
+    Connect(host, remotePort, 0);
 }
 
 void Connector::Connect(String ^ host) {

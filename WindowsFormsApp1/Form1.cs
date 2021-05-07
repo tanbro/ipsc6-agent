@@ -223,11 +223,11 @@ namespace WindowsFormsApp1
             mainConnected = (e.ConnectionInfo == agent.MainConnectionInfo) && (e.NewState == ipsc6.agent.client.ConnectionState.Ok);
             Invoke(new Action(() =>
             {
-                var s = string.Format("{1}", e.OldState, e.NewState);
-                var i = serverList.IndexOf(e.ConnectionInfo.Host);
-                var isMain = i == agent.MainConnectionIndex;
                 var listView = listView_connections;
-                var item = listView.Items[i];
+                var index = agent.GetConnetionIndex(e.ConnectionInfo);
+                var isMain = (index == agent.MainConnectionIndex);
+                var item = listView.Items[index];
+                var s = string.Format("{0}->{1}", e.OldState, e.NewState);
                 item.SubItems[1].Text = s;
                 item.SubItems[2].Text = isMain ? "*" : "";
             }));
@@ -293,13 +293,13 @@ namespace WindowsFormsApp1
             {
                 var s = textBox_ServerAddressList.Text.Trim();
                 var addresses = s.Split(new char[] { ',' });
-                CreateAgent(addresses);
                 serverList = addresses.ToList();
+                CreateAgent(addresses);
 
                 listView_connections.Items.Clear();
-                foreach (var x in agent.ConnectionList.Select((value, index) => new { value, index }))
+                foreach (var connInfo in agent.ConnectionList)
                 {
-                    string[] row = { x.value.Host, "", "" };
+                    string[] row = { string.Format("{0}:{1}", connInfo.Host, connInfo.Port), "", "" };
                     var item = new ListViewItem(row);
                     listView_connections.Items.Add(item);
                 }
@@ -359,6 +359,8 @@ namespace WindowsFormsApp1
                 }
                 sipAccounts.Clear();
                 listView_sipAccounts.Items.Clear();
+
+                listView_connections.Items.Clear();
             }
         }
 
@@ -550,6 +552,11 @@ namespace WindowsFormsApp1
                 await agent.UnHold(chan);
             }
 
+        }
+
+        private async void button6_Click(object sender, EventArgs e)
+        {
+            await agent.TakeOver((int)numericUpDown_MainIndex.Value);
         }
     }
 }

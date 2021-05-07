@@ -91,10 +91,13 @@ namespace WindowsFormsApp1
             this.contextMenuStrip_hold = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.unHoldToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label10 = new System.Windows.Forms.Label();
+            this.button6 = new System.Windows.Forms.Button();
+            this.numericUpDown_MainIndex = new System.Windows.Forms.NumericUpDown();
             this.contextMenuStrip_group.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType2)).BeginInit();
             this.contextMenuStrip_hold.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_MainIndex)).BeginInit();
             this.SuspendLayout();
             // 
             // textBox_ServerAddressList
@@ -180,7 +183,7 @@ namespace WindowsFormsApp1
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(171, 69);
+            this.label5.Location = new System.Drawing.Point(171, 71);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(71, 12);
             this.label5.TabIndex = 10;
@@ -189,7 +192,7 @@ namespace WindowsFormsApp1
             // label_agentState
             // 
             this.label_agentState.AutoSize = true;
-            this.label_agentState.Location = new System.Drawing.Point(248, 69);
+            this.label_agentState.Location = new System.Drawing.Point(248, 71);
             this.label_agentState.Name = "label_agentState";
             this.label_agentState.Size = new System.Drawing.Size(41, 12);
             this.label_agentState.TabIndex = 11;
@@ -478,20 +481,20 @@ namespace WindowsFormsApp1
             this.columnHeader7,
             this.columnHeader8});
             this.listView_connections.HideSelection = false;
-            this.listView_connections.Location = new System.Drawing.Point(596, 11);
+            this.listView_connections.Location = new System.Drawing.Point(567, 11);
             this.listView_connections.Name = "listView_connections";
-            this.listView_connections.Size = new System.Drawing.Size(291, 121);
+            this.listView_connections.Size = new System.Drawing.Size(320, 121);
             this.listView_connections.TabIndex = 42;
             this.listView_connections.UseCompatibleStateImageBehavior = false;
             this.listView_connections.View = System.Windows.Forms.View.Details;
             // 
             // columnHeader6
             // 
-            this.columnHeader6.Width = 107;
+            this.columnHeader6.Width = 108;
             // 
             // columnHeader7
             // 
-            this.columnHeader7.Width = 76;
+            this.columnHeader7.Width = 151;
             // 
             // btn_hold
             // 
@@ -516,7 +519,7 @@ namespace WindowsFormsApp1
             // label_workChannel
             // 
             this.label_workChannel.AutoSize = true;
-            this.label_workChannel.Location = new System.Drawing.Point(451, 69);
+            this.label_workChannel.Location = new System.Drawing.Point(540, 92);
             this.label_workChannel.Name = "label_workChannel";
             this.label_workChannel.Size = new System.Drawing.Size(17, 12);
             this.label_workChannel.TabIndex = 45;
@@ -545,7 +548,7 @@ namespace WindowsFormsApp1
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(171, 94);
+            this.label7.Location = new System.Drawing.Point(171, 92);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(65, 12);
             this.label7.TabIndex = 49;
@@ -554,7 +557,7 @@ namespace WindowsFormsApp1
             // label_teleState
             // 
             this.label_teleState.AutoSize = true;
-            this.label_teleState.Location = new System.Drawing.Point(242, 94);
+            this.label_teleState.Location = new System.Drawing.Point(242, 92);
             this.label_teleState.Name = "label_teleState";
             this.label_teleState.Size = new System.Drawing.Size(65, 12);
             this.label_teleState.TabIndex = 50;
@@ -603,24 +606,43 @@ namespace WindowsFormsApp1
             // unHoldToolStripMenuItem
             // 
             this.unHoldToolStripMenuItem.Name = "unHoldToolStripMenuItem";
-            this.unHoldToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.unHoldToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
             this.unHoldToolStripMenuItem.Text = "UnHold";
             this.unHoldToolStripMenuItem.Click += new System.EventHandler(this.unHoldToolStripMenuItem_Click);
             // 
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(380, 69);
+            this.label10.Location = new System.Drawing.Point(469, 92);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(53, 12);
             this.label10.TabIndex = 54;
             this.label10.Text = "Channel:";
             // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(231, 136);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(151, 23);
+            this.button6.TabIndex = 55;
+            this.button6.Text = "Set Main Server Index";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
+            // numericUpDown_MainIndex
+            // 
+            this.numericUpDown_MainIndex.Location = new System.Drawing.Point(388, 136);
+            this.numericUpDown_MainIndex.Name = "numericUpDown_MainIndex";
+            this.numericUpDown_MainIndex.Size = new System.Drawing.Size(42, 21);
+            this.numericUpDown_MainIndex.TabIndex = 56;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1192, 630);
+            this.ClientSize = new System.Drawing.Size(901, 630);
+            this.Controls.Add(this.numericUpDown_MainIndex);
+            this.Controls.Add(this.button6);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.listView_hold);
             this.Controls.Add(this.label8);
@@ -675,6 +697,7 @@ namespace WindowsFormsApp1
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType2)).EndInit();
             this.contextMenuStrip_hold.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_MainIndex)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -743,6 +766,8 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_hold;
         private System.Windows.Forms.ToolStripMenuItem unHoldToolStripMenuItem;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.NumericUpDown numericUpDown_MainIndex;
     }
 }
 

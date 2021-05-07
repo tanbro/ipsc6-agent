@@ -57,9 +57,11 @@ namespace ipsc6.agent.client
 
         string workerNumber;
         public string WorkerNumber => workerNumber;
+        string password;
 
         readonly List<ConnectionInfo> connectionList = new List<ConnectionInfo>();
         public IReadOnlyCollection<ConnectionInfo> ConnectionList => connectionList;
+        public int GetConnetionIndex(ConnectionInfo connectionInfo) => connectionList.IndexOf(connectionInfo);
 
         readonly List<Connection> internalConnections = new List<Connection>();
 
@@ -480,19 +482,163 @@ namespace ipsc6.agent.client
         }
 
 
+        bool starting = false;
+        bool started = false;
+        bool stopping = true;
+
         public event ConnectionInfoStateChangedEventHandler OnConnectionStateChanged;
         void Conn_OnConnectionStateChanged(object sender, ConnectionStateChangedEventArgs<ConnectionState> e)
         {
             var conn = sender as Connection;
-            var i = internalConnections.IndexOf(conn);
-            var connInfo = connectionList[i];
+            var connIdx = internalConnections.IndexOf(conn);
+            var connInfo = connectionList[connIdx];
+
+            // 断线处理
+            ConnectionState[] disconntedStates = { ConnectionState.Lost, ConnectionState.Failed, ConnectionState.Closed };
+            if (disconntedStates.Any(x => x == e.NewState))
+            {
+                Action action;
+                var isMain = connIdx == mainConnectionIndex;
+                bool isChangeMain = false;
+                if (isMain)
+                {
+                    bool bStarted;
+                    lock (this)
+                    {
+                        bStarted = started;
+                    }
+                    if (!bStarted)
+                    {
+                        switch (e.NewState)
+                        {
+                            case ConnectionState.Closed:
+                                logger.ErrorFormat("主服务节点 [{0}]({1}:{2}) 首次连接中途连接被对端关闭， 放弃重连接.", connIdx, connectionList[connIdx].Host, connectionList[connIdx].Port);
+                                break;
+                            case ConnectionState.Failed:
+                                logger.ErrorFormat("主服务节点 [{0}]({1}:{2}) 首次连接失败， 放弃重连接.", connIdx, connectionList[connIdx].Host, connectionList[connIdx].Port);
+                                break;
+                            case ConnectionState.Lost:
+                                logger.ErrorFormat("主服务节点 [{0}]({1}:{2}) 首次连接中途断开， 放弃重连接.", connIdx, connectionList[connIdx].Host, connectionList[connIdx].Port);
+                                break;
+                            default: throw new IndexOutOfRangeException(string.Format("{0}", e.NewState));
+                        }
+                        return;
+                    }
+                    // 其它连接还有连接上了的吗?
+                    var indices = (
+                        from vi
+                        in internalConnections.Select((value, index) => new { value, index })
+                        where vi.index != mainConnectionIndex && vi.value.State == ConnectionState.Ok
+                        select vi.index
+                    ).ToList();
+                    if (indices.Count == 0)
+                    {
+                        // 没得选
+                        switch (e.NewState)
+                        {
+                            case ConnectionState.Closed:
+                                logger.ErrorFormat("主服务节点 [{0}]({1}:{2}) 连接被对端关闭. 虽然找不到其它可用服务节点连接, 仍将切换主节点", connIdx, connectionList[connIdx].Host, connectionList[connIdx].Port);
+                                isChangeMain = true;
+                                break;
+                            case ConnectionState.Lost:
+                                logger.ErrorFormat("主服务节点 [{0}]({1}:{2}) 连接丢失. 但是由于找不到其它可用服务节点连接, 将继续使用该主节点并发起重连", connIdx, connectionList[connIdx].Host, connectionList[connIdx].Port);
+                                break;
+                            case ConnectionState.Failed:
+                                logger.ErrorFormat("主服务节点 [{0}]({1}:{2}) 连接失败. 但是由于找不到其它可用服务节点连接, 将继续使用该主节点并发起重连", connIdx, connectionList[connIdx].Host, connectionList[connIdx].Port);
+                                break;
+                            default: throw new IndexOutOfRangeException(string.Format("{0}", e.NewState));
+                        }
+                    }
+                    else
+                    {
+                        // 有的选,但是如果在工作状态,不能变!
+                        AgentState[] workingState = { AgentState.Ring, AgentState.Work, AgentState.WorkPause };
+                        if (workingState.Any(x => x == AgentState))
+                        {
+                            if (e.NewState == ConnectionState.Lost)
+                                logger.ErrorFormat("主服务节点 [{0}]({1}:{2}) 连接丢失. 由于处于工作状态, 将继续使用该主节点并发起重连", connIdx, connectionList[connIdx].Host, connectionList[connIdx].Port);
+                            else
+                                logger.ErrorFormat("主服务节点 [{0}]({1}:{2}) 连接失败. 由于处于工作状态, 将继续使用该主节点并发起重连", connIdx, connectionList[connIdx].Host, connectionList[connIdx].Port);
+                        }
+                        else
+                        {
+                            isChangeMain = true;
+                        }
+                    }
+                    ///
+                    if (isChangeMain)
+                    {
+                        var rand = new Random();
+                        if (indices.Count > 0)
+                        {
+                            mainConnectionIndex = indices[rand.Next(indices.Count)];
+                            logger.ErrorFormat(
+                                "主服务节点 [{0}]({1}:{2}) 连接丢失. 切换新的主服务节点到 [{3}]({4}:{5})",
+                                connIdx, connInfo.Host, connInfo.Port,
+                                mainConnectionIndex, MainConnectionInfo.Host, MainConnectionInfo.Port
+                            );
+                        }
+                        else
+                        {
+                            var indices2 = (
+                                from vi
+                                in internalConnections.Select((value, index) => new { value, index })
+                                where vi.index != mainConnectionIndex && vi.value.State != ConnectionState.Closed
+                                select vi.index
+                            ).ToList();
+                            mainConnectionIndex = indices2[rand.Next(indices2.Count)];
+                            logger.ErrorFormat(
+                                "主服务节点 [{0}]({1}:{2}) 连接丢失. 切换新的主服务节点(目前不可用)到 [{3}]({4}:{5})",
+                                connIdx, connInfo.Host, connInfo.Port,
+                                mainConnectionIndex, MainConnectionInfo.Host, MainConnectionInfo.Port
+                            );
+                        }
+                        action = new Action(async () =>
+                        {
+                            logger.InfoFormat("从服务节点 [{0}]({1}:{2}) 重新连接 ... ", connIdx, connInfo.Host, connInfo.Port);
+                            try
+                            {
+                                await conn.Open(connInfo.Host, connInfo.Port, workerNumber, password, flag: 0);
+                            }
+                            catch (ConnectionException) { };
+                        });
+                        // 抛出切换新的主服务节事件
+                        OnMainConnectionChanged?.Invoke(this, new EventArgs());
+                    }
+                    else
+                    {
+                        action = new Action(async () =>
+                        {
+                            logger.InfoFormat("主服务节点 [{0}]({1}:{2}) 重新连接 ... ", connIdx, connInfo.Host, connInfo.Port);
+                            try
+                            {
+                                await conn.Open(connInfo.Host, connInfo.Port, workerNumber, password, flag: 1);
+                            }
+                            catch (ConnectionException) { };
+                        });
+                    }
+                }
+                else
+                {
+                    logger.ErrorFormat("从服务节点 [{0}]({1}:{2}) 连接丢失. 将发起重连", connIdx, connInfo.Host, connInfo.Port);
+                    action = new Action(async () =>
+                    {
+                        logger.InfoFormat("从服务节点 [{0}]({1}:{2}) 重新连接 ... ", connIdx, connInfo.Host, connInfo.Port);
+                        try
+                        {
+                            await conn.Open(connInfo.Host, connInfo.Port, workerNumber, password, flag: 0);
+                        }
+                        catch (ConnectionException) { };
+                    });
+                }
+                // 执行重连
+                Task.Run(action);
+            }
+
+            // 抛出连接状态变化事件
             var evt = new ConnectionInfoStateChangedEventArgs<ConnectionState>(connInfo, e.OldState, e.NewState);
-            // TODO: 断线处理???
             OnConnectionStateChanged?.Invoke(this, evt);
         }
-
-        bool starting = false;
-        bool started = false;
 
         public async Task StartUp(string workerNumber, string password)
         {
@@ -506,6 +652,7 @@ namespace ipsc6.agent.client
                 started = false;
             }
             this.workerNumber = workerNumber;
+            this.password = password;
             // 首先，主节点
             var rand = new Random();
             mainConnectionIndex = rand.Next(0, connectionList.Count);
@@ -590,9 +737,9 @@ namespace ipsc6.agent.client
             );
         }
 
-        public async Task<ServerSentMessage> Request(AgentRequestMessage args, int millisecondsTimeout = Connection.DefaultTimeoutMilliseconds)
+        public async Task<ServerSentMessage> Request(AgentRequestMessage args, int timeout = Connection.DefaultRequestTimeoutMilliseconds)
         {
-            return await MainConnection.Request(args, millisecondsTimeout);
+            return await MainConnection.Request(args, timeout);
         }
 
         public async Task SignIn()
@@ -772,6 +919,21 @@ namespace ipsc6.agent.client
         {
             var s = string.Format("{0}|{1}|{2}", ivrName, (int)invokeType, customString);
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CALLSUBFLOW, channel, s);
+            await MainConnection.Request(req);
+        }
+
+        public async Task TakeOver(int index)
+        {
+            lock (this)
+            {
+                if (index < 0 || index > internalConnections.Count || index == mainConnectionIndex)
+                {
+                    throw new ArgumentOutOfRangeException(string.Format("{0}", index));
+                }
+            }
+            mainConnectionIndex = index;
+            OnMainConnectionChanged?.Invoke(this, new EventArgs());
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKEOVER);
             await MainConnection.Request(req);
         }
 

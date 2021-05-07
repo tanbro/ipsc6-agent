@@ -61,6 +61,9 @@ ref class Connector {
     static Connector ^ CreateInstance();
     static void DeallocateInstance(Connector ^ connector);
 
+    void Connect(String ^ host,
+                 unsigned short remotePort,
+                 unsigned int timeoutMs);
     void Connect(String ^ host, unsigned short remotePort);
     void Connect(String ^ host);
     void Disconnect();
