@@ -1,6 +1,6 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ipsc6.agent.client
@@ -301,22 +301,22 @@ namespace ipsc6.agent.client
         }
 
         public event EventHandler OnSignedGroupsChanged;
-        private void DoOnSignedGroupIdList(ConnectionInfo connInfo, ServerSentMessage msg)
+        private void DoOnSignedGroupIdList(ConnectionInfo _, ServerSentMessage msg)
         {
             var signed = Convert.ToBoolean(msg.N2);
-            var ids = msg.S.Split(new char[] { '|' });
+            var ids = msg.S.Split(Constants.VerticalBarDelimiter);
             lock (this)
             {
                 foreach (var id in ids)
                 {
-                    try
+                    var groupObj = groupCollection.FirstOrDefault(m => m.Id == id);
+                    if (groupObj == null)
                     {
-                        groupCollection.First(m => m.Id == id)
-                            .Signed = signed;
+                        logger.ErrorFormat("DoOnSignedGroupIdList - {0} (id=\"{1})\" does not exist", this, id);
                     }
-                    catch (InvalidOperationException exc)
+                    else
                     {
-                        logger.ErrorFormat("DoOnSignedGroupIdList - {0} (id=\"{1})\"", exc, id);
+                        groupObj.Signed = signed;
                     }
                 }
             }
@@ -327,7 +327,7 @@ namespace ipsc6.agent.client
         private void DoOnSipRegistrarList(ConnectionInfo _, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var val = msg.S.Split(new char[] { '|' });
+            var val = msg.S.Split(Constants.VerticalBarDelimiter);
             var evt = new SipRegistrarListReceivedEventArgs(val);
             OnSipRegistrarListReceived?.Invoke(this, evt);
         }
@@ -395,7 +395,7 @@ namespace ipsc6.agent.client
         private void DoOnPrivilegeList(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var parts = msg.S.Split(new char[] { '|' });
+            var parts = msg.S.Split(Constants.VerticalBarDelimiter);
             lock (this)
             {
                 foreach (var s in parts)
@@ -412,10 +412,10 @@ namespace ipsc6.agent.client
             get { return privilegeExternCollection; }
         }
         public event EventHandler OnPrivilegeExternCollectionReceived;
-        private void DoOnPrivilegeExternList(ConnectionInfo connInfo, ServerSentMessage msg)
+        private void DoOnPrivilegeExternList(ConnectionInfo _, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var parts = msg.S.Split(new char[] { '|' });
+            var parts = msg.S.Split(Constants.VerticalBarDelimiter);
             lock (this)
             {
                 foreach (var s in parts)
@@ -435,7 +435,7 @@ namespace ipsc6.agent.client
         void DoOnGroupIdList(ConnectionInfo _, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var ids = msg.S.Split(new char[] { '|' });
+            var ids = msg.S.Split(Constants.VerticalBarDelimiter);
             lock (this)
             {
                 foreach (var id in ids)
@@ -450,7 +450,8 @@ namespace ipsc6.agent.client
 
         void DoOnGroupNameList(ConnectionInfo _, ServerSentMessage msg)
         {
-            var names = msg.S.Split(new char[] { '|' });
+            if (string.IsNullOrWhiteSpace(msg.S)) return;
+            var names = msg.S.Split(Constants.VerticalBarDelimiter);
             lock (this)
             {
                 var it = groupCollection.Zip(names, (first, second) => new { first, second });

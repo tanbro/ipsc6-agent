@@ -2,7 +2,7 @@ using System;
 
 namespace ipsc6.agent.client
 {
-    public class AgentStateWorkType: IEquatable<AgentStateWorkType>, ICloneable
+    public class AgentStateWorkType : IEquatable<AgentStateWorkType>, ICloneable
     {
         public readonly AgentState AgentState;
         public readonly WorkType WorkType;

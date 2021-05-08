@@ -7,13 +7,13 @@ namespace agent {
 namespace network {
 
 public
-delegate void ConnectAttemptFailedEventHandler(Object ^ sender);
+delegate void ConnectAttemptFailedEventHandler(Object ^ sender, EventArgs ^ e);
 
 public
-delegate void DisconnectedEventHandler(Object ^ sender);
+delegate void DisconnectedEventHandler(Object ^ sender, EventArgs ^ e);
 
 public
-delegate void ConnectionLostEventHandler(Object ^ sender);
+delegate void ConnectionLostEventHandler(Object ^ sender, EventArgs ^ e);
 
 public
 ref class ConnectedEventArgs : EventArgs {
@@ -32,10 +32,7 @@ ref class AgentMessageReceivedEventArgs : EventArgs {
     property int N2;
     property String ^ S;
     AgentMessageReceivedEventArgs() : EventArgs(){};
-    AgentMessageReceivedEventArgs(int commandType,
-                                  int n1,
-                                  int n2,
-                                  String ^ s)
+    AgentMessageReceivedEventArgs(int commandType, int n1, int n2, String ^ s)
         : EventArgs() {
         CommandType = commandType;
         N1 = n1;

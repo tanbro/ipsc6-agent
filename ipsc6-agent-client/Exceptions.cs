@@ -1,5 +1,4 @@
 using System;
-using ipsc6.agent.network;
 
 namespace ipsc6.agent.client
 {

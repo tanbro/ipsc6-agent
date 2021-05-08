@@ -192,7 +192,7 @@ int Connector::Receive() {
         case ID_DISCONNECTION_NOTIFICATION: {
             _remoteAddrIndex = -1;
             try {
-                OnDisconnected(this);
+                OnDisconnected(this, gcnew EventArgs());
             } catch (NullReferenceException ^) {
             }
         } break;
@@ -200,7 +200,7 @@ int Connector::Receive() {
         case ID_CONNECTION_ATTEMPT_FAILED: {
             _remoteAddrIndex = -1;
             try {
-                OnConnectAttemptFailed(this);
+                OnConnectAttemptFailed(this, gcnew EventArgs());
             } catch (NullReferenceException ^) {
             }
         } break;
@@ -208,7 +208,7 @@ int Connector::Receive() {
         case ID_INVALID_PASSWORD: {
             _remoteAddrIndex = -1;
             try {
-                OnConnectAttemptFailed(this);
+                OnConnectAttemptFailed(this, gcnew EventArgs());
             } catch (NullReferenceException ^) {
             }
         } break;
@@ -216,7 +216,7 @@ int Connector::Receive() {
         case ID_NO_FREE_INCOMING_CONNECTIONS: {
             _remoteAddrIndex = -1;
             try {
-                OnConnectAttemptFailed(this);
+                OnConnectAttemptFailed(this, gcnew EventArgs());
             } catch (NullReferenceException ^) {
             }
         } break;
@@ -224,7 +224,7 @@ int Connector::Receive() {
         case ID_CONNECTION_BANNED: {
             _remoteAddrIndex = -1;
             try {
-                OnConnectAttemptFailed(this);
+                OnConnectAttemptFailed(this, gcnew EventArgs());
             } catch (NullReferenceException ^) {
             }
         } break;
@@ -232,7 +232,7 @@ int Connector::Receive() {
         case ID_INCOMPATIBLE_PROTOCOL_VERSION: {
             _remoteAddrIndex = -1;
             try {
-                OnConnectAttemptFailed(this);
+                OnConnectAttemptFailed(this, gcnew EventArgs());
             } catch (NullReferenceException ^) {
             }
         } break;
@@ -240,7 +240,7 @@ int Connector::Receive() {
         case ID_IP_RECENTLY_CONNECTED: {
             _remoteAddrIndex = -1;
             try {
-                OnConnectAttemptFailed(this);
+                OnConnectAttemptFailed(this, gcnew EventArgs());
             } catch (NullReferenceException ^) {
             }
         } break;
@@ -248,7 +248,7 @@ int Connector::Receive() {
         case ID_CONNECTION_LOST: {
             _remoteAddrIndex = -1;
             try {
-                OnConnectionLost(this);
+                OnConnectionLost(this, gcnew EventArgs());
             } catch (NullReferenceException ^) {
             }
         } break;
@@ -306,32 +306,36 @@ void Connector::SendAgentMessage(int commandType, int n, String ^ s) {
     size_t data_sz = sizeof(MsgType) + sizeof(int) + sizeof(int) + sizeof(int) +
                      s->Length + 1;
     BYTE* data_buf = (BYTE*)calloc(data_sz, sizeof(BYTE));
-    try {
-        BYTE* ptr = data_buf;
-        //
-        *(MsgType*)ptr = mtAppData;
-        ptr += sizeof(MsgType);
-        // 不再需要指定AgentID了
-        *(int*)ptr = 0;
-        ptr += sizeof(int);
-        //
-        *(int*)ptr = commandType;
-        ptr += sizeof(int);
-        //
-        *(int*)ptr = n;
-        ptr += sizeof(int);
-        //
-        marshal_context ^ context = gcnew marshal_context();
+    if (data_buf) {
         try {
-            const char* pch = context->marshal_as<const char*>(s);
-            strcpy((char*)ptr, pch);
+            BYTE* ptr = data_buf;
+            //
+            *(MsgType*)ptr = mtAppData;
+            ptr += sizeof(MsgType);
+            // 不再需要指定AgentID了
+            *(int*)ptr = 0;
+            ptr += sizeof(int);
+            //
+            *(int*)ptr = commandType;
+            ptr += sizeof(int);
+            //
+            *(int*)ptr = n;
+            ptr += sizeof(int);
+            //
+            marshal_context ^ context = gcnew marshal_context();
+            try {
+                const char* pch = context->marshal_as<const char*>(s);
+                strcpy((char*)ptr, pch);
+            } finally {
+                delete context;
+            }
+            //
+            SendRawData(data_buf, data_sz);
         } finally {
-            delete context;
+            free(data_buf);
         }
-        //
-        SendRawData(data_buf, data_sz);
-    } finally {
-        free(data_buf);
+    } else {
+        throw new std::runtime_error("calloc failed");
     }
 }
 

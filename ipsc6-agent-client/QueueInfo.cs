@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace ipsc6.agent.client
 {
@@ -23,7 +21,7 @@ namespace ipsc6.agent.client
         {
             Channel = msg.N1;
             Type = (QueueInfoType)msg.N2;
-            var parts = msg.S.Split(new char[] { '|' });
+            var parts = msg.S.Split(Constants.VerticalBarDelimiter);
             var it = parts.Select((s, i) => new { s, i });
             foreach (var m in it)
             {

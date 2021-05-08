@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace ipsc6.agent.client
 {
     public enum ServerSentMessageSubType
@@ -24,7 +20,7 @@ namespace ipsc6.agent.client
         /// <summary>
         /// 本座席所有座席组ID集合
         /// </summary>
-        GroupIdList = 4 ,
+        GroupIdList = 4,
 
         /// <summary>
         /// 本座席基础权限
@@ -44,7 +40,7 @@ namespace ipsc6.agent.client
         /// <summary>
         /// ?
         /// </summary>
-        Udl=8,
+        Udl = 8,
 
         /// <summary>
         /// 座席心跳同步超时值

@@ -1,6 +1,6 @@
 using System;
-using System.Linq;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -285,13 +285,13 @@ namespace ipsc6.agent.client
             eventQueue.Enqueue(data);
         }
 
-        private void Connector_OnConnectionLost(object sender)
+        private void Connector_OnConnectionLost(object sender, EventArgs e)
         {
             logger.ErrorFormat("{0} OnConnectionLost", this);
             eventQueue.Enqueue(new ConnectorConnectionLostEventArgs());
         }
 
-        private void Connector_OnDisconnected(object sender)
+        private void Connector_OnDisconnected(object sender, EventArgs e)
         {
             logger.WarnFormat("{0} OnDisconnected", this);
             eventQueue.Enqueue(new ConnectorDisconnectedEventArgs());
@@ -303,7 +303,7 @@ namespace ipsc6.agent.client
             eventQueue.Enqueue(new ConnectorConnectedEventArgs());
         }
 
-        private void Connector_OnConnectAttemptFailed(object sender)
+        private void Connector_OnConnectAttemptFailed(object sender, EventArgs e)
         {
             logger.ErrorFormat("{0} OnConnectAttemptFailed", this);
             eventQueue.Enqueue(new ConnectorConnectAttemptFailedEventArgs());

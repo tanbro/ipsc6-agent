@@ -1,5 +1,3 @@
-using ipsc6.agent.network;
-
 namespace ipsc6.agent.client
 {
     public class AgentRequestMessage
@@ -8,7 +6,7 @@ namespace ipsc6.agent.client
         public readonly int N;
         public readonly string S;
 
-        public AgentRequestMessage(MessageType type, int n = 0, string s = "")
+        public AgentRequestMessage(MessageType type, int n, string s)
         {
             Type = type;
             N = n;
@@ -26,6 +24,13 @@ namespace ipsc6.agent.client
         {
             Type = type;
             N = n;
+            S = "";
+        }
+
+        public AgentRequestMessage(MessageType type)
+        {
+            Type = type;
+            N = 0;
             S = "";
         }
 
