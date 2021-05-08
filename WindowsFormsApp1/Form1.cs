@@ -120,38 +120,49 @@ namespace WindowsFormsApp1
                         var uri = string.Format("sip:{0}@{1}", user, addr);
 
                         // 这个地址是不是已经注册了?
-                        if (sipAccounts.Any(x => x.isValid() && x.getInfo()?.uri == uri))
-                            continue;
-
-                        MySipAccount acc;
-                        using (var cfg = new AccountConfig()
+                        // 如果是的，重新注册一次！
+                        var existedAcc = (
+                            from x in sipAccounts
+                            where x.isValid() && x.getInfo()?.uri == uri
+                            select x
+                        ).FirstOrDefault();
+                        if (existedAcc != null)
                         {
-                            idUri = uri
-                        })
-                        {
-                            cfg.regConfig.registrarUri = string.Format("sip:{0}", addr);
-                            using (var sipAuthCred = new AuthCredInfo("digest", "*", user, 0, "hesong"))
-                            {
-                                cfg.sipConfig.authCreds.Add(sipAuthCred);
-                            }
-                            acc = new MySipAccount(sipAccounts.Count, this);
-
-                            lock (listView_sipAccounts)
-                            {
-                                string[] row = { uri, "" };
-                                ListViewItem item = new ListViewItem(row);
-                                listView_sipAccounts.Items.Add(item);
-                            }
-
-                            acc.create(cfg);
-                            sipAccounts.Add(acc);
+                            // Re-Register
+                            logger.DebugFormat("重新注册 SipAccount {0}", uri);
+                            existedAcc.setRegistration(true);
                         }
-
-                        if (listView_sipAccounts.Items.Count != sipAccounts.Count)
+                        else
                         {
-                            throw new IndexOutOfRangeException("SIP 帐户数据和显示列表数量不一致");
+                            using (var sipAuthCred = new AuthCredInfo("digest", "*", user, 0, "hesong"))
+                            using (var cfg = new AccountConfig()
+                            {
+                                idUri = uri
+                            })
+                            {
+                                cfg.regConfig.registrarUri = string.Format("sip:{0}", addr);
+                                cfg.sipConfig.authCreds.Add(sipAuthCred);
+
+                                logger.DebugFormat("新建 SipAccount {0}", uri);
+
+                                var acc = new MySipAccount(sipAccounts.Count, this);
+
+                                lock (listView_sipAccounts)
+                                {
+                                    string[] row = { uri, "" };
+                                    ListViewItem item = new ListViewItem(row);
+                                    listView_sipAccounts.Items.Add(item);
+                                }
+
+                                acc.create(cfg);
+                                sipAccounts.Add(acc);
+                            }
                         }
                     }
+                }
+                if (listView_sipAccounts.Items.Count != sipAccounts.Count)
+                {
+                    throw new IndexOutOfRangeException("SIP 帐户数据和显示列表数量不一致");
                 }
             }));
         }
@@ -333,28 +344,15 @@ namespace WindowsFormsApp1
                 if (agent == null) return;
                 await agent.ShutDown(checkBox_forceClose.Checked);
 
-                foreach (var pair in sipAccounts.Select((value, index) => new { value, index }))
-                {
-                    var acc = pair.value;
-                    var index = pair.index;
-                    System.Diagnostics.Debug.Assert(acc.Index == index);
-                    if (acc.isValid())
-                    {
-                        logger.DebugFormat("shutdown SIP account [{0}] {1}", acc.Index, acc.getId());
-                        acc.shutdown();
-                        lock (listView_sipAccounts)
-                        {
-                            listView_sipAccounts.Items[index].SubItems[0].Text = string.Format("sip acc[{0}]", index);
-                            listView_sipAccounts.Items[index].SubItems[1].Text = "";
-                        }
-                    }
-                }
-
                 agent.Dispose();
                 agent = null;
+                listView_Groups.Items.Clear();
+                listView_hold.Items.Clear();
 
                 foreach (var acc in sipAccounts)
                 {
+                    if (acc.isValid())
+                        acc.shutdown();
                     acc.Dispose();
                 }
                 sipAccounts.Clear();

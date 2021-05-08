@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Agent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AgentGroup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AgentRequestMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AgentRunningState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AgentState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AgentStateWorkType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Connection.cs" />
