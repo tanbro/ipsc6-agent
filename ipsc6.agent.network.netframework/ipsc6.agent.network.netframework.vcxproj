@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{F3A6CEAA-81EA-4F7E-978E-10639C21186B}</ProjectGuid>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <Keyword>ManagedCProj</Keyword>
     <RootNamespace>ipsc6agentnetworknetframework</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
@@ -128,7 +128,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\src\ipsc6.agent.network\Connector.h" />
-    <ClInclude Include="..\src\ipsc6.agent.network\errors.h" />
     <ClInclude Include="..\src\ipsc6.agent.network\Events.h" />
     <ClInclude Include="..\src\ipsc6.agent.network\framework.h" />
     <ClInclude Include="pch.h" />
@@ -155,6 +154,7 @@
   <ItemGroup>
     <None Include="..\ipsc6.agent.network\.clang-format" />
     <None Include="..\ipsc6.agent.network\.editorconfig" />
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

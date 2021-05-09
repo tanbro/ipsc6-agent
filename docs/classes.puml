@@ -4,7 +4,7 @@ skinparam DefaultFontSize 14
 
 class BaseAgent {
     AgentId: string
-    WorkNo: string
+    WorkerNumber: string
     DisplayName: string
     State: AgentState
     WorkType: WorkType
@@ -22,10 +22,56 @@ note top: \
     工友列表\n\
     在进行转等操作时，在这里个列表类型的 Singleton 对象中放置其它坐席的信息。
 
+class ConnectionInfo {
+    Host: string
+    Port: ushort
+}
+note left: 坐席客户端与CTI服务器之间的网络连接到信息
+
+enum Privilege
+{
+    AUTO_CALLOUT = 3
+    BLOCK = 13
+    BREAK_SESS = 20
+    CALLIN = 1
+    CONSULT = 7
+    CONSULT_EX = 8
+    DES_CALLIN = 2
+    FORCEBREAK = 12
+    FORCEIDLE = 21
+    FORCEINSERT = 11
+    FORCEPAUSE = 22
+    FORCESIGNOFF = 16
+    GREETVOICE = 23
+    INTERCEPT = 6
+    KICKOUT = 15
+    LISTEN = 17
+    MAN_CALLOUT = 5
+    MAN_CONSULT = 30
+    MODIFYPOWER = 24
+    MODIFYPOWER_EX = 25
+    RECORD = 18
+    RECORD2 = 19
+    SYS_CALLOUT = 4
+    TRANSFER = 9
+    TRANSFER_EX = 10
+    UNBLOCK = 14
+}
+note bottom: 坐席的权限枚举
+
+class AgentGroup {
+    Id: string
+    Name: string
+    Checked: bool
+}
+note left: 坐席组
+
 class Agent << (S, Orange) Singleton >> {
-    Connections: Connection[]
-    SipUacs: LocalSipUacInfo[]
-    Privileges: Privilege[]
+    ConnectionList: List<ConnectionInfo>
+    PrivilegeList: List<Privilege>
+    PrivilegeExternList: int[]
+    GroupSet: Set<AgentGroup>
+
 }
 note top: 坐席客户端。一个客户端程序有且只有一个坐席对象。
 
@@ -114,30 +160,6 @@ note right of TeleState::OffHook
     挂机
 endnote
 
-enum Privilege {
-    Unknown = 0
-    CallIn = 1
-    DesCallIn = 2
-    AutoCallOut = 3
-    SysCallOut = 4
-    ManCallOut = 5
-    Intercept = 6
-    Consult = 7
-    ConsultEx = 8
-    Transfer = 9
-    TransferEx = 10
-    ForceInsert = 11
-    ForceBreak = 12
-    Block = 13
-    Unblock = 14
-    kickOut = 15
-    ForceSignOff = 16
-    Listen = 17
-    Record = 18
-    Record2 = 19
-}
-note bottom: 坐席的权限枚举
-
 class QueueInfo {
     Type: QueueInfoType
     BegtinTime: DateTime
@@ -163,7 +185,7 @@ class WorkingCallInfo {
     GroupId: string
     GroupName: string
     AgentId: string
-    AgentWorkNo: string
+    AgentWorkerNumber: string
     AgentDisplayName: string
     Dir: WorkingCallDir
     BegtinTime: DateTime

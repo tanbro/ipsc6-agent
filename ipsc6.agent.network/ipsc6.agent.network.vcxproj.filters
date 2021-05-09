@@ -28,9 +28,6 @@
     <ClInclude Include="..\src\ipsc6.agent.network\framework.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ipsc6.agent.network\errors.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\ipsc6.agent.network\Connector.cpp">

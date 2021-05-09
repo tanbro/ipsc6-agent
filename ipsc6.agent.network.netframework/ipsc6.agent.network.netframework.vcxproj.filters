@@ -30,9 +30,6 @@
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ipsc6.agent.network\errors.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -61,5 +58,6 @@
   <ItemGroup>
     <None Include="..\ipsc6.agent.network\.clang-format" />
     <None Include="..\ipsc6.agent.network\.editorconfig" />
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

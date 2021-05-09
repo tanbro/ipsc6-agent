@@ -1,9 +1,9 @@
-using System;
-
 namespace ipsc6.agent.client
 {
-    public enum ServerSendErrorCode
+    public enum ServerSentErrorCode
     {
+        ERR_OK = 1,
+
         ERR_AGENT = -300,
         // 无效座席
         ERR_AGENT_INVALID_AGENTNO = -301,
@@ -95,7 +95,7 @@ namespace ipsc6.agent.client
         ERR_AGENT_SIGNON_FAILED = -510,
         //指定的坐席组不存在
         ERR_AGENT_NOTEXSIT_GROUP = -511,
-        //签出座席组失败	
+        //签出座席组失败
         ERR_AGENT_SIGNOFF_FAILED = -512,
         //座席暂停失败
         ERR_AGENT_PAUSE = -513,
@@ -179,19 +179,5 @@ namespace ipsc6.agent.client
         ERR_AGENT_OUTOFARRAYRANGE = -552,
         //从服务器端获取的座席组ID集合与座席组名称集合尺寸不相等
         ERR_AGENT_GROUPSIZENOTEQUAL = -553
-    }
-
-    public class ServerSendError : BaseAgentException
-    {
-        public ServerSendError() { }
-        public ServerSendError(string message) : base(message) { }
-        public ServerSendError(string message, Exception inner) : base(message, inner) { }
-    }
-
-    public class ErrorResponseException : BaseAgentException
-    {
-        public ErrorResponseException() { }
-        public ErrorResponseException(string message) : base(message) { }
-        public ErrorResponseException(string message, Exception inner) : base(message, inner) { }
     }
 }

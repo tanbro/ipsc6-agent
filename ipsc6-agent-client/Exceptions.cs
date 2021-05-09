@@ -2,53 +2,94 @@ using System;
 
 namespace ipsc6.agent.client
 {
-    public class BaseAgentException : Exception
+    public class BaseException : Exception
     {
-        public BaseAgentException() { }
-        public BaseAgentException(string message) : base(message) { }
-        public BaseAgentException(string message, Exception inner) : base(message, inner) { }
+        public BaseException() { }
+        public BaseException(string message) : base(message) { }
+        public BaseException(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class AgentConnectException : BaseAgentException
+    public class ConnectionException : BaseException
     {
-        public AgentConnectException() { }
-        public AgentConnectException(string message) : base(message) { }
-        public AgentConnectException(string message, Exception inner) : base(message, inner) { }
+        public ConnectionException() { }
+        public ConnectionException(string message) : base(message) { }
+        public ConnectionException(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class AgentConnectFailedException : AgentConnectException
+    public class ConnectionFailedException : ConnectionException
     {
-        public AgentConnectFailedException() { }
-        public AgentConnectFailedException(string message) : base(message) { }
-        public AgentConnectFailedException(string message, Exception inner) : base(message, inner) { }
+        public ConnectionFailedException() { }
+        public ConnectionFailedException(string message) : base(message) { }
+        public ConnectionFailedException(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class AgentConnectLostException : AgentConnectException
+    public class ConnecttionLostException : ConnectionException
     {
-        public AgentConnectLostException() { }
-        public AgentConnectLostException(string message) : base(message) { }
-        public AgentConnectLostException(string message, Exception inner) : base(message, inner) { }
+        public ConnecttionLostException() { }
+        public ConnecttionLostException(string message) : base(message) { }
+        public ConnecttionLostException(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class AgentDisconnectedException : AgentConnectException
+    public class ConnectionClosedException : ConnectionException
     {
-        public AgentDisconnectedException() { }
-        public AgentDisconnectedException(string message) : base(message) { }
-        public AgentDisconnectedException(string message, Exception inner) : base(message, inner) { }
+        public ConnectionClosedException() { }
+        public ConnectionClosedException(string message) : base(message) { }
+        public ConnectionClosedException(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class AgentRequestException : BaseAgentException
+    public class ConnectionTimeoutException : ConnectionException
     {
-        public AgentRequestException() { }
-        public AgentRequestException(string message) : base(message) { }
-        public AgentRequestException(string message, Exception inner) : base(message, inner) { }
+        public ConnectionTimeoutException() { }
+        public ConnectionTimeoutException(string message) : base(message) { }
+        public ConnectionTimeoutException(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class AgentRequestTimeoutException : AgentRequestException
+    public class DisconnectionTimeoutException : ConnectionException
     {
-        public AgentRequestTimeoutException() { }
-        public AgentRequestTimeoutException(string message) : base(message) { }
-        public AgentRequestTimeoutException(string message, Exception inner) : base(message, inner) { }
+        public DisconnectionTimeoutException() { }
+        public DisconnectionTimeoutException(string message) : base(message) { }
+        public DisconnectionTimeoutException(string message, Exception inner) : base(message, inner) { }
+    }
+
+    public class BaseRequestError : BaseException
+    {
+        public BaseRequestError() { }
+        public BaseRequestError(string message) : base(message) { }
+        public BaseRequestError(string message, Exception inner) : base(message, inner) { }
+    }
+
+    public class RequestTimeoutError : BaseRequestError
+    {
+        public RequestTimeoutError() { }
+        public RequestTimeoutError(string message) : base(message) { }
+        public RequestTimeoutError(string message, Exception inner) : base(message, inner) { }
+    }
+
+    public class ServerSentError : BaseException
+    {
+        public ServerSentError() { }
+        public ServerSentError(string message) : base(message) { }
+        public ServerSentError(string message, Exception inner) : base(message, inner) { }
+    }
+
+    public class ErrorResponse : BaseRequestError
+    {
+        public readonly ServerSentMessage Arg;
+
+        static string MakeMessage(ServerSentMessage arg)
+        {
+            return string.Format("ErrorResponse: {0}", arg);
+        }
+
+        public ErrorResponse(ServerSentMessage arg) : base(MakeMessage(arg))
+        {
+            Arg = arg;
+        }
+
+        public ErrorResponse(ServerSentMessage arg, Exception inner) : base(MakeMessage(arg), inner)
+        {
+            Arg = arg;
+        }
     }
 
 }

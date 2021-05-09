@@ -35,24 +35,23 @@ namespace NetFrameworkWindowsFormsSampleApp
             {
                 var msg = string.Format("{0} Register {1} {2}", getInfo().uri, (int)prm.code, prm.reason);
                 logger.InfoFormat(msg);
-                switch (connId)
+                if (this == form.sipAcc1)
                 {
-                    case 1:
-                        form.Invoke(new Action(() =>
-                        {
-                            form.textBox_Log1.AppendText(string.Format("{0}\r\n", msg));
-                            form.label_SipReg1.Text = msg;
-                        }));
-                        break;
-                    case 2:
-                        form.Invoke(new Action(() =>
-                        {
-                            form.textBox_Log2.AppendText(string.Format("{0}\r\n", msg));
-                            form.label_SipReg2.Text = msg;
-                        }));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    form.Invoke(new Action(() =>
+                    {
+                        form.label_SipReg1.Text = msg;
+                    }));
+                }
+                else if (this == form.sipAcc2)
+                {
+                    form.Invoke(new Action(() =>
+                    {
+                        form.label_SipReg2.Text = msg;
+                    }));
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException();
                 }
             }
 
@@ -67,25 +66,25 @@ namespace NetFrameworkWindowsFormsSampleApp
                     var call = currentSipCall = new SipCall(this, prm.callId);
                     var ci = call.getInfo();
                     var msg = string.Format("IncomingCall {0} {1} \t\n", ci.remoteUri, ci.state);
-                    switch (connId)
+                    if (this == form.sipAcc1)
                     {
-                        case 1:
-                            form.Invoke(new Action(() =>
-                            {
-                                form.textBox_Log1.AppendText(string.Format("{0}\r\n", msg));
-                                form.label_SipReg1.Text = msg;
-                            }));
-                            break;
-                        case 2:
-                            form.Invoke(new Action(() =>
-                            {
-                                form.textBox_Log2.AppendText(string.Format("{0}\r\n", msg));
-                                form.label_SipReg2.Text = msg;
-                            }));
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
+                        form.Invoke(new Action(() =>
+                        {
+                            form.label_SipReg1.Text = msg;
+                        }));
                     }
+                    else if (this == form.sipAcc2)
+                    {
+                        form.Invoke(new Action(() =>
+                        {
+                            form.label_SipReg2.Text = msg;
+                        }));
+                    }
+                    else
+                    {
+                        throw new ArgumentOutOfRangeException();
+                    }
+
                 }
             }
         }
@@ -111,24 +110,23 @@ namespace NetFrameworkWindowsFormsSampleApp
                 }
 
                 var msg = string.Format("Call {0} {1} \t\n", ci.remoteUri, ci.state);
-                switch (acc.connId)
+                if (acc == acc.form.sipAcc1)
                 {
-                    case 1:
-                        acc.form.Invoke(new Action(() =>
-                        {
-                            acc.form.textBox_Log1.AppendText(string.Format("{0}\r\n", msg));
-                            acc.form.label_SipReg1.Text = msg;
-                        }));
-                        break;
-                    case 2:
-                        acc.form.Invoke(new Action(() =>
-                        {
-                            acc.form.textBox_Log2.AppendText(string.Format("{0}\r\n", msg));
-                            acc.form.label_SipReg2.Text = msg;
-                        }));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    acc.form.Invoke(new Action(() =>
+                    {
+                        acc.form.label_SipReg1.Text = msg;
+                    }));
+                }
+                else if (acc == acc.form.sipAcc2)
+                {
+                    acc.form.Invoke(new Action(() =>
+                    {
+                        acc.form.label_SipReg2.Text = msg;
+                    }));
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException();
                 }
 
                 switch (ci.state)
@@ -172,13 +170,35 @@ namespace NetFrameworkWindowsFormsSampleApp
             conn1 = new Connection();
             conn2 = new Connection();
 
-            conn1.OnServerSendEventReceived += Conn_OnServerSendEventReceived;
-            conn1.OnDisconnected += Conn_OnDisconnected;
-            conn1.OnConnectionLost += Conn_OnConnectionLost;
+            conn1.OnServerSentEvent += Conn_OnServerSendEventReceived;
+            conn1.OnClosed += Conn_OnDisconnected;
+            conn1.OnLost += Conn_OnConnectionLost;
+            conn1.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
 
-            conn2.OnServerSendEventReceived += Conn_OnServerSendEventReceived;
-            conn2.OnDisconnected += Conn_OnDisconnected;
-            conn2.OnConnectionLost += Conn_OnConnectionLost;
+            conn2.OnServerSentEvent += Conn_OnServerSendEventReceived;
+            conn2.OnClosed += Conn_OnDisconnected;
+            conn2.OnLost += Conn_OnConnectionLost;
+            conn2.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
+        }
+
+
+        private void Conn_OnConnectionStateChanged(object sender, ConnectionStateChangedEventArgs<ipsc6.agent.client.ConnectionState> e)
+        {
+            Connection conn = (Connection)sender;
+            var text = string.Format("{0}", e.NewState);
+            if (conn == conn1)
+            {
+                Invoke(new Action(() => label_ConnectStatus1.Text = text));
+            }
+            else if (conn == conn2)
+            {
+                Invoke(new Action(() => label_ConnectStatus2.Text = text));
+
+            }
+            else
+            {
+                throw new Exception("Connection 1 or 2?");
+            }
         }
 
         ~Form1()
@@ -197,6 +217,8 @@ namespace NetFrameworkWindowsFormsSampleApp
         private void Form1_Load(object sender, EventArgs e)
         {
             EnumAudioDevices();
+            label_ConnectStatus1.Text = string.Format("{0}", conn1.State);
+            label_ConnectStatus2.Text = string.Format("{0}", conn2.State);
         }
 
         public class PjAudioDeviceInfoAndIndex
@@ -251,12 +273,10 @@ namespace NetFrameworkWindowsFormsSampleApp
             {
                 if (sender == conn1)
                 {
-                    label_ConnectStatus1.Text = "ConnectionLost";
                     sipAcc1?.shutdown();
                 }
                 else if (sender == conn2)
                 {
-                    label_ConnectStatus2.Text = "ConnectionLost";
                     sipAcc2?.shutdown();
                 }
             }));
@@ -268,23 +288,21 @@ namespace NetFrameworkWindowsFormsSampleApp
             {
                 if (sender == conn1)
                 {
-                    label_ConnectStatus1.Text = "Disconnected";
                     sipAcc1?.shutdown();
                 }
                 else if (sender == conn2)
                 {
-                    label_ConnectStatus2.Text = "Disconnected";
                     sipAcc2?.shutdown();
                 }
             }));
         }
 
-        private void Conn_OnServerSendEventReceived(object sender, AgentMessageReceivedEventArgs e)
+        private void Conn_OnServerSendEventReceived(object sender, ServerSentEventArgs e)
         {
 
             Invoke(new Action(() =>
             {
-                var msg = string.Format("event: {0} - [{1}] [{2}] \"{3}\"\r\n", e.CommandType, e.N1, e.N2, e.S);
+                var msg = string.Format("event: {0} - [{1}] [{2}] \"{3}\"\r\n", e.Message.Type, e.Message.N1, e.Message.N2, e.Message.S);
                 int id = 0;
                 if (sender == conn1)
                 {
@@ -297,12 +315,12 @@ namespace NetFrameworkWindowsFormsSampleApp
                     textBox_Log2.AppendText(msg);
                 }
                 // server-send data
-                if (e.CommandType == 55)
+                if (e.Message.Type == MessageType.REMOTE_MSG_SENDDATA)
                 {
                     // SIP 注册地址
-                    if (e.N1 == 13)
+                    if (e.Message.N1 == 13)
                     {
-                        var sipRegistrar = e.S.Trim();
+                        var sipRegistrar = e.Message.S.Trim();
                         if (!string.IsNullOrWhiteSpace(sipRegistrar))
                         {
                             CreateSipAccount(id, sipRegistrar);
@@ -341,10 +359,12 @@ namespace NetFrameworkWindowsFormsSampleApp
                 switch (id)
                 {
                     case 1:
+                        sipAcc1?.Dispose();
                         sipAcc1 = new SipAccount(this, 1);
                         sipAcc1.create(sipAccountCfg);
                         break;
                     case 2:
+                        sipAcc2?.Dispose();
                         sipAcc2 = new SipAccount(this, 2);
                         sipAcc2.create(sipAccountCfg);
                         break;
@@ -362,89 +382,49 @@ namespace NetFrameworkWindowsFormsSampleApp
 
         private async void button_Connect1_Click(object sender, EventArgs e)
         {
-            label_ConnectStatus1.Text = "Connecting ...";
-            try
-            {
-                await conn1.Open(textBox_Server1.Text);
-            }
-            catch (AgentConnectException err)
-            {
-                label_ConnectStatus1.Text = string.Format("Connect failed: {0}", err.Message);
-                return;
-            }
-            label_ConnectStatus1.Text = "Connected.";
+            await conn1.Open(textBox_Server1.Text, textBox_User1.Text, textBox_Psw1.Text, flag: 1);
         }
 
         private async void button_Connect2_Click(object sender, EventArgs e)
         {
-            label_ConnectStatus2.Text = "Connecting ...";
-            try
-            {
-                await conn2.Open(textBox_Server2.Text);
-            }
-            catch (AgentConnectException err)
-            {
-                label_ConnectStatus2.Text = string.Format("Connect failed: {0}", err.Message);
-                return;
-            }
-            label_ConnectStatus2.Text = "Connected.";
-        }
-
-        private async void button_LogIn1_Click(object sender, EventArgs e)
-        {
-            var s = string.Format("{0}|{1}|1|0|{0}", textBox_User1.Text, textBox_Psw1.Text);
-            var r = await conn1.Request(new AgentRequestArgs(
-                AgentMessageEnum.REMOTE_MSG_LOGIN, s
-            ));
-            textBox_Log1.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.CommandType, r.N1, r.N2, r.S));
-        }
-
-        private async void button_LogOut_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                await conn1.Request(new AgentRequestArgs(AgentMessageEnum.REMOTE_MSG_RELEASE), 0);
-            }
-            catch (AgentRequestTimeoutException) { }
+            await conn2.Open(textBox_Server2.Text, textBox_User2.Text, textBox_Psw2.Text, flag: 1);
         }
 
         private async void button_Req1_Click(object sender, EventArgs e)
         {
-            var t = (AgentMessageEnum)numericUpDown_ReqType1.Value;
+            var t = (MessageType)numericUpDown_ReqType1.Value;
             var n = (int)numericUpDown_ReqNum1.Value;
             var s = textBox_ReqContent1.Text.Trim();
-            var r = await conn1.Request(new AgentRequestArgs(t, n, s));
-            textBox_Log1.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.CommandType, r.N1, r.N2, r.S));
+            var r = await conn1.Request(new AgentRequestMessage(t, n, s));
+            textBox_Log1.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.Type, r.N1, r.N2, r.S));
         }
 
         private void button_Disconnect1_Click(object sender, EventArgs e)
         {
             conn1.Close();
-            label_ConnectStatus1.Text = "Closed";
         }
 
         private void button_Disconnect2_Click(object sender, EventArgs e)
         {
             conn2.Close();
-            label_ConnectStatus2.Text = "Closed";
         }
 
         private async void button_LogIn2_Click(object sender, EventArgs e)
         {
             var s = string.Format("{0}|{1}|1|0|{0}", textBox_User2.Text, textBox_Psw2.Text);
-            var r = await conn2.Request(new AgentRequestArgs(
-                AgentMessageEnum.REMOTE_MSG_LOGIN, s
+            var r = await conn2.Request(new AgentRequestMessage(
+                MessageType.REMOTE_MSG_LOGIN, s
             ));
-            textBox_Log2.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.CommandType, r.N1, r.N2, r.S));
+            textBox_Log2.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.Type, r.N1, r.N2, r.S));
         }
 
         private async void button_Req2_Click(object sender, EventArgs e)
         {
-            var t = (AgentMessageEnum)numericUpDown_ReqType2.Value;
+            var t = (MessageType)numericUpDown_ReqType2.Value;
             var n = (int)numericUpDown_ReqNum2.Value;
             var s = textBox_ReqContent2.Text.Trim();
-            var r = await conn2.Request(new AgentRequestArgs(t, n, s));
-            textBox_Log2.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.CommandType, r.N1, r.N2, r.S));
+            var r = await conn2.Request(new AgentRequestMessage(t, n, s));
+            textBox_Log2.AppendText(string.Format("response: {0} {1} {2} {3}\r\n", r.Type, r.N1, r.N2, r.S));
         }
 
         private void button1_Click(object sender, EventArgs e)

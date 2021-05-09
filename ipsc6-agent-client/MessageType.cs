@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace ipsc6.agent.client
 {
-    public enum AgentMessageEnum
+    public enum MessageType
     {
-        UNKNOWN = 0,
+        NONE = 0,
         REMOTE_MSG_LOGIN = 2,    // 登录
         REMOTE_MSG_RELEASE = 3,  // 注销
 
@@ -45,9 +39,11 @@ namespace ipsc6.agent.client
 
         REMOTE_MSG_GREETVOICE = 33,      // 问候语管理
         REMOTE_MSG_MODIFYPOWER = 34,     // 修改权限（自己、他人）
-        REMOTE_MSG_MODIFYPOWER_EX = 35, // 修改扩展权限
+        REMOTE_MSG_MODIFYPOWER_EX = 35,  // 修改扩展权限
         REMOTE_MSG_FORCEPAUSE = 36,      // 强制暂停
         REMOTE_MSG_FORCEIDLE = 37,       // 强制空闲
+
+        REMOTE_MSG_TAKEOVER = 38,       // 告诉服务器：该客户端不再“主要使用”该服务节点
 
         //设置话机模式
 
@@ -55,8 +51,8 @@ namespace ipsc6.agent.client
         REMOTE_MSG_SETSTATE = 50,      // 设置状态
         REMOTE_MSG_SETTELESTATE = 51,  // 设置话机状态
         REMOTE_MSG_SETTELEMODE = 52,
-        REMOTE_MSG_QUEUEINFO = 53,     // 排队信息
-        REMOTE_MSG_HOLDINFO = 54,      // HOLD信息
-        REMOTE_MSG_SENDDATA = 55      // 发送数据
+        REMOTE_MSG_QUEUEINFO = 53,  // 排队信息
+        REMOTE_MSG_HOLDINFO = 54,   // HOLD信息
+        REMOTE_MSG_SENDDATA = 55    // 发送数据
     }
 }
