@@ -33,14 +33,12 @@ namespace ipsc6.agent.client
 
     public class StateChangedEventArgs<T> : EventArgs
     {
-        private readonly T oldState;
-        private readonly T newState;
-        public T OldState => oldState;
-        public T NewState => newState;
+        public T OldState { get; }
+        public T NewState { get; }
         public StateChangedEventArgs(T oldState, T newState) : base()
         {
-            this.oldState = oldState;
-            this.newState = newState;
+            OldState = oldState;
+            NewState = newState;
         }
     }
 
@@ -71,14 +69,12 @@ namespace ipsc6.agent.client
 
     public class BaseCtiEventArgs<T> : EventArgs
     {
-        private readonly ConnectionInfo connectionInfo;
-        public ConnectionInfo ConnectionInfo => connectionInfo;
-        private readonly T value;
-        public T Value => value;
+        public ConnectionInfo ConnectionInfo { get; }
+        public T Value { get; }
         public BaseCtiEventArgs(ConnectionInfo connectionInfo, T value)
         {
-            this.connectionInfo = connectionInfo;
-            this.value = value;
+            ConnectionInfo = connectionInfo;
+            Value = value;
         }
     }
 
@@ -105,8 +101,8 @@ namespace ipsc6.agent.client
 
     public struct AgentIdName
     {
-        public readonly int Id;
-        public readonly string DisplayName;
+        public int Id { get; }
+        public string DisplayName { get; }
     }
 
     public class AgentIdAssignedEventArgs : BaseCtiEventArgs<AgentIdName>
@@ -146,7 +142,7 @@ namespace ipsc6.agent.client
 
     public class SipRegistrarListReceivedEventArgs : EventArgs
     {
-        public readonly string[] Value;
+        public string[] Value { get; }
         public SipRegistrarListReceivedEventArgs(string[] value) : base()
         {
             Value = value;

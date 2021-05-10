@@ -80,6 +80,12 @@ namespace ipsc6.agent.client
         readonly List<ConnectionInfo> connectionList = new List<ConnectionInfo>();
         public IReadOnlyCollection<ConnectionInfo> ConnectionList => connectionList;
         public int GetConnetionIndex(ConnectionInfo connectionInfo) => connectionList.IndexOf(connectionInfo);
+        public ConnectionState GetConnectionState(int index) => internalConnections[index].State;
+        public ConnectionState GetConnectionState(ConnectionInfo connectionInfo)
+        {
+            var index = connectionList.IndexOf(connectionInfo);
+            return internalConnections[index].State;
+        }
 
         readonly List<Connection> internalConnections = new List<Connection>();
 

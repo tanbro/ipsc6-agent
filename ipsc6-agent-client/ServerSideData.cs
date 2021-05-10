@@ -2,11 +2,13 @@ namespace ipsc6.agent.client
 {
     public class ServerSideData
     {
-        public readonly ConnectionInfo ConnectionInfo;
+        private readonly ConnectionInfo connectionInfo;
+        public ConnectionInfo ConnectionInfo => connectionInfo;
 
         public ServerSideData(ConnectionInfo connectionInfo)
         {
-            ConnectionInfo = connectionInfo;
+            this.connectionInfo = connectionInfo;
         }
+
     }
 }

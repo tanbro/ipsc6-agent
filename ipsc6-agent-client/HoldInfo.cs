@@ -6,9 +6,9 @@ namespace ipsc6.agent.client
 {
     public class HoldInfo : ServerSideData, IEquatable<HoldInfo>
     {
-        public readonly int Channel;
-        public readonly HoldEventType EventType;
-        public readonly string SessionId;
+        public int Channel { get; }
+        public HoldEventType EventType { get; }
+        public string SessionId { get; }
 
         public HoldInfo(ConnectionInfo connectionInfo, ServerSentMessage msg) : base(connectionInfo)
         {

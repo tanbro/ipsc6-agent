@@ -7,15 +7,15 @@ namespace ipsc6.agent.client
 
     public class QueueInfo : ServerSideData, IEquatable<QueueInfo>
     {
-        public readonly int Channel;
-        public readonly string GroupId;
-        public readonly string Id;
-        public readonly QueueInfoType Type;
-        public readonly QueueEventType EventType;
-        public readonly string SessionId;
-        public readonly string CallingNo;
-        public readonly string Username;
-        public readonly string CustomeString;
+        public int Channel { get; }
+        public string GroupId { get; }
+        public string Id { get; }
+        public QueueInfoType Type { get; }
+        public QueueEventType EventType { get; }
+        public string SessionId { get; }
+        public string CallingNo { get; }
+        public string Username { get; }
+        public string CustomeString { get; }
 
         public QueueInfo(ConnectionInfo connectionInfo, ServerSentMessage msg) : base(connectionInfo)
         {

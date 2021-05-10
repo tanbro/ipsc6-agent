@@ -2,8 +2,8 @@ namespace ipsc6.agent.client
 {
     public class WorkingChannelInfo
     {
-        public readonly int Channel;
-        public readonly string CustomString;
+        public int Channel { get; }
+        public string CustomString { get; }
         public WorkingChannelInfo(int channel, string customString) : base()
         {
             Channel = channel;
