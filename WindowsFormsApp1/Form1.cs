@@ -105,7 +105,7 @@ namespace WindowsFormsApp1
             }));
         }
 
-        List<MySipAccount> sipAccounts = new List<MySipAccount>();
+        readonly List<MySipAccount> sipAccounts = new List<MySipAccount>();
 
         private void Agent_OnSipRegistrarListReceived(object sender, SipRegistrarListReceivedEventArgs e)
         {
@@ -135,10 +135,7 @@ namespace WindowsFormsApp1
                         else
                         {
                             using (var sipAuthCred = new AuthCredInfo("digest", "*", user, 0, "hesong"))
-                            using (var cfg = new AccountConfig()
-                            {
-                                idUri = uri
-                            })
+                            using (var cfg = new AccountConfig { idUri = uri })
                             {
                                 cfg.regConfig.registrarUri = string.Format("sip:{0}", addr);
                                 cfg.sipConfig.authCreds.Add(sipAuthCred);
@@ -242,9 +239,7 @@ namespace WindowsFormsApp1
             }));
         }
 
-        List<string> serverList;
         public Endpoint Endpoint;
-
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -254,14 +249,15 @@ namespace WindowsFormsApp1
             using (var epCfg = new EpConfig())
             using (var sipTpConfig = new TransportConfig { port = 5060 })
             {
-                //epCfg.logConfig.level = 6;
-                //epCfg.logConfig.writer = SipLogWriter.Instance;
+                epCfg.logConfig.level = 3;
+                epCfg.logConfig.writer = SipLogWriter.Instance;
                 Endpoint.libInit(epCfg);
                 Endpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
                 Endpoint.libStart();
             }
 
             listView_sipAccounts.Items.Clear();
+
             ///// 固定4个 Sip Account
             //for (var i = 0; i < 4; i++)
             //{
@@ -305,7 +301,6 @@ namespace WindowsFormsApp1
                     in textBox_ServerAddressList.Text.Trim().Split(new char[] { ',' })
                     where !string.IsNullOrWhiteSpace(s)
                     select s.Trim();
-                serverList = addresses.ToList();
                 CreateAgent(addresses);
 
                 listView_connections.Items.Clear();
@@ -343,17 +338,17 @@ namespace WindowsFormsApp1
             using (WaitingCursor.Instance)
             {
                 if (agent == null) return;
+                
                 await agent.ShutDown(checkBox_forceClose.Checked);
 
                 agent.Dispose();
                 agent = null;
+
                 listView_Groups.Items.Clear();
                 listView_hold.Items.Clear();
 
                 foreach (var acc in sipAccounts)
                 {
-                    if (acc.isValid())
-                        acc.shutdown();
                     acc.Dispose();
                 }
                 sipAccounts.Clear();

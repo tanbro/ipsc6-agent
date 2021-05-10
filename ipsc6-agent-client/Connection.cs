@@ -49,7 +49,7 @@ namespace ipsc6.agent.client
             {
                 logger.InfoFormat("{0} Dispose", this);
                 // Check to see if Dispose has already been called.
-                if (this.disposed)
+                if (disposed)
                 {
                     logger.ErrorFormat("{0} Dispose has already been called.", this);
                 }
@@ -108,7 +108,7 @@ namespace ipsc6.agent.client
         private TaskCompletionSource<object> disconnectTcs;
         private TaskCompletionSource<int> logInTcs;
         private TaskCompletionSource<object> logOutTcs;
-        private MessageType hangingReqType = MessageType.NONE;
+        private MessageType pendingReqType = MessageType.NONE;
         private TaskCompletionSource<ServerSentMessage> reqTcs;
         private readonly ConcurrentQueue<object> eventQueue = new ConcurrentQueue<object>();
         private readonly CancellationTokenSource eventThreadCancelSource = new CancellationTokenSource();
@@ -258,7 +258,7 @@ namespace ipsc6.agent.client
                 {
                     lock (requestLock)
                     {
-                        isResponse = (hangingReqType == msg_.Type);
+                        isResponse = (pendingReqType == msg_.Type);
                     }
                     if (isResponse)
                     {
@@ -322,7 +322,7 @@ namespace ipsc6.agent.client
             connector.SendAgentMessage((int)value.Type, value.N, value.S);
         }
 
-        public const int DefaultRequestTimeoutMilliseconds = 15000;
+        public const int DefaultRequestTimeoutMilliseconds = 5000;
         public const int DefaultKeepAliveTimeoutMilliseconds = 5000;
 
         public async Task<int> Open(string remoteHost, ushort remotePort, string workerNumber, string password, uint keepAliveTimeout = DefaultKeepAliveTimeoutMilliseconds, int requestTimeout = DefaultRequestTimeoutMilliseconds, int flag = 0)
@@ -355,17 +355,18 @@ namespace ipsc6.agent.client
             ///
             /// 登录
             logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Log-in(flag={4}) as workerNumber \"{3}\"", this, remoteHost, remoteHost, workerNumber, flag);
+            var cst = new CancellationTokenSource();
             var reqData = new AgentRequestMessage(MessageType.REMOTE_MSG_LOGIN, flag, string.Format("{0}|{1}|1|0|{0}", workerNumber, password));
             logInTcs = new TaskCompletionSource<int>();
             Send(reqData);
-            var task = await Task.WhenAny(logInTcs.Task, Task.Delay(requestTimeout));
+            var task = await Task.WhenAny(logInTcs.Task, Task.Delay(requestTimeout, cst.Token));
             if (task != logInTcs.Task)
             {
                 logger.ErrorFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Log in timeout. Closing the connector", this, remoteHost, remoteHost);
                 connector.Disconnect();
                 throw new ConnectionTimeoutException();
             }
-
+            cst.Cancel();
             var agentid = await logInTcs.Task;
             logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Succeed: workerNumber=\"{3}\", AgentId={4}", this, remoteHost, remoteHost, workerNumber, agentid);
             return agentid;
@@ -399,8 +400,9 @@ namespace ipsc6.agent.client
 
             if (graceful)
             {
+                var cst = new CancellationTokenSource();
                 logOutTcs = new TaskCompletionSource<object>();
-                var timeoutTask = Task.Delay(requestTimeout);
+                var timeoutTask = Task.Delay(requestTimeout, cst.Token);
                 logger.InfoFormat("{0} Close(graceful) ...", this);
                 Send(new AgentRequestMessage(MessageType.REMOTE_MSG_RELEASE, flag));
                 task = await Task.WhenAny(logOutTcs.Task, disconnectTcs.Task, timeoutTask);
@@ -408,14 +410,13 @@ namespace ipsc6.agent.client
                 {
                     throw new DisconnectionTimeoutException();
                 }
-                else
-                {
-                    await task;
-                }
+                cst.Cancel();
+                await task;
             }
             else
             {
-                var timeoutTask = Task.Delay(requestTimeout);
+                var cst = new CancellationTokenSource();
+                var timeoutTask = Task.Delay(requestTimeout, cst.Token);
                 logger.InfoFormat("{0} Close(force) ...", this);
                 connector.Disconnect();
                 task = await Task.WhenAny(disconnectTcs.Task, timeoutTask);
@@ -423,10 +424,8 @@ namespace ipsc6.agent.client
                 {
                     throw new ConnectionTimeoutException();
                 }
-                else
-                {
-                    await task;
-                }
+                cst.Cancel();
+                await task;
             }
         }
 
@@ -443,29 +442,31 @@ namespace ipsc6.agent.client
             }
             lock (requestLock)
             {
-                if (hangingReqType != MessageType.NONE)
+                if (pendingReqType != MessageType.NONE)
                 {
-                    throw new InvalidOperationException(string.Format("A hanging request exists: {0}", hangingReqType));
+                    throw new InvalidOperationException(string.Format("A pending request exists: {0}", pendingReqType));
                 }
-                hangingReqType = args.Type;
+                pendingReqType = args.Type;
             }
             try
             {
-                logger.InfoFormat("{0} Request({1})", this, args);
+                logger.DebugFormat("{0} Request({1})", this, args);
                 reqTcs = new TaskCompletionSource<ServerSentMessage>();
                 connector.SendAgentMessage((int)args.Type, args.N, args.S);
-                var task = await Task.WhenAny(reqTcs.Task, Task.Delay(millisecondsTimeout));
+                var cst = new CancellationTokenSource();
+                var task = await Task.WhenAny(reqTcs.Task, Task.Delay(millisecondsTimeout, cst.Token));
                 if (task != reqTcs.Task)
                 {
                     throw new RequestTimeoutError();
                 }
+                cst.Cancel();
                 return await reqTcs.Task;
             }
             finally
             {
                 lock (requestLock)
                 {
-                    hangingReqType = MessageType.NONE;
+                    pendingReqType = MessageType.NONE;
                 }
             }
         }

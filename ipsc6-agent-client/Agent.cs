@@ -304,7 +304,7 @@ namespace ipsc6.agent.client
                     var groupObj = groupCollection.FirstOrDefault(m => m.Id == id);
                     if (groupObj == null)
                     {
-                        logger.ErrorFormat("DoOnSignedGroupIdList - {0} (id=\"{1})\" does not exist", this, id);
+                        logger.ErrorFormat("DoOnSignedGroupIdList - 技能组 <id=\"{0})\"> 不存在", id);
                     }
                     else
                     {
@@ -711,7 +711,6 @@ namespace ipsc6.agent.client
                     select x.value;
                 await Task.WhenAll(
                     from conn in itConnObj
-                    where conn.Connected
                     select Task.Run(async () =>
                     {
                         if (graceful)

@@ -7,6 +7,14 @@ namespace WindowsFormsApp1
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger("org.pjsip.pjsua2");
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                base.Dispose(disposing);
+            }
+        }
+
         static readonly object _l = new object();
         private static SipLogWriter instance = null;
         public static SipLogWriter Instance
