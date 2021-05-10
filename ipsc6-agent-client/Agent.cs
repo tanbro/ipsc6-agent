@@ -109,12 +109,15 @@ namespace ipsc6.agent.client
         WorkType workType = WorkType.Unknown;
         public AgentState AgentState => agentState;
         public WorkType WorkType => workType;
-        void SetAgentStateWorkType(AgentStateWorkType value)
+        public AgentStateWorkType AgentStateWorkType
         {
-            agentState = value.AgentState;
-            workType = value.WorkType;
+            get => new AgentStateWorkType(agentState, workType);
+            private set
+            {
+                agentState = value.AgentState;
+                workType = value.WorkType;
+            }
         }
-        public AgentStateWorkType AgentStateWorkType => new AgentStateWorkType(agentState, workType);
         public event AgentStateChangedEventHandler OnAgentStateChanged;
 
         TeleState teleState = TeleState.HangUp;
@@ -164,37 +167,45 @@ namespace ipsc6.agent.client
 
         void ProcessStateChangedMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
-            AgentStateWorkType oldState;
-            AgentStateChangedEventArgs<AgentStateWorkType> ev = null;
+            AgentState[] workingState = { AgentState.Ring, AgentState.Work };
+            AgentStateWorkType oldState = null;
             var newState = new AgentStateWorkType((AgentState)msg.N1, (WorkType)msg.N2);
+            var currIndex = connectionList.FindIndex(ci => ci == connInfo);
+            Connection oldMainConnObj = null;
             lock (this)
             {
-                var index = connectionList.FindIndex(x => x == connInfo);
-                oldState = AgentStateWorkType.Clone() as AgentStateWorkType;
-                var connObj = internalConnections[index];
-                if (
-                    (newState.AgentState == AgentState.Ring) ||
-                    (newState.AgentState == AgentState.Work)
-                )
+                if (AgentStateWorkType != newState)
                 {
-                    TakeOverMaster(index);
+                    oldState = AgentStateWorkType.Clone() as AgentStateWorkType;
+                    AgentStateWorkType = newState;
                 }
-                if (oldState != newState)
+                // 如果是工作状态且主连接不是当前的，需要切换！
+                if (workingState.Any(state => state == newState.AgentState) && currIndex != mainConnectionIndex)
                 {
-                    SetAgentStateWorkType(newState);
-                    ev = new AgentStateChangedEventArgs<AgentStateWorkType>(oldState, newState);
+                    oldMainConnObj = mainConnectionIndex < 0 ? null : MainConnection;
+                    // 先修改 index
+                    mainConnectionIndex = currIndex;
+                    logger.InfoFormat("切换主连接到 {0}", MainConnection);
                 }
             }
-            if (ev != null)
+            if (oldMainConnObj != null)
             {
+                OnMainConnectionChanged?.Invoke(this, new EventArgs());
+                // 再通知原来的主，无论能否通知成功
+                if (oldMainConnObj != null)
+                {
+                    Task.Run(async () =>
+                    {
+                        var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKENAWAY);
+                        await oldMainConnObj.Request(req);
+                    });
+                }
+            }
+            if (oldState != null)
+            {
+                var ev = new AgentStateChangedEventArgs<AgentStateWorkType>(oldState, newState);
                 OnAgentStateChanged?.Invoke(this, ev);
             }
-        }
-
-        private void TakeOverMaster(int index)
-        {
-            mainConnectionIndex = index;
-            OnMainConnectionChanged?.Invoke(this, new EventArgs());
         }
 
         void ProcessTeleStateChangedMessage(ConnectionInfo connInfo, ServerSentMessage msg)
@@ -951,7 +962,7 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task TakeOver(int index)
+        public async Task TakenAway(int index)
         {
             Connection connObj;
             // 先修改 index
@@ -971,6 +982,7 @@ namespace ipsc6.agent.client
                 }
                 connObj = MainConnection;
                 mainConnectionIndex = index;
+                logger.InfoFormat("切换主连接到 {0}", MainConnection);
             }
             OnMainConnectionChanged?.Invoke(this, new EventArgs());
             // 再通知原来的主，无论能否通知成功
