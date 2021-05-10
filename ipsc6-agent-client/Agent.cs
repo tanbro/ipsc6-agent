@@ -8,8 +8,7 @@ namespace ipsc6.agent.client
     public class Agent : IDisposable
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Agent));
-        // Flag: Has Dispose already been called?
-        private bool disposed = false;
+
         public Agent(IEnumerable<ConnectionInfo> connections)
         {
             foreach (var m in connections)
@@ -22,10 +21,26 @@ namespace ipsc6.agent.client
             }
         }
 
+        public Agent(IEnumerable<string> addresses)
+        {
+            foreach (var s in addresses)
+            {
+                var connInfo = new ConnectionInfo(s);
+                var conn = new Connection();
+                conn.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
+                conn.OnServerSentEvent += Conn_OnServerSend;
+                internalConnections.Add(conn);
+                connectionList.Add(connInfo);
+            }
+        }
+
         ~Agent()
         {
             Dispose(false);
         }
+
+        // Flag: Has Dispose already been called?
+        private bool disposed = false;
 
         public void Dispose()
         {
@@ -75,10 +90,7 @@ namespace ipsc6.agent.client
 
         public ConnectionInfo MainConnectionInfo => (mainConnectionIndex < 0) ? null : connectionList[mainConnectionIndex];
 
-        Connection MainConnection
-        {
-            get { return internalConnections[mainConnectionIndex]; }
-        }
+        Connection MainConnection => internalConnections[mainConnectionIndex];
         public int AgentId => MainConnection.AgentId;
 
         string displayName;
@@ -89,46 +101,26 @@ namespace ipsc6.agent.client
 
         AgentState agentState = AgentState.NotExist;
         WorkType workType = WorkType.Unknown;
-        public AgentState AgentState
-        {
-            get { return agentState; }
-        }
-        public WorkType WorkType
-        {
-            get { return workType; }
-        }
+        public AgentState AgentState => agentState;
+        public WorkType WorkType => workType;
         void SetAgentStateWorkType(AgentStateWorkType value)
         {
             agentState = value.AgentState;
             workType = value.WorkType;
         }
-        public AgentStateWorkType AgentStateWorkType
-        {
-            get { return new AgentStateWorkType(agentState, workType); }
-        }
+        public AgentStateWorkType AgentStateWorkType => new AgentStateWorkType(agentState, workType);
         public event AgentStateChangedEventHandler OnAgentStateChanged;
 
-
         TeleState teleState = TeleState.HangUp;
-        public TeleState TeleState
-        {
-            get { return teleState; }
-        }
+        public TeleState TeleState => teleState;
         public event TeleStateChangedEventHandler OnTeleStateChanged;
 
-
-        HashSet<QueueInfo> queueInfoCollection = new HashSet<QueueInfo>();
-        public IReadOnlyCollection<QueueInfo> QueueInfoCollection
-        {
-            get { return queueInfoCollection; }
-        }
+        readonly HashSet<QueueInfo> queueInfoCollection = new HashSet<QueueInfo>();
+        public IReadOnlyCollection<QueueInfo> QueueInfoCollection => queueInfoCollection;
         public event QueueInfoEventHandler OnQueueInfo;
 
-        HashSet<HoldInfo> holdInfoCollection = new HashSet<HoldInfo>();
-        public IReadOnlyCollection<HoldInfo> HoldInfoCollection
-        {
-            get { return holdInfoCollection; }
-        }
+        readonly HashSet<HoldInfo> holdInfoCollection = new HashSet<HoldInfo>();
+        public IReadOnlyCollection<HoldInfo> HoldInfoCollection => holdInfoCollection;
         public event HoldInfoEventHandler OnHoldInfo;
 
         void Conn_OnServerSend(object sender, ServerSentEventArgs e)
@@ -349,10 +341,7 @@ namespace ipsc6.agent.client
         }
 
         RingInfo ringInfo;
-        public RingInfo RingInfo
-        {
-            get { return ringInfo; }
-        }
+        public RingInfo RingInfo => ringInfo;
         public event RingInfoReceivedEventHandler OnRingInfoReceived;
         private void DoOnRing(ConnectionInfo connInfo, ServerSentMessage msg)
         {
@@ -370,10 +359,7 @@ namespace ipsc6.agent.client
         }
 
         WorkingChannelInfo workingChannelInfo;
-        public WorkingChannelInfo WorkingChannel
-        {
-            get { return workingChannelInfo; }
-        }
+        public WorkingChannelInfo WorkingChannel => workingChannelInfo;
         public event WorkingChannelInfoReceivedEventHandler OnWorkingChannelInfoReceived;
         private void DoOnWorkingChannel(ConnectionInfo connInfo, ServerSentMessage msg)
         {
@@ -386,13 +372,10 @@ namespace ipsc6.agent.client
             OnWorkingChannelInfoReceived?.Invoke(this, evt);
         }
 
-        private HashSet<Privilege> privilegeCollection = new HashSet<Privilege>();
-        public IReadOnlyCollection<Privilege> PrivilegeCollection
-        {
-            get { return privilegeCollection; }
-        }
+        private readonly HashSet<Privilege> privilegeCollection = new HashSet<Privilege>();
+        public IReadOnlyCollection<Privilege> PrivilegeCollection => privilegeCollection;
         public event EventHandler OnPrivilegeCollectionReceived;
-        private void DoOnPrivilegeList(ConnectionInfo connInfo, ServerSentMessage msg)
+        private void DoOnPrivilegeList(ConnectionInfo _, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var parts = msg.S.Split(Constants.VerticalBarDelimiter);
@@ -406,11 +389,8 @@ namespace ipsc6.agent.client
             OnPrivilegeCollectionReceived?.Invoke(this, new EventArgs());
         }
 
-        private HashSet<int> privilegeExternCollection = new HashSet<int>();
-        public IReadOnlyCollection<int> PrivilegeExternCollection
-        {
-            get { return privilegeExternCollection; }
-        }
+        private readonly HashSet<int> privilegeExternCollection = new HashSet<int>();
+        public IReadOnlyCollection<int> PrivilegeExternCollection => privilegeExternCollection;
         public event EventHandler OnPrivilegeExternCollectionReceived;
         private void DoOnPrivilegeExternList(ConnectionInfo _, ServerSentMessage msg)
         {
@@ -426,11 +406,8 @@ namespace ipsc6.agent.client
             OnPrivilegeExternCollectionReceived?.Invoke(this, new EventArgs());
         }
 
-        HashSet<AgentGroup> groupCollection = new HashSet<AgentGroup>();
-        public IReadOnlyCollection<AgentGroup> GroupCollection
-        {
-            get { return groupCollection; }
-        }
+        readonly List<AgentGroup> groupCollection = new List<AgentGroup>();
+        public IReadOnlyCollection<AgentGroup> GroupCollection => groupCollection;
         public event EventHandler OnGroupCollectionReceived;
         void DoOnGroupIdList(ConnectionInfo _, ServerSentMessage msg)
         {
@@ -454,10 +431,9 @@ namespace ipsc6.agent.client
             var names = msg.S.Split(Constants.VerticalBarDelimiter);
             lock (this)
             {
-                var it = groupCollection.Zip(names, (first, second) => new { first, second });
-                foreach (var m in it)
+                foreach (var pair in groupCollection.Zip(names, (first, second) => new { first, second }))
                 {
-                    m.first.Name = m.second;
+                    pair.first.Name = pair.second;
                 }
             }
             OnGroupCollectionReceived?.Invoke(this, new EventArgs());
@@ -972,7 +948,6 @@ namespace ipsc6.agent.client
 
         public async Task TakeOver(int index)
         {
-            int savedValue;
             Connection connObj;
             // 先修改 index
             lock (this)
@@ -987,15 +962,14 @@ namespace ipsc6.agent.client
                 }
                 if (internalConnections[index].State != ConnectionState.Ok)
                 {
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException(string.Format("{0}", internalConnections[index].State));
                 }
                 connObj = MainConnection;
-                savedValue = mainConnectionIndex;
                 mainConnectionIndex = index;
             }
             OnMainConnectionChanged?.Invoke(this, new EventArgs());
             // 再通知原来的主，无论能否通知成功
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKEOVER);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKENAWAY);
             await connObj.Request(req);
         }
 

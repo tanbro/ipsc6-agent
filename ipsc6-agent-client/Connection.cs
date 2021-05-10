@@ -16,6 +16,7 @@ namespace ipsc6.agent.client
         {
             this.connector = connector;
             Encoding = encoding ?? Encoding.Default;
+            eventThread = new Thread(new ParameterizedThreadStart(EventThreadStarter));
             Initialize();
         }
 
@@ -23,6 +24,7 @@ namespace ipsc6.agent.client
         {
             connector = network.Connector.CreateInstance(localPort, address);
             Encoding = encoding ?? Encoding.Default;
+            eventThread = new Thread(new ParameterizedThreadStart(EventThreadStarter));
             Initialize();
         }
 
@@ -31,6 +33,7 @@ namespace ipsc6.agent.client
             Dispose(false);
         }
 
+        #region IDisposable
         // Flag: Has Dispose already been called?
         private bool disposed = false;
 
@@ -64,7 +67,18 @@ namespace ipsc6.agent.client
                 }
             }
         }
+        #endregion
 
+        private void Initialize()
+        {
+            logger.InfoFormat("{0} Initialize", this);
+            connector.OnConnectAttemptFailed += Connector_OnConnectAttemptFailed;
+            connector.OnConnected += Connector_OnConnected;
+            connector.OnDisconnected += Connector_OnDisconnected;
+            connector.OnConnectionLost += Connector_OnConnectionLost;
+            connector.OnAgentMessageReceived += Connector_OnAgentMessageReceived;
+            eventThread.Start(eventThreadCancelSource.Token);
+        }
 
         private readonly network.Connector connector;
 
@@ -82,16 +96,12 @@ namespace ipsc6.agent.client
         }
 
         private ConnectionState state = ConnectionState.Init;
+        public ConnectionState State => state;
         private void SetState(ConnectionState newState)
         {
             var e = new ConnectionStateChangedEventArgs<ConnectionState>(state, newState);
             state = newState;
             Task.Run(() => OnConnectionStateChanged?.Invoke(this, e));
-        }
-
-        public ConnectionState State
-        {
-            get { return state; }
         }
 
         private TaskCompletionSource<object> connectTcs;
@@ -100,21 +110,16 @@ namespace ipsc6.agent.client
         private TaskCompletionSource<object> logOutTcs;
         private MessageType hangingReqType = MessageType.NONE;
         private TaskCompletionSource<ServerSentMessage> reqTcs;
-        private ConcurrentQueue<object> eventQueue;
-        private Thread eventThread;
+        private readonly ConcurrentQueue<object> eventQueue = new ConcurrentQueue<object>();
         private readonly CancellationTokenSource eventThreadCancelSource = new CancellationTokenSource();
+        private readonly Thread eventThread;
 
         string remoteHost;
-        public string RemoteHost
-        { get { return remoteHost; } }
+        public string RemoteHost => remoteHost;
         ushort remotePort;
-        public ushort RemotePort
-        { get { return remotePort; } }
+        public ushort RemotePort => remotePort;
 
-        public bool Connected
-        {
-            get { return connector.Connected; }
-        }
+        public bool Connected => connector.Connected;
 
         public event ServerSentEventHandler OnServerSentEvent;
         public event ClosedEventHandler OnClosed;
@@ -279,8 +284,7 @@ namespace ipsc6.agent.client
 
         private void Connector_OnAgentMessageReceived(object sender, network.AgentMessageReceivedEventArgs e)
         {
-            /* UTF-8 转当前编码 */
-            var data = new ServerSentMessage(e);
+            var data = new ServerSentMessage(e, Encoding);
             logger.DebugFormat("{0} AgentMessageReceived: {1}", this, data);
             eventQueue.Enqueue(data);
         }
@@ -310,19 +314,6 @@ namespace ipsc6.agent.client
         }
 
         public readonly Encoding Encoding;
-
-        private void Initialize()
-        {
-            logger.InfoFormat("{0} Initialize", this);
-            connector.OnConnectAttemptFailed += Connector_OnConnectAttemptFailed;
-            connector.OnConnected += Connector_OnConnected;
-            connector.OnDisconnected += Connector_OnDisconnected;
-            connector.OnConnectionLost += Connector_OnConnectionLost;
-            connector.OnAgentMessageReceived += Connector_OnAgentMessageReceived;
-            eventQueue = new ConcurrentQueue<object>();
-            eventThread = new Thread(new ParameterizedThreadStart(EventThreadStarter));
-            eventThread.Start(eventThreadCancelSource.Token);
-        }
 
         private readonly object connectLock = new object();
 

@@ -29,6 +29,7 @@ namespace ipsc6.agent.client
             Type = (MessageType)e.CommandType;
             N1 = e.N1;
             N2 = e.N2;
+            /* UTF-8 转当前编码 */
             var utfBytes = (encoding ?? Encoding.Default).GetBytes(e.S);
             e.S = Encoding.UTF8.GetString(utfBytes, 0, utfBytes.Length);
             S = e.S;

@@ -30,12 +30,12 @@ namespace ipsc6.agent.client
 
         public static bool operator ==(AgentGroup lhs, AgentGroup rhs)
         {
-            return lhs.Equals(rhs);
+            return (lhs is object) && (rhs is object) && lhs.Equals(rhs);
         }
 
         public static bool operator !=(AgentGroup lhs, AgentGroup rhs)
         {
-            return !lhs.Equals(rhs);
+            return !(lhs == rhs);
         }
 
     }

@@ -227,11 +227,9 @@ namespace WindowsFormsApp1
             }));
         }
 
-        bool mainConnected = false;
 
         private void Agent_OnConnectionStateChanged(object sender, ConnectionInfoStateChangedEventArgs<ipsc6.agent.client.ConnectionState> e)
         {
-            mainConnected = (e.ConnectionInfo == agent.MainConnectionInfo) && (e.NewState == ipsc6.agent.client.ConnectionState.Ok);
             Invoke(new Action(() =>
             {
                 var listView = listView_connections;
@@ -302,8 +300,11 @@ namespace WindowsFormsApp1
 
             using (WaitingCursor.Instance)
             {
-                var s = textBox_ServerAddressList.Text.Trim();
-                var addresses = s.Split(new char[] { ',' });
+                var addresses =
+                    from s
+                    in textBox_ServerAddressList.Text.Trim().Split(new char[] { ',' })
+                    where !string.IsNullOrWhiteSpace(s)
+                    select s.Trim();
                 serverList = addresses.ToList();
                 CreateAgent(addresses);
 
@@ -325,7 +326,7 @@ namespace WindowsFormsApp1
                 }
                 catch (ConnectionException)
                 {
-                    if (!mainConnected)
+                    if (agent.RunningState != AgentRunningState.Started)
                     {
                         agent.Dispose();
                         agent = null;

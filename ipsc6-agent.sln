@@ -30,6 +30,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "pjsua2_csharp", "pjsua2_csh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApp1", "WindowsFormsApp1\WindowsFormsApp1.csproj", "{76A1FFCC-50D1-45FE-B2D7-8F3C9387F6C9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{2B080D5B-D8C5-4262-9021-BA48BDF16335}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		ipsc6-agent-client\ipsc6-agent-client.projitems*{01e42cd4-e152-4513-a66f-7d75b3b70bfc}*SharedItemsImports = 13
@@ -150,6 +152,18 @@ Global
 		{76A1FFCC-50D1-45FE-B2D7-8F3C9387F6C9}.Release|x64.Build.0 = Release|Any CPU
 		{76A1FFCC-50D1-45FE-B2D7-8F3C9387F6C9}.Release|x86.ActiveCfg = Release|Any CPU
 		{76A1FFCC-50D1-45FE-B2D7-8F3C9387F6C9}.Release|x86.Build.0 = Release|Any CPU
+		{2B080D5B-D8C5-4262-9021-BA48BDF16335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B080D5B-D8C5-4262-9021-BA48BDF16335}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B080D5B-D8C5-4262-9021-BA48BDF16335}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2B080D5B-D8C5-4262-9021-BA48BDF16335}.Debug|x64.Build.0 = Debug|Any CPU
+		{2B080D5B-D8C5-4262-9021-BA48BDF16335}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2B080D5B-D8C5-4262-9021-BA48BDF16335}.Debug|x86.Build.0 = Debug|Any CPU
+		{2B080D5B-D8C5-4262-9021-BA48BDF16335}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B080D5B-D8C5-4262-9021-BA48BDF16335}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B080D5B-D8C5-4262-9021-BA48BDF16335}.Release|x64.ActiveCfg = Release|Any CPU
+		{2B080D5B-D8C5-4262-9021-BA48BDF16335}.Release|x64.Build.0 = Release|Any CPU
+		{2B080D5B-D8C5-4262-9021-BA48BDF16335}.Release|x86.ActiveCfg = Release|Any CPU
+		{2B080D5B-D8C5-4262-9021-BA48BDF16335}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

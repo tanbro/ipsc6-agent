@@ -31,12 +31,12 @@ namespace ipsc6.agent.client
 
         public static bool operator ==(ConnectionInfo lhs, ConnectionInfo rhs)
         {
-            return lhs.Equals(rhs);
+            return (lhs is object) && (rhs is object) && lhs.Equals(rhs);
         }
 
         public static bool operator !=(ConnectionInfo lhs, ConnectionInfo rhs)
         {
-            return !lhs.Equals(rhs);
+            return !(lhs == rhs);
         }
 
         public override string ToString()
