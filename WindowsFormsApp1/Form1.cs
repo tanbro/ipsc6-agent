@@ -1,10 +1,14 @@
-using ipsc6.agent.client;
-using org.pjsip.pjsua2;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text.Json;
 using System.Windows.Forms;
+
+using ipsc6.agent.client;
+using org.pjsip.pjsua2;
+using EmbedIO;
+
 
 namespace WindowsFormsApp1
 {
@@ -12,6 +16,8 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Form1));
+        WebServer webServer;
+        WebSocketsChatServer chatServer;
         public Form1()
         {
             InitializeComponent();
@@ -195,22 +201,35 @@ namespace WindowsFormsApp1
         private void Agent_OnSignedGroupsChanged(object sender, EventArgs e)
         {
 
-            Invoke(new Action(() => RefreshGroupListView()));
+            Invoke(new Action(async () => {
+                RefreshGroupListView();
+                //
+                var payload = JsonSerializer.Serialize(agent.GroupCollection);
+                await chatServer.Broadcast(payload);
+            }));
         }
 
         private void Agent_OnGroupCollectionReceived(object sender, EventArgs e)
         {
 
-            Invoke(new Action(() => RefreshGroupListView()));
+            Invoke(new Action(async () => {
+                RefreshGroupListView();
+                //
+                var payload = JsonSerializer.Serialize(agent.GroupCollection);
+                await chatServer.Broadcast(payload);
+            }));
         }
 
         private void Agent_OnAgentStateChanged(object sender, AgentStateChangedEventArgs<AgentStateWorkType> e)
         {
 
-            Invoke(new Action(() =>
+            Invoke(new Action(async () =>
             {
                 var s = string.Format("{0}({1}) ==> {2}({3})", e.OldState.AgentState, e.OldState.WorkType, e.NewState.AgentState, e.NewState.WorkType);
                 label_agentState.Text = s;
+                //
+                var payload = JsonSerializer.Serialize(e);
+                await chatServer.Broadcast(payload);
             }));
         }
 
@@ -227,7 +246,7 @@ namespace WindowsFormsApp1
 
         private void Agent_OnConnectionStateChanged(object sender, ConnectionInfoStateChangedEventArgs<ipsc6.agent.client.ConnectionState> e)
         {
-            Invoke(new Action(() =>
+            Invoke(new Action(async () =>
             {
                 var listView = listView_connections;
                 var index = agent.GetConnetionIndex(e.ConnectionInfo);
@@ -236,6 +255,9 @@ namespace WindowsFormsApp1
                 var s = string.Format("{0}->{1}", e.OldState, e.NewState);
                 item.SubItems[1].Text = s;
                 item.SubItems[2].Text = isMain ? "*" : "";
+                ///
+                var payload = JsonSerializer.Serialize(e);
+                await chatServer.Broadcast(payload);
             }));
         }
 
@@ -270,6 +292,11 @@ namespace WindowsFormsApp1
 
             ///
             ipsc6.agent.network.Connector.Initial();
+
+            //
+            chatServer = new WebSocketsChatServer("/chat");
+            webServer = new WebServer(8080).WithModule(chatServer);
+            webServer.Start();
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -282,6 +309,7 @@ namespace WindowsFormsApp1
             Endpoint.Dispose();
             //
             ipsc6.agent.network.Connector.Release();
+            //
         }
 
         private async void button_open_Click(object sender, EventArgs e)
@@ -338,7 +366,7 @@ namespace WindowsFormsApp1
             using (WaitingCursor.Instance)
             {
                 if (agent == null) return;
-                
+
                 await agent.ShutDown(checkBox_forceClose.Checked);
 
                 agent.Dispose();
@@ -536,7 +564,7 @@ namespace WindowsFormsApp1
             await agent.HangUp();
         }
 
-        private async void unHoldToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void UnHoldToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
             var holdInfo = listView_hold.SelectedItems[0].Tag as HoldInfo;

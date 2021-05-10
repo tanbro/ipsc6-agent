@@ -608,7 +608,7 @@ namespace WindowsFormsApp1
             this.unHoldToolStripMenuItem.Name = "unHoldToolStripMenuItem";
             this.unHoldToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
             this.unHoldToolStripMenuItem.Text = "UnHold";
-            this.unHoldToolStripMenuItem.Click += new System.EventHandler(this.unHoldToolStripMenuItem_Click);
+            this.unHoldToolStripMenuItem.Click += new System.EventHandler(this.UnHoldToolStripMenuItem_Click);
             // 
             // label10
             // 

@@ -4,9 +4,12 @@ namespace ipsc6.agent.client
 {
     public class AgentGroup : IEquatable<AgentGroup>
     {
-        public readonly string Id;
-        public string Name;
-        public bool Signed = false;
+        public string Id { get; }
+        public string Name { get; set; }
+
+        private bool signed = false;
+        public bool Signed { get => signed; set => signed = value; }
+
         public AgentGroup(string id)
         {
             Id = id;

@@ -4,8 +4,8 @@ namespace ipsc6.agent.client
 {
     public class ConnectionInfo : IEquatable<ConnectionInfo>
     {
-        public readonly string Host;
-        public readonly ushort Port;
+        public string Host { get; }
+        public ushort Port { get; }
 
         public ConnectionInfo(string host, ushort port = 0)
         {
@@ -45,5 +45,6 @@ namespace ipsc6.agent.client
                 "<{0} at 0x{1:x8} Host={2}, Port={3}>",
                 GetType().Name, GetHashCode(), Host, Port);
         }
+
     }
 }

@@ -33,13 +33,14 @@ namespace ipsc6.agent.client
 
     public class StateChangedEventArgs<T> : EventArgs
     {
-        public readonly T OldState;
-        public readonly T NewState;
-
+        private readonly T oldState;
+        private readonly T newState;
+        public T OldState => oldState;
+        public T NewState => newState;
         public StateChangedEventArgs(T oldState, T newState) : base()
         {
-            OldState = oldState;
-            NewState = newState;
+            this.oldState = oldState;
+            this.newState = newState;
         }
     }
 
@@ -50,7 +51,7 @@ namespace ipsc6.agent.client
 
     public class ConnectionInfoStateChangedEventArgs<T> : StateChangedEventArgs<ConnectionState>
     {
-        public readonly ConnectionInfo ConnectionInfo;
+        public ConnectionInfo ConnectionInfo { get; }
 
         public ConnectionInfoStateChangedEventArgs(
             ConnectionInfo connectionInfo,
@@ -70,12 +71,14 @@ namespace ipsc6.agent.client
 
     public class BaseCtiEventArgs<T> : EventArgs
     {
-        public readonly ConnectionInfo ConnectionInfo;
-        public readonly T Value;
+        private readonly ConnectionInfo connectionInfo;
+        public ConnectionInfo ConnectionInfo => connectionInfo;
+        private readonly T value;
+        public T Value => value;
         public BaseCtiEventArgs(ConnectionInfo connectionInfo, T value)
         {
-            ConnectionInfo = connectionInfo;
-            Value = value;
+            this.connectionInfo = connectionInfo;
+            this.value = value;
         }
     }
 

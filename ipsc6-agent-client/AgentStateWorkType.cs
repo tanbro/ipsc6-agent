@@ -4,8 +4,8 @@ namespace ipsc6.agent.client
 {
     public class AgentStateWorkType : IEquatable<AgentStateWorkType>, ICloneable
     {
-        public readonly AgentState AgentState;
-        public readonly WorkType WorkType;
+        public AgentState AgentState { get; }
+        public WorkType WorkType { get; }
 
         public AgentStateWorkType(AgentState agentState, WorkType workType)
         {
@@ -16,9 +16,29 @@ namespace ipsc6.agent.client
         public bool Equals(AgentStateWorkType other)
         {
             return (
-                (this.AgentState == other.AgentState) &&
-                (this.WorkType == other.WorkType)
+                (AgentState == other.AgentState) &&
+                (WorkType == other.WorkType)
             );
+        }
+        public override bool Equals(object obj)
+        {
+            var that = obj as AgentStateWorkType;
+            return Equals(that);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public static bool operator ==(AgentStateWorkType lhs, AgentStateWorkType rhs)
+        {
+            return (lhs is object) && (rhs is object) && lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(AgentStateWorkType lhs, AgentStateWorkType rhs)
+        {
+            return !(lhs == rhs);
         }
 
         public object Clone()
