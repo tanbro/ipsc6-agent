@@ -93,11 +93,19 @@ namespace WindowsFormsApp1
             this.label10 = new System.Windows.Forms.Label();
             this.button6 = new System.Windows.Forms.Button();
             this.numericUpDown_MainIndex = new System.Windows.Forms.NumericUpDown();
+            this.listView_queue = new System.Windows.Forms.ListView();
+            this.columnHeader12 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader13 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader14 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.label15 = new System.Windows.Forms.Label();
+            this.contextMenuStrip_queue = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.dequeueToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_group.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqNum2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType2)).BeginInit();
             this.contextMenuStrip_hold.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_MainIndex)).BeginInit();
+            this.contextMenuStrip_queue.SuspendLayout();
             this.SuspendLayout();
             // 
             // textBox_ServerAddressList
@@ -329,7 +337,7 @@ namespace WindowsFormsApp1
             this.listView_sipAccounts.HideSelection = false;
             this.listView_sipAccounts.Location = new System.Drawing.Point(7, 392);
             this.listView_sipAccounts.Name = "listView_sipAccounts";
-            this.listView_sipAccounts.Size = new System.Drawing.Size(423, 110);
+            this.listView_sipAccounts.Size = new System.Drawing.Size(846, 110);
             this.listView_sipAccounts.TabIndex = 28;
             this.listView_sipAccounts.UseCompatibleStateImageBehavior = false;
             this.listView_sipAccounts.View = System.Windows.Forms.View.Details;
@@ -512,7 +520,7 @@ namespace WindowsFormsApp1
             this.btn_unhold.Name = "btn_unhold";
             this.btn_unhold.Size = new System.Drawing.Size(75, 23);
             this.btn_unhold.TabIndex = 44;
-            this.btn_unhold.Text = "Un-Hold";
+            this.btn_unhold.Text = "Un-Hold(无用)";
             this.btn_unhold.UseVisualStyleBackColor = true;
             this.btn_unhold.Click += new System.EventHandler(this.btn_unhold_Click);
             // 
@@ -636,11 +644,60 @@ namespace WindowsFormsApp1
             this.numericUpDown_MainIndex.Size = new System.Drawing.Size(42, 21);
             this.numericUpDown_MainIndex.TabIndex = 56;
             // 
+            // listView_queue
+            // 
+            this.listView_queue.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader12,
+            this.columnHeader13,
+            this.columnHeader14});
+            this.listView_queue.ContextMenuStrip = this.contextMenuStrip_queue;
+            this.listView_queue.FullRowSelect = true;
+            this.listView_queue.HideSelection = false;
+            this.listView_queue.Location = new System.Drawing.Point(531, 276);
+            this.listView_queue.Name = "listView_queue";
+            this.listView_queue.Size = new System.Drawing.Size(322, 110);
+            this.listView_queue.TabIndex = 57;
+            this.listView_queue.UseCompatibleStateImageBehavior = false;
+            this.listView_queue.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader12
+            // 
+            this.columnHeader12.Width = 89;
+            // 
+            // columnHeader13
+            // 
+            this.columnHeader13.Width = 88;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(540, 261);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(65, 12);
+            this.label15.TabIndex = 58;
+            this.label15.Text = "Queue List";
+            // 
+            // contextMenuStrip_queue
+            // 
+            this.contextMenuStrip_queue.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dequeueToolStripMenuItem});
+            this.contextMenuStrip_queue.Name = "contextMenuStrip_queue";
+            this.contextMenuStrip_queue.Size = new System.Drawing.Size(129, 26);
+            // 
+            // dequeueToolStripMenuItem
+            // 
+            this.dequeueToolStripMenuItem.Name = "dequeueToolStripMenuItem";
+            this.dequeueToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.dequeueToolStripMenuItem.Text = "Dequeue";
+            this.dequeueToolStripMenuItem.Click += new System.EventHandler(this.dequeueToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(901, 630);
+            this.ClientSize = new System.Drawing.Size(901, 546);
+            this.Controls.Add(this.label15);
+            this.Controls.Add(this.listView_queue);
             this.Controls.Add(this.numericUpDown_MainIndex);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.label10);
@@ -698,6 +755,7 @@ namespace WindowsFormsApp1
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_ReqType2)).EndInit();
             this.contextMenuStrip_hold.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_MainIndex)).EndInit();
+            this.contextMenuStrip_queue.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -768,6 +826,13 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Button button6;
         private System.Windows.Forms.NumericUpDown numericUpDown_MainIndex;
+        private System.Windows.Forms.ListView listView_queue;
+        private System.Windows.Forms.ColumnHeader columnHeader12;
+        private System.Windows.Forms.ColumnHeader columnHeader13;
+        private System.Windows.Forms.ColumnHeader columnHeader14;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip_queue;
+        private System.Windows.Forms.ToolStripMenuItem dequeueToolStripMenuItem;
     }
 }
 

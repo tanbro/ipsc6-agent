@@ -50,7 +50,6 @@ namespace ipsc6.agent.client
     public class ConnectionInfoStateChangedEventArgs<T> : StateChangedEventArgs<ConnectionState>
     {
         public ConnectionInfo ConnectionInfo { get; }
-
         public ConnectionInfoStateChangedEventArgs(
             ConnectionInfo connectionInfo,
             ConnectionState oldState, ConnectionState newState

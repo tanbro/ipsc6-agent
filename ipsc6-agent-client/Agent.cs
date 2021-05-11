@@ -61,7 +61,7 @@ namespace ipsc6.agent.client
                 {
                     foreach (var conn in internalConnections)
                     {
-                        logger.DebugFormat("{0} Dispose {1}", this, conn);
+                        logger.DebugFormat("Dispose {0}", conn);
                         conn.Dispose();
                     }
                     // Note disposing has been done.
@@ -80,6 +80,8 @@ namespace ipsc6.agent.client
         readonly List<ConnectionInfo> connectionList = new List<ConnectionInfo>();
         public IReadOnlyCollection<ConnectionInfo> ConnectionList => connectionList;
         public int GetConnetionIndex(ConnectionInfo connectionInfo) => connectionList.IndexOf(connectionInfo);
+        private Connection GetConnection(int index) => internalConnections[index];
+        private Connection GetConnection(ConnectionInfo connectionInfo) => internalConnections[GetConnetionIndex(connectionInfo)];
         public ConnectionState GetConnectionState(int index) => internalConnections[index].State;
         public ConnectionState GetConnectionState(ConnectionInfo connectionInfo)
         {
@@ -168,9 +170,9 @@ namespace ipsc6.agent.client
         void ProcessStateChangedMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             AgentState[] workingState = { AgentState.Ring, AgentState.Work };
-            AgentStateWorkType oldState = null;
-            var newState = new AgentStateWorkType((AgentState)msg.N1, (WorkType)msg.N2);
             var currIndex = connectionList.FindIndex(ci => ci == connInfo);
+            var newState = new AgentStateWorkType((AgentState)msg.N1, (WorkType)msg.N2);
+            AgentStateWorkType oldState = null;
             Connection oldMainConnObj = null;
             lock (this)
             {
@@ -180,9 +182,9 @@ namespace ipsc6.agent.client
                     AgentStateWorkType = newState;
                 }
                 // 如果是工作状态且主连接不是当前的，需要切换！
-                if (workingState.Any(state => state == newState.AgentState) && currIndex != mainConnectionIndex)
+                if (workingState.Any(m => m == newState.AgentState) && currIndex != mainConnectionIndex)
                 {
-                    oldMainConnObj = mainConnectionIndex < 0 ? null : MainConnection;
+                    oldMainConnObj = MainConnection;
                     // 先修改 index
                     mainConnectionIndex = currIndex;
                     logger.InfoFormat("切换主连接到 {0}", MainConnection);
@@ -190,16 +192,14 @@ namespace ipsc6.agent.client
             }
             if (oldMainConnObj != null)
             {
-                OnMainConnectionChanged?.Invoke(this, new EventArgs());
-                // 再通知原来的主，无论能否通知成功
-                if (oldMainConnObj != null)
+                // 通知原来的主，无论能否通知成功
+                Task.Run(async () =>
                 {
-                    Task.Run(async () =>
-                    {
-                        var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKENAWAY);
-                        await oldMainConnObj.Request(req);
-                    });
-                }
+                    var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKENAWAY);
+                    await oldMainConnObj.Request(req);
+                });
+                // fire the event
+                OnMainConnectionChanged?.Invoke(this, new EventArgs());
             }
             if (oldState != null)
             {
@@ -208,7 +208,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        void ProcessTeleStateChangedMessage(ConnectionInfo connInfo, ServerSentMessage msg)
+        void ProcessTeleStateChangedMessage(ConnectionInfo _, ServerSentMessage msg)
         {
             TeleState oldState;
             TeleState newState = (TeleState)msg.N1;
@@ -230,19 +230,18 @@ namespace ipsc6.agent.client
 
         void ProcessQueueInfoMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
-            var info = new QueueInfo(connInfo, msg);
-            var ev = new QueueInfoEventArgs(connInfo, info);
+            var queueInfo = new QueueInfo(connInfo, msg);
             // 记录 QueueInfo
             lock (this)
             {
                 // 修改之前,一律先删除
-                queueInfoCollection.RemoveWhere(m => m == info);
-                if (info.EventType != QueueEventType.Cancel)
+                queueInfoCollection.RemoveWhere(m => m == queueInfo);
+                if (queueInfo.EventType != QueueEventType.Cancel)
                 {
-                    queueInfoCollection.Add(info);
+                    queueInfoCollection.Add(queueInfo);
                 }
             }
-            /// 
+            var ev = new QueueInfoEventArgs(connInfo, queueInfo);
             OnQueueInfo?.Invoke(this, ev);
         }
 
@@ -381,11 +380,11 @@ namespace ipsc6.agent.client
         private void DoOnWorkingChannel(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             var info = new WorkingChannelInfo(msg.N2, msg.S);
-            var evt = new WorkingChannelInfoReceivedEventArgs(connInfo, info);
             lock (this)
             {
                 workingChannelInfo = info;
             }
+            var evt = new WorkingChannelInfoReceivedEventArgs(connInfo, info);
             OnWorkingChannelInfoReceived?.Invoke(this, evt);
         }
 
@@ -395,13 +394,11 @@ namespace ipsc6.agent.client
         private void DoOnPrivilegeList(ConnectionInfo _, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var parts = msg.S.Split(Constants.VerticalBarDelimiter);
+            var values = from s in msg.S.Split(Constants.VerticalBarDelimiter)
+                         select (Privilege)Convert.ToInt32(s);
             lock (this)
             {
-                foreach (var s in parts)
-                {
-                    privilegeCollection.Add((Privilege)Convert.ToInt32(s));
-                }
+                privilegeCollection.UnionWith(values);
             }
             OnPrivilegeCollectionReceived?.Invoke(this, new EventArgs());
         }
@@ -412,13 +409,11 @@ namespace ipsc6.agent.client
         private void DoOnPrivilegeExternList(ConnectionInfo _, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var parts = msg.S.Split(Constants.VerticalBarDelimiter);
+            var values = from s in msg.S.Split(Constants.VerticalBarDelimiter)
+                         select Convert.ToInt32(s);
             lock (this)
             {
-                foreach (var s in parts)
-                {
-                    privilegeExternCollection.Add(Convert.ToInt32(s));
-                }
+                privilegeExternCollection.UnionWith(values);
             }
             OnPrivilegeExternCollectionReceived?.Invoke(this, new EventArgs());
         }
@@ -429,16 +424,12 @@ namespace ipsc6.agent.client
         void DoOnGroupIdList(ConnectionInfo _, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var ids = msg.S.Split(Constants.VerticalBarDelimiter);
+            var groups = from s in msg.S.Split(Constants.VerticalBarDelimiter)
+                         select new AgentGroup(s);
             lock (this)
             {
-                foreach (var id in ids)
-                {
-                    if (!groupCollection.Any(m => m.Id == id))
-                    {
-                        groupCollection.Add(new AgentGroup(id));
-                    }
-                }
+                groupCollection.Clear();
+                groupCollection.AddRange(groups);
             }
         }
 
@@ -511,12 +502,11 @@ namespace ipsc6.agent.client
                             bool isChangeMain = false;
                             // 其它连接还有连接上了的吗?
                             var indices = (
-                                from vi
-                                in internalConnections.Select((value, index) => new { value, index })
+                                from vi in internalConnections.Select((value, index) => new { value, index })
                                 where vi.index != mainConnectionIndex && vi.value.State == ConnectionState.Ok
                                 select vi.index
-                            ).ToList();
-                            if (indices.Count == 0)
+                            ).ToArray();
+                            if (indices.Length == 0)
                             {
                                 // 没得选
                                 switch (e.NewState)
@@ -553,9 +543,9 @@ namespace ipsc6.agent.client
                             if (isChangeMain)
                             {
                                 var rand = new Random();
-                                if (indices.Count > 0)
+                                if (indices.Length > 0)
                                 {
-                                    mainConnectionIndex = indices[rand.Next(indices.Count)];
+                                    mainConnectionIndex = indices[rand.Next(indices.Length)];
                                     logger.WarnFormat(
                                         "主服务节点 [{0}]({1}:{2}) 连接丢失. 切换新的主服务节点到 [{3}]({4}:{5})",
                                         connIdx, connInfo.Host, connInfo.Port,
@@ -641,7 +631,6 @@ namespace ipsc6.agent.client
             {
                 Task.Run(action);
             }
-
         }
 
         public async Task StartUp(string workerNumber, string password)
@@ -676,21 +665,15 @@ namespace ipsc6.agent.client
                 throw;
             }
             // 然后其他节点
-            var itConnInfo =
-                from x in connectionList.Select((value, index) => new { value, index })
-                where x.index != mainConnectionIndex
-                select x.value;
-            var itConnObj =
-                from x in internalConnections.Select((value, index) => new { value, index })
-                where x.index != mainConnectionIndex
-                select x.value;
-            var itZipped = itConnInfo.Zip(
-                itConnObj,
-                (info, conn) => new { info, conn }
-            );
-            var tasks =
-                from x in itZipped
-                select x.conn.Open(x.info.Host, x.info.Port, workerNumber, password, flag: 0);
+            var itConnInfo = from x in connectionList.Select((value, index) => new { value, index })
+                             where x.index != mainConnectionIndex
+                             select x.value;
+            var itConnObj = from x in internalConnections.Select((value, index) => new { value, index })
+                            where x.index != mainConnectionIndex
+                            select x.value;
+            var itZipped = itConnInfo.Zip(itConnObj, (info, conn) => new { info, conn });
+            var tasks = from pair in itZipped
+                        select pair.conn.Open(pair.info.Host, pair.info.Port, workerNumber, password, flag: 0);
             await Task.WhenAll(tasks);
         }
 
@@ -824,13 +807,13 @@ namespace ipsc6.agent.client
         {
             if (workType < WorkType.PauseBusy)
             {
-                throw new ArgumentOutOfRangeException(string.Format("{0}", workType));
+                throw new ArgumentOutOfRangeException("workType", string.Format("Invalid work type {0}", workType));
             }
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_PAUSE, (int)workType);
             await MainConnection.Request(req);
         }
 
-        public async Task Intercept(ConnectionInfo connInfo, int agentId)
+        public async Task Intercept(ConnectionInfo _, int agentId)
         {
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_INTERCEPT, agentId);
             await MainConnection.Request(req);
@@ -861,28 +844,17 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task UnHold(int channel = -1)
+        public async Task UnHold(HoldInfo holdInfo)
         {
-            if (channel < 0)
-            {
-                if (workingChannelInfo.Channel < 0)
-                {
-                    throw new InvalidOperationException();
-                }
-                channel = workingChannelInfo.Channel;
-            }
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_RETRIEVE, channel);
-            await MainConnection.Request(req);
+            var connObj = GetConnection(holdInfo.ConnectionInfo);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_RETRIEVE, holdInfo.Channel);
+            await connObj.Request(req);
         }
 
         public async Task Break(int channel = -1, string customString = "")
         {
             if (channel < 0)
             {
-                if (workingChannelInfo.Channel < 0)
-                {
-                    throw new InvalidOperationException();
-                }
                 channel = workingChannelInfo.Channel;
             }
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_BREAK_SESS, channel, customString);
@@ -925,10 +897,11 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task Dequeue(int channel)
+        public async Task Dequeue(QueueInfo queueInfo)
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, channel);
-            await MainConnection.Request(req);
+            var connObj = GetConnection(queueInfo.ConnectionInfo);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, queueInfo.Channel);
+            await connObj.Request(req);
         }
 
         public async Task Block(int agentId)

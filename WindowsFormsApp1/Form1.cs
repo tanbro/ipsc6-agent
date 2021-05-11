@@ -44,6 +44,31 @@ namespace WindowsFormsApp1
             agent.OnMainConnectionChanged += Agent_OnMainConnectionChanged;
             agent.OnWorkingChannelInfoReceived += Agent_OnWorkingChannelInfoReceived;
             agent.OnHoldInfo += Agent_OnHoldInfo;
+            agent.OnQueueInfo += Agent_OnQueueInfo;
+        }
+
+        private void Agent_OnQueueInfo(object sender, QueueInfoEventArgs e)
+        {
+            Invoke(new Action(() =>
+            {
+                lock (listView_queue)
+                {
+                    listView_queue.Items.Clear();
+                    foreach (var qi in agent.QueueInfoCollection)
+                    {
+                        string[] row = {
+                            string.Format("{0} # {1}", qi.ConnectionInfo.Host, qi.Channel),
+                            qi.SessionId,
+                            string.Format("{0} # {1}", qi.CallingNo, qi.CustomeString)
+                        };
+                        var item = new ListViewItem(row)
+                        {
+                            Tag = qi
+                        };
+                        listView_queue.Items.Add(item);
+                    }
+                }
+            }));
         }
 
         private void Agent_OnHoldInfo(object sender, HoldInfoEventArgs e)
@@ -201,7 +226,8 @@ namespace WindowsFormsApp1
         private void Agent_OnSignedGroupsChanged(object sender, EventArgs e)
         {
 
-            Invoke(new Action(async () => {
+            Invoke(new Action(async () =>
+            {
                 RefreshGroupListView();
                 //
                 var payload = JsonSerializer.Serialize(agent.GroupCollection);
@@ -212,7 +238,8 @@ namespace WindowsFormsApp1
         private void Agent_OnGroupCollectionReceived(object sender, EventArgs e)
         {
 
-            Invoke(new Action(async () => {
+            Invoke(new Action(async () =>
+            {
                 RefreshGroupListView();
                 //
                 var payload = JsonSerializer.Serialize(agent.GroupCollection);
@@ -541,17 +568,17 @@ namespace WindowsFormsApp1
             await agent.Hold();
         }
 
-        private async void btn_unhold_Click(object sender, EventArgs e)
+        private void btn_unhold_Click(object sender, EventArgs e)
         {
-            if (agent.HoldInfoCollection.Count == 1)
-            {
-                var chan = agent.HoldInfoCollection.First().Channel;
-                await agent.UnHold(chan);
-            }
-            else
-            {
-                MessageBox.Show("保持队列的数量大于1, 应从列表中选择.");
-            }
+            //if (agent.HoldInfoCollection.Count == 1)
+            //{
+            //    var chan = agent.HoldInfoCollection.First().Channel;
+            //    await agent.UnHold(chan);
+            //}
+            //else
+            //{
+            //    MessageBox.Show("保持队列的数量大于1, 应从列表中选择.");
+            //}
         }
 
         private async void button_offhook_Click(object sender, EventArgs e)
@@ -567,18 +594,26 @@ namespace WindowsFormsApp1
         private async void UnHoldToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-            var holdInfo = listView_hold.SelectedItems[0].Tag as HoldInfo;
             using (WaitingCursor.Instance)
             {
-                var chan = holdInfo.Channel;
-                await agent.UnHold(chan);
+                var holdInfo = listView_hold.SelectedItems[0].Tag as HoldInfo;
+                await agent.UnHold(holdInfo);
             }
 
         }
 
         private async void button6_Click(object sender, EventArgs e)
         {
-            await agent.TakeOver((int)numericUpDown_MainIndex.Value);
+            await agent.TakenAway((int)numericUpDown_MainIndex.Value);
+        }
+
+        private async void dequeueToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (WaitingCursor.Instance)
+            {
+                var queueInfo = listView_queue.SelectedItems[0].Tag as QueueInfo;
+                await agent.Dequeue(queueInfo);
+            }
         }
     }
 }
