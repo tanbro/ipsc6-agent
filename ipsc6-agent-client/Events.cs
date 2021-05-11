@@ -5,11 +5,11 @@ namespace ipsc6.agent.client
     public delegate void ServerSentEventHandler(object sender, ServerSentEventArgs e);
     public delegate void ClosedEventHandler(object sender);
     public delegate void LostEventHandler(object sender);
-    public delegate void ConnectionStateChangedEventHandler(object sender, ConnectionStateChangedEventArgs<ConnectionState> e);
-    public delegate void ConnectionInfoStateChangedEventHandler(object sender, ConnectionInfoStateChangedEventArgs<ConnectionState> e);
+    public delegate void ConnectionStateChangedEventHandler(object sender, ConnectionStateChangedEventArgs e);
+    public delegate void ConnectionInfoStateChangedEventHandler(object sender, ConnectionInfoStateChangedEventArgs e);
 
-    public delegate void AgentStateChangedEventHandler(object sender, AgentStateChangedEventArgs<AgentStateWorkType> e);
-    public delegate void TeleStateChangedEventHandler(object sender, TeleStateChangedEventArgs<TeleState> e);
+    public delegate void AgentStateChangedEventHandler(object sender, AgentStateChangedEventArgs e);
+    public delegate void TeleStateChangedEventHandler(object sender, TeleStateChangedEventArgs e);
     public delegate void QueueInfoEventHandler(object sender, QueueInfoEventArgs e);
     public delegate void HoldInfoEventHandler(object sender, HoldInfoEventArgs e);
 
@@ -24,7 +24,7 @@ namespace ipsc6.agent.client
 
     public class ServerSentEventArgs : EventArgs
     {
-        public readonly ServerSentMessage Message;
+        public ServerSentMessage Message { get; }
         public ServerSentEventArgs(ServerSentMessage message) : base()
         {
             Message = message;
@@ -42,12 +42,12 @@ namespace ipsc6.agent.client
         }
     }
 
-    public class ConnectionStateChangedEventArgs<T> : StateChangedEventArgs<ConnectionState>
+    public class ConnectionStateChangedEventArgs : StateChangedEventArgs<ConnectionState>
     {
         public ConnectionStateChangedEventArgs(ConnectionState oldState, ConnectionState newState) : base(oldState, newState) { }
     }
 
-    public class ConnectionInfoStateChangedEventArgs<T> : StateChangedEventArgs<ConnectionState>
+    public class ConnectionInfoStateChangedEventArgs : StateChangedEventArgs<ConnectionState>
     {
         public ConnectionInfo ConnectionInfo { get; }
         public ConnectionInfoStateChangedEventArgs(
@@ -60,10 +60,13 @@ namespace ipsc6.agent.client
     }
 
     public class BaseConnectorEventArgs : EventArgs { }
+
     public class ConnectorConnectedEventArgs : BaseConnectorEventArgs { }
 
     public class ConnectorConnectAttemptFailedEventArgs : BaseConnectorEventArgs { }
+    
     public class ConnectorDisconnectedEventArgs : BaseConnectorEventArgs { }
+    
     public class ConnectorConnectionLostEventArgs : BaseConnectorEventArgs { }
 
     public class BaseCtiEventArgs<T> : EventArgs
@@ -77,12 +80,12 @@ namespace ipsc6.agent.client
         }
     }
 
-    public class AgentStateChangedEventArgs<T> : StateChangedEventArgs<AgentStateWorkType>
+    public class AgentStateChangedEventArgs : StateChangedEventArgs<AgentStateWorkType>
     {
         public AgentStateChangedEventArgs(AgentStateWorkType oldState, AgentStateWorkType newState) : base(oldState, newState) { }
     }
 
-    public class TeleStateChangedEventArgs<T> : StateChangedEventArgs<TeleState>
+    public class TeleStateChangedEventArgs : StateChangedEventArgs<TeleState>
     {
         public TeleStateChangedEventArgs(TeleState oldState, TeleState newState) : base(oldState, newState) { }
     }

@@ -99,7 +99,7 @@ namespace ipsc6.agent.client
         public ConnectionState State => state;
         private void SetState(ConnectionState newState)
         {
-            var e = new ConnectionStateChangedEventArgs<ConnectionState>(state, newState);
+            var e = new ConnectionStateChangedEventArgs(state, newState);
             state = newState;
             Task.Run(() => OnConnectionStateChanged?.Invoke(this, e));
         }
@@ -339,7 +339,7 @@ namespace ipsc6.agent.client
                     throw new InvalidOperationException(string.Format("{0}", State));
                 }
             }
-            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ...", this, remoteHost, remoteHost);
+            logger.InfoFormat("{0} Open \"{1}|{2}\", flag={3} ...", this, remoteHost, remotePort, flag);
             connectTcs = new TaskCompletionSource<object>();
             if (remotePort > 0)
             {
@@ -354,7 +354,7 @@ namespace ipsc6.agent.client
             await connectTcs.Task;
             ///
             /// 登录
-            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Log-in(flag={4}) as workerNumber \"{3}\"", this, remoteHost, remoteHost, workerNumber, flag);
+            logger.DebugFormat("{0} Log-in \"{1}\" ... ", this, workerNumber);
             var cst = new CancellationTokenSource();
             var reqData = new AgentRequestMessage(MessageType.REMOTE_MSG_LOGIN, flag, string.Format("{0}|{1}|1|0|{0}", workerNumber, password));
             logInTcs = new TaskCompletionSource<int>();
@@ -362,13 +362,13 @@ namespace ipsc6.agent.client
             var task = await Task.WhenAny(logInTcs.Task, Task.Delay(requestTimeout, cst.Token));
             if (task != logInTcs.Task)
             {
-                logger.ErrorFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Log in timeout. Closing the connector", this, remoteHost, remoteHost);
+                logger.ErrorFormat("{0} Log-in timeout", this, workerNumber);
                 connector.Disconnect();
                 throw new ConnectionTimeoutException();
             }
             cst.Cancel();
             var agentid = await logInTcs.Task;
-            logger.InfoFormat("{0} Open(remoteHost={1}, remotePort={2}) ... Succeed: workerNumber=\"{3}\", AgentId={4}", this, remoteHost, remoteHost, workerNumber, agentid);
+            logger.InfoFormat("{0} Log-in \"{1}\" Succeed, AgentID={2}", this, workerNumber, agentid);
             return agentid;
         }
 
@@ -474,7 +474,8 @@ namespace ipsc6.agent.client
         public override string ToString()
         {
             return string.Format(
-                "<{0} at 0x{1:x8} Local={2}, Remote={3}:{4}, State={4}>",
+                /*"<{0} at 0x{1:x8} Local={2}, Remote={3}:{4}, State={5}>",*/
+                "<{0} Local={2}, Remote={3}|{4}, State={5}>",
                 GetType().Name, GetHashCode(), connector.BoundAddress, RemoteHost, RemotePort, State);
         }
 

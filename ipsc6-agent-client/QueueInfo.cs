@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ipsc6.agent.client
@@ -54,31 +55,31 @@ namespace ipsc6.agent.client
             }
         }
 
-        public bool Equals(QueueInfo other)
-        {
-            return ConnectionInfo == other.ConnectionInfo && Channel == other.Channel;
-        }
-
-        public override bool Equals(object obj)
-        {
-            var that = obj as QueueInfo;
-            return Equals(that);
-        }
-
         public override int GetHashCode()
         {
             return base.GetHashCode();
         }
 
-        public static bool operator ==(QueueInfo lhs, QueueInfo rhs)
+        public override bool Equals(object obj)
         {
-            return (lhs is object) && (rhs is object) && lhs.Equals(rhs);
+            return Equals(obj as QueueInfo);
         }
 
-        public static bool operator !=(QueueInfo lhs, QueueInfo rhs)
+        public bool Equals(QueueInfo other)
         {
-            return !(lhs == rhs);
+            return other != null &&
+                   EqualityComparer<ConnectionInfo>.Default.Equals(ConnectionInfo, other.ConnectionInfo) &&
+                   Channel == other.Channel;
         }
 
+        public static bool operator ==(QueueInfo left, QueueInfo right)
+        {
+            return EqualityComparer<QueueInfo>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(QueueInfo left, QueueInfo right)
+        {
+            return !(left == right);
+        }
     }
 }

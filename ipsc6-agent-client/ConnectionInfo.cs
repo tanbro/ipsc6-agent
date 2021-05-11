@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace ipsc6.agent.client
 {
@@ -13,30 +14,9 @@ namespace ipsc6.agent.client
             Port = port;
         }
 
-        public bool Equals(ConnectionInfo other)
-        {
-            return Host == other.Host && Port == other.Port;
-        }
-
-        public override bool Equals(object obj)
-        {
-            var that = obj as ConnectionInfo;
-            return Equals(that);
-        }
-
         public override int GetHashCode()
         {
             return base.GetHashCode();
-        }
-
-        public static bool operator ==(ConnectionInfo lhs, ConnectionInfo rhs)
-        {
-            return (lhs is object) && (rhs is object) && lhs.Equals(rhs);
-        }
-
-        public static bool operator !=(ConnectionInfo lhs, ConnectionInfo rhs)
-        {
-            return !(lhs == rhs);
         }
 
         public override string ToString()
@@ -46,5 +26,26 @@ namespace ipsc6.agent.client
                 GetType().Name, GetHashCode(), Host, Port);
         }
 
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as ConnectionInfo);
+        }
+
+        public bool Equals(ConnectionInfo other)
+        {
+            return other != null &&
+                   Host == other.Host &&
+                   Port == other.Port;
+        }
+
+        public static bool operator ==(ConnectionInfo left, ConnectionInfo right)
+        {
+            return EqualityComparer<ConnectionInfo>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(ConnectionInfo left, ConnectionInfo right)
+        {
+            return !(left == right);
+        }
     }
 }

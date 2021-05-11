@@ -91,7 +91,7 @@ namespace WindowsFormsApp1
             }));
         }
 
-        private void Agent_OnTeleStateChanged(object sender, TeleStateChangedEventArgs<TeleState> e)
+        private void Agent_OnTeleStateChanged(object sender, TeleStateChangedEventArgs e)
         {
             Invoke(new Action(() =>
             {
@@ -247,7 +247,7 @@ namespace WindowsFormsApp1
             }));
         }
 
-        private void Agent_OnAgentStateChanged(object sender, AgentStateChangedEventArgs<AgentStateWorkType> e)
+        private void Agent_OnAgentStateChanged(object sender, AgentStateChangedEventArgs e)
         {
 
             Invoke(new Action(async () =>
@@ -271,7 +271,7 @@ namespace WindowsFormsApp1
         }
 
 
-        private void Agent_OnConnectionStateChanged(object sender, ConnectionInfoStateChangedEventArgs<ipsc6.agent.client.ConnectionState> e)
+        private void Agent_OnConnectionStateChanged(object sender, ConnectionInfoStateChangedEventArgs e)
         {
             Invoke(new Action(async () =>
             {

@@ -1,8 +1,9 @@
 using System;
+using System.Collections.Generic;
 
 namespace ipsc6.agent.client
 {
-    public class AgentStateWorkType : IEquatable<AgentStateWorkType>, ICloneable
+    public class AgentStateWorkType : ICloneable, IEquatable<AgentStateWorkType>
     {
         public AgentState AgentState { get; }
         public WorkType WorkType { get; }
@@ -13,37 +14,36 @@ namespace ipsc6.agent.client
             WorkType = workType;
         }
 
-        public bool Equals(AgentStateWorkType other)
-        {
-            return (
-                (AgentState == other.AgentState) &&
-                (WorkType == other.WorkType)
-            );
-        }
-        public override bool Equals(object obj)
-        {
-            var that = obj as AgentStateWorkType;
-            return Equals(that);
-        }
-
         public override int GetHashCode()
         {
             return base.GetHashCode();
         }
 
-        public static bool operator ==(AgentStateWorkType lhs, AgentStateWorkType rhs)
-        {
-            return (lhs is object) && (rhs is object) && lhs.Equals(rhs);
-        }
-
-        public static bool operator !=(AgentStateWorkType lhs, AgentStateWorkType rhs)
-        {
-            return !(lhs == rhs);
-        }
-
         public object Clone()
         {
             return new AgentStateWorkType(AgentState, WorkType);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as AgentStateWorkType);
+        }
+
+        public bool Equals(AgentStateWorkType other)
+        {
+            return other != null &&
+                   AgentState == other.AgentState &&
+                   WorkType == other.WorkType;
+        }
+
+        public static bool operator ==(AgentStateWorkType left, AgentStateWorkType right)
+        {
+            return EqualityComparer<AgentStateWorkType>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(AgentStateWorkType left, AgentStateWorkType right)
+        {
+            return !(left == right);
         }
     }
 }

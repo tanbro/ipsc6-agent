@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace ipsc6.agent.client
 {
@@ -15,31 +16,30 @@ namespace ipsc6.agent.client
             Id = id;
         }
 
-        public bool Equals(AgentGroup other)
-        {
-            return Id == other.Id;
-        }
-
-        public override bool Equals(object obj)
-        {
-            var that = obj as AgentGroup;
-            return Equals(that);
-        }
-
         public override int GetHashCode()
         {
             return base.GetHashCode();
         }
 
-        public static bool operator ==(AgentGroup lhs, AgentGroup rhs)
+        public override bool Equals(object obj)
         {
-            return (lhs is object) && (rhs is object) && lhs.Equals(rhs);
+            return Equals(obj as AgentGroup);
         }
 
-        public static bool operator !=(AgentGroup lhs, AgentGroup rhs)
+        public bool Equals(AgentGroup other)
         {
-            return !(lhs == rhs);
+            return other != null &&
+                   Id == other.Id;
         }
 
+        public static bool operator ==(AgentGroup left, AgentGroup right)
+        {
+            return EqualityComparer<AgentGroup>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(AgentGroup left, AgentGroup right)
+        {
+            return !(left == right);
+        }
     }
 }
