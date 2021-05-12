@@ -64,9 +64,9 @@ namespace ipsc6.agent.client
     public class ConnectorConnectedEventArgs : BaseConnectorEventArgs { }
 
     public class ConnectorConnectAttemptFailedEventArgs : BaseConnectorEventArgs { }
-    
+
     public class ConnectorDisconnectedEventArgs : BaseConnectorEventArgs { }
-    
+
     public class ConnectorConnectionLostEventArgs : BaseConnectorEventArgs { }
 
     public class BaseCtiEventArgs<T> : EventArgs

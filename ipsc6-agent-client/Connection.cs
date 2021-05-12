@@ -475,8 +475,8 @@ namespace ipsc6.agent.client
         {
             return string.Format(
                 /*"<{0} at 0x{1:x8} Local={2}, Remote={3}:{4}, State={5}>",*/
-                "<{0} Local={2}, Remote={3}|{4}, State={5}>",
-                GetType().Name, GetHashCode(), connector.BoundAddress, RemoteHost, RemotePort, State);
+                "<{0} Local={1}, Remote={2}|{3}, State={4}>",
+                GetType().Name, connector.BoundAddress, RemoteHost, RemotePort, State);
         }
 
     }

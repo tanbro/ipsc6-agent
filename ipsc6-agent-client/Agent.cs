@@ -82,7 +82,7 @@ namespace ipsc6.agent.client
         public int GetConnetionIndex(ConnectionInfo connectionInfo) => connectionList.IndexOf(connectionInfo);
         private Connection GetConnection(int index) => internalConnections[index];
         private Connection GetConnection(ConnectionInfo connectionInfo) => internalConnections[GetConnetionIndex(connectionInfo)];
-        public ConnectionState GetConnectionState(int index) => internalConnections[index].State;
+        public ConnectionState GetConnectionState(int index) => GetConnection(index).State;
         public ConnectionState GetConnectionState(ConnectionInfo connectionInfo)
         {
             var index = connectionList.IndexOf(connectionInfo);
@@ -772,7 +772,7 @@ namespace ipsc6.agent.client
 
         public async Task SignIn()
         {
-            await SignIn(new string[] { });
+            await SignIn(Array.Empty<string>());
         }
         public async Task SignIn(string id)
         {
@@ -788,7 +788,7 @@ namespace ipsc6.agent.client
 
         public async Task SignOut()
         {
-            await SignOut(new string[] { });
+            await SignOut(Array.Empty<string>());
         }
         public async Task SignOut(string id)
         {
@@ -812,7 +812,7 @@ namespace ipsc6.agent.client
         {
             if (workType < WorkType.PauseBusy)
             {
-                throw new ArgumentOutOfRangeException("workType", string.Format("Invalid work type {0}", workType));
+                throw new ArgumentOutOfRangeException(nameof(workType), string.Format("Invalid work type {0}", workType));
             }
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_PAUSE, (int)workType);
             await MainConnection.Request(req);
@@ -952,7 +952,7 @@ namespace ipsc6.agent.client
                 }
                 if (index < 0 || index >= internalConnections.Count || index == mainConnectionIndex)
                 {
-                    throw new ArgumentOutOfRangeException("index", index, "");
+                    throw new ArgumentOutOfRangeException(nameof(index), index, "");
                 }
                 if (internalConnections[index].State != ConnectionState.Ok)
                 {
