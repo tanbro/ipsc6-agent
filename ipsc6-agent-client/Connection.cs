@@ -169,13 +169,14 @@ namespace ipsc6.agent.client
                         SetState(ConnectionState.Lost);
                     }
                 }
+
                 if (msg is ConnectorDisconnectedEventArgs)
                 {
-                    OnClosed?.Invoke(this);
+                    OnClosed?.Invoke(this, new EventArgs());
                 }
                 else
                 {
-                    OnLost?.Invoke(this);
+                    OnLost?.Invoke(this, new EventArgs());
                 }
                 if (prevState == ConnectionState.Closing)
                 {
@@ -325,7 +326,7 @@ namespace ipsc6.agent.client
         public const int DefaultRequestTimeoutMilliseconds = 5000;
         public const int DefaultKeepAliveTimeoutMilliseconds = 5000;
 
-        public async Task<int> Open(string remoteHost, ushort remotePort, string workerNumber, string password, uint keepAliveTimeout = DefaultKeepAliveTimeoutMilliseconds, int requestTimeout = DefaultRequestTimeoutMilliseconds, int flag = 0)
+        public async Task<int> Open(string remoteHost, ushort remotePort, string workerNumber, string password, uint keepAliveTimeout = DefaultKeepAliveTimeoutMilliseconds, int flag = 0)
         {
             ConnectionState[] allowStates = { ConnectionState.Init, ConnectionState.Closed, ConnectionState.Failed, ConnectionState.Lost };
             lock (connectLock)
@@ -339,7 +340,7 @@ namespace ipsc6.agent.client
                     throw new InvalidOperationException(string.Format("{0}", State));
                 }
             }
-            logger.InfoFormat("{0} Open \"{1}|{2}\", flag={3} ...", this, remoteHost, remotePort, flag);
+            logger.InfoFormat("{0} connect \"{1}|{2}\", flag={3} ...", this, remoteHost, remotePort, flag);
             connectTcs = new TaskCompletionSource<object>();
             if (remotePort > 0)
             {
@@ -349,27 +350,49 @@ namespace ipsc6.agent.client
             {
                 connector.Connect(remoteHost);
             }
+            logger.DebugFormat("{0} connect request was sent", this);
             this.remoteHost = remoteHost;
             this.remotePort = remotePort;
+            logger.DebugFormat("{0} await connect >>>", this);
             await connectTcs.Task;
+            logger.DebugFormat("{0} await connect <<<", this);
             ///
             /// 登录
             logger.DebugFormat("{0} Log-in \"{1}\" ... ", this, workerNumber);
             var cst = new CancellationTokenSource();
             var reqData = new AgentRequestMessage(MessageType.REMOTE_MSG_LOGIN, flag, string.Format("{0}|{1}|1|0|{0}", workerNumber, password));
             logInTcs = new TaskCompletionSource<int>();
+            var timeoutTask = Task.Delay((int)keepAliveTimeout * 3, cst.Token);
             Send(reqData);
-            var task = await Task.WhenAny(logInTcs.Task, Task.Delay(requestTimeout, cst.Token));
-            if (task != logInTcs.Task)
+            var task = await Task.WhenAny(logInTcs.Task, timeoutTask);
+            if (task == timeoutTask)
             {
                 logger.ErrorFormat("{0} Log-in timeout", this, workerNumber);
-                connector.Disconnect();
+                lock (connectLock)
+                {
+                    logger.DebugFormat("{0} Log-in timeout : ForceClose", this);
+                    disconnectTcs = new TaskCompletionSource<object>();
+                    SetState(ConnectionState.Closing);
+                    connector.Disconnect(true);
+                }
+                var cst2 = new CancellationTokenSource();
+                var timeoutTask2 = Task.Delay((int)keepAliveTimeout, cst2.Token);
+                var task2 = Task.WhenAny(disconnectTcs.Task, timeoutTask2);
+                if (task2 != timeoutTask2)
+                {
+                    cst2.Cancel();
+                    logger.DebugFormat("{0} Log-in timeout : ForceClose Timeout", this);
+                }
+                logger.DebugFormat("{0} Log-in timeout : ForceClose Ok", this);
                 throw new ConnectionTimeoutException();
             }
-            cst.Cancel();
-            var agentid = await logInTcs.Task;
-            logger.InfoFormat("{0} Log-in \"{1}\" Succeed, AgentID={2}", this, workerNumber, agentid);
-            return agentid;
+            else
+            {
+                cst.Cancel();
+                var agentid = await logInTcs.Task;
+                logger.InfoFormat("{0} Log-in \"{1}\" Succeed, AgentID={2}", this, workerNumber, agentid);
+                return agentid;
+            }
         }
 
         public async Task<int> Open(string remoteHost, string workerNumber, string password, uint keepAliveTimeout = DefaultKeepAliveTimeoutMilliseconds, int flag = 0)
@@ -475,8 +498,8 @@ namespace ipsc6.agent.client
         {
             return string.Format(
                 /*"<{0} at 0x{1:x8} Local={2}, Remote={3}:{4}, State={5}>",*/
-                "<{0} Local={1}, Remote={2}|{3}, State={4}>",
-                GetType().Name, connector.BoundAddress, RemoteHost, RemotePort, State);
+                "<{0} Local={1}, Remote={2}|{3}, State={4}, PhysicalConnected={5}>",
+                GetType().Name, connector.BoundAddress, RemoteHost, RemotePort, State, connector.Connected);
         }
 
     }

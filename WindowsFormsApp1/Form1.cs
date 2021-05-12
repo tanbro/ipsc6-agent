@@ -298,8 +298,9 @@ namespace WindowsFormsApp1
             using (var epCfg = new EpConfig())
             using (var sipTpConfig = new TransportConfig { port = 5060 })
             {
-                epCfg.logConfig.level = 5;
-                epCfg.logConfig.writer = SipLogWriter.Instance;
+                //epCfg.logConfig.level = 3;
+                //epCfg.logConfig.msgLogging = 0;
+                //epCfg.logConfig.writer = SipLogWriter.Instance;
                 Endpoint.libInit(epCfg);
                 Endpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
                 Endpoint.libStart();

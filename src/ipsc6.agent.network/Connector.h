@@ -67,6 +67,7 @@ ref class Connector {
     void Connect(String ^ host, unsigned short remotePort);
     void Connect(String ^ host);
     void Disconnect();
+    void Disconnect(bool force);
     void SendRawData(array<Byte> ^ data);
     void SendAgentMessage(int commandType, int n, String ^ s);
 

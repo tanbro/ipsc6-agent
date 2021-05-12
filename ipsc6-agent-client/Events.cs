@@ -3,8 +3,8 @@ using System;
 namespace ipsc6.agent.client
 {
     public delegate void ServerSentEventHandler(object sender, ServerSentEventArgs e);
-    public delegate void ClosedEventHandler(object sender);
-    public delegate void LostEventHandler(object sender);
+    public delegate void ClosedEventHandler(object sender, EventArgs e);
+    public delegate void LostEventHandler(object sender, EventArgs e);
     public delegate void ConnectionStateChangedEventHandler(object sender, ConnectionStateChangedEventArgs e);
     public delegate void ConnectionInfoStateChangedEventHandler(object sender, ConnectionInfoStateChangedEventArgs e);
 
