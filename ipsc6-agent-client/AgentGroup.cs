@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ipsc6.agent.client
 {
-    public class AgentGroup : IEquatable<AgentGroup>
+    public class AgentGroup : IEquatable<AgentGroup>, ICloneable
     {
         public string Id { get; }
         public string Name { get; set; }
@@ -14,6 +14,13 @@ namespace ipsc6.agent.client
         public AgentGroup(string id)
         {
             Id = id;
+            Name = "";
+        }
+
+        public AgentGroup(string id, string name)
+        {
+            Id = id;
+            Name = name;
         }
 
         public override int GetHashCode()
@@ -30,6 +37,11 @@ namespace ipsc6.agent.client
         {
             return other != null &&
                    Id == other.Id;
+        }
+
+        public object Clone()
+        {
+            return new AgentGroup(Id, Name);
         }
 
         public static bool operator ==(AgentGroup left, AgentGroup right)

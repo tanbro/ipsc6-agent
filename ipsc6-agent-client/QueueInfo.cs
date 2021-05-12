@@ -9,7 +9,6 @@ namespace ipsc6.agent.client
     public class QueueInfo : ServerSideData, IEquatable<QueueInfo>
     {
         public int Channel { get; }
-        public string GroupId { get; }
         public string Id { get; }
         public QueueInfoType Type { get; }
         public QueueEventType EventType { get; }
@@ -17,37 +16,45 @@ namespace ipsc6.agent.client
         public string CallingNo { get; }
         public string Username { get; }
         public string CustomeString { get; }
+        private readonly HashSet<AgentGroup> groups = new HashSet<AgentGroup>();
+        public IReadOnlyCollection<AgentGroup> Groups => groups;
 
-        public QueueInfo(ConnectionInfo connectionInfo, ServerSentMessage msg) : base(connectionInfo)
+        public QueueInfo(ConnectionInfo connectionInfo, ServerSentMessage msg, IReadOnlyCollection<AgentGroup> refGroups) : base(connectionInfo)
         {
             Channel = msg.N1;
             Type = (QueueInfoType)msg.N2;
-            var parts = msg.S.Split(Constants.VerticalBarDelimiter);
-            var it = parts.Select((s, i) => new { s, i });
-            foreach (var m in it)
+            var parts = msg.S.Split(Constants.SemicolonBarDelimiter);
+            foreach (var part in parts.Select((str, index) => new { str, index }))
             {
-                switch (m.i)
+                switch (part.index)
                 {
                     case 0:
-                        GroupId = m.s;
+                        foreach (var id in part.str.Split(Constants.VerticalBarDelimiter))
+                        {
+                            var groupObj = refGroups.FirstOrDefault(m => m.Id == id);
+                            if (groupObj != null)
+                            {
+                                groups.Add(groupObj);
+                            }
+                        }
                         break;
                     case 1:
-                        EventType = (QueueEventType)Convert.ToInt32(m.s);
+                        EventType = (QueueEventType)Convert.ToInt32(part.str);
                         break;
                     case 2:
-                        SessionId = m.s;
+                        SessionId = part.str;
                         break;
                     case 3:
-                        Id = m.s;
+                        Id = part.str;
                         break;
                     case 4:
-                        Username = m.s;
+                        Username = part.str;
                         break;
                     case 5:
-                        CallingNo = m.s;
+                        CallingNo = part.str;
                         break;
                     case 6:
-                        CustomeString = m.s;
+                        CustomeString = part.str;
                         break;
                     default:
                         break;

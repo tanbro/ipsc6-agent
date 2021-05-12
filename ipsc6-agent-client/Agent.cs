@@ -230,7 +230,7 @@ namespace ipsc6.agent.client
 
         void ProcessQueueInfoMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
-            var queueInfo = new QueueInfo(connInfo, msg);
+            var queueInfo = new QueueInfo(connInfo, msg, groupCollection);
             // 记录 QueueInfo
             lock (this)
             {
