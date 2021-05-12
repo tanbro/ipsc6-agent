@@ -76,6 +76,25 @@ namespace WindowsFormsApp1
         {
             if (Account.Form.IsDisposed) return;
 
+            var mgr = Account.Form.Endpoint.audDevManager();
+            var play_dev_med = mgr.getPlaybackDevMedia();
+            var cap_dev_med = mgr.getCaptureDevMedia();
+            AudioMedia aud_med;
+            try
+            {
+                // Get the first audio media
+                aud_med = getAudioMedia(-1);
+            }
+            catch
+            {
+                return;
+            }
+            // This will connect the sound device/mic to the call audio media
+            cap_dev_med.startTransmit(aud_med);
+            // And this will connect the call audio media to the sound device/speaker
+            aud_med.startTransmit(play_dev_med);
+
+            /* Deprecated: for PJSIP version 2.8 or earlier
             var ci = getInfo();
             // Iterate all the call medias
             for (int i = 0; i < ci.media.Count(); i++)
@@ -89,6 +108,7 @@ namespace WindowsFormsApp1
                     mgr.getCaptureDevMedia().startTransmit(audMed);
                 }
             }
+            */
         }
 
     }
