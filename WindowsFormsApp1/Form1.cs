@@ -321,63 +321,59 @@ namespace WindowsFormsApp1
             ipsc6.agent.network.Connector.Initial();
 
             //
-            //chatServer = new WebSocketsChatServer("/chat");
-            //webServer = new WebServer(8080).WithModule(chatServer);
-            //webServer.Start();
+            chatServer = new WebSocketsChatServer("/chat");
+            webServer = new WebServer("http://localhost:8080").WithModule(chatServer);
+            webServer.Start();
 
             // Audio Devices
             var audInputDevs = new Dictionary<int, string>();
             var audOutputDevs = new Dictionary<int, string>();
-            using (var devMgr = Endpoint.audDevManager())
+            var devMgr = Endpoint.audDevManager();
+            for (var i = 0; i < devMgr.getDevCount(); i++)
             {
-                for (var i = 0; i < devMgr.getDevCount(); i++)
+                var devInfo = devMgr.getDevInfo(i);
+                if (devInfo.inputCount > 0)
                 {
-                    using (var devInfo = devMgr.getDevInfo(i))
-                    {
-                        if (devInfo.inputCount > 0)
-                        {
-                            audInputDevs.Add(i, devInfo.name);
-                        }
-                        if (devInfo.outputCount > 0)
-                        {
-                            audOutputDevs.Add(i, devInfo.name);
-                        }
-                    }
+                    audInputDevs.Add(i, string.Format("{0}({1})", devInfo.name, devInfo.driver));
                 }
-
-                comboBox_audInputDev.DataSource = new BindingSource(audInputDevs, null);
-                comboBox_audInputDev.DisplayMember = "value";
-                comboBox_audInputDev.ValueMember = "key";
-                comboBox_audInputDev.SelectedValue = devMgr.getCaptureDev();
-
-
-                comboBox_audOutputDev.DataSource = new BindingSource(audOutputDevs, null);
-                comboBox_audOutputDev.DisplayMember = "value";
-                comboBox_audOutputDev.ValueMember = "key";
-                comboBox_audOutputDev.SelectedValue = devMgr.getPlaybackDev();
-
-                comboBox_audInputDev.SelectedValueChanged += ComboBox_audInputDev_SelectedValueChanged;
-                comboBox_audOutputDev.SelectedValueChanged += ComboBox_audOutputDev_SelectedValueChanged;
+                if (devInfo.outputCount > 0)
+                {
+                    audOutputDevs.Add(i, string.Format("{0}({1})", devInfo.name, devInfo.driver));
+                }
+            }
+            {
+                var combobox = comboBox_audInputDev;
+                combobox.DataSource = new BindingSource(audInputDevs, null);
+                combobox.DisplayMember = "value";
+                combobox.ValueMember = "key";
+                var di = devMgr.getDevInfo(devMgr.getCaptureDev());
+                combobox.SelectedValue = devMgr.lookupDev(di.driver, di.name);
+                combobox.SelectedIndexChanged += ComboBox_audInputDev_SelectedIndexChanged;
+            }
+            {
+                var combobox = comboBox_audOutputDev;
+                combobox.DataSource = new BindingSource(audOutputDevs, null);
+                combobox.DisplayMember = "value";
+                combobox.ValueMember = "key";
+                var di = devMgr.getDevInfo(devMgr.getPlaybackDev());
+                combobox.SelectedValue = devMgr.lookupDev(di.driver, di.name);
+                combobox.SelectedIndexChanged += ComboBox_audOutputDev_SelectedIndexChanged;
             }
 
         }
 
-        private void ComboBox_audOutputDev_SelectedValueChanged(object sender, EventArgs e)
+        private void ComboBox_audOutputDev_SelectedIndexChanged(object sender, EventArgs e)
         {
             var combobox = sender as ComboBox;
-            using (var devMgr = Endpoint.audDevManager())
-            {
-                devMgr.setPlaybackDev((int)combobox.SelectedValue);
-            }
+            var devMgr = Endpoint.audDevManager();
+            devMgr.setPlaybackDev((int)combobox.SelectedValue);
         }
 
-        private void ComboBox_audInputDev_SelectedValueChanged(object sender, EventArgs e)
+        private void ComboBox_audInputDev_SelectedIndexChanged(object sender, EventArgs e)
         {
             var combobox = sender as ComboBox;
-            using (var devMgr = Endpoint.audDevManager())
-            {
-                devMgr.setCaptureDev((int)combobox.SelectedValue);
-            }
+            var devMgr = Endpoint.audDevManager();
+            devMgr.setCaptureDev((int)combobox.SelectedValue);
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)

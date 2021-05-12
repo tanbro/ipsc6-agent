@@ -1,10 +1,7 @@
-<meta http-equiv="Content-Security-Policy" content="connect-src ws://192.168.56.102:8080">
-<html>
+<meta http-equiv="Content-Security-Policy" content="connect-src ws://localhost:8080">
 <script>
-    var ws = new WebSocket("ws://192.168.56.102:8080/chat");
+    var ws = new WebSocket("ws://localhost:8080/chat");
     ws.onmessage = e => {
         console.log(e.data);
     }
 </script>
-
-</html>

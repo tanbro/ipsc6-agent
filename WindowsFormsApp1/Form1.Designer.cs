@@ -114,67 +114,60 @@ namespace WindowsFormsApp1
             // 
             // textBox_ServerAddressList
             // 
-            this.textBox_ServerAddressList.Location = new System.Drawing.Point(213, 16);
-            this.textBox_ServerAddressList.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_ServerAddressList.Location = new System.Drawing.Point(142, 11);
             this.textBox_ServerAddressList.Name = "textBox_ServerAddressList";
-            this.textBox_ServerAddressList.Size = new System.Drawing.Size(628, 28);
+            this.textBox_ServerAddressList.Size = new System.Drawing.Size(420, 21);
             this.textBox_ServerAddressList.TabIndex = 0;
             this.textBox_ServerAddressList.Text = "192.168.2.107,192.168.2.108";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(26, 21);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(17, 14);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(179, 18);
+            this.label1.Size = new System.Drawing.Size(119, 12);
             this.label1.TabIndex = 1;
             this.label1.Text = "服务器列表(\",\"分隔)";
             // 
             // textBox_workerNum
             // 
-            this.textBox_workerNum.Location = new System.Drawing.Point(78, 60);
-            this.textBox_workerNum.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_workerNum.Location = new System.Drawing.Point(52, 40);
             this.textBox_workerNum.Name = "textBox_workerNum";
-            this.textBox_workerNum.Size = new System.Drawing.Size(148, 28);
+            this.textBox_workerNum.Size = new System.Drawing.Size(100, 21);
             this.textBox_workerNum.TabIndex = 3;
             this.textBox_workerNum.Text = "1000";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(26, 64);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Location = new System.Drawing.Point(17, 43);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(44, 18);
+            this.label2.Size = new System.Drawing.Size(29, 12);
             this.label2.TabIndex = 4;
             this.label2.Text = "工号";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(256, 64);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Location = new System.Drawing.Point(171, 43);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(44, 18);
+            this.label3.Size = new System.Drawing.Size(29, 12);
             this.label3.TabIndex = 4;
             this.label3.Text = "密码";
             // 
             // textBox_password
             // 
-            this.textBox_password.Location = new System.Drawing.Point(309, 60);
-            this.textBox_password.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_password.Location = new System.Drawing.Point(206, 40);
             this.textBox_password.Name = "textBox_password";
-            this.textBox_password.Size = new System.Drawing.Size(148, 28);
+            this.textBox_password.Size = new System.Drawing.Size(100, 21);
             this.textBox_password.TabIndex = 5;
             this.textBox_password.Text = "1000";
             // 
             // button_open
             // 
-            this.button_open.Location = new System.Drawing.Point(468, 57);
-            this.button_open.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_open.Location = new System.Drawing.Point(312, 38);
             this.button_open.Name = "button_open";
-            this.button_open.Size = new System.Drawing.Size(112, 34);
+            this.button_open.Size = new System.Drawing.Size(75, 23);
             this.button_open.TabIndex = 6;
             this.button_open.Text = "上线";
             this.button_open.UseVisualStyleBackColor = true;
@@ -183,19 +176,17 @@ namespace WindowsFormsApp1
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(18, 392);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Location = new System.Drawing.Point(12, 261);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(62, 18);
+            this.label4.Size = new System.Drawing.Size(41, 12);
             this.label4.TabIndex = 7;
             this.label4.Text = "技能组";
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(590, 57);
-            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button1.Location = new System.Drawing.Point(393, 38);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(112, 34);
+            this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 9;
             this.button1.Text = "下线";
             this.button1.UseVisualStyleBackColor = true;
@@ -204,49 +195,44 @@ namespace WindowsFormsApp1
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(256, 106);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Location = new System.Drawing.Point(171, 71);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(107, 18);
+            this.label5.Size = new System.Drawing.Size(71, 12);
             this.label5.TabIndex = 10;
             this.label5.Text = "AgentState:";
             // 
             // label_agentState
             // 
             this.label_agentState.AutoSize = true;
-            this.label_agentState.Location = new System.Drawing.Point(372, 106);
-            this.label_agentState.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_agentState.Location = new System.Drawing.Point(248, 71);
             this.label_agentState.Name = "label_agentState";
-            this.label_agentState.Size = new System.Drawing.Size(62, 18);
+            this.label_agentState.Size = new System.Drawing.Size(41, 12);
             this.label_agentState.TabIndex = 11;
             this.label_agentState.Text = "State?";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(26, 96);
-            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label6.Location = new System.Drawing.Point(17, 64);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(80, 18);
+            this.label6.Size = new System.Drawing.Size(53, 12);
             this.label6.TabIndex = 12;
             this.label6.Text = "AgentID:";
             // 
             // label_agentName
             // 
             this.label_agentName.AutoSize = true;
-            this.label_agentName.Location = new System.Drawing.Point(130, 122);
-            this.label_agentName.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_agentName.Location = new System.Drawing.Point(87, 81);
             this.label_agentName.Name = "label_agentName";
-            this.label_agentName.Size = new System.Drawing.Size(53, 18);
+            this.label_agentName.Size = new System.Drawing.Size(35, 12);
             this.label_agentName.TabIndex = 13;
             this.label_agentName.Text = "Name?";
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(10, 164);
-            this.button2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button2.Location = new System.Drawing.Point(7, 109);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(152, 34);
+            this.button2.Size = new System.Drawing.Size(101, 23);
             this.button2.TabIndex = 18;
             this.button2.Text = "Sign in - All";
             this.button2.UseVisualStyleBackColor = true;
@@ -254,10 +240,9 @@ namespace WindowsFormsApp1
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(171, 164);
-            this.button3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button3.Location = new System.Drawing.Point(114, 109);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(148, 34);
+            this.button3.Size = new System.Drawing.Size(99, 23);
             this.button3.TabIndex = 19;
             this.button3.Text = "Sign out - All";
             this.button3.UseVisualStyleBackColor = true;
@@ -266,20 +251,18 @@ namespace WindowsFormsApp1
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(26, 122);
-            this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label9.Location = new System.Drawing.Point(17, 81);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(98, 18);
+            this.label9.Size = new System.Drawing.Size(65, 12);
             this.label9.TabIndex = 20;
             this.label9.Text = "AgentName:";
             // 
             // label_agentId
             // 
             this.label_agentId.AutoSize = true;
-            this.label_agentId.Location = new System.Drawing.Point(114, 96);
-            this.label_agentId.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_agentId.Location = new System.Drawing.Point(76, 64);
             this.label_agentId.Name = "label_agentId";
-            this.label_agentId.Size = new System.Drawing.Size(35, 18);
+            this.label_agentId.Size = new System.Drawing.Size(23, 12);
             this.label_agentId.TabIndex = 21;
             this.label_agentId.Text = "ID?";
             // 
@@ -292,10 +275,9 @@ namespace WindowsFormsApp1
             this.listView_Groups.ContextMenuStrip = this.contextMenuStrip_group;
             this.listView_Groups.FullRowSelect = true;
             this.listView_Groups.HideSelection = false;
-            this.listView_Groups.Location = new System.Drawing.Point(10, 414);
-            this.listView_Groups.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.listView_Groups.Location = new System.Drawing.Point(7, 276);
             this.listView_Groups.Name = "listView_Groups";
-            this.listView_Groups.Size = new System.Drawing.Size(382, 163);
+            this.listView_Groups.Size = new System.Drawing.Size(256, 110);
             this.listView_Groups.TabIndex = 22;
             this.listView_Groups.UseCompatibleStateImageBehavior = false;
             this.listView_Groups.View = System.Windows.Forms.View.Details;
@@ -315,29 +297,28 @@ namespace WindowsFormsApp1
             this.toolStripMenuItem1,
             this.toolStripMenuItem2});
             this.contextMenuStrip_group.Name = "contextMenuStrip1";
-            this.contextMenuStrip_group.Size = new System.Drawing.Size(157, 64);
+            this.contextMenuStrip_group.Size = new System.Drawing.Size(127, 48);
             this.contextMenuStrip_group.Text = "Sign in or out of Agent Group";
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(156, 30);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(126, 22);
             this.toolStripMenuItem1.Text = "Sign In";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(156, 30);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(126, 22);
             this.toolStripMenuItem2.Text = "Sign Out";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(346, 164);
-            this.button4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button4.Location = new System.Drawing.Point(231, 109);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(112, 34);
+            this.button4.Size = new System.Drawing.Size(75, 23);
             this.button4.TabIndex = 23;
             this.button4.Text = "示闲";
             this.button4.UseVisualStyleBackColor = true;
@@ -345,10 +326,9 @@ namespace WindowsFormsApp1
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(468, 164);
-            this.button5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button5.Location = new System.Drawing.Point(312, 109);
             this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(112, 34);
+            this.button5.Size = new System.Drawing.Size(75, 23);
             this.button5.TabIndex = 24;
             this.button5.Text = "示忙";
             this.button5.UseVisualStyleBackColor = true;
@@ -360,10 +340,9 @@ namespace WindowsFormsApp1
             this.columnHeader4,
             this.columnHeader5});
             this.listView_sipAccounts.HideSelection = false;
-            this.listView_sipAccounts.Location = new System.Drawing.Point(10, 588);
-            this.listView_sipAccounts.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.listView_sipAccounts.Location = new System.Drawing.Point(7, 392);
             this.listView_sipAccounts.Name = "listView_sipAccounts";
-            this.listView_sipAccounts.Size = new System.Drawing.Size(1267, 163);
+            this.listView_sipAccounts.Size = new System.Drawing.Size(846, 110);
             this.listView_sipAccounts.TabIndex = 28;
             this.listView_sipAccounts.UseCompatibleStateImageBehavior = false;
             this.listView_sipAccounts.View = System.Windows.Forms.View.Details;
@@ -378,10 +357,9 @@ namespace WindowsFormsApp1
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(10, 762);
-            this.button7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button7.Location = new System.Drawing.Point(7, 508);
             this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(112, 34);
+            this.button7.Size = new System.Drawing.Size(75, 23);
             this.button7.TabIndex = 29;
             this.button7.Text = "接听";
             this.button7.UseVisualStyleBackColor = true;
@@ -389,10 +367,9 @@ namespace WindowsFormsApp1
             // 
             // button8
             // 
-            this.button8.Location = new System.Drawing.Point(132, 762);
-            this.button8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button8.Location = new System.Drawing.Point(88, 508);
             this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(112, 34);
+            this.button8.Size = new System.Drawing.Size(75, 23);
             this.button8.TabIndex = 30;
             this.button8.Text = "挂断";
             this.button8.UseVisualStyleBackColor = true;
@@ -400,85 +377,80 @@ namespace WindowsFormsApp1
             // 
             // textBox_ringInfo
             // 
-            this.textBox_ringInfo.Location = new System.Drawing.Point(96, 328);
-            this.textBox_ringInfo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_ringInfo.Location = new System.Drawing.Point(64, 219);
             this.textBox_ringInfo.Name = "textBox_ringInfo";
             this.textBox_ringInfo.ReadOnly = true;
-            this.textBox_ringInfo.Size = new System.Drawing.Size(1232, 28);
+            this.textBox_ringInfo.Size = new System.Drawing.Size(823, 21);
             this.textBox_ringInfo.TabIndex = 31;
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(14, 332);
-            this.label11.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label11.Location = new System.Drawing.Point(9, 221);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(80, 18);
+            this.label11.Size = new System.Drawing.Size(53, 12);
             this.label11.TabIndex = 32;
             this.label11.Text = "振铃信息";
             // 
             // numericUpDown_ReqNum2
             // 
-            this.numericUpDown_ReqNum2.Location = new System.Drawing.Point(96, 250);
-            this.numericUpDown_ReqNum2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.numericUpDown_ReqNum2.Location = new System.Drawing.Point(64, 167);
+            this.numericUpDown_ReqNum2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.numericUpDown_ReqNum2.Maximum = new decimal(new int[] {
             0,
             1,
             0,
             0});
             this.numericUpDown_ReqNum2.Name = "numericUpDown_ReqNum2";
-            this.numericUpDown_ReqNum2.Size = new System.Drawing.Size(78, 28);
+            this.numericUpDown_ReqNum2.Size = new System.Drawing.Size(53, 21);
             this.numericUpDown_ReqNum2.TabIndex = 38;
             // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(96, 230);
-            this.label12.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label12.Location = new System.Drawing.Point(64, 153);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(62, 18);
+            this.label12.Size = new System.Drawing.Size(41, 12);
             this.label12.TabIndex = 36;
             this.label12.Text = "MsgNum";
             // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(182, 230);
-            this.label13.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label13.Location = new System.Drawing.Point(121, 153);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(98, 18);
+            this.label13.Size = new System.Drawing.Size(65, 12);
             this.label13.TabIndex = 37;
             this.label13.Text = "MsgContent";
             // 
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(10, 231);
-            this.label14.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label14.Location = new System.Drawing.Point(7, 154);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(71, 18);
+            this.label14.Size = new System.Drawing.Size(47, 12);
             this.label14.TabIndex = 35;
             this.label14.Text = "MsgType";
             // 
             // textBox_ReqContent2
             // 
-            this.textBox_ReqContent2.Location = new System.Drawing.Point(182, 250);
-            this.textBox_ReqContent2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_ReqContent2.Location = new System.Drawing.Point(121, 167);
+            this.textBox_ReqContent2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox_ReqContent2.Name = "textBox_ReqContent2";
-            this.textBox_ReqContent2.Size = new System.Drawing.Size(198, 28);
+            this.textBox_ReqContent2.Size = new System.Drawing.Size(133, 21);
             this.textBox_ReqContent2.TabIndex = 34;
             // 
             // numericUpDown_ReqType2
             // 
-            this.numericUpDown_ReqType2.Location = new System.Drawing.Point(12, 252);
-            this.numericUpDown_ReqType2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.numericUpDown_ReqType2.Location = new System.Drawing.Point(8, 168);
+            this.numericUpDown_ReqType2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.numericUpDown_ReqType2.Maximum = new decimal(new int[] {
             0,
             1,
             0,
             0});
             this.numericUpDown_ReqType2.Name = "numericUpDown_ReqType2";
-            this.numericUpDown_ReqType2.Size = new System.Drawing.Size(78, 28);
+            this.numericUpDown_ReqType2.Size = new System.Drawing.Size(53, 21);
             this.numericUpDown_ReqType2.TabIndex = 33;
             this.numericUpDown_ReqType2.Value = new decimal(new int[] {
             4,
@@ -488,10 +460,9 @@ namespace WindowsFormsApp1
             // 
             // button9
             // 
-            this.button9.Location = new System.Drawing.Point(390, 248);
-            this.button9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button9.Location = new System.Drawing.Point(260, 165);
             this.button9.Name = "button9";
-            this.button9.Size = new System.Drawing.Size(176, 34);
+            this.button9.Size = new System.Drawing.Size(117, 23);
             this.button9.TabIndex = 39;
             this.button9.Text = "Send Request";
             this.button9.UseVisualStyleBackColor = true;
@@ -499,20 +470,19 @@ namespace WindowsFormsApp1
             // 
             // textBox_reqRes
             // 
-            this.textBox_reqRes.Location = new System.Drawing.Point(10, 290);
-            this.textBox_reqRes.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_reqRes.Location = new System.Drawing.Point(7, 193);
+            this.textBox_reqRes.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox_reqRes.Name = "textBox_reqRes";
             this.textBox_reqRes.ReadOnly = true;
-            this.textBox_reqRes.Size = new System.Drawing.Size(553, 28);
+            this.textBox_reqRes.Size = new System.Drawing.Size(370, 21);
             this.textBox_reqRes.TabIndex = 40;
             // 
             // checkBox_forceClose
             // 
             this.checkBox_forceClose.AutoSize = true;
-            this.checkBox_forceClose.Location = new System.Drawing.Point(706, 60);
-            this.checkBox_forceClose.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_forceClose.Location = new System.Drawing.Point(471, 40);
             this.checkBox_forceClose.Name = "checkBox_forceClose";
-            this.checkBox_forceClose.Size = new System.Drawing.Size(133, 22);
+            this.checkBox_forceClose.Size = new System.Drawing.Size(90, 16);
             this.checkBox_forceClose.TabIndex = 41;
             this.checkBox_forceClose.Text = "force close";
             this.checkBox_forceClose.UseVisualStyleBackColor = true;
@@ -524,10 +494,9 @@ namespace WindowsFormsApp1
             this.columnHeader7,
             this.columnHeader8});
             this.listView_connections.HideSelection = false;
-            this.listView_connections.Location = new System.Drawing.Point(850, 16);
-            this.listView_connections.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.listView_connections.Location = new System.Drawing.Point(567, 11);
             this.listView_connections.Name = "listView_connections";
-            this.listView_connections.Size = new System.Drawing.Size(478, 180);
+            this.listView_connections.Size = new System.Drawing.Size(320, 121);
             this.listView_connections.TabIndex = 42;
             this.listView_connections.UseCompatibleStateImageBehavior = false;
             this.listView_connections.View = System.Windows.Forms.View.Details;
@@ -542,10 +511,9 @@ namespace WindowsFormsApp1
             // 
             // btn_hold
             // 
-            this.btn_hold.Location = new System.Drawing.Point(608, 246);
-            this.btn_hold.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btn_hold.Location = new System.Drawing.Point(405, 164);
             this.btn_hold.Name = "btn_hold";
-            this.btn_hold.Size = new System.Drawing.Size(112, 34);
+            this.btn_hold.Size = new System.Drawing.Size(75, 23);
             this.btn_hold.TabIndex = 43;
             this.btn_hold.Text = "Hold";
             this.btn_hold.UseVisualStyleBackColor = true;
@@ -553,10 +521,9 @@ namespace WindowsFormsApp1
             // 
             // btn_unhold
             // 
-            this.btn_unhold.Location = new System.Drawing.Point(730, 246);
-            this.btn_unhold.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btn_unhold.Location = new System.Drawing.Point(487, 164);
             this.btn_unhold.Name = "btn_unhold";
-            this.btn_unhold.Size = new System.Drawing.Size(112, 34);
+            this.btn_unhold.Size = new System.Drawing.Size(75, 23);
             this.btn_unhold.TabIndex = 44;
             this.btn_unhold.Text = "Un-Hold(无用)";
             this.btn_unhold.UseVisualStyleBackColor = true;
@@ -565,19 +532,17 @@ namespace WindowsFormsApp1
             // label_workChannel
             // 
             this.label_workChannel.AutoSize = true;
-            this.label_workChannel.Location = new System.Drawing.Point(810, 138);
-            this.label_workChannel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_workChannel.Location = new System.Drawing.Point(540, 92);
             this.label_workChannel.Name = "label_workChannel";
-            this.label_workChannel.Size = new System.Drawing.Size(26, 18);
+            this.label_workChannel.Size = new System.Drawing.Size(17, 12);
             this.label_workChannel.TabIndex = 45;
             this.label_workChannel.Text = "-1";
             // 
             // button_offhook
             // 
-            this.button_offhook.Location = new System.Drawing.Point(608, 290);
-            this.button_offhook.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_offhook.Location = new System.Drawing.Point(405, 193);
             this.button_offhook.Name = "button_offhook";
-            this.button_offhook.Size = new System.Drawing.Size(112, 34);
+            this.button_offhook.Size = new System.Drawing.Size(75, 23);
             this.button_offhook.TabIndex = 47;
             this.button_offhook.Text = "Offhook";
             this.button_offhook.UseVisualStyleBackColor = true;
@@ -585,10 +550,9 @@ namespace WindowsFormsApp1
             // 
             // button_hangup
             // 
-            this.button_hangup.Location = new System.Drawing.Point(730, 290);
-            this.button_hangup.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_hangup.Location = new System.Drawing.Point(487, 193);
             this.button_hangup.Name = "button_hangup";
-            this.button_hangup.Size = new System.Drawing.Size(112, 34);
+            this.button_hangup.Size = new System.Drawing.Size(75, 23);
             this.button_hangup.TabIndex = 48;
             this.button_hangup.Text = "Hangup";
             this.button_hangup.UseVisualStyleBackColor = true;
@@ -597,30 +561,27 @@ namespace WindowsFormsApp1
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(256, 138);
-            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label7.Location = new System.Drawing.Point(171, 92);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(98, 18);
+            this.label7.Size = new System.Drawing.Size(65, 12);
             this.label7.TabIndex = 49;
             this.label7.Text = "TeleState:";
             // 
             // label_teleState
             // 
             this.label_teleState.AutoSize = true;
-            this.label_teleState.Location = new System.Drawing.Point(363, 138);
-            this.label_teleState.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_teleState.Location = new System.Drawing.Point(242, 92);
             this.label_teleState.Name = "label_teleState";
-            this.label_teleState.Size = new System.Drawing.Size(98, 18);
+            this.label_teleState.Size = new System.Drawing.Size(65, 12);
             this.label_teleState.TabIndex = 50;
             this.label_teleState.Text = "TeleState?";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(400, 392);
-            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label8.Location = new System.Drawing.Point(267, 261);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(89, 18);
+            this.label8.Size = new System.Drawing.Size(59, 12);
             this.label8.TabIndex = 51;
             this.label8.Text = "Hold List";
             // 
@@ -633,10 +594,9 @@ namespace WindowsFormsApp1
             this.listView_hold.ContextMenuStrip = this.contextMenuStrip_hold;
             this.listView_hold.FullRowSelect = true;
             this.listView_hold.HideSelection = false;
-            this.listView_hold.Location = new System.Drawing.Point(404, 414);
-            this.listView_hold.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.listView_hold.Location = new System.Drawing.Point(269, 276);
             this.listView_hold.Name = "listView_hold";
-            this.listView_hold.Size = new System.Drawing.Size(382, 163);
+            this.listView_hold.Size = new System.Drawing.Size(256, 110);
             this.listView_hold.TabIndex = 52;
             this.listView_hold.UseCompatibleStateImageBehavior = false;
             this.listView_hold.View = System.Windows.Forms.View.Details;
@@ -655,31 +615,29 @@ namespace WindowsFormsApp1
             this.contextMenuStrip_hold.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.unHoldToolStripMenuItem});
             this.contextMenuStrip_hold.Name = "contextMenuStrip_hold";
-            this.contextMenuStrip_hold.Size = new System.Drawing.Size(147, 34);
+            this.contextMenuStrip_hold.Size = new System.Drawing.Size(121, 26);
             // 
             // unHoldToolStripMenuItem
             // 
             this.unHoldToolStripMenuItem.Name = "unHoldToolStripMenuItem";
-            this.unHoldToolStripMenuItem.Size = new System.Drawing.Size(146, 30);
+            this.unHoldToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
             this.unHoldToolStripMenuItem.Text = "UnHold";
             this.unHoldToolStripMenuItem.Click += new System.EventHandler(this.UnHoldToolStripMenuItem_Click);
             // 
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(704, 138);
-            this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label10.Location = new System.Drawing.Point(469, 92);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(80, 18);
+            this.label10.Size = new System.Drawing.Size(53, 12);
             this.label10.TabIndex = 54;
             this.label10.Text = "Channel:";
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(346, 204);
-            this.button6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button6.Location = new System.Drawing.Point(231, 136);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(226, 34);
+            this.button6.Size = new System.Drawing.Size(151, 23);
             this.button6.TabIndex = 55;
             this.button6.Text = "Set Main Server Index";
             this.button6.UseVisualStyleBackColor = true;
@@ -687,10 +645,9 @@ namespace WindowsFormsApp1
             // 
             // numericUpDown_MainIndex
             // 
-            this.numericUpDown_MainIndex.Location = new System.Drawing.Point(582, 204);
-            this.numericUpDown_MainIndex.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDown_MainIndex.Location = new System.Drawing.Point(388, 136);
             this.numericUpDown_MainIndex.Name = "numericUpDown_MainIndex";
-            this.numericUpDown_MainIndex.Size = new System.Drawing.Size(63, 28);
+            this.numericUpDown_MainIndex.Size = new System.Drawing.Size(43, 21);
             this.numericUpDown_MainIndex.TabIndex = 56;
             // 
             // listView_queue
@@ -702,10 +659,9 @@ namespace WindowsFormsApp1
             this.listView_queue.ContextMenuStrip = this.contextMenuStrip_queue;
             this.listView_queue.FullRowSelect = true;
             this.listView_queue.HideSelection = false;
-            this.listView_queue.Location = new System.Drawing.Point(796, 414);
-            this.listView_queue.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.listView_queue.Location = new System.Drawing.Point(531, 276);
             this.listView_queue.Name = "listView_queue";
-            this.listView_queue.Size = new System.Drawing.Size(481, 163);
+            this.listView_queue.Size = new System.Drawing.Size(322, 110);
             this.listView_queue.TabIndex = 57;
             this.listView_queue.UseCompatibleStateImageBehavior = false;
             this.listView_queue.View = System.Windows.Forms.View.Details;
@@ -724,22 +680,21 @@ namespace WindowsFormsApp1
             this.contextMenuStrip_queue.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.dequeueToolStripMenuItem});
             this.contextMenuStrip_queue.Name = "contextMenuStrip_queue";
-            this.contextMenuStrip_queue.Size = new System.Drawing.Size(159, 34);
+            this.contextMenuStrip_queue.Size = new System.Drawing.Size(129, 26);
             // 
             // dequeueToolStripMenuItem
             // 
             this.dequeueToolStripMenuItem.Name = "dequeueToolStripMenuItem";
-            this.dequeueToolStripMenuItem.Size = new System.Drawing.Size(158, 30);
+            this.dequeueToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
             this.dequeueToolStripMenuItem.Text = "Dequeue";
             this.dequeueToolStripMenuItem.Click += new System.EventHandler(this.dequeueToolStripMenuItem_Click);
             // 
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(810, 392);
-            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label15.Location = new System.Drawing.Point(540, 261);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(98, 18);
+            this.label15.Size = new System.Drawing.Size(65, 12);
             this.label15.TabIndex = 58;
             this.label15.Text = "Queue List";
             // 
@@ -747,43 +702,47 @@ namespace WindowsFormsApp1
             // 
             this.comboBox_audInputDev.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_audInputDev.FormattingEnabled = true;
-            this.comboBox_audInputDev.Location = new System.Drawing.Point(337, 772);
+            this.comboBox_audInputDev.Location = new System.Drawing.Point(225, 515);
+            this.comboBox_audInputDev.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.comboBox_audInputDev.Name = "comboBox_audInputDev";
-            this.comboBox_audInputDev.Size = new System.Drawing.Size(275, 26);
+            this.comboBox_audInputDev.Size = new System.Drawing.Size(285, 20);
             this.comboBox_audInputDev.TabIndex = 59;
             // 
             // comboBox_audOutputDev
             // 
             this.comboBox_audOutputDev.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_audOutputDev.FormattingEnabled = true;
-            this.comboBox_audOutputDev.Location = new System.Drawing.Point(721, 770);
+            this.comboBox_audOutputDev.Location = new System.Drawing.Point(565, 514);
+            this.comboBox_audOutputDev.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.comboBox_audOutputDev.Name = "comboBox_audOutputDev";
-            this.comboBox_audOutputDev.Size = new System.Drawing.Size(275, 26);
+            this.comboBox_audOutputDev.Size = new System.Drawing.Size(288, 20);
             this.comboBox_audOutputDev.TabIndex = 60;
             // 
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(260, 775);
+            this.label16.Location = new System.Drawing.Point(173, 517);
+            this.label16.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(62, 18);
+            this.label16.Size = new System.Drawing.Size(41, 12);
             this.label16.TabIndex = 61;
             this.label16.Text = "AUD IN";
             // 
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(640, 775);
+            this.label17.Location = new System.Drawing.Point(514, 517);
+            this.label17.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(71, 18);
+            this.label17.Size = new System.Drawing.Size(47, 12);
             this.label17.TabIndex = 62;
             this.label17.Text = "AUD OUT";
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1352, 819);
+            this.ClientSize = new System.Drawing.Size(901, 546);
             this.Controls.Add(this.label17);
             this.Controls.Add(this.label16);
             this.Controls.Add(this.comboBox_audOutputDev);
@@ -837,7 +796,6 @@ namespace WindowsFormsApp1
             this.Controls.Add(this.textBox_workerNum);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox_ServerAddressList);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Form1";
             this.Text = "Form1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
