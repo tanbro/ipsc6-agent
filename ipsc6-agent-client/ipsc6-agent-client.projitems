@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>01e42cd4-e152-4513-a66f-7d75b3b70bfc</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>ipsc6.agent.client</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Agent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AgentGroup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AgentRequestMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AgentRunningState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AgentState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AgentStateWorkType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Connection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConnectionInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConnectionState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Constants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Events.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HoldInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HoldEventType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IvrData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IvrInvokeType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Privilege.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QueueInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QueueEventType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QueueInfoType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RingInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ServerSentCustomString.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ServerSentErrorCode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ServerSentMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MessageType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ServerSentMessageSubType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ServerSideData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TeleMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TeleState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WorkingChannelInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WorkType.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory).editorconfig" />
+  </ItemGroup>
+</Project>
