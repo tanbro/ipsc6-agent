@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using hesong.Lib.Log;
 
 
@@ -18,7 +18,7 @@ namespace hesong.plum.client.Utils
                 _loggerFatal = new LogSaver(Log4NetConfigFile, Log4NetLaggerNameFatal);
                 LogSaver = new SaveLog();
             }
-            catch (Exception err)
+            catch
             {
                 Console.Out.WriteLine("error for init LogSaver from file 'hesong.log4net'.");
             }

@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ipsc6.agent.winapp", "ipsc6
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hesong.plum.client.winform", "hesong.plum.client.winform\hesong.plum.client.winform.csproj", "{2735009A-3464-4DA4-9595-63A1C62492C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hesong.lib.Log", "hesong.lib.Log\hesong.lib.Log.csproj", "{87B12392-DF10-40B8-A414-3669CCD99E4F}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		ipsc6-agent-client\ipsc6-agent-client.projitems*{01e42cd4-e152-4513-a66f-7d75b3b70bfc}*SharedItemsImports = 13
@@ -178,6 +180,18 @@ Global
 		{2735009A-3464-4DA4-9595-63A1C62492C5}.Release|x64.Build.0 = Release|Any CPU
 		{2735009A-3464-4DA4-9595-63A1C62492C5}.Release|x86.ActiveCfg = Release|Any CPU
 		{2735009A-3464-4DA4-9595-63A1C62492C5}.Release|x86.Build.0 = Release|Any CPU
+		{87B12392-DF10-40B8-A414-3669CCD99E4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87B12392-DF10-40B8-A414-3669CCD99E4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87B12392-DF10-40B8-A414-3669CCD99E4F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{87B12392-DF10-40B8-A414-3669CCD99E4F}.Debug|x64.Build.0 = Debug|Any CPU
+		{87B12392-DF10-40B8-A414-3669CCD99E4F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{87B12392-DF10-40B8-A414-3669CCD99E4F}.Debug|x86.Build.0 = Debug|Any CPU
+		{87B12392-DF10-40B8-A414-3669CCD99E4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87B12392-DF10-40B8-A414-3669CCD99E4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87B12392-DF10-40B8-A414-3669CCD99E4F}.Release|x64.ActiveCfg = Release|Any CPU
+		{87B12392-DF10-40B8-A414-3669CCD99E4F}.Release|x64.Build.0 = Release|Any CPU
+		{87B12392-DF10-40B8-A414-3669CCD99E4F}.Release|x86.ActiveCfg = Release|Any CPU
+		{87B12392-DF10-40B8-A414-3669CCD99E4F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

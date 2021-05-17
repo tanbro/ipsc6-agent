@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -33,13 +33,13 @@ namespace hesong.plum.client
         private void UcCallOutOnClick(object sender, EventArgs e)
         {
 
-            var frm = new frmDial(ucCallOut);
-            var res = frm.ShowDialog(this);
-            frm.Close();
-            frm.Dispose();
-            if (res == DialogResult.OK)
+            using (var frm = new frmDial(ucCallOut))
             {
-                
+                var res = frm.ShowDialog(this);
+                if (res == DialogResult.OK)
+                {
+
+                }
             }
         }
 

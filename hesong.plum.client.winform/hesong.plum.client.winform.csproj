@@ -25,7 +25,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -34,28 +34,24 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>hesong.plum.client.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="hesong.Lib.Log">
-      <HintPath>..\..\hesong.lib.Log\bin\Debug\hesong.Lib.Log.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\..\Dlls\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json.Net20">
-      <HintPath>..\..\Dlls\Newtonsoft.Json.Net20.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite">
       <HintPath>..\..\Dlls\System.Data.SQLite.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -83,24 +79,19 @@
     <Compile Include="Controls\UserControl3.xaml.cs">
       <DependentUpon>UserControl3.xaml</DependentUpon>
     </Compile>
-    <Compile Include="frmDial.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="frmDial.cs" />
     <Compile Include="frmDial.Designer.cs">
       <DependentUpon>frmDial.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmLogon.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="frmLogon.cs" />
     <Compile Include="frmLogon.Designer.cs">
       <DependentUpon>frmLogon.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmSoftTel.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="frmSoftTel.cs" />
     <Compile Include="frmSoftTel.Designer.cs">
       <DependentUpon>frmSoftTel.cs</DependentUpon>
     </Compile>
+    <Compile Include="G.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\ISaveLog.cs" />
@@ -130,6 +121,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="hesong.plum.client.snk" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -178,6 +170,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\hesong.lib.Log\hesong.lib.Log.csproj">
+      <Project>{87b12392-df10-40b8-a414-3669ccd99e4f}</Project>
+      <Name>hesong.lib.Log</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ipsc6.agent.client.netframework\ipsc6.agent.client.netframework.csproj">
       <Project>{62d33297-c37d-44a8-8a97-13425e0d54d5}</Project>
       <Name>ipsc6.agent.client.netframework</Name>
