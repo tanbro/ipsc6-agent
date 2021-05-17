@@ -26,7 +26,6 @@ namespace hesong.plum.client
         /// <param name="e"></param>
         private async void tableLayoutPanel2_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("点击了“登录”按钮！");
             if (G.agent == null)
             {
                 string[] addresses = { "192.168.2.107", "192.168.2.108" };

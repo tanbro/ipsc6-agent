@@ -33,14 +33,7 @@ namespace hesong.plum.client
         private void UcCallOutOnClick(object sender, EventArgs e)
         {
 
-            using (var frm = new frmDial(ucCallOut))
-            {
-                var res = frm.ShowDialog(this);
-                if (res == DialogResult.OK)
-                {
 
-                }
-            }
         }
 
         private void frmSoftTel_Load(object sender, EventArgs e)
@@ -48,6 +41,20 @@ namespace hesong.plum.client
             // 设置窗体出现的初始位置
             this.Top = 200;
             this.Left = 20;
+
+            using (var frm = new frmLogon())
+            {
+                var res = frm.ShowDialog(this);
+                if (res == DialogResult.OK)
+                {
+
+                }
+                else
+                {
+                    MessageBox.Show("登陆失败");
+                    return;
+                }
+            }
 
             // 初始化内存数据库（整个程序开始时初始化一次就行）
             // 如果不希望SQLiteMem记日志， 传递一个null也行
