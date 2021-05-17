@@ -78,7 +78,7 @@ namespace ipsc6.agent.client
 
         static string MakeMessage(ServerSentMessage arg)
         {
-            return string.Format("ErrorResponse: {0}", arg);
+            return $"ErrorResponse: {arg}";
         }
 
         public ErrorResponse(ServerSentMessage arg) : base(MakeMessage(arg))

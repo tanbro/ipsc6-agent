@@ -22,7 +22,8 @@ namespace hesong.plum.client
 
         private async void Button_LogIn_Click(object sender, EventArgs e)
         {
-            string[] addresses = { "192.168.2.107", "192.168.2.108" };
+            //string[] addresses = { "192.168.2.107", "192.168.2.108" };
+            string[] addresses = { "192.168.2.108" };
             Control[] disableControls = { sender as Control, txtUser, txtPass };
             using (new Utils.WaitCursorBlock(disableControls))
             {

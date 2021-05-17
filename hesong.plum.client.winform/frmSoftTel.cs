@@ -8,13 +8,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using hesong.plum.client.Utils;
+
+using ipsc6.agent.network;
+using ipsc6.agent.client;
+
 
 namespace hesong.plum.client
 {
+    using Utils;
+
     public partial class frmSoftTel : Form
     {
-  
+
 
         public frmSoftTel()
         {
@@ -39,8 +44,14 @@ namespace hesong.plum.client
         private void frmSoftTel_Load(object sender, EventArgs e)
         {
             // 设置窗体出现的初始位置
-            this.Top = 200;
-            this.Left = 20;
+            //this.Top = 200;
+            //this.Left = 20;
+            var rect = Screen.GetWorkingArea(this);
+            Top = rect.Top + Height;
+            Left = (rect.Width - Width / 2) / 2;
+
+            Logger.Log("ipsc6.agent.network Initial");
+            Connector.Initial();
 
             using (var frm = new frmLogon())
             {
@@ -77,7 +88,7 @@ namespace hesong.plum.client
             for (var i = 0; i < ds.Tables[0].Rows.Count; i++)
             {
                 var dr = ds.Tables[0].Rows[i];
-                MessageBox.Show($"id={dr["id"]}, name ={ dr["name"]}, age ={dr["age"]}");
+                //MessageBox.Show($"id={dr["id"]}, name ={ dr["name"]}, age ={dr["age"]}");
             }
 
             ResetControls();
@@ -87,7 +98,7 @@ namespace hesong.plum.client
         {
             ucQueueAndLost.QueueCount = 0;
             ucQueueAndLost.LostCount = 0;
-            
+
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -104,11 +115,39 @@ namespace hesong.plum.client
 
         private void frmSoftTel_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if(G.agent!=null)
+
+        }
+
+        bool closing = false;
+        private async void frmSoftTel_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (closing)
             {
+                return;
+            }
+            Enabled = false;
+            closing = true;
+            e.Cancel = true;
+
+            // caller returns and window stays open
+
+            if (G.agent != null)
+            {
+                Logger.Log("agent.ShutDown()...");
+                await G.agent.ShutDown();
+
+                Logger.Log("agent.Dispose()...");
                 G.agent.Dispose();
+
                 G.agent = null;
             }
+            Logger.Log("ipsc6.agent.network Release...");
+            Connector.Release();
+
+            // doesn't matter if it's closed
+            Close();
+            Enabled = true;
+            
         }
     }
 }

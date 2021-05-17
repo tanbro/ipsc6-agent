@@ -445,6 +445,19 @@ namespace WindowsFormsApp1
             {
                 if (agent == null) return;
 
+                agent.OnConnectionStateChanged -= Agent_OnConnectionStateChanged;
+                agent.OnAgentDisplayNameReceived -= Agent_OnAgentDisplayNameReceived;
+                agent.OnAgentStateChanged -= Agent_OnAgentStateChanged;
+                agent.OnGroupCollectionReceived -= Agent_OnGroupCollectionReceived;
+                agent.OnSignedGroupsChanged -= Agent_OnSignedGroupsChanged;
+                agent.OnSipRegistrarListReceived -= Agent_OnSipRegistrarListReceived;
+                agent.OnTeleStateChanged -= Agent_OnTeleStateChanged;
+                agent.OnRingInfoReceived -= Agent_OnRingInfoReceived;
+                agent.OnMainConnectionChanged -= Agent_OnMainConnectionChanged;
+                agent.OnWorkingChannelInfoReceived -= Agent_OnWorkingChannelInfoReceived;
+                agent.OnHoldInfo -= Agent_OnHoldInfo;
+                agent.OnQueueInfo -= Agent_OnQueueInfo;
+
                 await agent.ShutDown(checkBox_forceClose.Checked);
 
                 agent.Dispose();
