@@ -77,7 +77,7 @@ namespace hesong.plum.client
             for (var i = 0; i < ds.Tables[0].Rows.Count; i++)
             {
                 var dr = ds.Tables[0].Rows[i];
-                MessageBox.Show($"id={dr["id"]}, name ={ dr["name"]}, age ={dr["age"]}");
+                //MessageBox.Show($"id={dr["id"]}, name ={ dr["name"]}, age ={dr["age"]}");
             }
 
             ResetControls();

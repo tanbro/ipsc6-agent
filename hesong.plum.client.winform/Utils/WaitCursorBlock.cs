@@ -8,8 +8,8 @@ namespace hesong.plum.client.Utils
     class WaitCursorBlock : IDisposable
     {
         readonly static object lck = new object();
-        readonly static Dictionary<Control, int> controlsCounter = new Dictionary<Control, int>();
-        static int appCounter = 0;
+        readonly static Dictionary<Control, ushort> controlsCounter = new Dictionary<Control, ushort>();
+        static ushort appCounter = 0;
 
         readonly Control control = null;
         readonly IReadOnlyCollection<Control> disableControls = null;
@@ -40,7 +40,7 @@ namespace hesong.plum.client.Utils
 
         void Initial()
         {
-            int c;
+            ushort c;
             lock (lck)
             {
                 if (control == null)
@@ -97,7 +97,7 @@ namespace hesong.plum.client.Utils
                 // Check to see if Dispose has already been called.
                 if (!disposed)
                 {
-                    int c;
+                    ushort c;
                     lock (lck)
                     {
                         if (control == null)
@@ -107,7 +107,7 @@ namespace hesong.plum.client.Utils
                         else
                         {
                             c = --controlsCounter[control];
-                            if (c < 1)
+                            if (c == 0)
                             {
                                 controlsCounter.Remove(control);
                             }

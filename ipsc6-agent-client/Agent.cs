@@ -645,17 +645,19 @@ namespace ipsc6.agent.client
         {
             AgentRunningState savedRunningState;
             IEnumerable<int> minorIndices;
+            var rand = new Random();
             lock (this)
             {
                 if (runningState != AgentRunningState.Stopped)
-                    throw new InvalidOperationException(string.Format("{0}", runningState));
+                {
+                    throw new InvalidOperationException($"Invalid state: {runningState}");
+                }
                 savedRunningState = runningState;
                 runningState = AgentRunningState.Starting;
             }
             // 首先，主节点
             try
             {
-                var rand = new Random();
                 mainConnectionIndex = rand.Next(0, connectionList.Count);
                 minorIndices = from i in Enumerable.Range(0, connectionList.Count)
                                where i != mainConnectionIndex
@@ -696,7 +698,9 @@ namespace ipsc6.agent.client
             lock (this)
             {
                 if (runningState != AgentRunningState.Started)
-                    throw new InvalidOperationException(string.Format("{0}", runningState));
+                {
+                    throw new InvalidOperationException($"Invalid state: {runningState}");
+                }
                 savedRunningState = runningState;
                 runningState = AgentRunningState.Stopping;
                 isMainNotConnected = !MainConnection.Connected;
@@ -817,7 +821,7 @@ namespace ipsc6.agent.client
         {
             if (workType < WorkType.PauseBusy)
             {
-                throw new ArgumentOutOfRangeException(nameof(workType), string.Format("Invalid work type {0}", workType));
+                throw new ArgumentOutOfRangeException(nameof(workType), $"Invalid work type {workType}");
             }
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_PAUSE, (int)workType);
             await MainConnection.Request(req);
