@@ -18,12 +18,10 @@ namespace WindowsFormsApp1
         {
             Index = index;
             Form = form;
-            logger.DebugFormat("ctor - [{0}] {1}", Index, getId());
         }
 
         ~MySipAccount()
         {
-            logger.DebugFormat("dtor - [{0}] {1}", Index, getId());
             shutdown();
         }
 

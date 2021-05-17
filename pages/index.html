@@ -1,0 +1,7 @@
+<meta http-equiv="Content-Security-Policy" content="connect-src ws://localhost:8080">
+<script>
+    var ws = new WebSocket("ws://localhost:8080/chat");
+    ws.onmessage = e => {
+        console.log(e.data);
+    }
+</script>

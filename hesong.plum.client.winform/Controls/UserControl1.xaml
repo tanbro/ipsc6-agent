@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="hesong.plum.client.Controls.UserControl1"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:hesong.plum.client.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="55" d:DesignWidth="295">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="60*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Border BorderThickness="1" BorderBrush="#FFB0BBC1" Background="White" CornerRadius="5" >
+            <StackPanel Margin="0.2,0.2,-0.4,-19.8">
+                <StackPanel Orientation="Horizontal" Margin="5,5,0,5">
+                    <TextBox Name="txtTelIncome" Width="160" IsReadOnly="True">13581579746 | 北京移动</TextBox>
+                    <GridSplitter Width="10"></GridSplitter>
+                    <TextBlock Foreground="#FF6E91A5" Name="tabIvrWorkflowPath" >IVR路径 | 投诉申告</TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="5,5,0,5">
+                    <TextBlock Foreground="#FF6E91A5" >通次：</TextBlock>
+                    <TextBlock Foreground="#FF6E91A5" Name="tabIncomeCount" > 12</TextBlock>
+                    <GridSplitter Width="10"></GridSplitter>
+                    <TextBlock Foreground="#FF6E91A5" >通时：</TextBlock>
+                    <TextBlock Foreground="#FF6E91A5" Name="tabIncomeTime" >12:34:56</TextBlock>
+                    <GridSplitter Width="10"></GridSplitter>
+                    <TextBlock Foreground="#FF6E91A5" >满意度：</TextBlock>
+                    <TextBlock Foreground="#FF6E91A5" Name="tabSatisfaction" >[90%]</TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

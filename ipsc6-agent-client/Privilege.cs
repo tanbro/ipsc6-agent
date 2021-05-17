@@ -69,28 +69,20 @@ namespace ipsc6.agent.client
         //保留
         UNUSED07 = 32,
         //保留
-
         UNUSED08 = 33,
         //保留
-
         UNUSED09 = 34,
         //保留
-
         UNUSED10 = 35,
         //保留
-
         UNUSED11 = 36,
         //保留
-
         UNUSED12 = 37,
         //保留
-
         UNUSED13 = 38,
         //保留
-
         UNUSED14 = 39,
         //保留
-
         UNUSED15 = 40,
     }
 }

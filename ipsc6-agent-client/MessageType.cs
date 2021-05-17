@@ -43,7 +43,7 @@ namespace ipsc6.agent.client
         REMOTE_MSG_FORCEPAUSE = 36,      // 强制暂停
         REMOTE_MSG_FORCEIDLE = 37,       // 强制空闲
 
-        REMOTE_MSG_TAKEOVER = 38,       // 告诉服务器：该客户端不再“主要使用”该服务节点
+        REMOTE_MSG_TAKENAWAY = 38,       // 告诉服务器：该客户端不再“主要使用”该服务节点
 
         //设置话机模式
 

@@ -1,26 +1,26 @@
 using System;
+using System.Collections.Generic;
 
 namespace ipsc6.agent.client
 {
-    public class AgentGroup : IEquatable<AgentGroup>
+    public class AgentGroup : IEquatable<AgentGroup>, ICloneable
     {
-        public readonly string Id;
-        public string Name;
-        public bool Signed = false;
+        public string Id { get; }
+        public string Name { get; set; }
+
+        private bool signed = false;
+        public bool Signed { get => signed; set => signed = value; }
+
         public AgentGroup(string id)
         {
             Id = id;
+            Name = "";
         }
 
-        public bool Equals(AgentGroup other)
+        public AgentGroup(string id, string name)
         {
-            return Id == other.Id;
-        }
-
-        public override bool Equals(object obj)
-        {
-            var that = obj as AgentGroup;
-            return Equals(that);
+            Id = id;
+            Name = name;
         }
 
         public override int GetHashCode()
@@ -28,15 +28,30 @@ namespace ipsc6.agent.client
             return base.GetHashCode();
         }
 
-        public static bool operator ==(AgentGroup lhs, AgentGroup rhs)
+        public override bool Equals(object obj)
         {
-            return lhs.Equals(rhs);
+            return Equals(obj as AgentGroup);
         }
 
-        public static bool operator !=(AgentGroup lhs, AgentGroup rhs)
+        public bool Equals(AgentGroup other)
         {
-            return !lhs.Equals(rhs);
+            return other != null &&
+                   Id == other.Id;
         }
 
+        public object Clone()
+        {
+            return new AgentGroup(Id, Name);
+        }
+
+        public static bool operator ==(AgentGroup left, AgentGroup right)
+        {
+            return EqualityComparer<AgentGroup>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(AgentGroup left, AgentGroup right)
+        {
+            return !(left == right);
+        }
     }
 }

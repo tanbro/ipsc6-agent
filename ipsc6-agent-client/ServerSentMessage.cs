@@ -4,10 +4,10 @@ namespace ipsc6.agent.client
 {
     public class ServerSentMessage
     {
-        public readonly MessageType Type;
-        public readonly int N1;
-        public readonly int N2;
-        public readonly string S;
+        public MessageType Type { get; }
+        public int N1 { get; }
+        public int N2 { get; }
+        public string S { get; }
 
         public ServerSentMessage(MessageType type, int n1, int n2, string s)
         {
@@ -29,6 +29,7 @@ namespace ipsc6.agent.client
             Type = (MessageType)e.CommandType;
             N1 = e.N1;
             N2 = e.N2;
+            /* UTF-8 转当前编码 */
             var utfBytes = (encoding ?? Encoding.Default).GetBytes(e.S);
             e.S = Encoding.UTF8.GetString(utfBytes, 0, utfBytes.Length);
             S = e.S;

@@ -2,9 +2,9 @@ namespace ipsc6.agent.client
 {
     public class AgentRequestMessage
     {
-        public readonly MessageType Type;
-        public readonly int N;
-        public readonly string S;
+        public MessageType Type { get; }
+        public int N { get; }
+        public string S { get; }
 
         public AgentRequestMessage(MessageType type, int n, string s)
         {

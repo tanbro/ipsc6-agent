@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 
 namespace ipsc6.agent.client
 {
-    public class AgentStateWorkType : IEquatable<AgentStateWorkType>, ICloneable
+    public class AgentStateWorkType : ICloneable, IEquatable<AgentStateWorkType>
     {
-        public readonly AgentState AgentState;
-        public readonly WorkType WorkType;
+        public AgentState AgentState { get; }
+        public WorkType WorkType { get; }
 
         public AgentStateWorkType(AgentState agentState, WorkType workType)
         {
@@ -13,17 +14,36 @@ namespace ipsc6.agent.client
             WorkType = workType;
         }
 
-        public bool Equals(AgentStateWorkType other)
+        public override int GetHashCode()
         {
-            return (
-                (this.AgentState == other.AgentState) &&
-                (this.WorkType == other.WorkType)
-            );
+            return base.GetHashCode();
         }
 
         public object Clone()
         {
             return new AgentStateWorkType(AgentState, WorkType);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as AgentStateWorkType);
+        }
+
+        public bool Equals(AgentStateWorkType other)
+        {
+            return other != null &&
+                   AgentState == other.AgentState &&
+                   WorkType == other.WorkType;
+        }
+
+        public static bool operator ==(AgentStateWorkType left, AgentStateWorkType right)
+        {
+            return EqualityComparer<AgentStateWorkType>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(AgentStateWorkType left, AgentStateWorkType right)
+        {
+            return !(left == right);
         }
     }
 }

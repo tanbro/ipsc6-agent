@@ -58,6 +58,5 @@
   <ItemGroup>
     <None Include="..\ipsc6.agent.network\.clang-format" />
     <None Include="..\ipsc6.agent.network\.editorconfig" />
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

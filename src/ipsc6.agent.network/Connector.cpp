@@ -122,8 +122,12 @@ void Connector::Connect(String ^ host) {
 }
 
 void Connector::Disconnect() {
+    Disconnect(false);
+}
+
+void Connector::Disconnect(bool force) {
     auto sysAddr = _peer->GetSystemAddressFromIndex(_remoteAddrIndex);
-    _peer->CloseConnection(sysAddr, true);
+    _peer->CloseConnection(sysAddr, force);
     _remoteAddrIndex = -1;
 }
 

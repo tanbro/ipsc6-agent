@@ -3,13 +3,13 @@ using System;
 namespace ipsc6.agent.client
 {
     public delegate void ServerSentEventHandler(object sender, ServerSentEventArgs e);
-    public delegate void ClosedEventHandler(object sender);
-    public delegate void LostEventHandler(object sender);
-    public delegate void ConnectionStateChangedEventHandler(object sender, ConnectionStateChangedEventArgs<ConnectionState> e);
-    public delegate void ConnectionInfoStateChangedEventHandler(object sender, ConnectionInfoStateChangedEventArgs<ConnectionState> e);
+    public delegate void ClosedEventHandler(object sender, EventArgs e);
+    public delegate void LostEventHandler(object sender, EventArgs e);
+    public delegate void ConnectionStateChangedEventHandler(object sender, ConnectionStateChangedEventArgs e);
+    public delegate void ConnectionInfoStateChangedEventHandler(object sender, ConnectionInfoStateChangedEventArgs e);
 
-    public delegate void AgentStateChangedEventHandler(object sender, AgentStateChangedEventArgs<AgentStateWorkType> e);
-    public delegate void TeleStateChangedEventHandler(object sender, TeleStateChangedEventArgs<TeleState> e);
+    public delegate void AgentStateChangedEventHandler(object sender, AgentStateChangedEventArgs e);
+    public delegate void TeleStateChangedEventHandler(object sender, TeleStateChangedEventArgs e);
     public delegate void QueueInfoEventHandler(object sender, QueueInfoEventArgs e);
     public delegate void HoldInfoEventHandler(object sender, HoldInfoEventArgs e);
 
@@ -24,7 +24,7 @@ namespace ipsc6.agent.client
 
     public class ServerSentEventArgs : EventArgs
     {
-        public readonly ServerSentMessage Message;
+        public ServerSentMessage Message { get; }
         public ServerSentEventArgs(ServerSentMessage message) : base()
         {
             Message = message;
@@ -33,9 +33,8 @@ namespace ipsc6.agent.client
 
     public class StateChangedEventArgs<T> : EventArgs
     {
-        public readonly T OldState;
-        public readonly T NewState;
-
+        public T OldState { get; }
+        public T NewState { get; }
         public StateChangedEventArgs(T oldState, T newState) : base()
         {
             OldState = oldState;
@@ -43,15 +42,14 @@ namespace ipsc6.agent.client
         }
     }
 
-    public class ConnectionStateChangedEventArgs<T> : StateChangedEventArgs<ConnectionState>
+    public class ConnectionStateChangedEventArgs : StateChangedEventArgs<ConnectionState>
     {
         public ConnectionStateChangedEventArgs(ConnectionState oldState, ConnectionState newState) : base(oldState, newState) { }
     }
 
-    public class ConnectionInfoStateChangedEventArgs<T> : StateChangedEventArgs<ConnectionState>
+    public class ConnectionInfoStateChangedEventArgs : StateChangedEventArgs<ConnectionState>
     {
-        public readonly ConnectionInfo ConnectionInfo;
-
+        public ConnectionInfo ConnectionInfo { get; }
         public ConnectionInfoStateChangedEventArgs(
             ConnectionInfo connectionInfo,
             ConnectionState oldState, ConnectionState newState
@@ -62,16 +60,19 @@ namespace ipsc6.agent.client
     }
 
     public class BaseConnectorEventArgs : EventArgs { }
+
     public class ConnectorConnectedEventArgs : BaseConnectorEventArgs { }
 
     public class ConnectorConnectAttemptFailedEventArgs : BaseConnectorEventArgs { }
+
     public class ConnectorDisconnectedEventArgs : BaseConnectorEventArgs { }
+
     public class ConnectorConnectionLostEventArgs : BaseConnectorEventArgs { }
 
     public class BaseCtiEventArgs<T> : EventArgs
     {
-        public readonly ConnectionInfo ConnectionInfo;
-        public readonly T Value;
+        public ConnectionInfo ConnectionInfo { get; }
+        public T Value { get; }
         public BaseCtiEventArgs(ConnectionInfo connectionInfo, T value)
         {
             ConnectionInfo = connectionInfo;
@@ -79,12 +80,12 @@ namespace ipsc6.agent.client
         }
     }
 
-    public class AgentStateChangedEventArgs<T> : StateChangedEventArgs<AgentStateWorkType>
+    public class AgentStateChangedEventArgs : StateChangedEventArgs<AgentStateWorkType>
     {
         public AgentStateChangedEventArgs(AgentStateWorkType oldState, AgentStateWorkType newState) : base(oldState, newState) { }
     }
 
-    public class TeleStateChangedEventArgs<T> : StateChangedEventArgs<TeleState>
+    public class TeleStateChangedEventArgs : StateChangedEventArgs<TeleState>
     {
         public TeleStateChangedEventArgs(TeleState oldState, TeleState newState) : base(oldState, newState) { }
     }
@@ -102,8 +103,8 @@ namespace ipsc6.agent.client
 
     public struct AgentIdName
     {
-        public readonly int Id;
-        public readonly string DisplayName;
+        public int Id { get; }
+        public string DisplayName { get; }
     }
 
     public class AgentIdAssignedEventArgs : BaseCtiEventArgs<AgentIdName>
@@ -143,7 +144,7 @@ namespace ipsc6.agent.client
 
     public class SipRegistrarListReceivedEventArgs : EventArgs
     {
-        public readonly string[] Value;
+        public string[] Value { get; }
         public SipRegistrarListReceivedEventArgs(string[] value) : base()
         {
             Value = value;
