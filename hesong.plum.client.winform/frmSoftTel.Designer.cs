@@ -30,6 +30,8 @@ namespace hesong.plum.client
         private void InitializeComponent()
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
+            this.userControl11 = new hesong.plum.client.Controls.UserControl1();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
@@ -37,8 +39,6 @@ namespace hesong.plum.client
             this.button5 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.button7 = new System.Windows.Forms.Button();
-            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
-            this.userControl11 = new hesong.plum.client.Controls.UserControl1();
             this.elementHost2 = new System.Windows.Forms.Integration.ElementHost();
             this.ucCallOut = new hesong.plum.client.Controls.UserControl2();
             this.elementHost3 = new System.Windows.Forms.Integration.ElementHost();
@@ -80,6 +80,17 @@ namespace hesong.plum.client
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1340, 63);
             this.tableLayoutPanel1.TabIndex = 0;
+            // 
+            // elementHost1
+            // 
+            this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.elementHost1.Location = new System.Drawing.Point(1, 1);
+            this.elementHost1.Margin = new System.Windows.Forms.Padding(1);
+            this.elementHost1.Name = "elementHost1";
+            this.elementHost1.Size = new System.Drawing.Size(298, 58);
+            this.elementHost1.TabIndex = 0;
+            this.elementHost1.Text = "elementHost1";
+            this.elementHost1.Child = this.userControl11;
             // 
             // button1
             // 
@@ -187,17 +198,6 @@ namespace hesong.plum.client
             this.button7.TabIndex = 7;
             this.button7.UseVisualStyleBackColor = false;
             // 
-            // elementHost1
-            // 
-            this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.elementHost1.Location = new System.Drawing.Point(1, 1);
-            this.elementHost1.Margin = new System.Windows.Forms.Padding(1);
-            this.elementHost1.Name = "elementHost1";
-            this.elementHost1.Size = new System.Drawing.Size(298, 58);
-            this.elementHost1.TabIndex = 0;
-            this.elementHost1.Text = "elementHost1";
-            this.elementHost1.Child = this.userControl11;
-            // 
             // elementHost2
             // 
             this.elementHost2.Location = new System.Drawing.Point(303, 3);
@@ -243,6 +243,7 @@ namespace hesong.plum.client
             this.Text = "Form1";
             this.TopMost = true;
             this.TransparencyKey = System.Drawing.SystemColors.Control;
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmSoftTel_FormClosed);
             this.Load += new System.EventHandler(this.frmSoftTel_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);

@@ -82,15 +82,21 @@
     <Compile Include="Controls\UserControl3.xaml.cs">
       <DependentUpon>UserControl3.xaml</DependentUpon>
     </Compile>
-    <Compile Include="frmDial.cs" />
+    <Compile Include="frmDial.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmDial.Designer.cs">
       <DependentUpon>frmDial.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmLogon.cs" />
+    <Compile Include="frmLogon.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmLogon.Designer.cs">
       <DependentUpon>frmLogon.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmSoftTel.cs" />
+    <Compile Include="frmSoftTel.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmSoftTel.Designer.cs">
       <DependentUpon>frmSoftTel.cs</DependentUpon>
     </Compile>
@@ -101,6 +107,7 @@
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\SaveLog.cs" />
     <Compile Include="Utils\SQLiteMem.cs" />
+    <Compile Include="Utils\WaitCursorBlock.cs" />
     <EmbeddedResource Include="frmDial.resx">
       <DependentUpon>frmDial.cs</DependentUpon>
     </EmbeddedResource>

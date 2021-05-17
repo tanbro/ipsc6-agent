@@ -101,5 +101,14 @@ namespace hesong.plum.client
             frm.ShowDialog(this);
             frm.Dispose();
         }
+
+        private void frmSoftTel_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if(G.agent!=null)
+            {
+                G.agent.Dispose();
+                G.agent = null;
+            }
+        }
     }
 }
