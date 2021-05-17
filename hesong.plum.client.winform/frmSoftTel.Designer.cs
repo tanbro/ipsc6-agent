@@ -243,6 +243,7 @@ namespace hesong.plum.client
             this.Text = "Form1";
             this.TopMost = true;
             this.TransparencyKey = System.Drawing.SystemColors.Control;
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmSoftTel_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmSoftTel_FormClosed);
             this.Load += new System.EventHandler(this.frmSoftTel_Load);
             this.tableLayoutPanel1.ResumeLayout(false);

@@ -89,7 +89,7 @@ namespace ipsc6.agent.client
             {
                 if (state != ConnectionState.Ok)
                 {
-                    throw new InvalidOperationException(string.Format("{0}", state));
+                    throw new InvalidOperationException($"Invalid state: {state}");
                 }
                 return agentId;
             }
@@ -320,6 +320,7 @@ namespace ipsc6.agent.client
 
         public void Send(AgentRequestMessage value)
         {
+            logger.DebugFormat("{0} Send {1}", this, value);
             connector.SendAgentMessage((int)value.Type, value.N, value.S);
         }
 
@@ -337,7 +338,7 @@ namespace ipsc6.agent.client
                 }
                 else
                 {
-                    throw new InvalidOperationException(string.Format("{0}", State));
+                    throw new InvalidOperationException($"Invalid state: {State}");
                 }
             }
             logger.InfoFormat("{0} connect \"{1}|{2}\", flag={3} ...", this, remoteHost, remotePort, flag);
@@ -360,7 +361,7 @@ namespace ipsc6.agent.client
             /// 登录
             logger.DebugFormat("{0} Log-in \"{1}\" ... ", this, workerNumber);
             var cst = new CancellationTokenSource();
-            var reqData = new AgentRequestMessage(MessageType.REMOTE_MSG_LOGIN, flag, string.Format("{0}|{1}|1|0|{0}", workerNumber, password));
+            var reqData = new AgentRequestMessage(MessageType.REMOTE_MSG_LOGIN, flag, $"{workerNumber}|{password}|1|0|{workerNumber}");
             logInTcs = new TaskCompletionSource<int>();
             var timeoutTask = Task.Delay((int)keepAliveTimeout * 3, cst.Token);
             Send(reqData);
@@ -404,18 +405,16 @@ namespace ipsc6.agent.client
         {
             ConnectionState[] closedStates = { ConnectionState.Closed, ConnectionState.Failed, ConnectionState.Lost };
             ConnectionState[] allowedStates = { ConnectionState.Opening, ConnectionState.Ok };
-            Task task;
-
             lock (connectLock)
             {
-                if (!closedStates.Any(m => m == State))
+                if (closedStates.Any(m => m == State))
                 {
-                    logger.DebugFormat("{0} Close(graceful) ... Already closed.", this);
+                    logger.WarnFormat("{0} Close(graceful) ... Already closed.", this);
                     return;
                 }
                 if (!allowedStates.Any(m => m == State))
                 {
-                    throw new InvalidOperationException(string.Format("{0}", State));
+                    throw new InvalidOperationException($"Invalid state: {State}");
                 }
                 SetState(ConnectionState.Closing);
                 disconnectTcs = new TaskCompletionSource<object>();
@@ -423,12 +422,12 @@ namespace ipsc6.agent.client
 
             if (graceful)
             {
+                logger.InfoFormat("{0} Close(graceful) ...", this);
                 var cst = new CancellationTokenSource();
                 logOutTcs = new TaskCompletionSource<object>();
                 var timeoutTask = Task.Delay(requestTimeout, cst.Token);
-                logger.InfoFormat("{0} Close(graceful) ...", this);
                 Send(new AgentRequestMessage(MessageType.REMOTE_MSG_RELEASE, flag));
-                task = await Task.WhenAny(logOutTcs.Task, disconnectTcs.Task, timeoutTask);
+                var task = await Task.WhenAny(logOutTcs.Task, disconnectTcs.Task, timeoutTask);
                 if (task == timeoutTask)
                 {
                     throw new DisconnectionTimeoutException();
@@ -442,7 +441,7 @@ namespace ipsc6.agent.client
                 var timeoutTask = Task.Delay(requestTimeout, cst.Token);
                 logger.InfoFormat("{0} Close(force) ...", this);
                 connector.Disconnect();
-                task = await Task.WhenAny(disconnectTcs.Task, timeoutTask);
+                var task = await Task.WhenAny(disconnectTcs.Task, timeoutTask);
                 if (task == timeoutTask)
                 {
                     throw new ConnectionTimeoutException();
@@ -460,14 +459,14 @@ namespace ipsc6.agent.client
             {
                 if (state != ConnectionState.Ok)
                 {
-                    throw new InvalidOperationException(string.Format("Can not send a request when state is {0}", state));
+                    throw new InvalidOperationException($"Can not send a request when state is {state}");
                 }
             }
             lock (requestLock)
             {
                 if (pendingReqType != MessageType.NONE)
                 {
-                    throw new InvalidOperationException(string.Format("A pending request exists: {0}", pendingReqType));
+                    throw new InvalidOperationException($"A pending request exists: {pendingReqType}");
                 }
                 pendingReqType = args.Type;
             }
@@ -496,10 +495,7 @@ namespace ipsc6.agent.client
 
         public override string ToString()
         {
-            return string.Format(
-                /*"<{0} at 0x{1:x8} Local={2}, Remote={3}:{4}, State={5}>",*/
-                "<{0} Local={1}, Remote={2}|{3}, State={4}, PhysicalConnected={5}>",
-                GetType().Name, connector.BoundAddress, RemoteHost, RemotePort, State, connector.Connected);
+            return $"<{GetType().Name} Local={connector.BoundAddress}, Remote={RemoteHost}|{RemotePort}, State={State}, PhysicalConnected={connector.Connected}>";
         }
 
     }

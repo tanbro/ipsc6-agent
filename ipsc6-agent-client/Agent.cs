@@ -481,7 +481,7 @@ namespace ipsc6.agent.client
             var evtStateChanged = new ConnectionInfoStateChangedEventArgs(connInfo, e.OldState, e.NewState);
             EventArgs evtMainConnChanged = null;
             Action action = null;
-            logger.DebugFormat("{0}: {1} --> {2}", conn, e.OldState, e.NewState);
+            logger.DebugFormat("{0}: {1} --> {2} >>>", conn, e.OldState, e.NewState);
             lock (this)
             {
                 //////////
@@ -639,6 +639,7 @@ namespace ipsc6.agent.client
             {
                 Task.Run(action);
             }
+            logger.DebugFormat("{0}: {1} --> {2} <<<", conn, e.OldState, e.NewState);
         }
 
         public async Task StartUp(string workerNumber, string password)
@@ -714,9 +715,9 @@ namespace ipsc6.agent.client
                 }
                 else
                 {
-                    logger.DebugFormat("关闭主节点连接 {0} graceful={1}...", this, MainConnection, graceful);
+                    logger.DebugFormat("关闭主节点连接 {0} graceful={1}...", MainConnection, graceful);
                     await MainConnection.Close(graceful, flag: 1);
-                    logger.DebugFormat("关闭主节点连接 {0} graceful={1} 完毕.", this, MainConnection, graceful);
+                    logger.DebugFormat("关闭主节点连接 {0} graceful={1} 完毕.", MainConnection, graceful);
                 }
 
                 // 然后其他节点
@@ -744,7 +745,7 @@ namespace ipsc6.agent.client
                                     ex is InvalidOperationException
                                 )
                                 {
-                                    logger.DebugFormat("关闭从节点连接 {10} 失败: {1} . 将强行关闭", conn, ex);
+                                    logger.DebugFormat("关闭从节点连接 {0} 失败: {1} . 将强行关闭", conn, ex);
                                     await conn.Close(graceful: false, flag: 0);
                                 }
                                 else
@@ -944,7 +945,7 @@ namespace ipsc6.agent.client
 
         public async Task CallIvr(int channel, string ivrName, IvrInvokeType invokeType, string customString)
         {
-            var s = string.Format("{0}|{1}|{2}", ivrName, (int)invokeType, customString);
+            var s = $"{ivrName}|{(int)invokeType}|{customString}";
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CALLSUBFLOW, channel, s);
             await MainConnection.Request(req);
         }
@@ -965,7 +966,7 @@ namespace ipsc6.agent.client
                 }
                 if (internalConnections[index].State != ConnectionState.Ok)
                 {
-                    throw new InvalidOperationException(string.Format("{0}", internalConnections[index].State));
+                    throw new InvalidOperationException($"Invalid state: {internalConnections[index].State}");
                 }
                 connObj = MainConnection;
                 mainConnectionIndex = index;
