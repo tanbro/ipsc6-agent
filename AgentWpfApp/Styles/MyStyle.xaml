@@ -1,0 +1,70 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <SolidColorBrush x:Key="MyBackgroud" Color="#e0ecf8"/>
+    <SolidColorBrush x:Key="MyBorderBrush" Color="#c0c0c0"/>
+    <SolidColorBrush x:Key="MyInfoPannelBackgroud" Color="#bdd7ee"/>
+    <SolidColorBrush x:Key="MyButtonBackground" Color="#377efe"/>
+    <SolidColorBrush x:Key="MyGroupTitleBackground" Color="#4d75cb"/>
+    <SolidColorBrush x:Key="MyInfoTextForeground" Color="#4d75cb"/>
+    <sys:Double x:Key="MyMainWindowHeight">140</sys:Double>
+
+    <Style x:Key="MyCommonText" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="16"/>
+    </Style>
+
+    <Style x:Key="MyHeadText" BasedOn="{StaticResource MyCommonText}" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="24"/>
+    </Style>
+
+    <Style x:Key="MyCommonButton" TargetType="Button">
+        <Setter Property="Background" Value="#377efe"/>
+        <Setter Property="Foreground" Value="#e0ecf8"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border CornerRadius="5" Background="{TemplateBinding Background}" BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}">
+                        <Grid>
+                            <ContentPresenter x:Name="MyContentPresenter" Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0" />
+                        </Grid>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="LightBlue" />
+                            <Setter Property="Foreground" Value="#e0ecf8" />
+                        </Trigger>
+
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="DeepSkyBlue" />
+                            <Setter Property="Foreground" Value="#e0ecf8" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="MySamllButton" TargetType="Button" BasedOn="{StaticResource MyCommonButton}">
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="FontSize" Value="32"/>
+    </Style>
+
+    <Style x:Key="MyMiddleButton" TargetType="Button" BasedOn="{StaticResource MyCommonButton}">
+        <Setter Property="Width" Value="48"/>
+        <Setter Property="Height" Value="48"/>
+        <Setter Property="FontSize" Value="48"/>
+    </Style>
+
+    <Style x:Key="MyMainButton" TargetType="Button" BasedOn="{StaticResource MyCommonButton}">
+        <Setter Property="Background" Value="#467fff"/>
+        <Setter Property="Foreground" Value="#e0ecf8"/>
+        <Setter Property="Width" Value="96"/>
+        <Setter Property="Height" Value="96"/>
+        <Setter Property="FontSize" Value="72"/>
+        <Setter Property="Margin" Value="4 0 4 0"/>
+    </Style>
+
+</ResourceDictionary>
