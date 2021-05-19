@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace AgentWpfApp.Models
 {
-    public class RingInfo : INotifyPropertyChanged
+    public class RingInfo : SingletonModelBase<RingInfo>, INotifyPropertyChanged
     {
         private string teleNum;
         public string TeleNum
@@ -24,7 +18,7 @@ namespace AgentWpfApp.Models
             set => SetField(ref location, value);
         }
 
-        private string ivrPath = "[]";
+        private string ivrPath;
         public string IvrPath
         {
             get => ivrPath;
@@ -37,24 +31,6 @@ namespace AgentWpfApp.Models
             get => bizName;
             set => SetField(ref bizName, value);
         }
-
-        #region SetField
-        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
-        {
-            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-            field = value;
-            OnPropertyChanged(propertyName);
-            return true;
-        }
-        #endregion
-
-        #region INotifyPropertyChanged Members  
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
 
     }
 }
