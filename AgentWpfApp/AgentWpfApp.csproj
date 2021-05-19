@@ -152,6 +152,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\RingInfo.cs" />
     <Compile Include="UserControls\DialPanel.xaml.cs">
       <DependentUpon>DialPanel.xaml</DependentUpon>
     </Compile>
@@ -167,6 +168,7 @@
     <Compile Include="UserControls\QueuePanel.xaml.cs">
       <DependentUpon>QueuePanel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\MainViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -233,6 +235,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Images\" />
+    <Folder Include="Views\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

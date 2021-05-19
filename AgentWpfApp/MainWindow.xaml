@@ -5,10 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AgentWpfApp"
         xmlns:uc="clr-namespace:AgentWpfApp.UserControls"
+        xmlns:vm="clr-namespace:AgentWpfApp.ViewModels"
         mc:Ignorable="d"
         Title="MainWindow" Height="140" Width="1280"
         Background="{StaticResource MyBackgroud}"
         >
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />

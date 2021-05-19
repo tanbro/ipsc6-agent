@@ -47,10 +47,11 @@
             </Grid>
 
             <TextBox Grid.Row="1"
-                        FontSize="14"
-                        VerticalAlignment="Center"
-                         Margin="2 0 2 0"
-                        TextAlignment="Right">
+                     Name="textBoxTeleNum"
+                     FontSize="14"
+                     VerticalAlignment="Center"
+                     Margin="2 0 2 0"
+                     TextAlignment="Right">
                 13012345678
             </TextBox>
 
