@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace AgentWpfApp.UserControls
 {
     /// <summary>
-    /// QueuePannel.xaml 的交互逻辑
+    /// InfoPannel.xaml 的交互逻辑
     /// </summary>
-    public partial class HoldPannel : UserControl
+    public partial class InfoPanel : UserControl
     {
-        public HoldPannel()
+        public InfoPanel()
         {
             InitializeComponent();
         }

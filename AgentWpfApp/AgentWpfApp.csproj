@@ -152,20 +152,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="UserControls\DialPannel.xaml.cs">
-      <DependentUpon>DialPannel.xaml</DependentUpon>
+    <Compile Include="UserControls\DialPanel.xaml.cs">
+      <DependentUpon>DialPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\InfoPannel.xaml.cs">
-      <DependentUpon>InfoPannel.xaml</DependentUpon>
+    <Compile Include="UserControls\InfoPanel.xaml.cs">
+      <DependentUpon>InfoPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\MainToolBar.xaml.cs">
       <DependentUpon>MainToolBar.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\HoldPannel.xaml.cs">
-      <DependentUpon>HoldPannel.xaml</DependentUpon>
+    <Compile Include="UserControls\HoldPanel.xaml.cs">
+      <DependentUpon>HoldPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\QueuePannel.xaml.cs">
-      <DependentUpon>QueuePannel.xaml</DependentUpon>
+    <Compile Include="UserControls\QueuePanel.xaml.cs">
+      <DependentUpon>QueuePanel.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -183,11 +183,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\DialPannel.xaml">
+    <Page Include="UserControls\DialPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\InfoPannel.xaml">
+    <Page Include="UserControls\InfoPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -195,11 +195,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\HoldPannel.xaml">
+    <Page Include="UserControls\HoldPanel.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UserControls\QueuePannel.xaml">
+    <Page Include="UserControls\QueuePanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

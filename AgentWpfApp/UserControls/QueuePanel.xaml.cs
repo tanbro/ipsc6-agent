@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,9 +18,9 @@ namespace AgentWpfApp.UserControls
     /// <summary>
     /// QueuePannel.xaml 的交互逻辑
     /// </summary>
-    public partial class QueuePannel : UserControl
+    public partial class QueuePanel : UserControl
     {
-        public QueuePannel()
+        public QueuePanel()
         {
             InitializeComponent();
         }
