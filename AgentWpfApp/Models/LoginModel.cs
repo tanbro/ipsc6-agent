@@ -12,12 +12,5 @@ namespace AgentWpfApp.Models
             set => SetField(ref workerNum, value);
         }
 
-        private string password;
-        public string Password
-        {
-            get => password;
-            set => SetField(ref password, value);
-        }
-
     }
 }

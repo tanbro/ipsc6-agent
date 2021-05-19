@@ -35,10 +35,13 @@
                             <Setter Property="Background" Value="LightBlue" />
                             <Setter Property="Foreground" Value="#e0ecf8" />
                         </Trigger>
-
                         <Trigger Property="IsPressed" Value="True">
                             <Setter Property="Background" Value="DeepSkyBlue" />
                             <Setter Property="Foreground" Value="#e0ecf8" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Background" Value="Gray"/>
+                            <Setter Property="Foreground" Value="#e0ecf8"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

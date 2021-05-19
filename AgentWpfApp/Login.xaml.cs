@@ -12,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-using ipsc6.agent.client;
 
 namespace AgentWpfApp
 {
@@ -26,16 +25,6 @@ namespace AgentWpfApp
             InitializeComponent();
             DataContext = ViewModels.LoginViewModel.Instance;
             ViewModels.LoginViewModel.Instance.LoginWindow = this;
-        }
-
-        private void Login_Button_Click(object sender, RoutedEventArgs e)
-        {
-            string[] addresses = { "192.168.2.108" };
-            if (G.agent == null)
-            {
-                G.agent = new Agent(addresses);
-            }
-            DialogResult = true;
         }
 
     }
