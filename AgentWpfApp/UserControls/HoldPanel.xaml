@@ -7,31 +7,31 @@
              mc:Ignorable="d" 
              >
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="48"/>
-            <RowDefinition Height="48"/>
-        </Grid.RowDefinitions>
+    <Border Grid.Column="1" BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="48"/>
+                <RowDefinition Height="48"/>
+            </Grid.RowDefinitions>
 
 
-        <Border Grid.Row="0"
-                BorderThickness="1 1 1 0" CornerRadius="5 5 0 0" BorderBrush="{StaticResource MyBorderBrush}"
+            <Border Grid.Row="0"
+                CornerRadius="5 5 0 0"
                 Background="{StaticResource MyGroupTitleBackground}" 
-                >
-            <TextBlock Height="32" FontSize="24" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center">
+            >
+                <TextBlock Height="32" FontSize="24" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center">
                     保持
-            </TextBlock>
-        </Border>
-        <Border Grid.Row="1"
+                </TextBlock>
+            </Border>
+            <Border Grid.Row="1"
                 Background="{StaticResource MyBackgroud}"
-                BorderThickness="1 0 1 1" CornerRadius="0 0 5 5" BorderBrush="{StaticResource MyBorderBrush}"
-                >
-            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="40" Foreground="{StaticResource MyInfoTextForeground}">
+                CornerRadius="0 0 5 5"
+            >
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                           FontSize="36" Foreground="{StaticResource MyInfoTextForeground}">
                     5
-            </TextBlock>
-        </Border>
-
-
-    </Grid>
-
+                </TextBlock>
+            </Border>
+        </Grid>
+    </Border>
 </UserControl>
