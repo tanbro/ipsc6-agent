@@ -13,7 +13,12 @@ namespace AgentWpfApp.ViewModels
 
         static MainViewModel()
         {
-            ringInfo = new Models.RingInfo();
+            ringInfo = new Models.RingInfo
+            {
+                TeleNum = "未知归号码",
+                Location = "未知归属地",
+                BizName = "未知业务",
+            };
         }
 
     }

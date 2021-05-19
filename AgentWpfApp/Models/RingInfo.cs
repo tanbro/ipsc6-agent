@@ -10,14 +10,14 @@ namespace AgentWpfApp.Models
 {
     public class RingInfo : INotifyPropertyChanged
     {
-        private string teleNum = "未知归号码";
+        private string teleNum;
         public string TeleNum
         {
             get => teleNum;
             set => SetField(ref teleNum, value);
         }
 
-        private string location = "未知归属地";
+        private string location;
         public string Location
         {
             get => location;
@@ -31,7 +31,7 @@ namespace AgentWpfApp.Models
             set => SetField(ref ivrPath, value);
         }
 
-        private string bizName = "未知业务";
+        private string bizName;
         public string BizName
         {
             get => bizName;
