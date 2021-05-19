@@ -6,69 +6,71 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:local="clr-namespace:AgentWpfApp.UserControls"
              mc:Ignorable="d" >
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="96"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
+    <Border HorizontalAlignment="Left" VerticalAlignment="Top">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="96"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-        <Button Grid.Row="0" Grid.Column="0"
+            <Button Grid.Row="0" Grid.Column="0"
                 Style="{StaticResource MyMainButton}"
                 >
-            <iconPacks:BootstrapIcons Kind="TelephoneFill" Height="72" Width="72"/>
-        </Button>
+                <iconPacks:BootstrapIcons Kind="TelephoneFill" Height="72" Width="72"/>
+            </Button>
 
-        <Button Grid.Row="0" Grid.Column="1"
+            <Button Grid.Row="0" Grid.Column="1"
                 Style="{StaticResource MyMainButton}"
                 >
-            <iconPacks:BootstrapIcons Kind="TelephoneFill" Height="72" Width="72" RotationAngle="135"/>
+                <iconPacks:BootstrapIcons Kind="TelephoneFill" Height="72" Width="72" RotationAngle="135"/>
 
-        </Button>
+            </Button>
 
-        <Button Grid.Row="0" Grid.Column="2"
+            <Button Grid.Row="0" Grid.Column="2"
                 Style="{StaticResource MyMainButton}"
                 >
-            <iconPacks:BootstrapIcons Kind="TelephonePlusFill" Height="72" Width="72"/>
-        </Button>
+                <iconPacks:BootstrapIcons Kind="TelephonePlusFill" Height="72" Width="72"/>
+            </Button>
 
-        <Button Grid.Row="0" Grid.Column="3"
+            <Button Grid.Row="0" Grid.Column="3"
                 Style="{StaticResource MyMainButton}"
                 >
-            <iconPacks:BootstrapIcons Kind="TelephoneForwardFill" Height="72" Width="72"/>
-        </Button>
+                <iconPacks:BootstrapIcons Kind="TelephoneForwardFill" Height="72" Width="72"/>
+            </Button>
 
-        <Button Grid.Row="0" Grid.Column="4"
+            <Button Grid.Row="0" Grid.Column="4"
                 Style="{StaticResource MyMainButton}"
                 >
-            <StackPanel>
-                <TextBlock FontSize="36" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <StackPanel>
+                    <TextBlock FontSize="36" HorizontalAlignment="Center" VerticalAlignment="Top">
                     IVR
-                </TextBlock>
-            <ContentControl VerticalAlignment="Bottom" HorizontalAlignment="Center">
-                <iconPacks:BootstrapIcons Kind="ArrowRight"
+                    </TextBlock>
+                    <ContentControl VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                        <iconPacks:BootstrapIcons Kind="ArrowRight"
                                           Height="24" Width="72"/>
-            </ContentControl>
-            </StackPanel>
-        </Button>
+                    </ContentControl>
+                </StackPanel>
+            </Button>
 
-        <Button Grid.Row="0" Grid.Column="5"
+            <Button Grid.Row="0" Grid.Column="5"
                 Style="{StaticResource MyMainButton}"
                 >
-            <iconPacks:BootstrapIcons Kind="PauseFill" Height="72" Width="72"/>
-        </Button>
+                <iconPacks:BootstrapIcons Kind="PauseFill" Height="72" Width="72"/>
+            </Button>
 
-        <Button Grid.Row="0" Grid.Column="6"
+            <Button Grid.Row="0" Grid.Column="6"
                 Style="{StaticResource MyMainButton}"
                 >
-            <iconPacks:BootstrapIcons Kind="ReplyFill" Height="72" Width="72"/>
-        </Button>
-    </Grid>
+                <iconPacks:BootstrapIcons Kind="ReplyFill" Height="72" Width="72"/>
+            </Button>
+        </Grid>
+    </Border>
 </UserControl>
