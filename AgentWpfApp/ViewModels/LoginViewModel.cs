@@ -16,12 +16,12 @@ namespace AgentWpfApp.ViewModels
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(LoginViewModel));
 
-        static LoginViewModel()
+        public LoginViewModel()
         {
-
+            loginCommand = new Utils.RelayCommand(x => DoLogin(x), x => CanLogin(x));
         }
 
-        private static LoginWindow window;
+        private LoginWindow window;
         public LoginWindow Window { set { window = value; } }
 
         static string workerNum;
@@ -31,20 +31,31 @@ namespace AgentWpfApp.ViewModels
             set => SetField(ref workerNum, value);
         }
 
+        int passwordLength;
+        public int PasswordLength
+        {
+            get => passwordLength;
+            set
+            {
+                passwordLength = value;
+            }
+        }
+
         #region Login Command
-        static readonly Utils.RelayCommand loginCommand = new Utils.RelayCommand(x => LoginExecute(x), x => LoginCanExecute(x));
+        readonly Utils.RelayCommand loginCommand;
         public ICommand LoginCommand => loginCommand;
 
-        static bool _isLogging = false;
+        bool _isLogging = false;
 
-        static bool LoginCanExecute(object _)
+        bool CanLogin(object _)
         {
-            if (_isLogging) return false;
             if (string.IsNullOrEmpty(workerNum)) return false;
+            if (passwordLength <= 0) return false;
+            if (_isLogging) return false;
             return true;
         }
 
-        static public async void LoginExecute(object parameter)
+        public async void DoLogin(object parameter)
         {
             _isLogging = true;
             try
@@ -52,7 +63,7 @@ namespace AgentWpfApp.ViewModels
                 var password = (parameter as PasswordBox).Password;
 
                 bool isOk = false;
-                var window = LoginViewModel.window;
+
                 string[] addresses = { "192.168.2.107" };
                 try
                 {

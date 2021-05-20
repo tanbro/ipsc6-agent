@@ -27,5 +27,10 @@ namespace AgentWpfApp
             ViewModels.LoginViewModel.Instance.Window = this;
         }
 
+        private void PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            var dc = DataContext as ViewModels.LoginViewModel;
+            dc.PasswordLength = (sender as PasswordBox).Password.Length;
+        }
     }
 }

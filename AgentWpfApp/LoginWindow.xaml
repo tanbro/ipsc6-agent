@@ -92,14 +92,10 @@
                 </TextBox>
 
                 <PasswordBox 
-                    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                     x:Name="textboxPassword"
-                    Grid.Row="1" Margin="16 8 16 8" FontSize="14">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="PasswordChanged">
-                            <i:InvokeCommandAction Command="{Binding Path=SomeCommand, Mode=OneWay}"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
+                    Grid.Row="1" Margin="16 8 16 8" FontSize="14"
+                    PasswordChanged="PasswordChanged"
+                    >
                     <PasswordBox.Style>
                         <Style xmlns:sys="clr-namespace:System;assembly=mscorlib" TargetType="{x:Type PasswordBox}">
                             <Style.Resources>
