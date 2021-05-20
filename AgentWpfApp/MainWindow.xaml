@@ -32,5 +32,6 @@
         <uc:QueuePanel Grid.Column="2" Margin="2 0 0 2"/>
         <uc:MainToolBar Grid.Column="3" Margin="2 0 0 2"/>
         <uc:HoldPanel Grid.Column="4" Margin="2 0 0 2"/>
+        <uc:WorkerStatusPanel Grid.Column="5" Margin="2 0 0 2"/>
     </Grid>
 </Window>

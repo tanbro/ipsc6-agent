@@ -159,6 +159,9 @@
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\WorkerStatusPanel.xaml.cs">
+      <DependentUpon>WorkerStatusPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\ModelBase.cs" />
     <Compile Include="Models\RingInfo.cs" />
     <Compile Include="Utils\SingletonModelBase.cs" />
@@ -222,6 +225,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UserControls\WorkerStatusPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -243,6 +250,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <Content Include="Fonts\LCD14.otf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fonts\LCD14Condensed.otf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="log4net.config">

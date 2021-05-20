@@ -32,7 +32,7 @@
             >
                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
                            Foreground="{StaticResource MyInfoTextForeground}"
-                           FontSize="20">
+                           FontSize="20" FontFamily="/Fonts/#LCD 14">
                     196
                 </TextBlock>
             </Border>

@@ -25,10 +25,11 @@
 
             <TextBlock Grid.Column="0"
                            Style="{StaticResource MyHeadText}" Margin="4" VerticalAlignment="Center"
-                           FontFamily="/Fonts/LCD14.otf#LCD"
-                           Text="130123456"
+                           FontFamily="/Fonts/#LCD 14Condensed"
+                       Text="13012345678" 
                            />
             <!--
+                FontFamily="/AgentWpfApp;component/Fonts/#LCD 14"
                 Text="130123456"
                 Text="{Binding RingInfo.TeleNum}"
                 -->
@@ -53,8 +54,9 @@
 
             <TextBlock Grid.Column="0" Style="{StaticResource MyCommonText}"
                            Margin="4" VerticalAlignment="Center"
+                       FontFamily="/Fonts/#LCD 14Condensed"
                            d:Text="RingInfo.IvrPath"
-                           Text="[1-2-3]"/>
+                           Text="1-2-3"/>
             <!--
                 Text="[1-2-3]"/>
                 Text="{Binding RingInfo.IvrPath}

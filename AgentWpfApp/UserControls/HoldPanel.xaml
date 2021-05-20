@@ -31,8 +31,9 @@
                 CornerRadius="0 0 5 5"
             >
                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                           FontSize="20" Foreground="{StaticResource MyInfoTextForeground}">
-                    5
+                           FontFamily="/Fonts/#LCD 14" FontSize="20"
+                           Foreground="{StaticResource MyInfoTextForeground}">
+                    2
                 </TextBlock>
             </Border>
         </Grid>
