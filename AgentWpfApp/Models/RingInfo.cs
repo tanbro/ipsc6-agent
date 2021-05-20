@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace AgentWpfApp.Models
 {
-    public class RingInfo : SingletonModelBase<RingInfo>, INotifyPropertyChanged
+    public class RingInfo : Utils.SingletonModelBase<RingInfo>, INotifyPropertyChanged
     {
         private string teleNum;
         public string TeleNum

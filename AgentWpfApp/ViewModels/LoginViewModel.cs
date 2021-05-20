@@ -12,7 +12,7 @@ using ipsc6.agent.client;
 
 namespace AgentWpfApp.ViewModels
 {
-    class LoginViewModel : Models.SingletonModelBase<LoginViewModel>
+    class LoginViewModel : Utils.SingletonModelBase<LoginViewModel>
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(LoginViewModel));
 
@@ -64,7 +64,7 @@ namespace AgentWpfApp.ViewModels
 
                 bool isOk = false;
 
-                string[] addresses = { "192.168.2.107" };
+                string[] addresses = { "192.168.2.108" };
                 try
                 {
                     if (G.agent == null)

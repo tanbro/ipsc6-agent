@@ -159,9 +159,9 @@
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\ModelBase.cs" />
+    <Compile Include="Utils\ModelBase.cs" />
     <Compile Include="Models\RingInfo.cs" />
-    <Compile Include="Models\SingletonModelBase.cs" />
+    <Compile Include="Utils\SingletonModelBase.cs" />
     <Compile Include="UserControls\DialPanel.xaml.cs">
       <DependentUpon>DialPanel.xaml</DependentUpon>
     </Compile>

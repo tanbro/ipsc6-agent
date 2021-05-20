@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace AgentWpfApp.Models
+namespace AgentWpfApp.Utils
 {
     public class ModelBase
     {

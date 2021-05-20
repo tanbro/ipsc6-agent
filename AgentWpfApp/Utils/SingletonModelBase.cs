@@ -1,7 +1,7 @@
 using System;
 
 
-namespace AgentWpfApp.Models
+namespace AgentWpfApp.Utils
 {
     /// <summary>
     /// A base class for the singleton design pattern.
