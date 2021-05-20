@@ -5,14 +5,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AgentWpfApp.UserControls"
              mc:Ignorable="d"
+             Width="48" Height="64"
              >
 
-    <Border BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
+    <Border Width="48" Height="64"
+            BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
             HorizontalAlignment="Left" VerticalAlignment="Top">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="48"/>
-                <RowDefinition Height="48"/>
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
 
@@ -20,7 +22,7 @@
                 CornerRadius="5 5 0 0"
                 Background="{StaticResource MyGroupTitleBackground}" 
             >
-                <TextBlock Height="32" FontSize="24" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock FontSize="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center">
                     保持
                 </TextBlock>
             </Border>
@@ -29,7 +31,7 @@
                 CornerRadius="0 0 5 5"
             >
                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                           FontSize="36" Foreground="{StaticResource MyInfoTextForeground}">
+                           FontSize="20" Foreground="{StaticResource MyInfoTextForeground}">
                     5
                 </TextBlock>
             </Border>

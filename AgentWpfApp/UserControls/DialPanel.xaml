@@ -6,51 +6,50 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:local="clr-namespace:AgentWpfApp.UserControls"
              mc:Ignorable="d"
+             Width="96" Height="64"
              >
 
     <Border BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
             HorizontalAlignment="Left" VerticalAlignment="Top">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="48"/>
-                <RowDefinition Height="48"/>
+                <RowDefinition Height="32"/>
+                <RowDefinition Height="32"/>
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="32"/>
+                    <ColumnDefinition Width="32"/>
+                    <ColumnDefinition Width="32"/>
                 </Grid.ColumnDefinitions>
 
                 <Button Grid.Column="0"
-                    Style="{StaticResource MySamllButton}"
-                    Margin="2"
+                    Style="{StaticResource MyTinyButton}"
                     >
-                    <iconPacks:BootstrapIcons Kind="TelephoneFill" Height="24" Width="24"/>
+                    <!--<iconPacks:BootstrapIcons Kind="TelephoneFill"/>-->
+                    <Image Source="pack://application:,,,/Icons/24/telehpone-outgoing-star.png"/>
                 </Button>
-
                 <Button Grid.Column="1"
-                    Style="{StaticResource MySamllButton}"
-                    Margin="2"
+                    Style="{StaticResource MyTinyButton}"
                     >
-                    <iconPacks:BootstrapIcons Kind="TelephonePlusFill" Height="24" Width="24"/>
+                    <!--<iconPacks:BootstrapIcons Kind="TelephonePlusFill" Height="20" Width="20"/>-->
+                    <Image Source="pack://application:,,,/Icons/24/people-plus-star.png"/>
                 </Button>
 
                 <Button Grid.Column="2"
-                    Style="{StaticResource MySamllButton}"
-                    Margin="2"
+                    Style="{StaticResource MyTinyButton}"
                     >
-                    <iconPacks:BootstrapIcons Kind="TelephoneForwardFill" Height="24" Width="24"/>
+                    <!--<iconPacks:BootstrapIcons Kind="TelephoneForwardFill" Height="20" Width="20"/>-->
+                    <Image Source="pack://application:,,,/Icons/24/telehpone-outgoing-star.png"/>
                 </Button>
 
             </Grid>
 
-            <TextBox Grid.Row="1"
-                     Name="textBoxTeleNum"
+            <TextBox Grid.Row="1" Margin="2 0 2 0"
+                     BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}"
                      FontSize="14"
                      VerticalAlignment="Center"
-                     Margin="2 0 2 0"
                      TextAlignment="Right">
                 13012345678
             </TextBox>

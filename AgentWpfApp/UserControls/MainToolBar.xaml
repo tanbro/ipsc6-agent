@@ -5,11 +5,83 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:local="clr-namespace:AgentWpfApp.UserControls"
-             mc:Ignorable="d" >
-    <Border HorizontalAlignment="Left" VerticalAlignment="Top">
+             mc:Ignorable="d" 
+             Height="64">
+
+    <UserControl.Resources>
+        <Style x:Key="OffhookButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#3ea4d8"/>
+            <Setter Property="Foreground" Value="#e0ecf8"/>
+            <Setter Property="Width" Value="64"/>
+            <Setter Property="Height" Value="64"/>
+            <Setter Property="FontSize" Value="48"/>
+            <Setter Property="Margin" Value="2 0 2 0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border CornerRadius="5" Background="{TemplateBinding Background}" BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}">
+                            <Grid>
+                                <ContentPresenter x:Name="MyContentPresenter" Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="LightSkyBlue" />
+                                <Setter Property="Foreground" Value="#e0ecf8" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="LightBlue" />
+                                <Setter Property="Foreground" Value="#e0ecf8" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Background" Value="Gray"/>
+                                <Setter Property="Foreground" Value="#e0ecf8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="HangupButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#d6716e"/>
+            <Setter Property="Foreground" Value="#e0ecf8"/>
+            <Setter Property="Width" Value="64"/>
+            <Setter Property="Height" Value="64"/>
+            <Setter Property="FontSize" Value="48"/>
+            <Setter Property="Margin" Value="2 0 2 0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border CornerRadius="5" Background="{TemplateBinding Background}" BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}">
+                            <Grid>
+                                <ContentPresenter x:Name="MyContentPresenter" Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="LightPink" />
+                                <Setter Property="Foreground" Value="#e0ecf8" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="Pink" />
+                                <Setter Property="Foreground" Value="#e0ecf8" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Background" Value="Gray"/>
+                                <Setter Property="Foreground" Value="#e0ecf8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    
+    <Border Height="64" HorizontalAlignment="Left" VerticalAlignment="Top">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="96"/>
+                <RowDefinition Height="64"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -22,54 +94,51 @@
             </Grid.ColumnDefinitions>
 
             <Button Grid.Row="0" Grid.Column="0"
-                Style="{StaticResource MyMainButton}"
+                Style="{StaticResource OffhookButtonStyle}"
                 >
-                <iconPacks:BootstrapIcons Kind="TelephoneFill" Height="72" Width="72"/>
+                <!--<iconPacks:BootstrapIcons Kind="TelephoneFill" Height="48" Width="48"/>-->
+                <Image Source="pack://application:,,,/Icons/64/telephone-offhook.png"/>
             </Button>
 
             <Button Grid.Row="0" Grid.Column="1"
-                Style="{StaticResource MyMainButton}"
+                Style="{StaticResource HangupButtonStyle}"
                 >
-                <iconPacks:BootstrapIcons Kind="TelephoneFill" Height="72" Width="72" RotationAngle="135"/>
-
+                <!--<iconPacks:BootstrapIcons Kind="TelephoneFill" Height="48" Width="48" RotationAngle="135"/>-->
+                <Image Source="pack://application:,,,/Icons/64/telephone-hangup.png"/>
             </Button>
 
             <Button Grid.Row="0" Grid.Column="2"
                 Style="{StaticResource MyMainButton}"
                 >
-                <iconPacks:BootstrapIcons Kind="TelephonePlusFill" Height="72" Width="72"/>
+                <!--<iconPacks:BootstrapIcons Kind="TelephonePlusFill" Height="48" Width="48"/>-->
+                <Image Source="pack://application:,,,/Icons/64/people-plus.png"/>
             </Button>
 
             <Button Grid.Row="0" Grid.Column="3"
                 Style="{StaticResource MyMainButton}"
                 >
-                <iconPacks:BootstrapIcons Kind="TelephoneForwardFill" Height="72" Width="72"/>
+                <!--<iconPacks:BootstrapIcons Kind="TelephoneForwardFill" Height="48" Width="48"/>-->
+                <Image Source="pack://application:,,,/Icons/64/telehpone-outgoing.png"/>
             </Button>
 
             <Button Grid.Row="0" Grid.Column="4"
                 Style="{StaticResource MyMainButton}"
                 >
-                <StackPanel>
-                    <TextBlock FontSize="36" HorizontalAlignment="Center" VerticalAlignment="Top">
-                    IVR
-                    </TextBlock>
-                    <ContentControl VerticalAlignment="Bottom" HorizontalAlignment="Center">
-                        <iconPacks:BootstrapIcons Kind="ArrowRight"
-                                          Height="24" Width="72"/>
-                    </ContentControl>
-                </StackPanel>
+                <Image Source="pack://application:,,,/Icons/64/xfer-ivr.png"/>
             </Button>
 
             <Button Grid.Row="0" Grid.Column="5"
                 Style="{StaticResource MyMainButton}"
                 >
-                <iconPacks:BootstrapIcons Kind="PauseFill" Height="72" Width="72"/>
+                <!--<iconPacks:BootstrapIcons Kind="PauseFill" Height="48" Width="48"/>-->
+                <Image Source="pack://application:,,,/Icons/64/pause.png"/>
             </Button>
 
             <Button Grid.Row="0" Grid.Column="6"
                 Style="{StaticResource MyMainButton}"
                 >
-                <iconPacks:BootstrapIcons Kind="ReplyFill" Height="72" Width="72"/>
+                <!--<iconPacks:BootstrapIcons Kind="ReplyFill" Height="48" Width="48"/>-->
+                <Image Source="pack://application:,,,/Icons/64/rewind.png"/>
             </Button>
         </Grid>
     </Border>

@@ -8,7 +8,7 @@
     <SolidColorBrush x:Key="MyButtonBackground" Color="#377efe"/>
     <SolidColorBrush x:Key="MyGroupTitleBackground" Color="#4d75cb"/>
     <SolidColorBrush x:Key="MyInfoTextForeground" Color="#4d75cb"/>
-    <sys:Double x:Key="MyMainWindowHeight">140</sys:Double>
+    <sys:Double x:Key="MyScoreBoardHeadHeight">26</sys:Double>
 
     <Style x:Key="MyCommonText" TargetType="TextBlock">
         <Setter Property="FontSize" Value="16"/>
@@ -49,6 +49,12 @@
         </Setter>
     </Style>
 
+    <Style x:Key="MyTinyButton" TargetType="Button" BasedOn="{StaticResource MyCommonButton}">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="24"/>
+        <Setter Property="FontSize" Value="24"/>
+    </Style>
+
     <Style x:Key="MySamllButton" TargetType="Button" BasedOn="{StaticResource MyCommonButton}">
         <Setter Property="Width" Value="32"/>
         <Setter Property="Height" Value="32"/>
@@ -64,10 +70,10 @@
     <Style x:Key="MyMainButton" TargetType="Button" BasedOn="{StaticResource MyCommonButton}">
         <Setter Property="Background" Value="#467fff"/>
         <Setter Property="Foreground" Value="#e0ecf8"/>
-        <Setter Property="Width" Value="96"/>
-        <Setter Property="Height" Value="96"/>
-        <Setter Property="FontSize" Value="72"/>
-        <Setter Property="Margin" Value="4 0 4 0"/>
+        <Setter Property="Width" Value="64"/>
+        <Setter Property="Height" Value="64"/>
+        <Setter Property="FontSize" Value="48"/>
+        <Setter Property="Margin" Value="2 0 2 0"/>
     </Style>
 
 </ResourceDictionary>

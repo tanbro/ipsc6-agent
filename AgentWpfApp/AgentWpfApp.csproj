@@ -237,10 +237,14 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Icons\64\telehpone-outgoing.png" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Content Include="Fonts\LCD14.otf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -266,6 +270,22 @@
       <Project>{f3a6ceaa-81ea-4f7e-978e-10639c21186b}</Project>
       <Name>ipsc6.agent.network.netframework</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\64\people-plus.png" />
+    <Resource Include="Icons\64\telephone-hangup.png" />
+    <Resource Include="Icons\64\telephone-offhook.png" />
+    <Resource Include="Icons\64\pause.png" />
+    <Resource Include="Icons\64\rewind.png" />
+    <Resource Include="Icons\64\xfer-ivr.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\24\people-plus-star.png" />
+    <Resource Include="Icons\24\telehpone-outgoing-star.png" />
+    <Resource Include="Icons\24\telephone-star.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Icons\svg\telephone-offhook.svg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
