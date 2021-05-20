@@ -12,20 +12,24 @@ using ipsc6.agent.client;
 
 namespace AgentWpfApp.ViewModels
 {
-    class LoginViewModel : Utils.SingletonBase<LoginViewModel>
+    class LoginViewModel : Models.SingletonModelBase<LoginViewModel>
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(LoginViewModel));
 
         static LoginViewModel()
         {
-            loginModel.WorkerNum = "1000";
+
         }
 
-        private static Login loginWindow;
-        public Login LoginWindow { set { loginWindow = value; } }
+        private static LoginWindow window;
+        public LoginWindow Window { set { window = value; } }
 
-        static readonly Models.LoginModel loginModel = Models.LoginModel.Instance;
-        public Models.LoginModel LoginModel => loginModel;
+        static string workerNum;
+        public string WorkerNum
+        {
+            get => workerNum;
+            set => SetField(ref workerNum, value);
+        }
 
         #region Login Command
         static readonly Utils.RelayCommand loginCommand = new Utils.RelayCommand(x => LoginExecute(x), x => LoginCanExecute(x));
@@ -36,7 +40,7 @@ namespace AgentWpfApp.ViewModels
         static bool LoginCanExecute(object _)
         {
             if (_isLogging) return false;
-            if (string.IsNullOrEmpty(loginModel.WorkerNum)) return false;
+            if (string.IsNullOrEmpty(workerNum)) return false;
             return true;
         }
 
@@ -45,12 +49,11 @@ namespace AgentWpfApp.ViewModels
             _isLogging = true;
             try
             {
-                var workerNum = loginModel.WorkerNum.Trim();
                 var password = (parameter as PasswordBox).Password;
 
                 bool isOk = false;
-                var window = loginWindow;
-                string[] addresses = { "192.168.2.108" };
+                var window = LoginViewModel.window;
+                string[] addresses = { "192.168.2.107" };
                 try
                 {
                     if (G.agent == null)
@@ -59,7 +62,7 @@ namespace AgentWpfApp.ViewModels
                         G.agent = new Agent(addresses);
                     }
                     logger.Debug("agent.StartUp ...");
-                    await G.agent.StartUp(workerNum, password);
+                    await G.agent.StartUp(workerNum.Trim(), password);
                     isOk = true;
                 }
                 catch (ConnectionException err)
@@ -71,7 +74,7 @@ namespace AgentWpfApp.ViewModels
                     }
                     else
                     {
-                        logger.Error("agent.StartUp 失败");
+                        logger.Error("agent.StartUp 失败. agent.Dispose");
                         G.agent.Dispose();
                         G.agent = null;
                         MessageBox.Show($"{err}", "登陆失败");

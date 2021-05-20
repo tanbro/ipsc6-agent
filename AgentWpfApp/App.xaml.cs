@@ -27,7 +27,7 @@ namespace AgentWpfApp
                 Connector.Initial();
                 try
                 {
-                    if (new Login().ShowDialog() == true)
+                    if (new LoginWindow().ShowDialog() == true)
                     {
                         logger.Debug("登录成功");
                         MessageBox.Show("登录成功");

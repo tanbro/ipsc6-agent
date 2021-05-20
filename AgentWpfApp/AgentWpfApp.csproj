@@ -156,11 +156,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="G.cs" />
-    <Compile Include="Login.xaml.cs">
-      <DependentUpon>Login.xaml</DependentUpon>
+    <Compile Include="LoginWindow.xaml.cs">
+      <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\ModelBase.cs" />
-    <Compile Include="Models\LoginModel.cs" />
     <Compile Include="Models\RingInfo.cs" />
     <Compile Include="Models\SingletonModelBase.cs" />
     <Compile Include="UserControls\DialPanel.xaml.cs">
@@ -183,7 +182,7 @@
     <Compile Include="Utils\SingletonBase.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
-    <Page Include="Login.xaml">
+    <Page Include="LoginWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

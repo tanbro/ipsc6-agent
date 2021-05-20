@@ -18,13 +18,13 @@ namespace AgentWpfApp
     /// <summary>
     /// Login.xaml 的交互逻辑
     /// </summary>
-    public partial class Login : Window
+    public partial class LoginWindow : Window
     {
-        public Login()
+        public LoginWindow()
         {
             InitializeComponent();
             DataContext = ViewModels.LoginViewModel.Instance;
-            ViewModels.LoginViewModel.Instance.LoginWindow = this;
+            ViewModels.LoginViewModel.Instance.Window = this;
         }
 
     }
