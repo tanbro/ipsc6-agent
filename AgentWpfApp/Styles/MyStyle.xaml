@@ -97,7 +97,7 @@
         <Setter Property="Width" Value="64"/>
         <Setter Property="Height" Value="64"/>
         <Setter Property="FontSize" Value="48"/>
-        <Setter Property="Margin" Value="2 0 2 0"/>
+        <Setter Property="Margin" Value="1 0 1 0"/>
     </Style>
 
 </ResourceDictionary>

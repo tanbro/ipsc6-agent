@@ -159,6 +159,12 @@
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\AdvPanel.xaml.cs">
+      <DependentUpon>AdvPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\PreferencePanel.xaml.cs">
+      <DependentUpon>PreferencePanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\SkillPanel.xaml.cs">
       <DependentUpon>SkillPanel.xaml</DependentUpon>
     </Compile>
@@ -226,6 +232,14 @@
     <Page Include="UserControls\HoldPanel.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UserControls\AdvPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\PreferencePanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\QueuePanel.xaml">
       <SubType>Designer</SubType>
