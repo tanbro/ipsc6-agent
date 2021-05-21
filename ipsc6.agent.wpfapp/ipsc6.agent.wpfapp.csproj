@@ -286,6 +286,7 @@
     <Content Include="Fonts\LCD14Condensed.otf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Fonts\PathwayGothicOne-Regular.ttf" />
     <None Include="log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

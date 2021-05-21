@@ -44,10 +44,10 @@
 
             </Grid>
 
-            <TextBox Grid.Row="1" Margin="2 1 2 1" Padding="2"
+            <TextBox Grid.Row="1" Margin="4 0 4 5"
                      BorderThickness="0"
                      Background="LightBlue"
-                     FontFamily="/Fonts/#LCD 14Condensed" FontSize="20"
+                     FontFamily="/Fonts/#Pathway Gothic One" FontSize="20"
                      VerticalAlignment="Center" MaxLength="11"
                      TextAlignment="Right">
                 19012345678

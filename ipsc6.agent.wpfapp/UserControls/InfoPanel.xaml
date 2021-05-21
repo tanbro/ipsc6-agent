@@ -24,8 +24,9 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0"
-                           Style="{StaticResource MyHeadText}" Margin="4" VerticalAlignment="Center"
-                           FontFamily="/Fonts/#LCD 14Condensed"
+                       Style="{StaticResource MyNumberTextStyle}"
+                       Margin="4" VerticalAlignment="Center"
+                       FontSize="24"
                        Text="13012345678" 
                            />
             <!--
@@ -52,11 +53,11 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" Style="{StaticResource MyCommonText}"
-                           Margin="4" VerticalAlignment="Center"
-                       FontFamily="/Fonts/#LCD 14Condensed"
-                           d:Text="RingInfo.IvrPath"
-                           Text="1-2-3"/>
+            <TextBlock Grid.Column="0"
+                       Style="{StaticResource MyNumberTextStyle}"
+                       Margin="4" VerticalAlignment="Center"
+                       d:Text="RingInfo.IvrPath"
+                       Text="1-2-3"/>
             <!--
                 Text="[1-2-3]"/>
                 Text="{Binding RingInfo.IvrPath}

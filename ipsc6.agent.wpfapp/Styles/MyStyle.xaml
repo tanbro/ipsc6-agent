@@ -14,6 +14,10 @@
         <Setter Property="FontSize" Value="16"/>
     </Style>
 
+    <Style x:Key="MyNumberTextStyle" TargetType="TextBlock" BasedOn="{StaticResource MyCommonText}">
+        <Setter Property="FontFamily" Value="/Fonts/#Pathway Gothic One"/>
+    </Style>
+
     <Style x:Key="MyScoreBoardTitleTextStyle" TargetType="TextBlock">
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="FontSize" Value="18"/>
@@ -25,7 +29,7 @@
     <Style x:Key="MyScoreBoardNumberTextStyle" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource MyInfoTextForeground}"/>
         <Setter Property="FontSize" Value="24"/>
-        <Setter Property="FontFamily" Value="/Fonts/#LCD 14"/>
+        <Setter Property="FontFamily" Value="/Fonts/#Pathway Gothic One"/>
         <Setter Property="HorizontalAlignment" Value="Center"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
@@ -33,7 +37,7 @@
     <Style x:Key="MyScoreBoardNumberTextRightThinStyle" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource MyInfoTextForeground}"/>
         <Setter Property="FontSize" Value="24"/>
-        <Setter Property="FontFamily" Value="/Fonts/#LCD 14Condensed"/>
+        <Setter Property="FontFamily" Value="/Fonts/#Pathway Gothic One"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-using ipsc6.agent.network;
 
 namespace ipsc6.agent.wpfapp
 {
@@ -23,9 +22,14 @@ namespace ipsc6.agent.wpfapp
 
             try
             {
+                //var settings = wpfapp.Properties.Settings.Default;
+                //logger.DebugFormat("settings.CtiServerAddress = {0}", settings.CtiServerAddress);
+                //settings.CtiServerAddress = "192.168.2.108";
+                //logger.DebugFormat("settings.CtiServerAddress = {0}", settings.CtiServerAddress);
+                //settings.Save();
 
                 logger.Debug("Connector.Initial");
-                Connector.Initial();
+                network.Connector.Initial();
                 try
                 {
                     if (new LoginWindow().ShowDialog() == true)
@@ -41,8 +45,9 @@ namespace ipsc6.agent.wpfapp
                 finally
                 {
                     logger.Debug("Connector.Release");
-                    Connector.Release();
+                    network.Connector.Release();
                 }
+
             }
             finally
             {
