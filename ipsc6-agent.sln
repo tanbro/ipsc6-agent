@@ -32,7 +32,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hesong.plum.client.winform"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hesong.lib.Log", "hesong.lib.Log\hesong.lib.Log.csproj", "{87B12392-DF10-40B8-A414-3669CCD99E4F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgentWpfApp", "AgentWpfApp\AgentWpfApp.csproj", "{132CDCA4-E2E0-4D4F-A131-3C8AF8E17A95}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ipsc6.agent.wpfapp", "ipsc6.agent.wpfapp\ipsc6.agent.wpfapp.csproj", "{132CDCA4-E2E0-4D4F-A131-3C8AF8E17A95}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
