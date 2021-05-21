@@ -481,7 +481,7 @@ namespace ipsc6.agent.client
             var evtStateChanged = new ConnectionInfoStateChangedEventArgs(connInfo, e.OldState, e.NewState);
             EventArgs evtMainConnChanged = null;
             Action action = null;
-            logger.DebugFormat("{0}: {1} --> {2} >>>", conn, e.OldState, e.NewState);
+            logger.DebugFormat("{0}: {1} --> {2}", conn, e.OldState, e.NewState);
             lock (this)
             {
                 //////////
@@ -639,7 +639,6 @@ namespace ipsc6.agent.client
             {
                 Task.Run(action);
             }
-            logger.DebugFormat("{0}: {1} --> {2} <<<", conn, e.OldState, e.NewState);
         }
 
         public async Task StartUp(string workerNumber, string password)

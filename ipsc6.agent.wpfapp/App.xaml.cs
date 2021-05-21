@@ -22,36 +22,32 @@ namespace ipsc6.agent.wpfapp
 
             try
             {
-                //var settings = wpfapp.Properties.Settings.Default;
-                //logger.DebugFormat("settings.CtiServerAddress = {0}", settings.CtiServerAddress);
-                //settings.CtiServerAddress = "192.168.2.108";
-                //logger.DebugFormat("settings.CtiServerAddress = {0}", settings.CtiServerAddress);
-                //settings.Save();
-
-                logger.Debug("Connector.Initial");
+                logger.Debug("network.Connector.Initial()");
                 network.Connector.Initial();
                 try
                 {
-                    if (new LoginWindow().ShowDialog() == true)
+                    try
                     {
-                        logger.Debug("登录成功");
-                        new MainWindow().ShowDialog();
+                        if (new LoginWindow().ShowDialog() == true)
+                        {
+                            new MainWindow().ShowDialog();
+                        }
                     }
-                    else
+                    finally
                     {
-                        logger.Error("登录失败");
+                        Enties.Cti.AgentController.DisposeAgent();
                     }
                 }
                 finally
                 {
-                    logger.Debug("Connector.Release");
+                    logger.Debug("network.Connector.Release()");
                     network.Connector.Release();
                 }
 
             }
             finally
             {
-                logger.Debug("Shutdown");
+                logger.Debug("Shutdown()");
                 Shutdown();
             }
         }

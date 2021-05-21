@@ -61,40 +61,26 @@ namespace ipsc6.agent.wpfapp.ViewModels
             try
             {
                 var password = (parameter as PasswordBox).Password;
-
                 bool isOk = false;
-                MessageBox.Show("Mock: 登录开始：Delay(1000)");
-                await Task.Delay(1000);
-                MessageBox.Show("Mock: 登录成功");
-                isOk = true;
+                var settings = Properties.Settings.Default;
 
-                //string[] addresses = { "192.168.2.108" };
-                //try
-                //{
-                //    if (G.agent == null)
-                //    {
-                //        logger.Debug("new Agent");
-                //        G.agent = new Agent(addresses);
-                //    }
-                //    logger.Debug("agent.StartUp ...");
-                //    await G.agent.StartUp(workerNum.Trim(), password);
-                //    isOk = true;
-                //}
-                //catch (ConnectionException err)
-                //{
-                //    if (G.agent.GetConnectionState(G.agent.MainConnectionIndex) == ConnectionState.Ok)
-                //    {
-                //        isOk = true;
-                //        logger.Debug("agent.StartUp 主服务节点连接成功");
-                //    }
-                //    else
-                //    {
-                //        logger.Error("agent.StartUp 失败. agent.Dispose");
-                //        G.agent.Dispose();
-                //        G.agent = null;
-                //        MessageBox.Show($"{err}", "登陆失败");
-                //    }
-                //}
+                char[] separator = { ';' };
+                var addresses = settings.CtiServerAddress.Split(separator);
+
+                logger.InfoFormat("登录开始: {0}@{1}", workerNum, addresses);
+
+                var agent = Enties.Cti.AgentController.CreateAgent(addresses);
+                try
+                {
+                    await Enties.Cti.AgentController.StartupAgent(workerNum, password);
+                    logger.InfoFormat("登录成功");
+                    isOk = true;
+                }
+                catch (ConnectionException err)
+                {
+                    Enties.Cti.AgentController.DisposeAgent();
+                    MessageBox.Show($"{err}", "登陆失败");
+                }
                 if (isOk)
                 {
                     window.DialogResult = true;
