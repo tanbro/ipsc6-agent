@@ -138,6 +138,9 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml" />
@@ -158,10 +161,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\AgentStateToBrushConverter.cs" />
+    <Compile Include="Converters\AgentStateToTextConverter.cs" />
     <Compile Include="Enties\Cti\AgentController.cs" />
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\Cti\AgentBasicInfo.cs" />
     <Compile Include="UserControls\AdvPanel.xaml.cs">
       <DependentUpon>AdvPanel.xaml</DependentUpon>
     </Compile>
@@ -178,7 +184,7 @@
       <DependentUpon>WorkerStatusPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utils\ModelBase.cs" />
-    <Compile Include="Models\RingInfo.cs" />
+    <Compile Include="Models\Cti\RingInfo.cs" />
     <Compile Include="Utils\SingletonModelBase.cs" />
     <Compile Include="UserControls\DialPanel.xaml.cs">
       <DependentUpon>DialPanel.xaml</DependentUpon>

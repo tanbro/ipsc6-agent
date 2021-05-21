@@ -23,6 +23,7 @@ namespace ipsc6.agent.wpfapp
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = ViewModels.MainViewModel.Instance;
         }
     }
 }

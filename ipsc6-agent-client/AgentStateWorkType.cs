@@ -45,5 +45,10 @@ namespace ipsc6.agent.client
         {
             return !(left == right);
         }
+
+        public override string ToString()
+        {
+            return $"<{GetType().Name} {AgentState}|{WorkType}>";
+        }
     }
 }

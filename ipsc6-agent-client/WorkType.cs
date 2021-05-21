@@ -15,10 +15,10 @@ namespace ipsc6.agent.client
         PauseBusy = 10,
         PauseLeave = 11,
         PauseTyping = 12,
-        Pause01 = 13,
-        Pause02 = 14,
-        Pause03 = 15,
-        Pause04 = 16,
-        Pause05 = 17,
+        PauseForce = 13,
+        PauseDisconnect = 14,
+        PauseSnooze = 15,
+        PauseDinner = 16,
+        PauseTrain = 17,
     }
 }

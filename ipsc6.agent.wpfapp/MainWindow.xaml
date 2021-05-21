@@ -11,9 +11,11 @@
         Title="MainWindow" Width="1296"
         SizeToContent="Height"
         >
+
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
+
     <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Height="72" Width="1280" Background="{StaticResource MyBackgroud}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />

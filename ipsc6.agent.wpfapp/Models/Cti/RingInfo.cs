@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace ipsc6.agent.wpfapp.Models
+namespace ipsc6.agent.wpfapp.Models.Cti
 {
     public class RingInfo : Utils.SingletonModelBase<RingInfo>, INotifyPropertyChanged
     {

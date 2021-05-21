@@ -4,14 +4,20 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2010" 
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
+             xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
+             xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              Width="128" Height="64">
 
+    <UserControl.DataContext>
+        <vm:MainViewModel/>
+    </UserControl.DataContext>
+
     <UserControl.Resources>
         <Style x:Key="WorkerStatusButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Margin" Value="2 0 2 0"/>
+            <Setter Property="Margin" Value="2"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
@@ -33,6 +39,10 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <converters:AgentStateToTextConverter x:Key="AgentStateToTextConverter"/>
+        <converters:AgentStateToBrushConverter x:Key="AgentStateToBrushConverter"/>
+
     </UserControl.Resources>
 
     <Border Width="128" Height="64"
@@ -56,13 +66,17 @@
 
                     <TextBlock Grid.Column="0"
                                Style="{StaticResource MyScoreBoardTitleTextStyle}"
-                               Margin="4 0 4 0" HorizontalAlignment="Left">
-                    小美
+                               Margin="4 0 4 0" HorizontalAlignment="Left"
+                               Text="{Binding AgentBasicInfo.DisplayName, Mode=OneWay}"
+                    >
+                        <!--小美-->
                     </TextBlock>
 
                     <TextBlock Grid.Column="1" Style="{StaticResource MyScoreBoardTitleTextStyle}"
-                               Margin="4 0 4 0" HorizontalAlignment="Right">
-                    1001
+                               Margin="4 0 4 0" HorizontalAlignment="Right"
+                               Text="{Binding AgentBasicInfo.WorkerNumber, Mode=OneWay}"
+                    >
+                    <!--1001-->
                     </TextBlock>
 
                 </Grid>
@@ -74,20 +88,31 @@
             >
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="46"/>
+                        <ColumnDefinition Width="52"/>
                         <ColumnDefinition Width="12"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <Button Grid.Column="0"
                             Style="{StaticResource WorkerStatusButtonStyle}">
-                        <TextBlock FontSize="16" TextWrapping="Wrap">空闲</TextBlock>
+                        <TextBlock Cursor="Hand"
+                                   FontSize="16" Foreground="Blue"
+                            Text="{Binding AgentBasicInfo.AgentStateWorkType, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
+                        />
+                            <!--
+                            Text="{Binding AgentBasicInfo.AgentStateWorkType, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
+                            超级空闲
+                            -->
                     </Button>
 
                     <Border Grid.Column="1"
                             CornerRadius="50"
                             Width="12" Height="12"
-                            Background="Green"/>
+                            Background="{Binding AgentBasicInfo.AgentStateWorkType, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
+                     />
+                    <!--
+                    Background="{Binding AgentBasicInfo.AgentStateWorkType, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
+                    -->
 
                     <TextBlock Grid.Column="2" Style="{StaticResource MyScoreBoardNumberTextRightThinStyle}">
                         01:23:45

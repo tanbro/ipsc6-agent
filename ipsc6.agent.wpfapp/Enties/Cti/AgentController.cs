@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace ipsc6.agent.wpfapp.Enties.Cti
 {
+    using AgentStateWorkType = Tuple<client.AgentState, client.WorkType>;
+
     public class AgentController
     {
-
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(AgentController));
 
         internal static client.Agent Agent = null;
@@ -17,7 +18,23 @@ namespace ipsc6.agent.wpfapp.Enties.Cti
         {
             if (Agent != null) throw new InvalidOperationException("Data member `agent` is not null");
             Agent = new client.Agent(adresses);
+            Agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
+            Agent.OnAgentStateChanged += Agent_OnAgentStateChanged;
             return Agent;
+        }
+
+        private static void Agent_OnAgentStateChanged(object sender, client.AgentStateChangedEventArgs e)
+        {
+            logger.DebugFormat("刷新: 状态: {0} -> {1}", e.OldState, e.NewState);
+            var model = Models.Cti.AgentBasicInfo.Instance;
+            model.AgentStateWorkType = new AgentStateWorkType(e.NewState.AgentState, e.NewState.WorkType);
+        }
+
+        private static void Agent_OnAgentDisplayNameReceived(object sender, client.AgentDisplayNameReceivedEventArgs e)
+        {
+            var model = Models.Cti.AgentBasicInfo.Instance;
+            model.WorkerNumber = Agent.WorkerNumber;
+            model.DisplayName = e.Value;
         }
 
         internal static void DisposeAgent()
@@ -31,6 +48,7 @@ namespace ipsc6.agent.wpfapp.Enties.Cti
 
         public static async Task StartupAgent(string workerNumber, string password)
         {
+            //Models.Cti.AgentBasicInfo.Instance.WorkerNumber = workerNumber;
             try
             {
                 await Agent.StartUp(workerNumber, password);
