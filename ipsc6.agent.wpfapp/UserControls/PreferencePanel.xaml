@@ -23,10 +23,10 @@
                                 <Setter Property="Foreground" Value="DarkGray" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Foreground" Value="Black" />
+                                <Setter Property="Foreground" Value="LightGray" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="false">
-                                <Setter Property="Foreground" Value="LightGray"/>
+                                <Setter Property="Foreground" Value="DimGray"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
