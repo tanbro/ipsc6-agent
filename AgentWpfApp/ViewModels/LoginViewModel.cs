@@ -63,34 +63,38 @@ namespace AgentWpfApp.ViewModels
                 var password = (parameter as PasswordBox).Password;
 
                 bool isOk = false;
+                MessageBox.Show("Mock: 登录开始：Delay(1000)");
+                await Task.Delay(1000);
+                MessageBox.Show("Mock: 登录成功");
+                isOk = true;
 
-                string[] addresses = { "192.168.2.108" };
-                try
-                {
-                    if (G.agent == null)
-                    {
-                        logger.Debug("new Agent");
-                        G.agent = new Agent(addresses);
-                    }
-                    logger.Debug("agent.StartUp ...");
-                    await G.agent.StartUp(workerNum.Trim(), password);
-                    isOk = true;
-                }
-                catch (ConnectionException err)
-                {
-                    if (G.agent.GetConnectionState(G.agent.MainConnectionIndex) == ConnectionState.Ok)
-                    {
-                        isOk = true;
-                        logger.Debug("agent.StartUp 主服务节点连接成功");
-                    }
-                    else
-                    {
-                        logger.Error("agent.StartUp 失败. agent.Dispose");
-                        G.agent.Dispose();
-                        G.agent = null;
-                        MessageBox.Show($"{err}", "登陆失败");
-                    }
-                }
+                //string[] addresses = { "192.168.2.108" };
+                //try
+                //{
+                //    if (G.agent == null)
+                //    {
+                //        logger.Debug("new Agent");
+                //        G.agent = new Agent(addresses);
+                //    }
+                //    logger.Debug("agent.StartUp ...");
+                //    await G.agent.StartUp(workerNum.Trim(), password);
+                //    isOk = true;
+                //}
+                //catch (ConnectionException err)
+                //{
+                //    if (G.agent.GetConnectionState(G.agent.MainConnectionIndex) == ConnectionState.Ok)
+                //    {
+                //        isOk = true;
+                //        logger.Debug("agent.StartUp 主服务节点连接成功");
+                //    }
+                //    else
+                //    {
+                //        logger.Error("agent.StartUp 失败. agent.Dispose");
+                //        G.agent.Dispose();
+                //        G.agent = null;
+                //        MessageBox.Show($"{err}", "登陆失败");
+                //    }
+                //}
                 if (isOk)
                 {
                     window.DialogResult = true;

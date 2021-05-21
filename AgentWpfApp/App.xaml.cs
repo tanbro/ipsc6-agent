@@ -23,28 +23,26 @@ namespace AgentWpfApp
 
             try
             {
-                new MainWindow().ShowDialog();
-                //logger.Debug("Connector.Initial");
-                //Connector.Initial();
-                //try
-                //{
-                //    if (new LoginWindow().ShowDialog() == true)
-                //    {
-                //        logger.Debug("登录成功");
-                //        MessageBox.Show("登录成功");
-                //        new MainWindow().ShowDialog();
-                //    }
-                //    else
-                //    {
-                //        logger.Debug("登录失败");
-                //        MessageBox.Show("登录失败");
-                //    }
-                //}
-                //finally
-                //{
-                //    logger.Debug("Connector.Release");
-                //    Connector.Release();
-                //}
+
+                logger.Debug("Connector.Initial");
+                Connector.Initial();
+                try
+                {
+                    if (new LoginWindow().ShowDialog() == true)
+                    {
+                        logger.Debug("登录成功");
+                        new MainWindow().ShowDialog();
+                    }
+                    else
+                    {
+                        logger.Error("登录失败");
+                    }
+                }
+                finally
+                {
+                    logger.Debug("Connector.Release");
+                    Connector.Release();
+                }
             }
             finally
             {
