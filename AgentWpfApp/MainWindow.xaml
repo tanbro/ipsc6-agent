@@ -7,6 +7,7 @@
         xmlns:uc="clr-namespace:AgentWpfApp.UserControls"
         xmlns:vm="clr-namespace:AgentWpfApp.ViewModels"
         mc:Ignorable="d"
+        FontSize="16"
         Title="MainWindow" Width="1280"
         SizeToContent="Height"
         >
@@ -33,5 +34,7 @@
         <uc:MainToolBar Grid.Column="3" Margin="2 0 0 2"/>
         <uc:HoldPanel Grid.Column="4" Margin="2 0 0 2"/>
         <uc:WorkerStatusPanel Grid.Column="5" Margin="2 0 0 2"/>
+        <uc:SkillPanel Grid.Column="6" Margin="2 0 0 2"/>
+        <uc:SysStatusPanel Grid.Column="7" Margin="2 0 0 2"/>
     </Grid>
 </Window>

@@ -22,7 +22,7 @@
                 CornerRadius="5 5 0 0"
                 Background="{StaticResource MyGroupTitleBackground}" 
             >
-                <TextBlock FontSize="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Style="{StaticResource MyScoreBoardTitleTextStyle}">
                     保持
                 </TextBlock>
             </Border>
@@ -30,9 +30,7 @@
                 Background="{StaticResource MyBackgroud}"
                 CornerRadius="0 0 5 5"
             >
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                           FontFamily="/Fonts/#LCD 14" FontSize="20"
-                           Foreground="{StaticResource MyInfoTextForeground}">
+                <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}">
                     2
                 </TextBlock>
             </Border>

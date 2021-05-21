@@ -54,13 +54,14 @@
                         <ColumnDefinition Width="64"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Margin="4 0 4 0"
-                           FontSize="18" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <TextBlock Grid.Column="0"
+                               Style="{StaticResource MyScoreBoardTitleTextStyle}"
+                               Margin="4 0 4 0" HorizontalAlignment="Left">
                     小美
                     </TextBlock>
 
-                    <TextBlock Grid.Column="1" Margin="4 0 4 0"
-                           FontSize="18" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Grid.Column="1" Style="{StaticResource MyScoreBoardTitleTextStyle}"
+                               Margin="4 0 4 0" HorizontalAlignment="Right">
                     1001
                     </TextBlock>
 
@@ -73,21 +74,22 @@
             >
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="52"/>
+                        <ColumnDefinition Width="46"/>
+                        <ColumnDefinition Width="12"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!--<Label Grid.Column="0">空闲</Label>-->
-                    <Button Grid.Column="0" Style="{StaticResource WorkerStatusButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="空闲" Margin="0 0 4 0" FontSize="14"/>
-                            <Border CornerRadius="50" Background="Green" Width="12" Height="12"/>
-                        </StackPanel>
+                    <Button Grid.Column="0"
+                            Style="{StaticResource WorkerStatusButtonStyle}">
+                        <TextBlock FontSize="16" TextWrapping="Wrap">空闲</TextBlock>
                     </Button>
 
-                    <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0 0 2 0"
-                               FontFamily="/Fonts/#LCD 14Condensed" FontSize="28"
-                               Foreground="{StaticResource MyInfoTextForeground}">
+                    <Border Grid.Column="1"
+                            CornerRadius="50"
+                            Width="12" Height="12"
+                            Background="Green"/>
+
+                    <TextBlock Grid.Column="2" Style="{StaticResource MyScoreBoardNumberTextRightThinStyle}">
                         01:23:45
                     </TextBlock>
                 </Grid>
