@@ -20,7 +20,19 @@ namespace ipsc6.agent.wpfapp.Enties.Cti
             Agent = new client.Agent(adresses);
             Agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
             Agent.OnAgentStateChanged += Agent_OnAgentStateChanged;
+            Agent.OnGroupCollectionReceived += Agent_OnGroupCollectionReceived;
+            Agent.OnSignedGroupsChanged += Agent_OnSignedGroupsChanged;
             return Agent;
+        }
+
+        private static void Agent_OnSignedGroupsChanged(object sender, EventArgs e)
+        {
+            ResetSkillGroup();
+        }
+
+        private static void Agent_OnGroupCollectionReceived(object sender, EventArgs e)
+        {
+            ResetSkillGroup();
         }
 
         private static void Agent_OnAgentStateChanged(object sender, client.AgentStateChangedEventArgs e)
@@ -44,6 +56,15 @@ namespace ipsc6.agent.wpfapp.Enties.Cti
                 Agent.Dispose();
                 Agent = null;
             }
+        }
+
+        static void ResetSkillGroup()
+        {
+            var model = Models.Cti.AgentBasicInfo.Instance;
+            model.AgentGroups = (
+                from obj in Agent.GroupCollection
+                select obj.Clone() as client.AgentGroup
+            ).ToList();
         }
 
         public static async Task StartupAgent(string workerNumber, string password)

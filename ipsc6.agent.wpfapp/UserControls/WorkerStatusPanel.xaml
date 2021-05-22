@@ -10,7 +10,7 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance dd:MainDesignViewModel, IsDesignTimeCreatable=True}"
              Width="128" Height="64">
-    
+
     <UserControl.DataContext>
         <vm:MainViewModel/>
     </UserControl.DataContext>
@@ -95,14 +95,27 @@
                     </Grid.ColumnDefinitions>
 
                     <Button Grid.Column="0"
-                            Style="{StaticResource WorkerStatusButtonStyle}">
-                        <TextBlock Cursor="Hand" FontSize="16" Foreground="Blue"
-                            Text="{Binding AgentBasicInfo.AgentStateWorkType, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
-                        />
+                            Style="{StaticResource WorkerStatusButtonStyle}"
+                            Command="{Binding OpenStatePopupCommand}"
+                            Click="ShowOrHideStatePopup"
+                            >
+                        <StackPanel>
+                            <TextBlock Cursor="Hand" FontSize="16" Foreground="Blue"
+                                Text="{Binding AgentBasicInfo.AgentStateWorkType, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
+                            />
                             <!--
                             Text="{Binding AgentBasicInfo.AgentStateWorkType, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
                             超级空闲
                             -->
+                            <Popup x:Name="StatePopup" StaysOpen="False">
+                                <StackPanel Background="White">
+                                    <TextBlock>State 1</TextBlock>
+                                    <TextBlock>State 2</TextBlock>
+                                    <TextBlock>State 3</TextBlock>
+                                    <TextBlock>State 4</TextBlock>
+                                </StackPanel>
+                            </Popup>
+                        </StackPanel>
                     </Button>
 
                     <Border Grid.Column="1"

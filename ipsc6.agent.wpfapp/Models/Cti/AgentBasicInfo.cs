@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 
@@ -13,12 +14,7 @@ namespace ipsc6.agent.wpfapp.Models.Cti
         public string WorkerNumber
         {
             get => workerNumber;
-            //set => SetField(ref workerNumber, value);
-            set
-            {
-                workerNumber = value;
-                OnPropertyChanged("WorkerNumber");
-            }
+            set => SetField(ref workerNumber, value);
         }
 
         string displayName;
@@ -28,11 +24,19 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetField(ref displayName, value);
         }
 
-        AgentStateWorkType agentStateWorkType;
+        AgentStateWorkType agentStateWorkType= new AgentStateWorkType(client.AgentState.OffLine, client.WorkType.Unknown);
         public AgentStateWorkType AgentStateWorkType
         {
             get => agentStateWorkType;
             set => SetField(ref agentStateWorkType, value);
         }
+
+        IList<client.AgentGroup> agentGroups = new List<client.AgentGroup>();
+        public IList<client.AgentGroup> AgentGroups
+        {
+            get => agentGroups;
+            set => SetField(ref agentGroups, value);
+        }
+
     }
 }

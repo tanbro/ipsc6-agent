@@ -2,10 +2,62 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2010" 
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
+             xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
+             xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
              mc:Ignorable="d" 
              Width="60" Height="64">
+    <UserControl.DataContext>
+        <vm:MainViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <converters:AgentGroupsToNumberTitleConverter x:Key="AgentGroupsToNumberTitleConverter"/>
+        
+        <Style x:Key="SkillButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource MyInfoTextForeground}"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontFamily" Value="/Fonts/#Pathway Gothic One"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid>
+                            <ContentPresenter x:Name="MyContentPresenter" Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="DeepSkyBlue" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Foreground" Value="DarkGreen" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="Gray"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="SkillItemTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding Path=Id}"/>
+                <TextBlock Grid.Column="1" Text="{Binding Path=Name}"/>
+            </Grid>
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+
+
     <Border Width="60" Height="64"
             BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
             HorizontalAlignment="Left" VerticalAlignment="Top">
@@ -28,9 +80,21 @@
                 Background="{StaticResource MyBackgroud}"
                 CornerRadius="0 0 5 5"
             >
-                <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}">
-                    3/5
-                </TextBlock>
+                <Button Style="{StaticResource SkillButtonStyle}"
+                        Cursor="Hand" Click="ShowOrHideSkillPopup">
+                    <StackPanel>
+                        <TextBlock Text="{Binding AgentBasicInfo.AgentGroups, Mode=OneWay, Converter=AgentGroupsToNumberTitleConverter}"/>
+                        <Popup x:Name="SkillPopup" StaysOpen="False">
+                            <ContentControl>
+                                <ListBox Width="400" Margin="10"
+                             ItemsSource="{Binding AgentBasicInfo.AgentGroups, Mode=OneWay}"
+                             ItemTemplate="{StaticResource SkillItemTemplate}"
+                             HorizontalContentAlignment="Stretch"/>
+                            </ContentControl>
+                            <!--ItemTemplate="{StaticResource myTaskTemplate}"-->
+                        </Popup>
+                    </StackPanel>
+                </Button>
             </Border>
 
         </Grid>

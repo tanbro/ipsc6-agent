@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Controls.Primitives;
 
 namespace ipsc6.agent.wpfapp.UserControls
 {
@@ -23,6 +24,13 @@ namespace ipsc6.agent.wpfapp.UserControls
         public SkillPanel()
         {
             InitializeComponent();
+            DataContext = ViewModels.MainViewModel.Instance;
+        }
+
+        private void ShowOrHideSkillPopup(object sender, RoutedEventArgs e)
+        {
+            var popup = FindName("SkillPopup") as Popup;
+            popup.IsOpen = !popup.IsOpen;
         }
     }
 }
