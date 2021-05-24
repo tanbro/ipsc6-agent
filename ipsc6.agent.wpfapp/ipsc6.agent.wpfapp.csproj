@@ -170,6 +170,7 @@
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\Cti\AgentBasicInfo.cs" />
+    <Compile Include="Models\Cti\AgentStateOperations.cs" />
     <Compile Include="UserControls\AdvPanel.xaml.cs">
       <DependentUpon>AdvPanel.xaml</DependentUpon>
     </Compile>

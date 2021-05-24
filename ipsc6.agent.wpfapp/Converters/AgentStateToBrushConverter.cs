@@ -16,15 +16,12 @@ namespace ipsc6.agent.wpfapp.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            Color color = Colors.Transparent;
+            Color color = (Color)ColorConverter.ConvertFromString("#808080"); //"不存在";
             if (value == null) return color;
 
             var tuple = value as AgentStateWorkType;
             switch (tuple?.Item1)
             {
-                case client.AgentState.NotExist:
-                    color = (Color)ColorConverter.ConvertFromString("#808080"); //"不存在";
-                    break;
                 case client.AgentState.OffLine:
                     color = (Color)ColorConverter.ConvertFromString("#808080"); // "离线";
                     break;
@@ -86,10 +83,6 @@ namespace ipsc6.agent.wpfapp.Converters
                 case client.AgentState.WorkPause: break; // "工作暂停(Deprecated)";
                 default:
                     break;
-            }
-            if (color == null)
-            {
-                throw new NotImplementedException($"{tuple.Item1}, {tuple.Item2}");
             }
             return new SolidColorBrush(color);
         }

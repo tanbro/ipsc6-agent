@@ -466,7 +466,7 @@ namespace ipsc6.agent.client
             {
                 if (pendingReqType != MessageType.NONE)
                 {
-                    throw new InvalidOperationException($"A pending request exists: {pendingReqType}");
+                    throw new RequestNotCompleteError($"A pending request exists: {pendingReqType}");
                 }
                 pendingReqType = args.Type;
             }

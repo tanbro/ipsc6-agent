@@ -6,9 +6,11 @@
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              xmlns:dd="clr-namespace:ipsc6.agent.wpfapp.DesignData"
+             xmlns:ctiModels="clr-namespace:ipsc6.agent.wpfapp.Models.Cti"
              xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance dd:MainDesignViewModel, IsDesignTimeCreatable=True}"
+             x:Name="WorkerStatusPannelUserControl"
              Width="128" Height="64">
 
     <UserControl.DataContext>
@@ -41,8 +43,15 @@
             </Setter>
         </Style>
 
+
         <converters:AgentStateToTextConverter x:Key="AgentStateToTextConverter"/>
         <converters:AgentStateToBrushConverter x:Key="AgentStateToBrushConverter"/>
+
+        <Style x:Key="MyStateLightStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="50"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="Width" Value="12"/>
+        </Style>
 
     </UserControl.Resources>
 
@@ -108,19 +117,33 @@
                             超级空闲
                             -->
                             <Popup x:Name="StatePopup" StaysOpen="False">
-                                <StackPanel Background="White">
-                                    <TextBlock>State 1</TextBlock>
-                                    <TextBlock>State 2</TextBlock>
-                                    <TextBlock>State 3</TextBlock>
-                                    <TextBlock>State 4</TextBlock>
-                                </StackPanel>
+                                <ListBox ItemsSource="{Binding AgentBasicInfo.StateOperationItems}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Margin="4"
+                                                    Command="{Binding ElementName=WorkerStatusPannelUserControl, Path=DataContext.SetStateCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    >
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock
+                                                           Text="{Binding Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
+                                                           Margin="4"
+                                                           />
+                                                    <Border
+                                                        Style="{StaticResource MyStateLightStyle}"
+                                                        Background="{Binding Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
+                                                        Margin="4"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
                             </Popup>
                         </StackPanel>
                     </Button>
 
                     <Border Grid.Column="1"
-                            CornerRadius="50"
-                            Width="12" Height="12"
+                            Style="{StaticResource MyStateLightStyle}"
                             Background="{Binding AgentBasicInfo.AgentStateWorkType, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
                      />
                     <!--

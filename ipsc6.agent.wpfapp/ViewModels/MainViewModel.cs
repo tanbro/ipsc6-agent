@@ -5,9 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Windows.Input;
+using System.Windows;
 
 namespace ipsc6.agent.wpfapp.ViewModels
 {
+    using AgentStateWorkType = Tuple<client.AgentState, client.WorkType>;
+
     public class MainViewModel : Utils.SingletonModelBase<MainViewModel>, INotifyPropertyChanged
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainViewModel));
@@ -62,6 +65,54 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         static bool CanSkillSignGroup(object _)
         {
+            var agent = Enties.Cti.AgentController.Agent;
+
+            if (agent.RequestNotComplete)
+            {
+                return false;
+            }
+            return true;
+        }
+        #endregion
+
+        #region 修改状态
+        static Utils.RelayCommand setStateCommand = new Utils.RelayCommand(x => DoSetState(x), x => CanSetState(x));
+        public ICommand SetStateCommand => setStateCommand;
+
+        static async void DoSetState(object parameter)
+        {
+            logger.DebugFormat("设置状态: {0}", parameter);
+            var st = parameter as AgentStateWorkType;
+            var agent = Enties.Cti.AgentController.Agent;
+
+            try
+            {
+                if (st.Item1 == client.AgentState.Idle)
+                {
+                    await agent.SetIdle();
+                }
+                else if (st.Item1 == client.AgentState.Pause)
+                {
+                    await agent.SetBusy(st.Item2);
+                }
+                else if (st.Item1 == client.AgentState.Leave)
+                {
+                    await agent.SetBusy();
+                }
+            }
+            catch (client.BaseRequestError err)
+            {
+                MessageBox.Show($"{err}", "坐席客户端远程调用失败");
+            }
+        }
+
+        static bool CanSetState(object _)
+        {
+            var agent = Enties.Cti.AgentController.Agent;
+            if (agent.RequestNotComplete)
+            {
+                return false;
+            }
             return true;
         }
         #endregion

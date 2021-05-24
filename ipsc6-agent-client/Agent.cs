@@ -775,207 +775,329 @@ namespace ipsc6.agent.client
             }
         }
 
+        class RequestContext : IDisposable
+        {
+            static readonly object lck = new object();
+            static bool hasReq = false;
+            public RequestContext()
+            {
+                lock (lck)
+                {
+                    //if (hasReq) throw new RequestNotCompleteError();
+                    hasReq = true;
+                }
+
+            }
+
+            public static bool HasRequest()
+            {
+                lock (lck)
+                {
+                    return hasReq;
+
+                }
+            }
+
+            public void Dispose()
+            {
+                lock (lck)
+                {
+                    hasReq = false;
+                }
+            }
+        }
+
+        public bool RequestNotComplete => RequestContext.HasRequest();
+
+
         public async Task<ServerSentMessage> Request(AgentRequestMessage args, int timeout = Connection.DefaultRequestTimeoutMilliseconds)
         {
-            return await MainConnection.Request(args, timeout);
+            using (new RequestContext())
+            {
+                return await MainConnection.Request(args, timeout);
+            }
         }
 
         public async Task SignIn()
         {
-            await SignIn(Array.Empty<string>());
+            using (new RequestContext())
+            {
+                await SignIn(Array.Empty<string>());
+            }
         }
         public async Task SignIn(string id)
         {
-            var ids = new string[] { id };
-            await SignIn(ids);
+            using (new RequestContext())
+            {
+                var ids = new string[] { id };
+                await SignIn(ids);
+            }
         }
         public async Task SignIn(IEnumerable<string> ids)
         {
-            var s = string.Join("|", ids);
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNON, s);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var s = string.Join("|", ids);
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNON, s);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task SignOut()
         {
-            await SignOut(Array.Empty<string>());
+            using (new RequestContext())
+            {
+                await SignOut(Array.Empty<string>());
+            }
         }
         public async Task SignOut(string id)
         {
-            var ids = new string[] { id };
-            await SignOut(ids);
+            using (new RequestContext())
+            {
+                var ids = new string[] { id };
+                await SignOut(ids);
+            }
         }
         public async Task SignOut(IEnumerable<string> ids)
         {
-            var s = string.Join("|", ids);
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNOFF, s);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var s = string.Join("|", ids);
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNOFF, s);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task SetIdle()
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONTINUE);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONTINUE);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task SetBusy(WorkType workType = WorkType.PauseBusy)
         {
-            if (workType < WorkType.PauseBusy)
+            using (new RequestContext())
             {
-                throw new ArgumentOutOfRangeException(nameof(workType), $"Invalid work type {workType}");
+                if (workType < WorkType.PauseBusy)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(workType), $"Invalid work type {workType}");
+                }
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_PAUSE, (int)workType);
+                await MainConnection.Request(req);
             }
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_PAUSE, (int)workType);
-            await MainConnection.Request(req);
         }
 
         public async Task Intercept(ConnectionInfo _, int agentId)
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_INTERCEPT, agentId);
-            await MainConnection.Request(req);
-            throw new NotImplementedException();
+            using (new RequestContext())
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_INTERCEPT, agentId);
+                await MainConnection.Request(req);
+                throw new NotImplementedException();
+            }
         }
 
         public void Dial()
         {
-            throw new NotImplementedException();
+            using (new RequestContext())
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public async Task Xfer(int agentId, int channel, string groupId, string customString = "", bool consultative = false)
         {
-            var s = $"{channel}|{groupId}|{customString}";
-            var mt = consultative ? MessageType.REMOTE_MSG_TRANSFER_EX : MessageType.REMOTE_MSG_TRANSFER;
-            var req = new AgentRequestMessage(mt, agentId, s);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var s = $"{channel}|{groupId}|{customString}";
+                var mt = consultative ? MessageType.REMOTE_MSG_TRANSFER_EX : MessageType.REMOTE_MSG_TRANSFER;
+                var req = new AgentRequestMessage(mt, agentId, s);
+                await MainConnection.Request(req);
+            }
         }
 
         public void XferExt()
         {
-            throw new NotImplementedException();
+            using (new RequestContext())
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public async Task Hold()
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HOLD);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HOLD);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task UnHold(HoldInfo holdInfo)
         {
-            var connObj = GetConnection(holdInfo.ConnectionInfo);
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_RETRIEVE, holdInfo.Channel);
-            await connObj.Request(req);
+            using (new RequestContext())
+            {
+                var connObj = GetConnection(holdInfo.ConnectionInfo);
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_RETRIEVE, holdInfo.Channel);
+                await connObj.Request(req);
+            }
         }
 
         public async Task Break(int channel = -1, string customString = "")
         {
-            if (channel < 0)
+            using (new RequestContext())
             {
-                channel = workingChannelInfo.Channel;
+                if (channel < 0)
+                {
+                    channel = workingChannelInfo.Channel;
+                }
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_BREAK_SESS, channel, customString);
+                await MainConnection.Request(req);
             }
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_BREAK_SESS, channel, customString);
-            await MainConnection.Request(req);
         }
 
         public async Task HangUp()
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HANGUP);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HANGUP);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task HangUp(int agentId)
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEHANGUP, agentId);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEHANGUP, agentId);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task OffHook()
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task Interrupt(int agentId)
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEINSERT, agentId);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEINSERT, agentId);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task Monitor(int agentId)
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_LISTEN, agentId);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_LISTEN, agentId);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task UnMonitor(int agentId)
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_STOPLISTEN, agentId);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_STOPLISTEN, agentId);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task Dequeue(QueueInfo queueInfo)
         {
-            var connObj = GetConnection(queueInfo.ConnectionInfo);
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, queueInfo.Channel);
-            await connObj.Request(req);
+            using (new RequestContext())
+            {
+                var connObj = GetConnection(queueInfo.ConnectionInfo);
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, queueInfo.Channel);
+                await connObj.Request(req);
+            }
         }
 
         public async Task Block(int agentId)
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_BLOCK, agentId);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_BLOCK, agentId);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task UnBlock(int agentId)
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_UNBLOCK, agentId);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_UNBLOCK, agentId);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task Kick(int agentId)
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_KICKOUT, agentId);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_KICKOUT, agentId);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task SignOut(int agentId, string groupId)
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCESIGNOFF, agentId, groupId);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCESIGNOFF, agentId, groupId);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task CallIvr(int channel, string ivrName, IvrInvokeType invokeType, string customString)
         {
-            var s = $"{ivrName}|{(int)invokeType}|{customString}";
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CALLSUBFLOW, channel, s);
-            await MainConnection.Request(req);
+            using (new RequestContext())
+            {
+                var s = $"{ivrName}|{(int)invokeType}|{customString}";
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CALLSUBFLOW, channel, s);
+                await MainConnection.Request(req);
+            }
         }
 
         public async Task TakenAway(int index)
         {
-            Connection connObj;
-            // 先修改 index
-            lock (this)
+            using (new RequestContext())
             {
-                if (mainConnectionIndex < 0)
+                Connection connObj;
+                // 先修改 index
+                lock (this)
                 {
-                    throw new InvalidOperationException();
+                    if (mainConnectionIndex < 0)
+                    {
+                        throw new InvalidOperationException();
+                    }
+                    if (index < 0 || index >= internalConnections.Count || index == mainConnectionIndex)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(index), index, "");
+                    }
+                    if (internalConnections[index].State != ConnectionState.Ok)
+                    {
+                        throw new InvalidOperationException($"Invalid state: {internalConnections[index].State}");
+                    }
+                    connObj = MainConnection;
+                    mainConnectionIndex = index;
+                    logger.InfoFormat("切换主服务节点到 {0}", MainConnection);
                 }
-                if (index < 0 || index >= internalConnections.Count || index == mainConnectionIndex)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(index), index, "");
-                }
-                if (internalConnections[index].State != ConnectionState.Ok)
-                {
-                    throw new InvalidOperationException($"Invalid state: {internalConnections[index].State}");
-                }
-                connObj = MainConnection;
-                mainConnectionIndex = index;
-                logger.InfoFormat("切换主服务节点到 {0}", MainConnection);
+                OnMainConnectionChanged?.Invoke(this, new EventArgs());
+                // 再通知原来的主，无论能否通知成功
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKENAWAY);
+                await connObj.Request(req);
             }
-            OnMainConnectionChanged?.Invoke(this, new EventArgs());
-            // 再通知原来的主，无论能否通知成功
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKENAWAY);
-            await connObj.Request(req);
         }
 
     }

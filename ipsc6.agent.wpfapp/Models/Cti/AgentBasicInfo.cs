@@ -38,5 +38,12 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetField(ref skillsGroup, value);
         }
 
+        IList<AgentStateWorkType> stateOperationItems = AgentStateOperations.Instance.Items;
+        public IList<AgentStateWorkType> StateOperationItems
+        {
+            get => stateOperationItems;
+            set => SetField(ref stateOperationItems, value);
+        }
+
     }
 }
