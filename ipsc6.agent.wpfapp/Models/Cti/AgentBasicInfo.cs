@@ -31,11 +31,11 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetField(ref agentStateWorkType, value);
         }
 
-        IList<client.AgentGroup> agentGroups = new List<client.AgentGroup>();
-        public IList<client.AgentGroup> AgentGroups
+        IList<client.AgentGroup> skillsGroup = new List<client.AgentGroup>();
+        public IList<client.AgentGroup> SkillGroups
         {
-            get => agentGroups;
-            set => SetField(ref agentGroups, value);
+            get => skillsGroup;
+            set => SetField(ref skillsGroup, value);
         }
 
     }

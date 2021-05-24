@@ -324,6 +324,7 @@ namespace ipsc6.agent.client
                     }
                     else
                     {
+                        logger.DebugFormat("DoOnSignedGroupIdList - 技能组 <id=\"{0})\" signed={1}>", id, signed);
                         groupObj.Signed = signed;
                     }
                 }

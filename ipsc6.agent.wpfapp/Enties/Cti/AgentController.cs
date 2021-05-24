@@ -37,7 +37,6 @@ namespace ipsc6.agent.wpfapp.Enties.Cti
 
         private static void Agent_OnAgentStateChanged(object sender, client.AgentStateChangedEventArgs e)
         {
-            logger.DebugFormat("刷新: 状态: {0} -> {1}", e.OldState, e.NewState);
             var model = Models.Cti.AgentBasicInfo.Instance;
             model.AgentStateWorkType = new AgentStateWorkType(e.NewState.AgentState, e.NewState.WorkType);
         }
@@ -61,8 +60,9 @@ namespace ipsc6.agent.wpfapp.Enties.Cti
         static void ResetSkillGroup()
         {
             var model = Models.Cti.AgentBasicInfo.Instance;
-            model.AgentGroups = (
+            model.SkillGroups = (
                 from obj in Agent.GroupCollection
+                orderby obj.Id
                 select obj.Clone() as client.AgentGroup
             ).ToList();
         }

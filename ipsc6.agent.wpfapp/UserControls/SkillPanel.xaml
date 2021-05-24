@@ -6,7 +6,11 @@
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
+             xmlns:dd="clr-namespace:ipsc6.agent.wpfapp.DesignData"
+             xmlns:iconpacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance dd:MainDesignViewModel, IsDesignTimeCreatable=True}"
+             x:Name="SkillPanelUserControl"
              Width="60" Height="64">
     <UserControl.DataContext>
         <vm:MainViewModel/>
@@ -14,7 +18,7 @@
 
     <UserControl.Resources>
         <converters:AgentGroupsToNumberTitleConverter x:Key="AgentGroupsToNumberTitleConverter"/>
-        
+
         <Style x:Key="SkillButtonStyle" TargetType="Button">
             <Setter Property="Foreground" Value="{StaticResource MyInfoTextForeground}"/>
             <Setter Property="FontSize" Value="24"/>
@@ -42,17 +46,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <DataTemplate x:Key="SkillItemTemplate">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="{Binding Path=Id}"/>
-                <TextBlock Grid.Column="1" Text="{Binding Path=Name}"/>
-            </Grid>
-        </DataTemplate>
 
     </UserControl.Resources>
 
@@ -83,15 +76,31 @@
                 <Button Style="{StaticResource SkillButtonStyle}"
                         Cursor="Hand" Click="ShowOrHideSkillPopup">
                     <StackPanel>
-                        <TextBlock Text="{Binding AgentBasicInfo.AgentGroups, Mode=OneWay, Converter=AgentGroupsToNumberTitleConverter}"/>
+                        <TextBlock Text="{Binding AgentBasicInfo.SkillGroups, Mode=OneWay, Converter={StaticResource AgentGroupsToNumberTitleConverter}}"/>
                         <Popup x:Name="SkillPopup" StaysOpen="False">
                             <ContentControl>
-                                <ListBox Width="400" Margin="10"
-                             ItemsSource="{Binding AgentBasicInfo.AgentGroups, Mode=OneWay}"
-                             ItemTemplate="{StaticResource SkillItemTemplate}"
-                             HorizontalContentAlignment="Stretch"/>
+                                <ListBox ItemsSource="{Binding AgentBasicInfo.SkillGroups, Mode=OneWay}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="32"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <CheckBox Grid.Column="0"
+                                                          Margin="2"
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                          Foreground="{StaticResource MyInfoTextForeground}"
+                                                          IsChecked="{Binding Signed, Mode=OneWay}"
+                                                          Command="{Binding ElementName=SkillPanelUserControl, Path=DataContext.SkillSignCommand}"
+                                                          CommandParameter="{Binding Id}">
+                                                </CheckBox>
+                                                <TextBlock Grid.Column="1" Text="{Binding Name, Mode=OneWay}" Margin="2"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
                             </ContentControl>
-                            <!--ItemTemplate="{StaticResource myTaskTemplate}"-->
                         </Popup>
                     </StackPanel>
                 </Button>

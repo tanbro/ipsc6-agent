@@ -40,5 +40,6 @@
         <uc:SysStatusPanel Grid.Column="7" Margin="1 0 0 1"/>
         <uc:AdvPanel Grid.Column="8" Margin="1 0 0 1"/>
         <uc:PreferencePanel Grid.Column="9" Margin="1 0 0 0"/>
+
     </Grid>
 </Window>

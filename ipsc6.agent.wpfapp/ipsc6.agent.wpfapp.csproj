@@ -304,6 +304,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="DataTemplates\" />
     <Folder Include="Images\" />
     <Folder Include="Views\" />
   </ItemGroup>

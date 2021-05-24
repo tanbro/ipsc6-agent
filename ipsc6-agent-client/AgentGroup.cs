@@ -41,7 +41,7 @@ namespace ipsc6.agent.client
 
         public object Clone()
         {
-            return new AgentGroup(Id, Name);
+            return new AgentGroup(Id, Name) { Signed = signed };
         }
 
         public static bool operator ==(AgentGroup left, AgentGroup right)
