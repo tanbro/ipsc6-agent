@@ -19,7 +19,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public Models.Cti.RingInfo RingInfo => Models.Cti.RingInfo.Instance;
 
 
-        #region 打开状态弹出窗
+        #region Command 打开状态弹出窗
         static bool isOpenStatePopup = false;
         public bool IsOpenStatePopup
         {
@@ -42,7 +42,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
         #endregion
 
-        #region 签入/出 Command
+        #region Command 签入/出
         static Utils.RelayCommand skillSignCommand = new Utils.RelayCommand(x => DoSkillSignGroup(x), x => CanSkillSignGroup(x));
         public ICommand SkillSignCommand => skillSignCommand;
 
@@ -70,7 +70,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
-        #region 修改状态
+        #region Command 修改状态
         static Utils.RelayCommand setStateCommand = new Utils.RelayCommand(x => DoSetState(x), x => CanSetState(x));
         public ICommand SetStateCommand => setStateCommand;
 
@@ -107,6 +107,36 @@ namespace ipsc6.agent.wpfapp.ViewModels
             return true;
         }
         #endregion
+
+        #region Command Offhook
+        static Utils.RelayCommand offhookCommand = new Utils.RelayCommand(x => DoOffhook(x), x => CanOffhook(x));
+        public ICommand OffhookCommand => offhookCommand;
+
+        static async void DoOffhook(object _)
+        {
+            logger.DebugFormat("摘机");
+            var agent = Enties.Cti.AgentController.Agent;
+            await agent.OffHook();
+        }
+
+        static bool CanOffhook(object _) => true;
+        #endregion
+
+
+        #region Command Hangup
+        static Utils.RelayCommand hangupCommand = new Utils.RelayCommand(x => DoHangup(x), x => CanHangup(x));
+        public ICommand HangupCommand => hangupCommand;
+
+        static async void DoHangup(object _)
+        {
+            logger.DebugFormat("挂机");
+            var agent = Enties.Cti.AgentController.Agent;
+            await agent.HangUp();
+        }
+
+        static bool CanHangup(object _) => true;
+        #endregion
+
 
     }
 }

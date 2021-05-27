@@ -449,6 +449,8 @@ namespace ipsc6.agent.client
 
         private static readonly object requestLock = new object();
 
+        public bool HasPendingRequest => pendingReqType != MessageType.NONE;
+
         public async Task<ServerSentMessage> Request(AgentRequestMessage args, int millisecondsTimeout = DefaultRequestTimeoutMilliseconds)
         {
             lock (connectLock)

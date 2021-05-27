@@ -32,8 +32,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hesong.plum.client.winform"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ipsc6.agent.wpfapp", "ipsc6.agent.wpfapp\ipsc6.agent.wpfapp.csproj", "{132CDCA4-E2E0-4D4F-A131-3C8AF8E17A95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{487F9345-4C74-4258-854F-45DFF0DF2473}"
-EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		ipsc6-agent-client\ipsc6-agent-client.projitems*{01e42cd4-e152-4513-a66f-7d75b3b70bfc}*SharedItemsImports = 13
@@ -166,18 +164,6 @@ Global
 		{132CDCA4-E2E0-4D4F-A131-3C8AF8E17A95}.Release|x64.Build.0 = Release|Any CPU
 		{132CDCA4-E2E0-4D4F-A131-3C8AF8E17A95}.Release|x86.ActiveCfg = Release|Any CPU
 		{132CDCA4-E2E0-4D4F-A131-3C8AF8E17A95}.Release|x86.Build.0 = Release|Any CPU
-		{487F9345-4C74-4258-854F-45DFF0DF2473}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{487F9345-4C74-4258-854F-45DFF0DF2473}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{487F9345-4C74-4258-854F-45DFF0DF2473}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{487F9345-4C74-4258-854F-45DFF0DF2473}.Debug|x64.Build.0 = Debug|Any CPU
-		{487F9345-4C74-4258-854F-45DFF0DF2473}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{487F9345-4C74-4258-854F-45DFF0DF2473}.Debug|x86.Build.0 = Debug|Any CPU
-		{487F9345-4C74-4258-854F-45DFF0DF2473}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{487F9345-4C74-4258-854F-45DFF0DF2473}.Release|Any CPU.Build.0 = Release|Any CPU
-		{487F9345-4C74-4258-854F-45DFF0DF2473}.Release|x64.ActiveCfg = Release|Any CPU
-		{487F9345-4C74-4258-854F-45DFF0DF2473}.Release|x64.Build.0 = Release|Any CPU
-		{487F9345-4C74-4258-854F-45DFF0DF2473}.Release|x86.ActiveCfg = Release|Any CPU
-		{487F9345-4C74-4258-854F-45DFF0DF2473}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

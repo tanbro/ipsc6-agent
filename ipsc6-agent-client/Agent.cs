@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 using org.pjsip.pjsua2;
@@ -79,9 +78,10 @@ namespace ipsc6.agent.client
             }
         }
 
-        static Endpoint endpoint;
-        static TaskScheduler syncContext;
-        static TaskFactory syncFactory;
+        internal static Endpoint SipEndpoint = null;
+        internal static TaskFactory SyncFactory = null;
+
+        internal Sip.Call currentCall = null;
 
         public static void Initial()
         {
@@ -90,26 +90,24 @@ namespace ipsc6.agent.client
             logger.Debug("network.Connector.Initial()");
             network.Connector.Initial();
 
-            syncContext = TaskScheduler.FromCurrentSynchronizationContext();
-            syncFactory = new TaskFactory(syncContext);
+            SyncFactory = new TaskFactory(TaskScheduler.FromCurrentSynchronizationContext());
 
             logger.Debug("create pjsua2 Endpoint");
-            var task = syncFactory.StartNew(() =>
+            SyncFactory.StartNew(() =>
             {
-                endpoint = new Endpoint();
-                endpoint.libCreate();
+                SipEndpoint = new Endpoint();
+                SipEndpoint.libCreate();
                 using (var epCfg = new EpConfig())
                 using (var sipTpConfig = new TransportConfig { port = 5060 })
                 {
                     //epCfg.logConfig.level = 3;
                     //epCfg.logConfig.msgLogging = 0;
                     //epCfg.logConfig.writer = SipLogWriter.Instance;
-                    endpoint.libInit(epCfg);
-                    endpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
-                    endpoint.libStart();
+                    SipEndpoint.libInit(epCfg);
+                    SipEndpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
                 }
-            });
-            task.Wait();
+                SipEndpoint.libStart();
+            }).Wait();
         }
 
         public static void Release()
@@ -120,8 +118,8 @@ namespace ipsc6.agent.client
             network.Connector.Release();
 
             logger.Debug("destory pjsua2 Endpoint");
-            endpoint.libDestroy();
-            endpoint.Dispose();
+            SipEndpoint.libDestroy();
+            SipEndpoint.Dispose();
         }
 
         private AgentRunningState runningState = AgentRunningState.Stopped;
@@ -387,17 +385,17 @@ namespace ipsc6.agent.client
         }
 
         public event SipRegistrarListReceivedEventHandler OnSipRegistrarListReceived;
-        private void DoOnSipRegistrarList(ConnectionInfo _, ServerSentMessage msg)
+        private void DoOnSipRegistrarList(ConnectionInfo connectionInfo, ServerSentMessage msg)
         {
+            var connectionIndex = GetConnetionIndex(connectionInfo);
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var val = msg.S.Split(Constants.VerticalBarDelimiter);
             var evt = new SipRegistrarListReceivedEventArgs(val);
 
-            var task = syncFactory.StartNew(() =>
+            SyncFactory.StartNew(() =>
             {
                 lock (this)
                 {
-
                     foreach (var addr in evt.Value)
                     {
                         var uri = string.Format("sip:{0}@{1}", workerNumber, addr);
@@ -412,10 +410,13 @@ namespace ipsc6.agent.client
                             using (var sipAuthCred = new AuthCredInfo("digest", "*", workerNumber, 0, "hesong"))
                             using (var cfg = new AccountConfig { idUri = uri })
                             {
-                                cfg.regConfig.registrarUri = string.Format("sip:{0}", addr);
+                                cfg.regConfig.registrarUri = $"sip:{addr}";
                                 cfg.sipConfig.authCreds.Add(sipAuthCred);
                                 logger.DebugFormat("新建 SipAccount {0}", uri);
-                                var acc = new Sip.Account();
+                                var acc = new Sip.Account(connectionIndex);
+                                acc.OnIncomingCall += Acc_OnIncomingCall;
+                                acc.OnRegisterStateChanged += Acc_OnRegisterStateChanged;
+                                acc.OnCallDisconnected += Acc_OnCallDisconnected;
                                 acc.create(cfg);
                                 sipAccounts.Add(acc);
                             }
@@ -428,10 +429,39 @@ namespace ipsc6.agent.client
                         }
                     }
                 }
-            });
-            task.Wait();
+            }).Wait();
 
             OnSipRegistrarListReceived?.Invoke(this, evt);
+        }
+
+        private void Acc_OnCallDisconnected(object sender, EventArgs e)
+        {
+            logger.Debug("呼叫断开，清空 “当前呼叫” 变量");
+            currentCall = null;
+        }
+
+        private void Acc_OnRegisterStateChanged(object sender, EventArgs e)
+        {
+            logger.DebugFormat("Acc_OnRegisterStateChanged");
+        }
+
+        private void Acc_OnIncomingCall(object sender, Sip.IncomingCallEventArgs e)
+        {
+            var call = e.Call;
+            if (currentCall != null)
+            {
+                logger.WarnFormat("因为当前呼叫已经存在，所以拒绝新来的呼叫 {0} --> {1}", call.Account.getInfo().uri, call.getInfo().remoteUri);
+                using (var op = new CallOpParam
+                {
+                    statusCode = pjsip_status_code.PJSIP_SC_DECLINE
+                })
+                {
+                    call.hangup(op);
+                }
+                return;
+            }
+            logger.DebugFormat("设置 “当前呼叫” 变量为 {0} --> {1}", call.Account.getInfo().uri, call.getInfo().remoteUri);
+            currentCall = e.Call;
         }
 
         public event CustomStringReceivedEventArgsReceivedEventHandler OnCustomStringReceived;
@@ -977,14 +1007,46 @@ namespace ipsc6.agent.client
 
         public async Task HangUp(int agentId)
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEHANGUP, agentId);
-            await MainConnection.Request(req);
+            if (currentCall == null)
+            {
+                logger.Debug("HangUp - 请求服务端挂断");
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEHANGUP, agentId);
+                await MainConnection.Request(req);
+            }
+            else
+            {
+                logger.Debug("HangUp - 本地呼叫拆线");
+                await SyncFactory.StartNew(() =>
+                {
+                    var cop = new CallOpParam();
+                    currentCall.hangup(cop);
+                });
+            }
         }
+
+        bool isOffHookRequesting = false;
 
         public async Task OffHook()
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
-            await MainConnection.Request(req);
+            if (currentCall == null)
+            {
+                logger.Debug("OffHook - 请求服务端回呼");
+                isOffHookRequesting = true;
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
+                await MainConnection.Request(req);
+            }
+            else
+            {
+                logger.Debug("OffHook - 本地呼叫应答");
+                await SyncFactory.StartNew(() =>
+                {
+                    var cop = new CallOpParam
+                    {
+                        statusCode = pjsip_status_code.PJSIP_SC_OK
+                    };
+                    currentCall.answer(cop);
+                });
+            }
         }
 
         public async Task Interrupt(int agentId)
@@ -1071,7 +1133,6 @@ namespace ipsc6.agent.client
             await connObj.Request(req);
         }
 
-        //LimitedConcurrencyLevelTaskScheduler sipThreadScheduler = new LimitedConcurrencyLevelTaskScheduler();
         HashSet<Sip.Account> sipAccounts = new HashSet<Sip.Account>();
 
     }
