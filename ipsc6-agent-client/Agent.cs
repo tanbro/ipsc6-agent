@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+
+using org.pjsip.pjsua2;
 
 namespace ipsc6.agent.client
 {
@@ -36,11 +39,11 @@ namespace ipsc6.agent.client
 
         ~Agent()
         {
-            Dispose(false);
+            Dispose(disposing: false);
         }
 
         // Flag: Has Dispose already been called?
-        private bool disposed = false;
+        private bool disposedValue = false;
 
         public void Dispose()
         {
@@ -50,24 +53,75 @@ namespace ipsc6.agent.client
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!disposedValue)
             {
-                // Check to see if Dispose has already been called.
-                if (disposed)
+                if (disposing)
                 {
-                    logger.Error("Dispose has already been called.");
+                    // 释放托管状态(托管对象)
                 }
-                else
+                // 释放未托管的资源(未托管的对象)并重写终结器
+                // 将大型字段设置为 null
+                foreach (var sipAcc in sipAccounts)
                 {
-                    foreach (var conn in internalConnections)
-                    {
-                        logger.DebugFormat("Dispose {0}", conn);
-                        conn.Dispose();
-                    }
-                    // Note disposing has been done.
-                    disposed = true;
+                    logger.DebugFormat("Dispose {0}", sipAcc);
+                    sipAcc.Dispose();
                 }
+                sipAccounts.Clear();
+                //
+                foreach (var conn in internalConnections)
+                {
+                    logger.DebugFormat("Dispose {0}", conn);
+                    conn.Dispose();
+                }
+                internalConnections.Clear();
+                //
+                disposedValue = true;
             }
+        }
+
+        static Endpoint endpoint;
+        static TaskScheduler syncContext;
+        static TaskFactory syncFactory;
+
+        public static void Initial()
+        {
+            logger.Info("Initial");
+
+            logger.Debug("network.Connector.Initial()");
+            network.Connector.Initial();
+
+            syncContext = TaskScheduler.FromCurrentSynchronizationContext();
+            syncFactory = new TaskFactory(syncContext);
+
+            logger.Debug("create pjsua2 Endpoint");
+            var task = syncFactory.StartNew(() =>
+            {
+                endpoint = new Endpoint();
+                endpoint.libCreate();
+                using (var epCfg = new EpConfig())
+                using (var sipTpConfig = new TransportConfig { port = 5060 })
+                {
+                    //epCfg.logConfig.level = 3;
+                    //epCfg.logConfig.msgLogging = 0;
+                    //epCfg.logConfig.writer = SipLogWriter.Instance;
+                    endpoint.libInit(epCfg);
+                    endpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
+                    endpoint.libStart();
+                }
+            });
+            task.Wait();
+        }
+
+        public static void Release()
+        {
+            logger.Info("Release");
+
+            logger.Debug("network.Connector.Release()");
+            network.Connector.Release();
+
+            logger.Debug("destory pjsua2 Endpoint");
+            endpoint.libDestroy();
+            endpoint.Dispose();
         }
 
         private AgentRunningState runningState = AgentRunningState.Stopped;
@@ -338,6 +392,45 @@ namespace ipsc6.agent.client
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var val = msg.S.Split(Constants.VerticalBarDelimiter);
             var evt = new SipRegistrarListReceivedEventArgs(val);
+
+            var task = syncFactory.StartNew(() =>
+            {
+                lock (this)
+                {
+
+                    foreach (var addr in evt.Value)
+                    {
+                        var uri = string.Format("sip:{0}@{1}", workerNumber, addr);
+                        // 这个地址是不是已经注册了? 如果是的，重新注册一次！
+                        var existedAcc = (
+                            from acc in sipAccounts
+                            where acc.isValid() && acc.getInfo()?.uri == uri
+                            select acc
+                        ).FirstOrDefault();
+                        if (existedAcc == null)
+                        {
+                            using (var sipAuthCred = new AuthCredInfo("digest", "*", workerNumber, 0, "hesong"))
+                            using (var cfg = new AccountConfig { idUri = uri })
+                            {
+                                cfg.regConfig.registrarUri = string.Format("sip:{0}", addr);
+                                cfg.sipConfig.authCreds.Add(sipAuthCred);
+                                logger.DebugFormat("新建 SipAccount {0}", uri);
+                                var acc = new Sip.Account();
+                                acc.create(cfg);
+                                sipAccounts.Add(acc);
+                            }
+                        }
+                        else
+                        {
+                            // Re-Register
+                            logger.DebugFormat("重注册 SipAccount {0}", uri);
+                            existedAcc.setRegistration(true);
+                        }
+                    }
+                }
+            });
+            task.Wait();
+
             OnSipRegistrarListReceived?.Invoke(this, evt);
         }
 
@@ -977,6 +1070,9 @@ namespace ipsc6.agent.client
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKENAWAY);
             await connObj.Request(req);
         }
+
+        //LimitedConcurrencyLevelTaskScheduler sipThreadScheduler = new LimitedConcurrencyLevelTaskScheduler();
+        HashSet<Sip.Account> sipAccounts = new HashSet<Sip.Account>();
 
     }
 }

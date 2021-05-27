@@ -22,8 +22,8 @@ namespace ipsc6.agent.wpfapp
 
             try
             {
-                logger.Debug("network.Connector.Initial()");
-                network.Connector.Initial();
+                logger.Debug("client.Agent.Initial()");
+                client.Agent.Initial();
                 try
                 {
                     try
@@ -40,8 +40,8 @@ namespace ipsc6.agent.wpfapp
                 }
                 finally
                 {
-                    logger.Debug("network.Connector.Release()");
-                    network.Connector.Release();
+                    logger.Debug("client.Agent.Release()");
+                    client.Agent.Release();
                 }
 
             }

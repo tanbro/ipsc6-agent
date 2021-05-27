@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ipsc6.agent.network\ipsc6.agent.network.vcxproj" />
+    <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
   </ItemGroup>
 
   <Import Project="..\ipsc6-agent-client\ipsc6-agent-client.projitems" Label="Shared" />

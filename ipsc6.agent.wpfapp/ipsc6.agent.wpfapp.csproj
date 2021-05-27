@@ -314,10 +314,6 @@
       <Project>{62d33297-c37d-44a8-8a97-13425e0d54d5}</Project>
       <Name>ipsc6.agent.client.netframework</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ipsc6.agent.network.netframework\ipsc6.agent.network.netframework.vcxproj">
-      <Project>{f3a6ceaa-81ea-4f7e-978e-10639c21186b}</Project>
-      <Name>ipsc6.agent.network.netframework</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\64\people-plus.png" />

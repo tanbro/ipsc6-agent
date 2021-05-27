@@ -63,6 +63,10 @@
       <Project>{f3a6ceaa-81ea-4f7e-978e-10639c21186b}</Project>
       <Name>ipsc6.agent.network.netframework</Name>
     </ProjectReference>
+    <ProjectReference Include="..\org.pjsip.pjsua2.netframework\org.pjsip.pjsua2.netframework.csproj">
+      <Project>{56b2fbca-189d-403c-909e-b22093122e2c}</Project>
+      <Name>org.pjsip.pjsua2.netframework</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\ipsc6-agent-client\ipsc6-agent-client.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
