@@ -196,10 +196,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\hesong.lib.Log\hesong.lib.Log.csproj">
-      <Project>{87b12392-df10-40b8-a414-3669ccd99e4f}</Project>
-      <Name>hesong.lib.Log</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ipsc6.agent.client.netframework\ipsc6.agent.client.netframework.csproj">
       <Project>{62d33297-c37d-44a8-8a97-13425e0d54d5}</Project>
       <Name>ipsc6.agent.client.netframework</Name>

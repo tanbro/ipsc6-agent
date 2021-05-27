@@ -66,11 +66,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
         static bool CanSkillSignGroup(object _)
         {
             var agent = Enties.Cti.AgentController.Agent;
-
-            if (agent.RequestNotComplete)
-            {
-                return false;
-            }
             return true;
         }
         #endregion
@@ -109,10 +104,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
         static bool CanSetState(object _)
         {
             var agent = Enties.Cti.AgentController.Agent;
-            if (agent.RequestNotComplete)
-            {
-                return false;
-            }
             return true;
         }
         #endregion
