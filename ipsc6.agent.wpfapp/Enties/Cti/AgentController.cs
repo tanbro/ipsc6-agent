@@ -22,7 +22,14 @@ namespace ipsc6.agent.wpfapp.Enties.Cti
             Agent.OnAgentStateChanged += Agent_OnAgentStateChanged;
             Agent.OnGroupCollectionReceived += Agent_OnGroupCollectionReceived;
             Agent.OnSignedGroupsChanged += Agent_OnSignedGroupsChanged;
+            Agent.OnTeleStateChanged += Agent_OnTeleStateChanged;
             return Agent;
+        }
+
+        private static void Agent_OnTeleStateChanged(object sender, client.TeleStateChangedEventArgs e)
+        {
+            var model = Models.Cti.AgentBasicInfo.Instance;
+            model.TeleState = e.NewState;
         }
 
         private static void Agent_OnSignedGroupsChanged(object sender, EventArgs e)

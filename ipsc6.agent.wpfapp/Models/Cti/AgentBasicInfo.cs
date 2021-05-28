@@ -24,7 +24,7 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetField(ref displayName, value);
         }
 
-        AgentStateWorkType agentStateWorkType= new AgentStateWorkType(client.AgentState.OffLine, client.WorkType.Unknown);
+        AgentStateWorkType agentStateWorkType = new AgentStateWorkType(client.AgentState.OffLine, client.WorkType.Unknown);
         public AgentStateWorkType AgentStateWorkType
         {
             get => agentStateWorkType;
@@ -43,6 +43,13 @@ namespace ipsc6.agent.wpfapp.Models.Cti
         {
             get => stateOperationItems;
             set => SetField(ref stateOperationItems, value);
+        }
+
+        client.TeleState teleState = client.TeleState.HangUp;
+        public client.TeleState TeleState
+        {
+            get => teleState;
+            set => SetField(ref teleState, value);
         }
 
     }

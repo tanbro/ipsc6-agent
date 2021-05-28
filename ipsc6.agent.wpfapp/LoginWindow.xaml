@@ -34,7 +34,7 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Background="#FF5E91E4">
-            <Border CornerRadius="50" Background="White" Width="64" Height="64" VerticalAlignment="Top" HorizontalAlignment="Center"  Margin="0 16 0 0">
+            <Border CornerRadius="32" Background="White" Width="64" Height="64" VerticalAlignment="Top" HorizontalAlignment="Center"  Margin="0 8 0 0">
                 <Canvas Name="svg2" Width="50" Height="50">
                     <Canvas.RenderTransform>
                         <TranslateTransform X="0" Y="-1.6544224"/>

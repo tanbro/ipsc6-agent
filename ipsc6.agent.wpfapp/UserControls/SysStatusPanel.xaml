@@ -23,7 +23,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column="0"
-                            CornerRadius="50"
+                            CornerRadius="12"
                             Width="24" Height="24"
                             Background="Green"/>
                 <TextBlock Grid.Column="1"
@@ -38,12 +38,13 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <ContentControl
+                    Grid.Column="0"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     Foreground="DeepSkyBlue">
                     <iconPacks:BootstrapIcons Height="24" Width="24"
                                               Kind="TelephoneFill"
                                               />
-                </ContentControl>                
+                </ContentControl>
                 <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
                     摘机
                 </TextBlock>

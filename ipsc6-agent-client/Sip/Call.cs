@@ -14,28 +14,38 @@ namespace ipsc6.agent.client.Sip
         public Call(org.pjsip.pjsua2.Account acc) : base(acc)
         {
             Account = acc as Account;
+            MakeString();
         }
 
         public Call(org.pjsip.pjsua2.Account acc, int call_id) : base(acc, call_id)
         {
             Account = acc as Account;
+            MakeString();
+        }
+
+        string _string = null;
+        string MakeString()
+        {
+            var info = getInfo();
+            _string = $"<{GetType().Name}@{GetHashCode():x8} Id={info.id}, Account={Account}, RemoteUri={info.remoteUri}, State={info.state}>";
+            return _string;
         }
 
         public override void onCallState(org.pjsip.pjsua2.OnCallStateParam param)
         {
-            var callInfo = getInfo();
-            var accInfo = Account.getInfo();
-            logger.DebugFormat("{0} --> {1}: {2} ", callInfo.remoteUri, accInfo.uri, callInfo.state);
+            logger.DebugFormat("CallState - {0} : {1}", this, param.e.type);
 
+            MakeString();
+            var callInfo = getInfo();
             switch (callInfo.state)
             {
                 case org.pjsip.pjsua2.pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED:
                     // /* Schedule/Dispatch call deletion to another thread here */
-                    Agent.SyncFactory.StartNew(() =>
+                    Task.Run(() =>
                     {
                         OnCallDisconnected?.Invoke(this, new EventArgs());
                         Dispose();
-                    }).Wait();
+                    });
                     break;
                 default:
                     break;
@@ -80,5 +90,10 @@ namespace ipsc6.agent.client.Sip
         }
 
         public event CallDisconnectedEventHandler OnCallDisconnected;
+
+        public override string ToString()
+        {
+            return string.IsNullOrEmpty(_string) ? base.ToString() : _string;
+        }
     }
 }

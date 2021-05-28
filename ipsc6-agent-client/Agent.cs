@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using org.pjsip.pjsua2;
@@ -92,9 +93,10 @@ namespace ipsc6.agent.client
 
             SyncFactory = new TaskFactory(TaskScheduler.FromCurrentSynchronizationContext());
 
-            logger.Debug("create pjsua2 Endpoint");
+            logger.Debug("initial pjsua2");
             SyncFactory.StartNew(() =>
             {
+                logger.Debug("create pjsua2 endpoint");
                 SipEndpoint = new Endpoint();
                 SipEndpoint.libCreate();
                 using (var epCfg = new EpConfig())
@@ -104,8 +106,15 @@ namespace ipsc6.agent.client
                     //epCfg.logConfig.msgLogging = 0;
                     //epCfg.logConfig.writer = SipLogWriter.Instance;
                     SipEndpoint.libInit(epCfg);
+                    //if (!SipEndpoint.libIsThreadRegistered())
+                    //{
+                    //    logger.Debug("pjsua2 endpoint registers thread");
+                    //    SipEndpoint.libRegisterThread(Thread.CurrentThread.Name);
+                    //}
+                    logger.Debug("pjsua2 endpoint creates transport");
                     SipEndpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
                 }
+                logger.Debug("pjsua2 endpoint starts");
                 SipEndpoint.libStart();
             }).Wait();
         }
@@ -222,12 +231,24 @@ namespace ipsc6.agent.client
         void ProcessStateChangedMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             AgentState[] workingState = { AgentState.Ring, AgentState.Work };
+            AgentStateWorkType newState;
+            var newWorkType = (WorkType)msg.N2;
+            if (newWorkType == WorkType.Offhooked)
+            {
+                // 特殊处理，不改变 WorkType!
+                newState = new AgentStateWorkType((AgentState)msg.N1, AgentStateWorkType.WorkType);
+            }
+            else
+            {
+                newState = new AgentStateWorkType((AgentState)msg.N1, (WorkType)msg.N2);
+            }
+            logger.DebugFormat("StateChanged - {0}", newState);
             var currIndex = connectionList.FindIndex(ci => ci == connInfo);
-            var newState = new AgentStateWorkType((AgentState)msg.N1, (WorkType)msg.N2);
             AgentStateWorkType oldState = null;
             Connection oldMainConnObj = null;
             lock (this)
             {
+                isOffHookRequesting = false;  // 请求服务器摘机的过程结束
                 if (AgentStateWorkType != newState)
                 {
                     oldState = AgentStateWorkType.Clone() as AgentStateWorkType;
@@ -264,6 +285,7 @@ namespace ipsc6.agent.client
         {
             TeleState oldState;
             TeleState newState = (TeleState)msg.N1;
+            logger.DebugFormat("TeleStateChanged - {0} --> {1}", teleState, newState);
             TeleStateChangedEventArgs ev = null;
             lock (this)
             {
@@ -372,11 +394,11 @@ namespace ipsc6.agent.client
                     var groupObj = groupCollection.FirstOrDefault(m => m.Id == id);
                     if (groupObj == null)
                     {
-                        logger.ErrorFormat("DoOnSignedGroupIdList - 技能组 <id=\"{0})\"> 不存在", id);
+                        logger.ErrorFormat("DoOnSignedGroupIdList - 技能组 <id=\"{0}\"> 不存在", id);
                     }
                     else
                     {
-                        logger.DebugFormat("DoOnSignedGroupIdList - 技能组 <id=\"{0})\" signed={1}>", id, signed);
+                        logger.DebugFormat("DoOnSignedGroupIdList - 技能组 <id=\"{0}\" signed={1}>", id, signed);
                         groupObj.Signed = signed;
                     }
                 }
@@ -398,15 +420,17 @@ namespace ipsc6.agent.client
                 {
                     foreach (var addr in evt.Value)
                     {
+                        logger.DebugFormat("处理 SipAccount 地址 {0} ...", addr);
                         var uri = string.Format("sip:{0}@{1}", workerNumber, addr);
                         // 这个地址是不是已经注册了? 如果是的，重新注册一次！
                         var existedAcc = (
                             from acc in sipAccounts
-                            where acc.isValid() && acc.getInfo()?.uri == uri
+                            where acc.isValid() && acc.getInfo().regIsConfigured && acc.getInfo()?.uri == uri
                             select acc
                         ).FirstOrDefault();
                         if (existedAcc == null)
                         {
+                            logger.DebugFormat("未找到 SipAccount 帐户 {0}，准备新建 ...", uri);
                             using (var sipAuthCred = new AuthCredInfo("digest", "*", workerNumber, 0, "hesong"))
                             using (var cfg = new AccountConfig { idUri = uri })
                             {
@@ -450,18 +474,35 @@ namespace ipsc6.agent.client
             var call = e.Call;
             if (currentCall != null)
             {
-                logger.WarnFormat("因为当前呼叫已经存在，所以拒绝新来的呼叫 {0} --> {1}", call.Account.getInfo().uri, call.getInfo().remoteUri);
-                using (var op = new CallOpParam
+                logger.WarnFormat("新来的呼叫 - 因为当前呼叫已经存在，所以拒绝新来的呼叫 {0}", call);
+                SyncFactory.StartNew(() =>
                 {
-                    statusCode = pjsip_status_code.PJSIP_SC_DECLINE
-                })
-                {
-                    call.hangup(op);
-                }
+                    using (var op = new CallOpParam
+                    {
+                        statusCode = pjsip_status_code.PJSIP_SC_DECLINE
+                    })
+                    {
+                        call.hangup(op);
+                    }
+                });
                 return;
             }
-            logger.DebugFormat("设置 “当前呼叫” 变量为 {0} --> {1}", call.Account.getInfo().uri, call.getInfo().remoteUri);
+            logger.DebugFormat("新来的呼叫 - 设置当前呼叫为 {0}", call);
             currentCall = e.Call;
+            if (isOffHookRequesting)
+            {
+                logger.DebugFormat("新来的呼叫 - IsOffHookRequesting is true, 主动应答 {0}", call);
+                SyncFactory.StartNew(() =>
+                {
+                    using (var cop = new CallOpParam
+                    {
+                        statusCode = pjsip_status_code.PJSIP_SC_OK
+                    })
+                    {
+                        currentCall.answer(cop);
+                    }
+                });
+            }
         }
 
         public event CustomStringReceivedEventArgsReceivedEventHandler OnCustomStringReceived;
@@ -485,16 +526,21 @@ namespace ipsc6.agent.client
         public event RingInfoReceivedEventHandler OnRingInfoReceived;
         private void DoOnRing(ConnectionInfo connInfo, ServerSentMessage msg)
         {
+            logger.DebugFormat("OnRing - [{0}]({1})", msg.N2, msg.S);
+            var _workChInfo = new WorkingChannelInfo(msg.N2);
             var _ringInfo = new RingInfo(connInfo, msg.N2, msg.S);
-            var _workChInfo = new WorkingChannelInfo(_ringInfo.WorkingChannel);
-            var e1 = new WorkingChannelInfoReceivedEventArgs(connInfo, _workChInfo);
-            var e2 = new RingInfoReceivedEventArgs(connInfo, _ringInfo);
             lock (this)
             {
                 workingChannelInfo = _workChInfo;
                 ringInfo = _ringInfo;
-                OnWorkingChannelInfoReceived?.Invoke(this, e1);
-                OnRingInfoReceived?.Invoke(this, e2);
+            }
+            {
+                var e = new WorkingChannelInfoReceivedEventArgs(connInfo, _workChInfo);
+                OnWorkingChannelInfoReceived?.Invoke(this, e);
+            }
+            {
+                var e = new RingInfoReceivedEventArgs(connInfo, _ringInfo);
+                OnRingInfoReceived?.Invoke(this, e);
             }
         }
 
@@ -1018,13 +1064,13 @@ namespace ipsc6.agent.client
                 logger.Debug("HangUp - 本地呼叫拆线");
                 await SyncFactory.StartNew(() =>
                 {
-                    var cop = new CallOpParam();
-                    currentCall.hangup(cop);
+                    SipEndpoint.hangupAllCalls();
                 });
             }
         }
 
-        bool isOffHookRequesting = false;
+        private bool isOffHookRequesting = false;
+        public bool IsOffHookRequesting => isOffHookRequesting;
 
         public async Task OffHook()
         {
@@ -1032,8 +1078,16 @@ namespace ipsc6.agent.client
             {
                 logger.Debug("OffHook - 请求服务端回呼");
                 isOffHookRequesting = true;
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
-                await MainConnection.Request(req);
+                try
+                {
+                    var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
+                    await MainConnection.Request(req);
+                }
+                catch
+                {
+                    isOffHookRequesting = false;
+                    throw;
+                }
             }
             else
             {

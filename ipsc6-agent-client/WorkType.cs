@@ -20,5 +20,9 @@ namespace ipsc6.agent.client
         PauseSnooze = 15,
         PauseDinner = 16,
         PauseTrain = 17,
+        /// <summary>
+        /// 在客户端主动请求“摘机”（服务器发起对客户端的呼叫）后，该呼叫被接通
+        /// </summary>
+        Offhooked = 20,
     }
 }
