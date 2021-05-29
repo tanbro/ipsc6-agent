@@ -1,0 +1,37 @@
+site_name: IPSC 座席客户端开发人员指南
+
+nav:
+    - index.md
+    - quick-start.md
+    - install.md
+    - config.md
+
+use_directory_urls: false
+
+theme:
+    name: material
+    language: zh
+    font: false
+    features:
+        - navigation.top
+
+markdown_extensions:
+    # Officially Supported Extensions
+    - abbr:
+    - admonition:
+    - attr_list:
+    - codehilite:
+        guess_lang: false
+        linenums: false
+    - def_list:
+    - footnotes:
+    - meta:
+    - sane_lists:
+    - smarty:
+    - toc:
+        permalink: true
+        slugify: !!python/name:pymdownx.slugs.uslugify
+    # 3rd extensions
+    - plantuml_markdown:
+        # server: http://www.plantuml.com/plantuml
+        format: svg
