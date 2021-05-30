@@ -5,15 +5,70 @@ nav:
     - quick-start.md
     - install.md
     - config.md
+    - startup.md
+
+    - API 参考:
+        - api/index.md
+
+        - api/auth.md
+
+        - 方法:
+            - 基本方法:
+                - api/methods/basic/login.md
+                - api/methods/basic/logout.md
+                - api/methods/basic/signin.md
+                - api/methods/basic/signout.md
+                - api/methods/basic/set_status.md
+
+            - 软电话:
+                - api/methods/phone/onhook.md
+                - api/methods/phone/offhook.md
+
+            - 呼叫:
+                - api/methods/call/dial.md
+                - api/methods/call/call_agent.md
+                - api/methods/call/hold.md
+                - api/methods/call/unhold.md
+
+            - 多方:
+                - api/methods/multiparts/xfer.md
+                - api/methods/multiparts/consult.md
+
+            - 管理:
+                - api/methods/manage/monitor.md
+                - api/methods/manage/intercept.md
+                - api/methods/manage/break.md
+                - api/methods/manage/block.md
+                - api/methods/manage/kick.md
+
+        - 事件:
+            - api/events/agent_status_changed.md
+            - api/events/client_connection_state_changed.md
+            - api/events/sip_register_state_changed.md
+            - api/events/ring_received.md
+
+        - 对象:
+            - api/objects/skill_group.md
+            - api/objects/call.md
+            - api/objects/queue.md
+            - api/objects/agent.md
+
+        - 枚举:
+            - api/enums/agent_status.md
+
 
 use_directory_urls: false
+
+plugins:
+    - search
 
 theme:
     name: material
     language: zh
     font: false
     features:
-        - navigation.top
+        - navigation.tabs
+        - navigation.sections: false
 
 markdown_extensions:
     # Officially Supported Extensions
@@ -21,17 +76,16 @@ markdown_extensions:
     - admonition:
     - attr_list:
     - codehilite:
-        guess_lang: false
-        linenums: false
+          guess_lang: false
+          linenums: false
     - def_list:
     - footnotes:
     - meta:
     - sane_lists:
     - smarty:
     - toc:
-        permalink: true
-        slugify: !!python/name:pymdownx.slugs.uslugify
+          slugify: !!python/name:pymdownx.slugs.uslugify
     # 3rd extensions
     - plantuml_markdown:
-        # server: http://www.plantuml.com/plantuml
-        format: svg
+          # server: http://www.plantuml.com/plantuml
+          format: svg
