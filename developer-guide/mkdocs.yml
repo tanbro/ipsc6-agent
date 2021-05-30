@@ -57,7 +57,7 @@ nav:
             - api/enums/agent_status.md
 
 
-use_directory_urls: false
+# use_directory_urls: false
 
 plugins:
     - search
@@ -68,6 +68,7 @@ theme:
     font: false
     features:
         - navigation.tabs
+        - navigation.top
         - navigation.sections: false
 
 markdown_extensions:
@@ -83,8 +84,6 @@ markdown_extensions:
     - meta:
     - sane_lists:
     - smarty:
-    - toc:
-          slugify: !!python/name:pymdownx.slugs.uslugify
     # 3rd extensions
     - plantuml_markdown:
           # server: http://www.plantuml.com/plantuml
