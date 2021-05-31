@@ -21,7 +21,15 @@ eg:
 
 如何浏览器启动
 
-如下:
+{>>
+
+TODO: 详细说明修改 windows 注册表配置浏览器打开的方法
+
+think: 这个功能似乎不太好，也不必要。
+
+<<}
+
+eg:
 
 ```Registry
 [HKEY_CURRENT_USER\Software\Classes\mycustproto]
