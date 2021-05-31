@@ -1,12 +1,18 @@
 # JSONRPC
 
-座席程序的接口采用 RPC 方式，它的大体上遵照 [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) 的定义[^1]。
+座席程序的接口采用 RPC 方式，大体上遵照 [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) 的定义[^1]。
 
 在本文的后续部分，我们将使用类似面向过程语言的函数定义形式，说明 API 接口。
 
 本节针对各种常见的调用方式作出说明，更多信息请参考 <https://www.jsonrpc.org/specification> 。
 
-## 方法调用例1
+## 举例说明
+
+### 修改坐席状态
+
+### 接收振铃事件
+
+### 接听来电
 
 座席程序提供了方法 `OffHook`，这个方法常被称为“摘机”。在该座席的软电话振铃时，调用此方法可以进行呼叫应答。
 
@@ -65,7 +71,9 @@ socket.onopen = event => {
 {id: 1, result: null}
 ```
 
-## 事件通知
+## 综合起来
+
+用时序图图表示:
 
 bla bla ...
 

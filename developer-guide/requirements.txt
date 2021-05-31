@@ -3,3 +3,4 @@ mkdocs-material
 pygments
 pymdown-extensions
 plantuml-markdown
+mkdocs-with-pdf

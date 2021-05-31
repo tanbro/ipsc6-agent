@@ -1,6 +1,9 @@
 site_name: IPSC 座席客户端开发人员指南
+site_author: 刘雪彦
+copyright: 广州市和声信息技术有限公司 © 2021
 
 docs_dir: src
+use_directory_urls: true
 
 nav:
     - index.md
@@ -61,10 +64,13 @@ nav:
             - docs/api/enums/agent_status.md
 
 
-# use_directory_urls: false
-
 plugins:
     - search
+    - with-pdf:
+        enabled_if_env: ENABLE_PDF_EXPORT
+        toc_title: 目录
+        cover_title: "IPSC 座席客户端"
+        cover_subtitle: "开发人员指南"
 
 theme:
     name: material
@@ -76,22 +82,16 @@ theme:
         - navigation.sections: false
 
 markdown_extensions:
-    # mkdocs-material Extensions
+    # pymdownx Extensions
+    - pymdownx.extra
     - pymdownx.highlight
-    - pymdownx.superfences
+    - pymdownx.saneheaders
+    - pymdownx.smartsymbols
     # Officially Supported Extensions
-    - abbr:
     - admonition:
-    - attr_list:
-    - codehilite:
-          guess_lang: false
-          linenums: false
-    - def_list:
-    - footnotes:
     - meta:
     - sane_lists:
-    - smarty:
+    # - smarty:
     # 3rd extensions
     - plantuml_markdown:
           # server: http://www.plantuml.com/plantuml
-          format: png
