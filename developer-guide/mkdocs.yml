@@ -15,7 +15,7 @@ nav:
     - API 参考:
         - JSONRPC over WebSocket:
             - docs/api/jsonrpc_websocket/jsonrpc.md
-            - docs/api/jsonrpc_websocket/websocket.md
+            - docs/api/jsonrpc_websocket/csp.md
 
         - 方法:
             - 基础方法:
