@@ -67,7 +67,7 @@ socket.onopen = event => {
 
 如果执行成功，我们可以在浏览器的控制台观察到输出
 
-```json
+```javascript
 {id: 1, result: null}
 ```
 
@@ -80,6 +80,6 @@ bla bla ...
 [^1]: 座席程序的RPC接口基本支持常见的 [JSONRPC][] 使用方式，但是有所限制:
 
       - 不支持 [`Batch`](https://www.jsonrpc.org/specification#batch) 方式
-      - 在 RPC 请求执行完成之前，不接受新的 RPC 请求
+      - 在一个 RPC 完成之前，不接受新的请求
 
 [JSONRPC]: https://www.jsonrpc.org/specification

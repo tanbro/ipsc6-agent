@@ -23,6 +23,6 @@ namespace ipsc6.agent.client
         /// <summary>
         /// 在客户端主动请求“摘机”（服务器发起对客户端的呼叫）后，该呼叫被接通
         /// </summary>
-        Offhooked = 20,
+        OffHooked = 20,
     }
 }

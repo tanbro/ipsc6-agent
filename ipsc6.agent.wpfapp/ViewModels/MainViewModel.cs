@@ -131,7 +131,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             logger.DebugFormat("挂机");
             var agent = Enties.Cti.AgentController.Agent;
-            await agent.HangUp();
+            await agent.OnHook();
         }
 
         static bool CanHangup(object _) => true;

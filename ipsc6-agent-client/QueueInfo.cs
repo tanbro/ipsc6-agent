@@ -14,7 +14,7 @@ namespace ipsc6.agent.client
         public QueueEventType EventType { get; }
         public string SessionId { get; }
         public string CallingNo { get; }
-        public string Username { get; }
+        public string WorkerNum { get; }
         public string CustomeString { get; }
         private readonly HashSet<AgentGroup> groups = new HashSet<AgentGroup>();
         public IReadOnlyCollection<AgentGroup> Groups => groups;
@@ -24,7 +24,7 @@ namespace ipsc6.agent.client
             Channel = msg.N1;
             Type = (QueueInfoType)msg.N2;
             var parts = msg.S.Split(Constants.SemicolonBarDelimiter);
-            foreach (var part in parts.Select((str, index) => new { str, index }))
+            foreach (var part in parts.Select((str, index) => (str, index)))
             {
                 switch (part.index)
                 {
@@ -48,7 +48,7 @@ namespace ipsc6.agent.client
                         Id = part.str;
                         break;
                     case 4:
-                        Username = part.str;
+                        WorkerNum = part.str;
                         break;
                     case 5:
                         CallingNo = part.str;

@@ -17,52 +17,50 @@ nav:
             - docs/api/jsonrpc_websocket/jsonrpc.md
             - docs/api/jsonrpc_websocket/websocket.md
 
-        - docs/api/auth.md
-
         - 方法:
-            - 基本方法:
-                - docs/api/methods/basic/login.md
-                - docs/api/methods/basic/logout.md
-                - docs/api/methods/basic/signin.md
-                - docs/api/methods/basic/signout.md
-                - docs/api/methods/basic/set_status.md
+            - 基础方法:
+                - docs/api/methods/basic/log_in_out.md
+                - docs/api/methods/basic/agent_status.md
+                - docs/api/methods/basic/skill_groups.md
+                - docs/api/methods/basic/connect_state.md
 
-            - 软电话:
-                - docs/api/methods/phone/onhook.md
-                - docs/api/methods/phone/offhook.md
+            - docs/api/methods/phone.md
 
             - 呼叫:
+                - docs/api/methods/call/current_call.md
                 - docs/api/methods/call/dial.md
                 - docs/api/methods/call/call_agent.md
                 - docs/api/methods/call/hold.md
-                - docs/api/methods/call/unhold.md
+                - docs/api/methods/call/xfer.md
 
-            - 多方:
-                - docs/api/methods/multiparts/xfer.md
-                - docs/api/methods/multiparts/consult.md
+            - docs/api/methods/queue.md
 
-            - 管理:
-                - docs/api/methods/manage/monitor.md
-                - docs/api/methods/manage/intercept.md
-                - docs/api/methods/manage/break.md
-                - docs/api/methods/manage/block.md
-                - docs/api/methods/manage/kick.md
+            - docs/api/methods/call_manage.md
+
+            - docs/api/methods/manage.md
 
         - 事件:
-            - docs/api/events/agent_status_changed.md
             - docs/api/events/client_connection_state_changed.md
+            - docs/api/events/agent_status_changed.md
             - docs/api/events/sip_register_state_changed.md
             - docs/api/events/ring_received.md
+            - docs/api/events/skill_groups_changed.md
+            - docs/api/events/hold_list_changed.md
 
         - 对象:
             - docs/api/objects/skill_group.md
             - docs/api/objects/call.md
-            - docs/api/objects/queue.md
             - docs/api/objects/agent.md
+            - docs/api/objects/ring_info.md
+            - docs/api/objects/phone_account_info.md
+            - docs/api/objects/hold_info.md
+            - docs/api/objects/queue_info.md
 
         - 枚举:
-            - docs/api/enums/agent_status.md
-
+            - docs/api/enums/agent_state.md
+            - docs/api/enums/agent_work_type.md
+            - docs/api/enums/client_connect_state.md
+            - docs/api/enums/queue_type.md
 
 plugins:
     - search
@@ -87,11 +85,21 @@ markdown_extensions:
     - pymdownx.highlight
     - pymdownx.saneheaders
     - pymdownx.smartsymbols
+    - pymdownx.critic:
+        mode: view
+    - pymdownx.snippets
+    - pymdownx.caret
+    - pymdownx.mark
+    - pymdownx.tilde
+    - pymdownx.smartsymbols
     # Officially Supported Extensions
     - admonition:
     - meta:
-    - sane_lists:
+    # - sane_lists:
     # - smarty:
+    - toc:
+        permalink: true
+        slugify: !!python/name:pymdownx.slugs.uslugify
     # 3rd extensions
     - plantuml_markdown:
           # server: http://www.plantuml.com/plantuml

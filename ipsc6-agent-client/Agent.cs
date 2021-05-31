@@ -233,7 +233,7 @@ namespace ipsc6.agent.client
             AgentState[] workingState = { AgentState.Ring, AgentState.Work };
             AgentStateWorkType newState;
             var newWorkType = (WorkType)msg.N2;
-            if (newWorkType == WorkType.Offhooked)
+            if (newWorkType == WorkType.OffHooked)
             {
                 // 特殊处理，不改变 WorkType!
                 newState = new AgentStateWorkType((AgentState)msg.N1, AgentStateWorkType.WorkType);
@@ -1045,23 +1045,23 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task HangUp()
+        public async Task OnHook()
         {
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HANGUP);
             await MainConnection.Request(req);
         }
 
-        public async Task HangUp(int agentId)
+        public async Task OnHook(int agentId)
         {
             if (currentCall == null)
             {
-                logger.Debug("HangUp - 请求服务端挂断");
+                logger.Debug("OnHook - 请求服务端挂断");
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEHANGUP, agentId);
                 await MainConnection.Request(req);
             }
             else
             {
-                logger.Debug("HangUp - 本地呼叫拆线");
+                logger.Debug("OnHook - 本地呼叫拆线");
                 await SyncFactory.StartNew(() =>
                 {
                     SipEndpoint.hangupAllCalls();
