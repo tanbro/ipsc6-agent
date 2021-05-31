@@ -1,0 +1,97 @@
+site_name: IPSC 座席客户端开发人员指南
+
+docs_dir: src
+
+nav:
+    - index.md
+    - docs/quick-start.md
+    - docs/install.md
+    - docs/config.md
+    - docs/startup.md
+
+    - API 参考:
+        - JSONRPC over WebSocket:
+            - docs/api/jsonrpc_websocket/jsonrpc.md
+            - docs/api/jsonrpc_websocket/websocket.md
+
+        - docs/api/auth.md
+
+        - 方法:
+            - 基本方法:
+                - docs/api/methods/basic/login.md
+                - docs/api/methods/basic/logout.md
+                - docs/api/methods/basic/signin.md
+                - docs/api/methods/basic/signout.md
+                - docs/api/methods/basic/set_status.md
+
+            - 软电话:
+                - docs/api/methods/phone/onhook.md
+                - docs/api/methods/phone/offhook.md
+
+            - 呼叫:
+                - docs/api/methods/call/dial.md
+                - docs/api/methods/call/call_agent.md
+                - docs/api/methods/call/hold.md
+                - docs/api/methods/call/unhold.md
+
+            - 多方:
+                - docs/api/methods/multiparts/xfer.md
+                - docs/api/methods/multiparts/consult.md
+
+            - 管理:
+                - docs/api/methods/manage/monitor.md
+                - docs/api/methods/manage/intercept.md
+                - docs/api/methods/manage/break.md
+                - docs/api/methods/manage/block.md
+                - docs/api/methods/manage/kick.md
+
+        - 事件:
+            - docs/api/events/agent_status_changed.md
+            - docs/api/events/client_connection_state_changed.md
+            - docs/api/events/sip_register_state_changed.md
+            - docs/api/events/ring_received.md
+
+        - 对象:
+            - docs/api/objects/skill_group.md
+            - docs/api/objects/call.md
+            - docs/api/objects/queue.md
+            - docs/api/objects/agent.md
+
+        - 枚举:
+            - docs/api/enums/agent_status.md
+
+
+# use_directory_urls: false
+
+plugins:
+    - search
+
+theme:
+    name: material
+    language: zh
+    font: false
+    features:
+        - navigation.tabs
+        - navigation.top
+        - navigation.sections: false
+
+markdown_extensions:
+    # mkdocs-material Extensions
+    - pymdownx.highlight
+    - pymdownx.superfences
+    # Officially Supported Extensions
+    - abbr:
+    - admonition:
+    - attr_list:
+    - codehilite:
+          guess_lang: false
+          linenums: false
+    - def_list:
+    - footnotes:
+    - meta:
+    - sane_lists:
+    - smarty:
+    # 3rd extensions
+    - plantuml_markdown:
+          # server: http://www.plantuml.com/plantuml
+          format: png
