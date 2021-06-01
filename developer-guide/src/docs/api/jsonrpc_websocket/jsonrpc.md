@@ -6,107 +6,235 @@
 
 本节针对各种常见的调用方式作出说明，更多信息请参考 <https://www.jsonrpc.org/specification> 。
 
-## 举例说明
+## 方法调用举例
 
-{>>
+以登录方法举例：座席程序提供了方法 `logIn`，调用后将连接并登录到 CTI 服务器。
 
-TODO: 写一个一个从登录到接听的简单例子来说明问题
+- 在座席客户端程序中，这个 RPC 的实现可以用下面的伪代码表示：
 
-这一章的里面的 API 说明不够详细，还要大量补充 ...
+    ```ts
+    function logIn(workerNum: String, password: String): null {
+        // 连接 CTI 服务器 ...
+    }
+    ```
 
-<<}
+- 在本文档中，我们这样撰写 RPC 的说明:
 
-### 修改坐席状态
+    {>>
+    在 Method 标题下，记录方法的名称，和简要说明
 
-{>>
+    例如：
+    <<}
 
-TODO:
+    - **Method**: `logIn`
 
-<<}
+    {>>
+    在 Params 标题下，记录参数列表及其相关说明
 
-### 接收振铃事件
+    例如：
+    <<}
 
-{>>
+    - **Params**:
 
-TODO:
+        | Argument    | Data Type | Default | Description |
+        | ----------- | --------- | ------- | ----------- |
+        | `workerNum` | `String`  | -       | 登录工号    |
+        | `password`  | `String`  | -       | 登录密码    |
 
-<<}
+        请求部分的 JSON 的写法可以是以下例中的任一:
 
-### 接听来电
+        - 顺序参数写法(`params`是数组):
 
-{>>
+            ```json
+            {
+                "jsonrpc": "2.0",
+                "id": "<your-rpc-id>",
+                "method": "logIn",
+                "params": ["1000", "rx19fED*^&gbiqw2"]
+            }
+            ```
 
-TODO:
+        - 命名参数写法(`params`是对象):
 
-<<}
+            ```json
+            {
+                "jsonrpc": "2.0",
+                "id": "<your-rpc-id>",
+                "method": "logIn",
+                "params": {
+                    "workerNum": "1000",
+                    "password": "rx19fED*^&gbiqw2"
+                }
+            }
+            ```
 
+    {>>
+    在 Result 标题下，记录返回值及其相关说明
 
-座席程序提供了方法 `OffHook`，这个方法常被称为“摘机”。在该座席的软电话振铃时，调用此方法可以进行呼叫应答。
+    例如：
+    <<}
 
-这个方法没有参数，其请求部分的 JSON 的形态可以是以下例子中的任意一个:
+    - **Result**: `null`
 
-- 省略 `params` 属性:
+        没有返回值，但受限于 [JSONRPC][] 规定，此处统一返回 `null`。
 
-  ```json
-  {"jsonrpc": "2.0", "id": "value-of-the-id", "method": "offHook"}
-  ```
+        回复数据的 JSON 格式形如:
 
-- `params` 属性是空的数组:
+        ```json
+        { "jsonrpc": "2.0", "id": "<your-rpc-id>", "result": null }
+        ```
 
-  ```json
-  {"jsonrpc": "2.0", "id": "value-of-the-id", "method": "offHook", "params": []}
-  ```
+- 下面的时序图表现了调用 `logIn` 成功登录的情况:
 
-- `params` 属性是空的对象:
+    ```plantuml
+    @startuml
 
-  ```json
-  {"jsonrpc": "2.0", "id": "value-of-the-id", "method": "offHook", "params": {}}
-  ```
+    autonumber
 
-当座席收到这个请求时，如果执行成功，就会把响应数据发送给调用方。
-对于此例中的 `offHook`，这个方法没有返回值，返回的结果是 `null`。
+    activate 用户程序
+    用户程序 -> 坐席客户端: logIn
+    activate 坐席客户端
+    坐席客户端 -> CTI服务器: 建立连接
+    activate CTI服务器
+    CTI服务器 -> CTI服务器: 身份验证
+    return: 连接成功
+    return: null
+    deactivate 用户程序
 
-返回数据形如：
+    @enduml
+    ```
+
+- 建立 WebSocket 连接，调用登录方法，并输出返回结果的 HTML 代码片段如下:
+
+    ```html
+    <button id="btnLogIn">点击按钮登录</button>
+
+    <script>
+        // 全局 WebSocket 对象
+        const sock = new WebSocket("ws://localhost:9876/ws");
+
+        // 输出收到的 Response
+        sock.onmessage = (event) => {
+            let res = JSON.parse(event.data);
+            if ("result" in res) {
+                console.log("Invoke 成功");
+            } else if ("error" in res) {
+                console.error("Invoke 失败");
+            }
+        };
+
+        // 点击按钮登录
+        document.getElementById("btnLogIn").addEventListener("click", ()=>{
+            console.log("登录 ...");
+            socket.send(JSON.stringify({
+                jsonrpc: "2.0",
+                id: 1,
+                method: "logIn",
+                params: ["1001", "1001abcd"]
+            }));
+        });
+    </script>
+    ```
+
+## 事件通知举例
+
+我们以座席状态变化事件举例：当登录成功后，座席状态会发生变化，座席程序会把状态变化事件以 [JSONRPC][] 的形式通知给与它相连的 WebSocket 客户端。
+
+座席客户端发出的事件通知相当于反向的 RPC，且消息的 JSON 对象没有 `id` 属性，不需要回复。
+
+我们用类似方法调用文档的形式描述它:
+
+- **Method**: `onAgentStatusChanged`
+
+    登录、注销，签入、签出技能组，示闲、示忙，来电接听等操作均可导致座席状态的改变。
+
+    这个事件将会把新的状态作为参数送出。
+
+- **Params**:
+
+    |   Argument   |   Type    | Default |     Description      |
+    | ------------ | --------- | ------- | -------------------- |
+    | `agentState` | `Integer` | -       | [座席状态][] 枚举值 |
+    | `workType`   | `Integer` | -       | [工作类型][] 枚举值  |
+
+这个事件的 JSON 数据形如：
 
 ```json
-{"jsonrpc": "2.0", "id": "value-of-the-id", "result": null}
+{
+    "jsonrpc": "2.0",
+    "method": "onAgentStatusChanged",
+    "params": [0, 0]
+}
 ```
 
-如果在浏览器上访问进行这样的调用，可我可以这样编写 Javascript 代码:
+WebSocket 客户端不应回复这个通知消息。
 
-```js
-// 新建到座席程序的 WebSocket 连接.
-const socket = new WebSocket('ws://localhost:9876');
+登录时，一旦 `logIn` 调用成功， `onAgentStatusChanged` 事件就会被触发。
+这个过程可以用下面的时序图表示：
 
-// 输出收到的 JSONRPC Response
-socket.onmessage = event => {
-    console.log(event.data);
-};
+```plantuml
+@startuml
 
-// 连接成功后发送 JSONRPC Request
-socket.onopen = event => {
-    socket.send(JSON.stringify({
-        id: 1,
-        method: "offHook",
-    }));
-};
+autonumber
+
+activate 用户程序
+用户程序 -> 坐席客户端: logIn
+activate 坐席客户端
+坐席客户端 -> CTI服务器: 建立连接
+activate CTI服务器
+CTI服务器 -> CTI服务器: 身份验证
+return: 连接成功
+用户程序 <<-o 坐席客户端: onAgentStatusChanged
+return: null
+deactivate 用户程序
+
+@enduml
 ```
 
-如果执行成功，我们可以在浏览器的控制台观察到输出
+!!! note
+    `logIn` 的回复和 `onAgentStatusChanged` 事件通知**没有**时序性。
+    也就是说，它们之中，哪个消息先被收到是不确定的。
 
-```javascript
-{id: 1, result: null}
+现在，我们可以补充上一个小节的 HTML 代码片段，把这个事件的处理加上:
+
+```html
+<button id="btnLogIn">点击按钮登录</button>
+
+<script>
+    // 全局 WebSocket 对象
+    const sock = new WebSocket("ws://localhost:9876/ws");
+
+    // 输出收到的 Response
+    sock.onmessage = (event) => {
+        let res = JSON.parse(event.data);
+        if ("result" in res) {
+            console.log("Invoke 成功");
+        } else if ("error" in res) {
+            console.error("Invoke 失败");
+        } else if (("method" in res ) && !("id" in res)) {
+            console.log(`Event: ${res}`);
+        }
+    };
+
+    // 点击按钮登录
+    document.getElementById("btnLogIn").addEventListener("click", ()=>{
+        console.log("登录 ...");
+        socket.send(JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            method: "logIn",
+            params: ["1001", "1001abcd"]
+        }));
+    });
+</script>
 ```
 
-## 综合起来
+[^1]: 座席程序的 RPC 接口基本支持常见的 [JSONRPC][] 使用方式，但是有所限制:
 
-用时序图图表示:
+    -   不支持 [`Batch`](https://www.jsonrpc.org/specification#batch) 方式
+    -   在一个 RPC 完成之前，不接受新的请求
 
-bla bla ...
+[jsonrpc]: https://www.jsonrpc.org/specification
 
-[^1]: 座席程序的RPC接口基本支持常见的 [JSONRPC][] 使用方式，但是有所限制:
-
-      - 不支持 [`Batch`](https://www.jsonrpc.org/specification#batch) 方式
-      - 在一个 RPC 完成之前，不接受新的请求
-
-[JSONRPC]: https://www.jsonrpc.org/specification
+[座席状态]: ../enums/agent_state.md
+[工作类型]: ../enums/agent_work_type.md

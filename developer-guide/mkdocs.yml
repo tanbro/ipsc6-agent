@@ -15,7 +15,7 @@ nav:
     - API 参考:
         - JSONRPC over WebSocket:
             - docs/api/jsonrpc_websocket/jsonrpc.md
-            - docs/api/jsonrpc_websocket/csp.md
+            - docs/api/jsonrpc_websocket/minxed_content.md
 
         - 方法:
             - 基础方法:
@@ -103,3 +103,4 @@ markdown_extensions:
     # 3rd extensions
     - plantuml_markdown:
           # server: http://www.plantuml.com/plantuml
+          format: svg
