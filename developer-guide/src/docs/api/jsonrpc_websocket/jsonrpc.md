@@ -211,8 +211,9 @@ deactivate 用户程序
 ```
 
 !!! note
-`logIn` 的回复和 `onAgentStatusChanged` 事件通知**没有**时序性。
-也就是说，它们之中，哪个消息先被收到是不确定的。
+
+    `logIn` 的回复和 `onAgentStatusChanged` 事件通知**没有**时序性。
+    也就是说，它们之中，哪个消息先被收到是不确定的。
 
 现在，我们可以补充上一个小节的 HTML 代码片段，把这个事件的处理加上:
 
