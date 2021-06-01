@@ -1,48 +1,40 @@
 # 启动
 
-## 启动参数
+## 进程启动参数
 
-座席程序接受 `JSON` 格式的字符串作为参数。
-
-参数名与参数的定义与 [配置](config.md) 一节所述相同。
+座席程序的命令行参数与 [配置项列表](config.md#配置项列表) 中的相同。这些参数将覆盖配置文件中的设置。
 
 eg:
 
-```bat
-"C:\Program Files (x86)\hesong\ipsc6-agent\ipsc6.agent.wpfapp.exe" ^
-'{ ^
-    "ServerAddress": ["192.168.2.100", "192.168.2.200"], ^
-    "LocalSipPort": 5060, ^
-    "LocalWebServerPort": 9876 ^
-}'
+```powershell
+ipsc6.agent.wpfapp.exe -ServerAddress 192.168.2.107 -LocalWebServerPort 8080
 ```
 
 ## 从浏览器启动
 
-如何浏览器启动
-
-{>>
-
-TODO: 详细说明修改 windows 注册表配置浏览器打开的方法
-
-think: 这个功能似乎不太好，也不必要。
-
-<<}
-
-eg:
+座席客户端的安装程序在 Windows 注册表写入了如下的内容：
 
 ```Registry
-[HKEY_CURRENT_USER\Software\Classes\mycustproto]
+[HKEY_CLASSES_ROOT\ipsc6-agent-app]
 "URL Protocol"="\"\""
-@="\"URL:MyCustProto Protocol\""
+@="\"URL:ipsc6-agent-app Protocol\""
 
-[HKEY_CURRENT_USER\Software\Classes\mycustproto\DefaultIcon]
-@="\"mycustproto.exe,1\""
+[HKEY_CLASSES_ROOT\ipsc6-agent-app\shell]
 
-[HKEY_CURRENT_USER\Software\Classes\mycustproto\shell]
+[HKEY_CLASSES_ROOT\ipsc6-agent-app\shell\open]
 
-[HKEY_CURRENT_USER\Software\Classes\mycustproto\shell\open]
-
-[HKEY_CURRENT_USER\Software\Classes\mycustproto\shell\open\command]
-@="\"C:\\Program Files\\MyProgram\\myprogram.exe\" \"%1\""
+[HKEY_CLASSES_ROOT\ipsc6-agent-app\shell\open\command]
+@="\"C:\\Program Files(x86)\\HesongInfoTech\\ipsc6.agent.wpfapp\ipsc6.agent.wpfapp.exe\" \"%1\" \"%*\""
 ```
+
+这样就可以通过 `ipsc6-agent-app://` Protocol 启动程序。
+
+例如这样的超链接:
+
+```html
+<a href="ipsc6-agent-app:///">启动座席程序</a>
+```
+
+点击这个超链接后，座席程序将会启动。
+
+如果座席程序已经在运行，它将切换到前台显示。

@@ -8,17 +8,34 @@
 
 ## 方法调用举例
 
-以登录方法举例：座席程序提供了方法 `logIn`，调用后将连接并登录到 CTI 服务器。
+此处以登录方法为例：座席程序提供了方法 `logIn`，调用后将连接并登录到 CTI 服务器。
 
-- 在座席客户端程序中，这个 RPC 的实现可以用下面的伪代码表示：
+座席客户端程序中，这个 RPC 的实现可以用下面的伪代码表示：
 
-    ```ts
-    function logIn(workerNum: String, password: String): null {
-        // 连接 CTI 服务器 ...
-    }
-    ```
+```js
+function logIn(workerNum, password) {
+    console.log("开始连接服务器");
+    connectServer(getAddress(), workerNum, password)
+        .then(() => {
+            console.log("连接成功");
+            return {
+                id: getRpcId(),
+                result: null,
+            };
+        })
+        .catch((e) => {
+            console.error("连接失败");
+            return {
+                id: getRpcId(),
+                error: { code: e.code, message: e.message },
+            };
+        });
+}
+```
 
-- 在本文档中，我们这样撰写 RPC 的说明:
+座席收到 RPC 请求后，按照方法名调用内部的函数。如果执行成功，返回执行结果；如果失败；则返回失败数据。
+
+-   在本文档中，我们这样撰写 RPC 的说明:
 
     {>>
     在 Method 标题下，记录方法的名称，和简要说明
@@ -26,7 +43,7 @@
     例如：
     <<}
 
-    - **Method**: `logIn`
+    -   **Method**: `logIn`
 
     {>>
     在 Params 标题下，记录参数列表及其相关说明
@@ -34,7 +51,7 @@
     例如：
     <<}
 
-    - **Params**:
+    -   **Params**:
 
         | Argument    | Data Type | Default | Description |
         | ----------- | --------- | ------- | ----------- |
@@ -43,7 +60,7 @@
 
         请求部分的 JSON 的写法可以是以下例中的任一:
 
-        - 顺序参数写法(`params`是数组):
+        -   顺序参数写法(`params`是数组):
 
             ```json
             {
@@ -54,7 +71,7 @@
             }
             ```
 
-        - 命名参数写法(`params`是对象):
+        -   命名参数写法(`params`是对象):
 
             ```json
             {
@@ -74,7 +91,7 @@
     例如：
     <<}
 
-    - **Result**: `null`
+    -   **Result**: `null`
 
         没有返回值，但受限于 [JSONRPC][] 规定，此处统一返回 `null`。
 
@@ -84,7 +101,7 @@
         { "jsonrpc": "2.0", "id": "<your-rpc-id>", "result": null }
         ```
 
-- 下面的时序图表现了调用 `logIn` 成功登录的情况:
+-   下面的时序图表现了调用 `logIn` 成功登录的情况:
 
     ```plantuml
     @startuml
@@ -104,7 +121,7 @@
     @enduml
     ```
 
-- 建立 WebSocket 连接，调用登录方法，并输出返回结果的 HTML 代码片段如下:
+-   建立 WebSocket 连接，调用登录方法，并输出返回结果的 HTML 代码片段如下:
 
     ```html
     <button id="btnLogIn">点击按钮登录</button>
@@ -124,14 +141,16 @@
         };
 
         // 点击按钮登录
-        document.getElementById("btnLogIn").addEventListener("click", ()=>{
+        document.getElementById("btnLogIn").addEventListener("click", () => {
             console.log("登录 ...");
-            socket.send(JSON.stringify({
-                jsonrpc: "2.0",
-                id: 1,
-                method: "logIn",
-                params: ["1001", "1001abcd"]
-            }));
+            socket.send(
+                JSON.stringify({
+                    jsonrpc: "2.0",
+                    id: 1,
+                    method: "logIn",
+                    params: ["1001", "1001abcd"],
+                })
+            );
         });
     </script>
     ```
@@ -144,18 +163,18 @@
 
 我们用类似方法调用文档的形式描述它:
 
-- **Method**: `onAgentStatusChanged`
+-   **Method**: `onAgentStatusChanged`
 
     登录、注销，签入、签出技能组，示闲、示忙，来电接听等操作均可导致座席状态的改变。
 
     这个事件将会把新的状态作为参数送出。
 
-- **Params**:
+-   **Params**:
 
-    |   Argument   |   Type    | Default |     Description      |
-    | ------------ | --------- | ------- | -------------------- |
+    | Argument     | Type      | Default | Description         |
+    | ------------ | --------- | ------- | ------------------- |
     | `agentState` | `Integer` | -       | [座席状态][] 枚举值 |
-    | `workType`   | `Integer` | -       | [工作类型][] 枚举值  |
+    | `workType`   | `Integer` | -       | [工作类型][] 枚举值 |
 
 这个事件的 JSON 数据形如：
 
@@ -192,8 +211,8 @@ deactivate 用户程序
 ```
 
 !!! note
-    `logIn` 的回复和 `onAgentStatusChanged` 事件通知**没有**时序性。
-    也就是说，它们之中，哪个消息先被收到是不确定的。
+`logIn` 的回复和 `onAgentStatusChanged` 事件通知**没有**时序性。
+也就是说，它们之中，哪个消息先被收到是不确定的。
 
 现在，我们可以补充上一个小节的 HTML 代码片段，把这个事件的处理加上:
 
@@ -211,20 +230,22 @@ deactivate 用户程序
             console.log("Invoke 成功");
         } else if ("error" in res) {
             console.error("Invoke 失败");
-        } else if (("method" in res ) && !("id" in res)) {
+        } else if ("method" in res && !("id" in res)) {
             console.log(`Event: ${res}`);
         }
     };
 
     // 点击按钮登录
-    document.getElementById("btnLogIn").addEventListener("click", ()=>{
+    document.getElementById("btnLogIn").addEventListener("click", () => {
         console.log("登录 ...");
-        socket.send(JSON.stringify({
-            jsonrpc: "2.0",
-            id: 1,
-            method: "logIn",
-            params: ["1001", "1001abcd"]
-        }));
+        socket.send(
+            JSON.stringify({
+                jsonrpc: "2.0",
+                id: 1,
+                method: "logIn",
+                params: ["1001", "1001abcd"],
+            })
+        );
     });
 </script>
 ```
@@ -235,6 +256,5 @@ deactivate 用户程序
     -   在一个 RPC 完成之前，不接受新的请求
 
 [jsonrpc]: https://www.jsonrpc.org/specification
-
 [座席状态]: ../enums/agent_state.md
 [工作类型]: ../enums/agent_work_type.md

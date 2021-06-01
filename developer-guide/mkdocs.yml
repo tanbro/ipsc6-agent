@@ -7,7 +7,7 @@ use_directory_urls: true
 
 nav:
     - index.md
-    - docs/quick-start.md
+
     - docs/install.md
     - docs/config.md
     - docs/startup.md
@@ -78,6 +78,19 @@ theme:
         - navigation.tabs
         - navigation.top
         - navigation.sections: false
+    palette:
+        - media: "(prefers-color-scheme: light)"
+          scheme: default
+          toggle:
+            icon: material/lightbulb-outline
+            name: 切换到暗色模式
+        - media: "(prefers-color-scheme: dark)"
+          scheme: slate
+          primary: light blue
+          accent: light blue
+          toggle:
+            icon: material/lightbulb
+            name: 切换到亮色模式
 
 markdown_extensions:
     # pymdownx Extensions
@@ -102,5 +115,5 @@ markdown_extensions:
         slugify: !!python/name:pymdownx.slugs.uslugify
     # 3rd extensions
     - plantuml_markdown:
-          # server: http://www.plantuml.com/plantuml
+        #   server: http://www.plantuml.com/plantuml
           format: svg
