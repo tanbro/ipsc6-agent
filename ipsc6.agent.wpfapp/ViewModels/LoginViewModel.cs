@@ -62,14 +62,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
             {
                 var password = (parameter as PasswordBox).Password;
                 bool isOk = false;
-                var settings = Properties.Settings.Default;
 
-                char[] separator = { ';' };
-                var addresses = settings.CtiServerAddress.Split(separator);
+                logger.InfoFormat("登录开始: {0}", workerNum);
 
-                logger.InfoFormat("登录开始: {0}@{1}", workerNum, addresses);
-
-                var agent = Enties.Cti.AgentController.CreateAgent(addresses);
+                var agent = Enties.Cti.AgentController.CreateAgent();
                 try
                 {
                     await Enties.Cti.AgentController.StartupAgent(workerNum, password);
@@ -79,7 +75,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 catch (ConnectionException err)
                 {
                     Enties.Cti.AgentController.DisposeAgent();
-                    MessageBox.Show($"{err}", "登陆失败");
+                    MessageBox.Show(
+                        $"登录失败\r\n\r\n{err}",
+                        Application.Current.MainWindow.Title,
+                        MessageBoxButton.OK, MessageBoxImage.Error
+                    );
                 }
                 if (isOk)
                 {

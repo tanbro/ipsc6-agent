@@ -12,11 +12,11 @@ namespace ipsc6.agent.client
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Agent));
 
-        public Agent(IEnumerable<ConnectionInfo> connections)
+        public Agent(IEnumerable<ConnectionInfo> connections, ushort localPort = 0, string localAddress = "")
         {
             foreach (var m in connections)
             {
-                var conn = new Connection();
+                var conn = new Connection(localPort, localAddress);
                 conn.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
                 conn.OnServerSentEvent += Conn_OnServerSend;
                 internalConnections.Add(conn);
@@ -24,12 +24,12 @@ namespace ipsc6.agent.client
             }
         }
 
-        public Agent(IEnumerable<string> addresses)
+        public Agent(IEnumerable<string> addresses, ushort localPort = 0, string localAddress = "")
         {
             foreach (var s in addresses)
             {
                 var connInfo = new ConnectionInfo(s);
-                var conn = new Connection();
+                var conn = new Connection(localPort, localAddress);
                 conn.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
                 conn.OnServerSentEvent += Conn_OnServerSend;
                 internalConnections.Add(conn);

@@ -8,7 +8,17 @@ namespace ipsc6.agent.client
         public string Host { get; }
         public ushort Port { get; }
 
-        public ConnectionInfo(string host, ushort port = 0)
+        public ConnectionInfo(string address)
+        {
+            var parts = address.Split(new char[] { ':' }, 2);
+            Host = parts[0];
+            if (parts.Length > 1)
+            {
+                Port = Convert.ToUInt16(parts[1]);
+            }
+        }
+
+        public ConnectionInfo(string host, ushort port)
         {
             Host = host;
             Port = port;

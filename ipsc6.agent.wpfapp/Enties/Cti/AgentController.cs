@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Configuration;
+
 namespace ipsc6.agent.wpfapp.Enties.Cti
 {
     using AgentStateWorkType = Tuple<client.AgentState, client.WorkType>;
@@ -14,15 +16,22 @@ namespace ipsc6.agent.wpfapp.Enties.Cti
 
         internal static client.Agent Agent = null;
 
-        internal static client.Agent CreateAgent(IReadOnlyCollection<string> adresses)
+        internal static client.Agent CreateAgent()
         {
             if (Agent != null) throw new InvalidOperationException("Data member `agent` is not null");
-            Agent = new client.Agent(adresses);
+
+            var cfg = Config.Manager.ConfigurationRoot;
+            var options = new Config.Ipsc();
+            cfg.GetSection(nameof(Config.Ipsc)).Bind(options);
+
+            Agent = new client.Agent(options.ServerList, options.LocalPort, options.LocalAddress);
+
             Agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
             Agent.OnAgentStateChanged += Agent_OnAgentStateChanged;
             Agent.OnGroupCollectionReceived += Agent_OnGroupCollectionReceived;
             Agent.OnSignedGroupsChanged += Agent_OnSignedGroupsChanged;
             Agent.OnTeleStateChanged += Agent_OnTeleStateChanged;
+
             return Agent;
         }
 
