@@ -28,8 +28,8 @@ namespace ipsc6.agent.wpfapp
             catch (Exception err)
             {
                 MessageBox.Show(
-                    $"应用程序配置文件加载失败，程序无法运行，即将退出。\r\n\r\n{err}",
-                    Current.MainWindow.Title,
+                    $"配置文件加载失败，程序无法运行，即将退出。\r\n\r\n{err}",
+                    "错误",
                     MessageBoxButton.OK, MessageBoxImage.Error
                 );
                 Shutdown();
@@ -73,7 +73,7 @@ namespace ipsc6.agent.wpfapp
             e.Handled = true;
             logger.ErrorFormat("UnhandledException: {0}", e.Exception);
             MessageBox.Show(
-                $"程序运行过程中出现了未捕获的异常。\r\n\r\n{e.Exception}",
+                $"程序运行过程中出现了未捕获的异常。\r\n\r\n{e.Exception.InnerException}",
                 Current.MainWindow.Title,
                 MessageBoxButton.OK, MessageBoxImage.Error
             );

@@ -19,7 +19,9 @@
 
 顺序靠后的将覆盖顺序考前的配置参数。
 
-## 配置格式
+座席程序的配置支持两级分层的键值对形式，我们用 `:` 作为键的层次分隔符。
+
+## 配置方式
 
 ### JSON 配置文件
 
@@ -33,7 +35,7 @@
         "ServerList": ["192.168.2.207", "192.168.2.108"]
     },
     "WebServer": {
-        "ListenPort": "9876"
+        "ListenPort": 9876
     },
     "Phone": {
         "LocalSipPort": 5060
@@ -41,30 +43,44 @@
 }
 ```
 
-座席程序的配置支持两级嵌套， 在 `JSON` 中，类似于 `Ipsc.LocalPort` 这样的属性，我们用 `Ipsc:LocalPort` 表示。
+其中的多层键值，也可以采用非嵌套的方式书写，如:
+
+```json
+{
+    "Ipsc:ServerList": ["192.168.2.207", "192.168.2.108"],
+    "Ipsc:LocalPort": 0,
+    "Ipsc:LocalAddress": "0.0.0.0",
+    "WebServer:ListenPort": 9876,
+    "Phone:LocalSipPort": 5060
+}
+```
 
 ### 环境变量配置
 
-环境变量分层键都不支持 `:` 分隔符。 双下划线 (`__`) 会自动替换为 `:` 。
+座席程序将带有前缀 `IPSC6AGENT_` 的环境变量视作配置项键值。
 
-座席程序的环境变量前缀是 `IPSC6AGENT_`。
-这样一来，假设我们使用环境变量配置本地Web服务器端口 `WebServer:ListenPort` 选项为`8080`，则这个环境变量键值对应是:
+由于环境变量不支持 `:` 分隔符，我们改用双下划线 (`__`)，它将被程序自动替换为 `:` 。
 
-```powershell
+假设我们使用环境变量配置本地 Web 服务器端口 `WebServer:ListenPort` 选项为`8080`，则应这样设定环境变量:
+
+```bat
 set IPSC6AGENT_WebServer__ListenPort=8080
 ```
 
-数组选项比较特殊，我们需要把数组的索引值视为键值。
-以设置CTI服务器地址列表为例，我们可以这样设置`0`,`1`两个服务器地址:
+数组选项比较特殊，我们需要把数组的索引值视为键名。
+例如，我们可以这样设置 `0`, `1` 两个要连接的 CTI 服务器地址:
 
-```powershell
+```bat
 set IPSC6AGENT_Ipsc__ServerList__0="192.168.2.100"
 set IPSC6AGENT_Ipsc__ServerList__1="192.168.2.200"
 ```
 
 ### 命令行参数配置
 
-座席程序命令行参数键值对中加载配置。“键”的名称规则和环境变量一致，除了使用 `:` 而不是双下划线 (`__`) 作为分隔符。
+座席程序可以从命令行参数键值对中加载配置。其用法与使用环境变量配置的方式一致，除了:
+
+1. 不需要前缀
+1. 使用 `:` 而不是双下划线 (`__`) 作为分隔符。
 
 假设我们使用命令行参数配置 CTI 服务器地址列表为 192.168.2.100 与 192.168.2.101，那么启动命令应是：
 
@@ -72,28 +88,30 @@ set IPSC6AGENT_Ipsc__ServerList__1="192.168.2.200"
 ipsc6.agent.wpfapp.exe --Ipsc:ServerList:0 "192.168.2.100" --Ipsc:ServerList:1 "192.168.2.101"
 ```
 
-键值对有多重写法：
+命令行参数中的配置项键值对有多种写法，其规则是：
 
-- 键与值要使用 `=` 连接；除非键之前具有 `--` 或 `/` 前缀，此时可以用空格连接键与值。
-- 如果使用 `=`，则值不是必需的。 例如 `SomeKey=`。
+-   键与值要使用 `=` 连接；除非键之前具有 `--` 或 `/` 前缀，此时可以用空格连接键与值。
+-   如果使用 `=`，则值不是必需的。 例如 `SomeKey=`。
 
-以下命令使用 `=` 设置键和值：
+例如：
 
-```powershell
-app.exe SecretKey="Secret key from command line"
-```
+-   以下命令使用 `=` 设置键和值：
 
-以下命令使用 `/` 设置键和值：
+    ```powershell
+    app.exe SecretKey="Secret key from command line"
+    ```
 
-```powershell
-app.exe /SecretKey "Secret key set from forward slash"
-```
+-   以下命令使用 `/` 设置键和值：
 
-以下命令使用 `--` 设置键和值：
+    ```powershell
+    app.exe /SecretKey "Secret key set from forward slash"
+    ```
 
-```powershell
-app.exe --SecretKey "Secret key set from double hyphen"
-```
+-   以下命令使用 `--` 设置键和值：
+
+    ```powershell
+    app.exe --SecretKey "Secret key set from double hyphen"
+    ```
 
 !!! warning
 

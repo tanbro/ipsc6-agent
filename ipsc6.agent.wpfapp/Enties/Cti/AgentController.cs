@@ -24,6 +24,13 @@ namespace ipsc6.agent.wpfapp.Enties.Cti
             var options = new Config.Ipsc();
             cfg.GetSection(nameof(Config.Ipsc)).Bind(options);
 
+            logger.InfoFormat(
+                "CreateAgent - ServerList: {0}, LocalPort: {1}, LocalAddress: \"{2}\"",
+                (options.ServerList == null) ? "<null>" : $"\"{string.Join(",", options.ServerList)}\"",
+                options.LocalPort,
+                options.LocalAddress
+            );
+
             Agent = new client.Agent(options.ServerList, options.LocalPort, options.LocalAddress);
 
             Agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
