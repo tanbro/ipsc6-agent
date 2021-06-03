@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace ipsc6.agent.wpfapp.Utils
 {
-    public class ModelBase
+    public class ModelBase: INotifyPropertyChanged
     {
         #region SetField
         protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)

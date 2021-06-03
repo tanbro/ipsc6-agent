@@ -14,7 +14,7 @@
     </UserControl.DataContext>
 
     <UserControl.Resources>
-        <Style x:Key="OffhookButtonStyle" TargetType="Button">
+        <Style x:Key="OffHookButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#3ea4d8"/>
             <Setter Property="Foreground" Value="#e0ecf8"/>
             <Setter Property="Width" Value="64"/>
@@ -48,7 +48,7 @@
             </Setter>
         </Style>
 
-        <Style x:Key="HangupButtonStyle" TargetType="Button">
+        <Style x:Key="OnHookButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#d6716e"/>
             <Setter Property="Foreground" Value="#e0ecf8"/>
             <Setter Property="Width" Value="64"/>
@@ -99,18 +99,20 @@
             </Grid.ColumnDefinitions>
 
             <Button Grid.Row="0" Grid.Column="0"
-                    Style="{StaticResource OffhookButtonStyle}"
-                    Command="{Binding OffhookCommand}"
+                    Style="{StaticResource OffHookButtonStyle}"
+                    Command="{Binding OffHookCommand}"
                 >
                 <!--<iconPacks:BootstrapIcons Kind="TelephoneFill" Height="48" Width="48"/>-->
                 <Image Source="pack://application:,,,/Icons/64/telephone-offhook.png"/>
             </Button>
 
             <Button Grid.Row="0" Grid.Column="1"
-                    Style="{StaticResource HangupButtonStyle}"
-                    Command="{Binding HangupCommand}"
+                    Style="{StaticResource OnHookButtonStyle}"
+                    Command="{Binding OnHookCommand}"
                 >
-                <!--<iconPacks:BootstrapIcons Kind="TelephoneFill" Height="48" Width="48" RotationAngle="135"/>-->
+                <!--
+                <iconPacks:BootstrapIcons Kind="TelephoneFill" Height="48" Width="48" RotationAngle="135"/>
+                -->
                 <Image Source="pack://application:,,,/Icons/64/telephone-hangup.png"/>
             </Button>
 

@@ -23,7 +23,8 @@ namespace ipsc6.agent.client.Sip
             MakeString();
         }
 
-        string _string = null;
+        string _string;
+
         string MakeString()
         {
             var info = getInfo();

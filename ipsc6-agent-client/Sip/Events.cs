@@ -1,6 +1,5 @@
 using System;
 
-using org.pjsip.pjsua2;
 
 namespace ipsc6.agent.client.Sip
 {

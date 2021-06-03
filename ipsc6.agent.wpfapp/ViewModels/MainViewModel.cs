@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows;
+
+using Microsoft.Toolkit.Mvvm.Input;
 
 namespace ipsc6.agent.wpfapp.ViewModels
 {
     using AgentStateWorkType = Tuple<client.AgentState, client.WorkType>;
 
-    public class MainViewModel : Utils.SingletonModelBase<MainViewModel>, INotifyPropertyChanged
+    public class MainViewModel : Utils.SingletonModelBase<MainViewModel>
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainViewModel));
 
@@ -26,25 +27,25 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => isOpenStatePopup;
             set => SetField(ref isOpenStatePopup, value);
         }
+        #endregion
 
         #region OpenStatePopup Command
-        static Utils.RelayCommand openStatePopupCommand = new Utils.RelayCommand(x => DoOpenStatePopup(x), x => CanOpenStatePopup(x));
+        static IRelayCommand openStatePopupCommand = new RelayCommand(DoOpenStatePopup, CanOpenStatePopup);
         public ICommand OpenStatePopupCommand => openStatePopupCommand;
-        static void DoOpenStatePopup(object _)
+        static void DoOpenStatePopup()
         {
             isOpenStatePopup = true;
         }
 
-        static bool CanOpenStatePopup(object _)
+        static bool CanOpenStatePopup()
         {
             return true;
         }
         #endregion
-        #endregion
 
         #region Command 签入/出
-        static Utils.RelayCommand skillSignCommand = new Utils.RelayCommand(x => DoSkillSignGroup(x), x => CanSkillSignGroup(x));
-        public ICommand SkillSignCommand => skillSignCommand;
+        static IRelayCommand skillSignCommand = new RelayCommand<object>(DoSkillSignGroup, CanSkillSignGroup);
+        public IRelayCommand SkillSignCommand => skillSignCommand;
 
         static async void DoSkillSignGroup(object parameter)
         {
@@ -71,8 +72,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region Command 修改状态
-        static Utils.RelayCommand setStateCommand = new Utils.RelayCommand(x => DoSetState(x), x => CanSetState(x));
-        public ICommand SetStateCommand => setStateCommand;
+        static IRelayCommand setStateCommand = new RelayCommand<object>(DoSetState, CanSetState);
+        public IRelayCommand SetStateCommand => setStateCommand;
 
         static async void DoSetState(object parameter)
         {
@@ -109,32 +110,42 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region Command Offhook
-        static Utils.RelayCommand offhookCommand = new Utils.RelayCommand(x => DoOffhook(x), x => CanOffhook(x));
-        public ICommand OffhookCommand => offhookCommand;
+        static readonly IRelayCommand offHookCommand = new RelayCommand(DoOffHook, CanOffHook);
+        public IRelayCommand OffHookCommand => offHookCommand;
 
-        static async void DoOffhook(object _)
+        static async void DoOffHook()
         {
             logger.DebugFormat("摘机");
             var agent = Enties.Cti.AgentController.Agent;
             await agent.OffHook();
         }
 
-        static bool CanOffhook(object _) => true;
+        static bool CanOffHook()
+        {
+            var agent = Enties.Cti.AgentController.Agent;
+            if (agent.HasActiveCall) return false;
+            if (agent.AgentState != client.AgentState.Idle) return false;
+            return true;
+        }
         #endregion
 
 
         #region Command Hangup
-        static Utils.RelayCommand hangupCommand = new Utils.RelayCommand(x => DoHangup(x), x => CanHangup(x));
-        public ICommand HangupCommand => hangupCommand;
+        static IRelayCommand onHookCommand = new RelayCommand(DoOnHook, CanHangup);
+        public ICommand OnHookCommand => onHookCommand;
 
-        static async void DoHangup(object _)
+        static async void DoOnHook()
         {
             logger.DebugFormat("挂机");
             var agent = Enties.Cti.AgentController.Agent;
             await agent.OnHook();
         }
 
-        static bool CanHangup(object _) => true;
+        static bool CanHangup()
+        {
+            var agent = Enties.Cti.AgentController.Agent;
+            return agent.HasActiveCall;
+        }
         #endregion
 
 

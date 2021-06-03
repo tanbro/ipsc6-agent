@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 // ref: agtctrl2/Events/EventHoldInfo.cpp
 
@@ -19,14 +20,14 @@ namespace ipsc6.agent.client
 
         public bool Equals(HoldInfo other)
         {
-            return ConnectionInfo == other.ConnectionInfo
+            return other != null
+                && ConnectionInfo == other.ConnectionInfo
                 && Channel == other.Channel;
         }
 
         public override bool Equals(object obj)
         {
-            var that = obj as HoldInfo;
-            return Equals(that);
+            return Equals(obj as HoldInfo);
         }
 
         public override int GetHashCode()
@@ -36,17 +37,18 @@ namespace ipsc6.agent.client
 
         public override string ToString()
         {
-            return base.ToString();
+            return $"<{GetType().Name} Connection={ConnectionInfo}, Channel ={Channel}， EventType={EventType}， SessionId={SessionId}> ";
         }
 
-        public static bool operator ==(HoldInfo lhs, HoldInfo rhs)
+        public static bool operator ==(HoldInfo left, HoldInfo right)
         {
-            return (lhs is object) && (rhs is object) && lhs.Equals(rhs);
+            return EqualityComparer<HoldInfo>.Default.Equals(left, right);
         }
 
-        public static bool operator !=(HoldInfo lhs, HoldInfo rhs)
+        public static bool operator !=(HoldInfo left, HoldInfo right)
         {
-            return !(lhs == rhs);
+            return !(left == right);
         }
+
     }
 }

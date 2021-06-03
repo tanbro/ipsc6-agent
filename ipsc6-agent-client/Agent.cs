@@ -12,15 +12,15 @@ namespace ipsc6.agent.client
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Agent));
 
-        public Agent(IEnumerable<ConnectionInfo> connections, ushort localPort = 0, string localAddress = "")
+        public Agent(IEnumerable<ConnectionInfo> connectionInfoCollection, ushort localPort = 0, string localAddress = "")
         {
-            foreach (var m in connections)
+            foreach (var connInfo in connectionInfoCollection)
             {
                 var conn = new Connection(localPort, localAddress);
                 conn.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
                 conn.OnServerSentEvent += Conn_OnServerSend;
                 internalConnections.Add(conn);
-                connectionList.Add(m);
+                connectionList.Add(connInfo);
             }
         }
 
@@ -79,10 +79,12 @@ namespace ipsc6.agent.client
             }
         }
 
-        internal static Endpoint SipEndpoint = null;
-        internal static TaskFactory SyncFactory = null;
+        internal static Endpoint SipEndpoint;
+        internal static TaskFactory SyncFactory;
 
-        internal Sip.Call currentCall = null;
+        internal Sip.Call currentCall;
+
+        public bool HasActiveCall => currentCall != null;
 
         public static void Initial()
         {
@@ -183,7 +185,7 @@ namespace ipsc6.agent.client
         }
         public event AgentStateChangedEventHandler OnAgentStateChanged;
 
-        TeleState teleState = TeleState.HangUp;
+        TeleState teleState = TeleState.OnHook;
         public TeleState TeleState => teleState;
         public event TeleStateChangedEventHandler OnTeleStateChanged;
 
@@ -421,16 +423,18 @@ namespace ipsc6.agent.client
                     foreach (var addr in evt.Value)
                     {
                         logger.DebugFormat("处理 SipAccount 地址 {0} ...", addr);
-                        var uri = string.Format("sip:{0}@{1}", workerNumber, addr);
+                        var uri = $"sip:{workerNumber}@{addr}";
                         // 这个地址是不是已经注册了? 如果是的，重新注册一次！
                         var existedAcc = (
                             from acc in sipAccounts
-                            where acc.isValid() && acc.getInfo().regIsConfigured && acc.getInfo()?.uri == uri
+                            where acc.isValid()
+                            let accInfo = acc.getInfo()
+                            where accInfo.regIsConfigured && accInfo.uri == uri
                             select acc
                         ).FirstOrDefault();
                         if (existedAcc == null)
                         {
-                            logger.DebugFormat("未找到 SipAccount 帐户 {0}，准备新建 ...", uri);
+                            logger.DebugFormat("未找到 SipAccount 帐户 {0}，新建 ...", uri);
                             using (var sipAuthCred = new AuthCredInfo("digest", "*", workerNumber, 0, "hesong"))
                             using (var cfg = new AccountConfig { idUri = uri })
                             {
@@ -461,12 +465,13 @@ namespace ipsc6.agent.client
         private void Acc_OnCallDisconnected(object sender, EventArgs e)
         {
             logger.Debug("呼叫断开，清空 “当前呼叫” 变量");
+            isOffHookRequesting = false;
             currentCall = null;
         }
 
         private void Acc_OnRegisterStateChanged(object sender, EventArgs e)
         {
-            logger.DebugFormat("Acc_OnRegisterStateChanged");
+            logger.Debug("Acc_OnRegisterStateChanged");
         }
 
         private void Acc_OnIncomingCall(object sender, Sip.IncomingCallEventArgs e)
@@ -477,12 +482,9 @@ namespace ipsc6.agent.client
                 logger.WarnFormat("新来的呼叫 - 因为当前呼叫已经存在，所以拒绝新来的呼叫 {0}", call);
                 SyncFactory.StartNew(() =>
                 {
-                    using (var op = new CallOpParam
+                    using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_DECLINE })
                     {
-                        statusCode = pjsip_status_code.PJSIP_SC_DECLINE
-                    })
-                    {
-                        call.hangup(op);
+                        call.hangup(cop);
                     }
                 });
                 return;
@@ -491,13 +493,11 @@ namespace ipsc6.agent.client
             currentCall = e.Call;
             if (isOffHookRequesting)
             {
+                isOffHookRequesting = false;
                 logger.DebugFormat("新来的呼叫 - IsOffHookRequesting is true, 主动应答 {0}", call);
                 SyncFactory.StartNew(() =>
                 {
-                    using (var cop = new CallOpParam
-                    {
-                        statusCode = pjsip_status_code.PJSIP_SC_OK
-                    })
+                    using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
                     {
                         currentCall.answer(cop);
                     }
@@ -565,7 +565,7 @@ namespace ipsc6.agent.client
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var values = from s in msg.S.Split(Constants.VerticalBarDelimiter)
-                         select (Privilege)Convert.ToInt32(s);
+                         select (Privilege)int.Parse(s);
             lock (this)
             {
                 privilegeCollection.UnionWith(values);
@@ -580,7 +580,7 @@ namespace ipsc6.agent.client
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var values = from s in msg.S.Split(Constants.VerticalBarDelimiter)
-                         select Convert.ToInt32(s);
+                         select int.Parse(s);
             lock (this)
             {
                 privilegeExternCollection.UnionWith(values);
@@ -609,7 +609,7 @@ namespace ipsc6.agent.client
             var names = msg.S.Split(Constants.VerticalBarDelimiter);
             lock (this)
             {
-                foreach (var pair in groupCollection.Zip(names, (first, second) => new { first, second }))
+                foreach (var pair in groupCollection.Zip(names, (first, second) => (first, second)))
                 {
                     pair.first.Name = pair.second;
                 }
@@ -672,7 +672,7 @@ namespace ipsc6.agent.client
                         {
                             // 其它连接还有连接上了的吗?
                             var indices = (
-                                from vi in internalConnections.Select((value, index) => new { value, index })
+                                from vi in internalConnections.Select((value, index) => (value, index))
                                 where vi.index != mainConnectionIndex && vi.value.State == ConnectionState.Ok
                                 select vi.index
                             ).ToList();
@@ -702,7 +702,7 @@ namespace ipsc6.agent.client
                                             // 被主动关闭
                                             ConnectionState[] exceptStats = { ConnectionState.Closed, ConnectionState.Closing };
                                             var indices2 = (
-                                                from vi in internalConnections.Select((value, index) => new { value, index })
+                                                from vi in internalConnections.Select((value, index) => (value, index))
                                                 where vi.index != mainConnectionIndex && exceptStats.All(m => m != vi.value.State)
                                                 select vi.index
                                             ).ToList();
@@ -835,8 +835,11 @@ namespace ipsc6.agent.client
                 this.workerNumber = workerNumber;
                 this.password = password;
                 logger.InfoFormat("主服务节点 [{0}]({1}|{2}) 首次连接 ... ", mainConnectionIndex, MainConnectionInfo.Host, MainConnectionInfo.Port);
-                await MainConnection.Open(MainConnectionInfo.Host, MainConnectionInfo.Port, workerNumber, password,
-                                          flag: 1);
+                await MainConnection.Open(
+                    MainConnectionInfo.Host, MainConnectionInfo.Port,
+                    workerNumber, password,
+                    flag: 1
+                );
                 lock (this)
                 {
                     runningState = AgentRunningState.Started;
@@ -891,7 +894,7 @@ namespace ipsc6.agent.client
 
                 // 然后其他节点
                 var itConnObj =
-                    from x in internalConnections.Select((value, index) => new { value, index })
+                    from x in internalConnections.Select((value, index) => (value, index))
                     where x.index != mainConnectionIndex
                     select x.value;
                 await Task.WhenAll(
@@ -906,20 +909,18 @@ namespace ipsc6.agent.client
                                 await conn.Close(graceful, flag: 0);
                                 logger.DebugFormat("关闭从节点连接 {0} graceful={1} 完毕.", conn, graceful);
                             }
-                            catch (Exception ex)
+                            catch (Exception exce)
                             {
-                                if (
-                                    ex is DisconnectionTimeoutException ||
-                                    ex is ErrorResponse ||
-                                    ex is InvalidOperationException
-                                )
+                                switch (exce)
                                 {
-                                    logger.DebugFormat("关闭从节点连接 {0} 失败: {1} . 将强行关闭", conn, ex);
-                                    await conn.Close(graceful: false, flag: 0);
-                                }
-                                else
-                                {
-                                    throw;
+                                    case DisconnectionTimeoutException _:
+                                    case ErrorResponse _:
+                                    case InvalidOperationException _:
+                                        logger.DebugFormat("关闭从节点连接 {0} 失败, 将强行关闭: {1}", conn, exce);
+                                        await conn.Close(graceful: false, flag: 0);
+                                        break;
+                                    default:
+                                        throw;
                                 }
                             }
                         }
@@ -942,6 +943,18 @@ namespace ipsc6.agent.client
                 }
                 throw;
             }
+
+            // release Sip Accounts
+            lock (this)
+            {
+                foreach (var sipAcc in sipAccounts)
+                {
+                    logger.DebugFormat("Dispose {0}", sipAcc);
+                    sipAcc.Dispose();
+                }
+                sipAccounts.Clear();
+            }
+
         }
 
         public async Task<ServerSentMessage> Request(AgentRequestMessage args, int timeout = Connection.DefaultRequestTimeoutMilliseconds)
@@ -1094,11 +1107,10 @@ namespace ipsc6.agent.client
                 logger.Debug("OffHook - 本地呼叫应答");
                 await SyncFactory.StartNew(() =>
                 {
-                    var cop = new CallOpParam
+                    using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
                     {
-                        statusCode = pjsip_status_code.PJSIP_SC_OK
-                    };
-                    currentCall.answer(cop);
+                        currentCall.answer(cop);
+                    }
                 });
             }
         }
@@ -1187,7 +1199,7 @@ namespace ipsc6.agent.client
             await connObj.Request(req);
         }
 
-        HashSet<Sip.Account> sipAccounts = new HashSet<Sip.Account>();
+        readonly HashSet<Sip.Account> sipAccounts = new HashSet<Sip.Account>();
 
     }
 }

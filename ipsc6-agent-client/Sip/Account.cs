@@ -23,7 +23,7 @@ namespace ipsc6.agent.client.Sip
         public event IncomingCallEventHandler OnIncomingCall;
         public event CallDisconnectedEventHandler OnCallDisconnected;
 
-        string _string = null;
+        string _string;
         string MakeString()
         {
             if (isValid())
@@ -46,7 +46,7 @@ namespace ipsc6.agent.client.Sip
         }
         public override void onRegState(org.pjsip.pjsua2.OnRegStateParam param)
         {
-            logger.DebugFormat("RegState: {0} {1}", getInfo().uri, param.code);
+            logger.DebugFormat("RegState - {0} : {1}", getInfo().uri, param.code);
             MakeString();
             Task.Run(() =>
             {

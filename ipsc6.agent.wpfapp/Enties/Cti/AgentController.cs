@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using Microsoft.Extensions.Configuration;
 
 namespace ipsc6.agent.wpfapp.Enties.Cti
@@ -62,6 +61,10 @@ namespace ipsc6.agent.wpfapp.Enties.Cti
         {
             var model = Models.Cti.AgentBasicInfo.Instance;
             model.AgentStateWorkType = new AgentStateWorkType(e.NewState.AgentState, e.NewState.WorkType);
+            App.TaskFactory.StartNew(() => {
+                ViewModels.MainViewModel.Instance.OffHookCommand.NotifyCanExecuteChanged();
+            });
+            
         }
 
         private static void Agent_OnAgentDisplayNameReceived(object sender, client.AgentDisplayNameReceivedEventArgs e)

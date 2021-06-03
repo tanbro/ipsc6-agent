@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
+using System.ComponentModel;
+
+using Microsoft.Toolkit.Mvvm.Input;
 
 using ipsc6.agent.client;
-
 
 namespace ipsc6.agent.wpfapp.ViewModels
 {
@@ -16,13 +17,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(LoginViewModel));
 
-        public LoginViewModel()
-        {
-            loginCommand = new Utils.RelayCommand(x => DoLogin(x), x => CanLogin(x));
-        }
-
-        private LoginWindow window;
-        public LoginWindow Window { set { window = value; } }
+        static LoginWindow window;
+        public LoginWindow Window { set => window = value; }
 
         static string workerNum;
         public string WorkerNum
@@ -31,23 +27,24 @@ namespace ipsc6.agent.wpfapp.ViewModels
             set => SetField(ref workerNum, value);
         }
 
-        int passwordLength;
+        static int passwordLength;
         public int PasswordLength
         {
             get => passwordLength;
             set
             {
                 passwordLength = value;
+                LoginCommand.NotifyCanExecuteChanged();
             }
         }
 
         #region Login Command
-        readonly Utils.RelayCommand loginCommand;
-        public ICommand LoginCommand => loginCommand;
+        readonly static IRelayCommand loginCommand = new RelayCommand<object>(DoLogin, CanLogin);
+        public IRelayCommand LoginCommand => loginCommand;
 
-        bool _isLogging = false;
+        static bool _isLogging = false;
 
-        bool CanLogin(object _)
+        static bool CanLogin(object _)
         {
             if (string.IsNullOrEmpty(workerNum)) return false;
             if (passwordLength <= 0) return false;
@@ -55,7 +52,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             return true;
         }
 
-        public async void DoLogin(object parameter)
+        public static async void DoLogin(object parameter)
         {
             _isLogging = true;
             try

@@ -13,9 +13,7 @@ namespace ipsc6.agent.client
             var parts = address.Split(new char[] { ':' }, 2);
             Host = parts[0];
             if (parts.Length > 1)
-            {
-                Port = Convert.ToUInt16(parts[1]);
-            }
+                Port = ushort.Parse(parts[1]);
         }
 
         public ConnectionInfo(string host, ushort port)
@@ -31,7 +29,7 @@ namespace ipsc6.agent.client
 
         public override string ToString()
         {
-            return $"<{GetType()} {Host}|{Port}>";
+            return $"<{GetType().Name} {Host}|{Port}>";
         }
 
         public override bool Equals(object obj)
@@ -41,9 +39,9 @@ namespace ipsc6.agent.client
 
         public bool Equals(ConnectionInfo other)
         {
-            return other != null &&
-                   Host == other.Host &&
-                   Port == other.Port;
+            return other != null
+                && Host == other.Host
+                && Port == other.Port;
         }
 
         public static bool operator ==(ConnectionInfo left, ConnectionInfo right)

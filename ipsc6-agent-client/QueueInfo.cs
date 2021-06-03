@@ -39,7 +39,7 @@ namespace ipsc6.agent.client
                         }
                         break;
                     case 1:
-                        EventType = (QueueEventType)Convert.ToInt32(part.str);
+                        EventType = (QueueEventType)int.Parse(part.str);
                         break;
                     case 2:
                         SessionId = part.str;

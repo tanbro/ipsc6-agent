@@ -17,6 +17,8 @@ namespace ipsc6.agent.wpfapp
 
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(App));
 
+        public static TaskScheduler TaskScheduler { get; private set; }
+        public static TaskFactory TaskFactory { get; private set; }
         void Application_Startup(object sender, StartupEventArgs e)
         {
             try
@@ -36,6 +38,9 @@ namespace ipsc6.agent.wpfapp
             }
 
             logger.Warn("\r\n!!!!!!!!!!!!!!!!!!!! Startup !!!!!!!!!!!!!!!!!!!!\r\n");
+
+            TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+            TaskFactory = new TaskFactory(TaskScheduler);
 
             try
             {
@@ -88,9 +93,9 @@ namespace ipsc6.agent.wpfapp
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             e.Handled = true;
-            logger.ErrorFormat("UnhandledException: {0}", e.Exception.InnerException);
+            logger.ErrorFormat("UnhandledException: {0}", e.Exception);
             MessageBox.Show(
-                $"程序运行过程中出现了未捕获的异常。\r\n\r\n{e.Exception.InnerException}",
+                $"程序运行过程中出现了未捕获的异常。\r\n\r\n{e.Exception}",
                 Current.MainWindow.Title,
                 MessageBoxButton.OK, MessageBoxImage.Error
             );

@@ -45,7 +45,7 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetField(ref stateOperationItems, value);
         }
 
-        client.TeleState teleState = client.TeleState.HangUp;
+        client.TeleState teleState = client.TeleState.OnHook;
         public client.TeleState TeleState
         {
             get => teleState;
