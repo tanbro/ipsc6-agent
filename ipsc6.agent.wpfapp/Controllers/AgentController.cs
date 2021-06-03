@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
-namespace ipsc6.agent.wpfapp.Enties.Cti
+namespace ipsc6.agent.wpfapp.Controllers
 {
     using AgentStateWorkType = Tuple<client.AgentState, client.WorkType>;
 

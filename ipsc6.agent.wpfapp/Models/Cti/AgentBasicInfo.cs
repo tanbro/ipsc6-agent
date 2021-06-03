@@ -7,7 +7,7 @@ namespace ipsc6.agent.wpfapp.Models.Cti
 {
     using AgentStateWorkType = Tuple<client.AgentState, client.WorkType>;
 
-    public class AgentBasicInfo : Utils.SingletonModelBase<AgentBasicInfo>, INotifyPropertyChanged
+    public class AgentBasicInfo : Utils.SingletonModelBase<AgentBasicInfo>
     {
 
         string workerNumber;

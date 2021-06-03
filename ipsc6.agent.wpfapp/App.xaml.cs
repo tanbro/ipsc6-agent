@@ -73,7 +73,7 @@ namespace ipsc6.agent.wpfapp
                     }
                     finally
                     {
-                        Enties.Cti.AgentController.DisposeAgent();
+                        Controllers.AgentController.DisposeAgent();
                     }
                 }
                 finally

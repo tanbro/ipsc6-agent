@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace ipsc6.agent.wpfapp.Models.Cti
 {
-    public class RingInfo : Utils.SingletonModelBase<RingInfo>, INotifyPropertyChanged
+    public class RingInfo : Utils.SingletonModelBase<RingInfo>
     {
         private string teleNum;
         public string TeleNum

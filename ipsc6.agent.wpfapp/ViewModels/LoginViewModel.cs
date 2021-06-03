@@ -62,16 +62,16 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
                 logger.InfoFormat("登录开始: {0}", workerNum);
 
-                var agent = Enties.Cti.AgentController.CreateAgent();
+                var agent = Controllers.AgentController.CreateAgent();
                 try
                 {
-                    await Enties.Cti.AgentController.StartupAgent(workerNum, password);
+                    await Controllers.AgentController.StartupAgent(workerNum, password);
                     logger.InfoFormat("登录成功");
                     isOk = true;
                 }
                 catch (ConnectionException err)
                 {
-                    Enties.Cti.AgentController.DisposeAgent();
+                    Controllers.AgentController.DisposeAgent();
                     MessageBox.Show(
                         $"登录失败\r\n\r\n{err}",
                         Application.Current.MainWindow.Title,

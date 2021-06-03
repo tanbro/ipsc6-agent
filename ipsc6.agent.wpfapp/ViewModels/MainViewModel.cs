@@ -50,7 +50,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         static async void DoSkillSignGroup(object parameter)
         {
             var skillId = parameter as string;
-            var agent = Enties.Cti.AgentController.Agent;
+            var agent = Controllers.AgentController.Agent;
             var sg = agent.GroupCollection.First((m) => m.Id == skillId);
             if (sg.Signed)
             {
@@ -66,7 +66,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         static bool CanSkillSignGroup(object _)
         {
-            var agent = Enties.Cti.AgentController.Agent;
+            var agent = Controllers.AgentController.Agent;
             return true;
         }
         #endregion
@@ -79,7 +79,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             logger.DebugFormat("设置状态: {0}", parameter);
             var st = parameter as AgentStateWorkType;
-            var agent = Enties.Cti.AgentController.Agent;
+            var agent = Controllers.AgentController.Agent;
 
             try
             {
@@ -104,7 +104,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         static bool CanSetState(object _)
         {
-            var agent = Enties.Cti.AgentController.Agent;
+            var agent = Controllers.AgentController.Agent;
             return true;
         }
         #endregion
@@ -116,13 +116,13 @@ namespace ipsc6.agent.wpfapp.ViewModels
         static async void DoOffHook()
         {
             logger.DebugFormat("摘机");
-            var agent = Enties.Cti.AgentController.Agent;
+            var agent = Controllers.AgentController.Agent;
             await agent.OffHook();
         }
 
         static bool CanOffHook()
         {
-            var agent = Enties.Cti.AgentController.Agent;
+            var agent = Controllers.AgentController.Agent;
             if (agent.HasActiveCall) return false;
             if (agent.AgentState != client.AgentState.Idle) return false;
             return true;
@@ -137,13 +137,13 @@ namespace ipsc6.agent.wpfapp.ViewModels
         static async void DoOnHook()
         {
             logger.DebugFormat("挂机");
-            var agent = Enties.Cti.AgentController.Agent;
+            var agent = Controllers.AgentController.Agent;
             await agent.OnHook();
         }
 
         static bool CanHangup()
         {
-            var agent = Enties.Cti.AgentController.Agent;
+            var agent = Controllers.AgentController.Agent;
             return agent.HasActiveCall;
         }
         #endregion

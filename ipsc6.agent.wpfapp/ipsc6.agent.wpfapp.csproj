@@ -249,7 +249,7 @@
     <Compile Include="Converters\AgentStateToBrushConverter.cs" />
     <Compile Include="Converters\AgentStateToTextConverter.cs" />
     <Compile Include="DesignData\MainDesignViewModel.cs" />
-    <Compile Include="Enties\Cti\AgentController.cs" />
+    <Compile Include="Controllers\AgentController.cs" />
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
