@@ -6,7 +6,7 @@ namespace ipsc6.agent.wpfapp.Models.Cti
 {
     using AgentStateWorkType = Tuple<client.AgentState, client.WorkType>;
 
-    public class AgentStateOperations : Utils.SingletonModelBase<AgentStateOperations>
+    public class AgentStateOperations : Utils.SingletonObservableObject<AgentStateOperations>
     {
         static readonly List<AgentStateWorkType> items = new List<AgentStateWorkType> {
             new AgentStateWorkType(client.AgentState.Idle, client.WorkType.Unknown),

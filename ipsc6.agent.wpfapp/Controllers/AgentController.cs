@@ -9,7 +9,7 @@ namespace ipsc6.agent.wpfapp.Controllers
 {
     using AgentStateWorkType = Tuple<client.AgentState, client.WorkType>;
 
-    public class AgentController
+    public static class AgentController
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(AgentController));
 
@@ -45,6 +45,7 @@ namespace ipsc6.agent.wpfapp.Controllers
         {
             var model = Models.Cti.AgentBasicInfo.Instance;
             model.TeleState = e.NewState;
+            ViewModels.MainViewModel.Instance.RefreshCanExecute();
         }
 
         private static void Agent_OnSignedGroupsChanged(object sender, EventArgs e)
@@ -61,10 +62,7 @@ namespace ipsc6.agent.wpfapp.Controllers
         {
             var model = Models.Cti.AgentBasicInfo.Instance;
             model.AgentStateWorkType = new AgentStateWorkType(e.NewState.AgentState, e.NewState.WorkType);
-            App.TaskFactory.StartNew(() => {
-                ViewModels.MainViewModel.Instance.OffHookCommand.NotifyCanExecuteChanged();
-            });
-            
+            ViewModels.MainViewModel.Instance.RefreshCanExecute();
         }
 
         private static void Agent_OnAgentDisplayNameReceived(object sender, client.AgentDisplayNameReceivedEventArgs e)

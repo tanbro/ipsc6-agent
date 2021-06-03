@@ -1,55 +1,56 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 
 
 namespace ipsc6.agent.wpfapp.Models.Cti
 {
     using AgentStateWorkType = Tuple<client.AgentState, client.WorkType>;
 
-    public class AgentBasicInfo : Utils.SingletonModelBase<AgentBasicInfo>
+    public class AgentBasicInfo : Utils.SingletonObservableObject<AgentBasicInfo>
     {
 
         string workerNumber;
         public string WorkerNumber
         {
             get => workerNumber;
-            set => SetField(ref workerNumber, value);
+            set => SetProperty(ref workerNumber, value);
         }
 
         string displayName;
         public string DisplayName
         {
             get => displayName;
-            set => SetField(ref displayName, value);
+            set => SetProperty(ref displayName, value);
         }
 
         AgentStateWorkType agentStateWorkType = new AgentStateWorkType(client.AgentState.OffLine, client.WorkType.Unknown);
         public AgentStateWorkType AgentStateWorkType
         {
             get => agentStateWorkType;
-            set => SetField(ref agentStateWorkType, value);
+            set => SetProperty(ref agentStateWorkType, value);
         }
 
         IList<client.AgentGroup> skillsGroup = new List<client.AgentGroup>();
         public IList<client.AgentGroup> SkillGroups
         {
             get => skillsGroup;
-            set => SetField(ref skillsGroup, value);
+            set => SetProperty(ref skillsGroup, value);
         }
 
         IList<AgentStateWorkType> stateOperationItems = AgentStateOperations.Instance.Items;
         public IList<AgentStateWorkType> StateOperationItems
         {
             get => stateOperationItems;
-            set => SetField(ref stateOperationItems, value);
+            set => SetProperty(ref stateOperationItems, value);
         }
 
         client.TeleState teleState = client.TeleState.OnHook;
         public client.TeleState TeleState
         {
             get => teleState;
-            set => SetField(ref teleState, value);
+            set => SetProperty(ref teleState, value);
         }
 
     }

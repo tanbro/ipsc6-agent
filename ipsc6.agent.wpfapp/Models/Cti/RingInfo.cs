@@ -2,34 +2,34 @@ using System.ComponentModel;
 
 namespace ipsc6.agent.wpfapp.Models.Cti
 {
-    public class RingInfo : Utils.SingletonModelBase<RingInfo>
+    public class RingInfo : Utils.SingletonObservableObject<RingInfo>
     {
         private string teleNum;
         public string TeleNum
         {
             get => teleNum;
-            set => SetField(ref teleNum, value);
+            set => SetProperty(ref teleNum, value);
         }
 
         private string location;
         public string Location
         {
             get => location;
-            set => SetField(ref location, value);
+            set => SetProperty(ref location, value);
         }
 
         private string ivrPath;
         public string IvrPath
         {
             get => ivrPath;
-            set => SetField(ref ivrPath, value);
+            set => SetProperty(ref ivrPath, value);
         }
 
         private string bizName;
         public string BizName
         {
             get => bizName;
-            set => SetField(ref bizName, value);
+            set => SetProperty(ref bizName, value);
         }
 
     }

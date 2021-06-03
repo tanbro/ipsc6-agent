@@ -13,7 +13,7 @@ using ipsc6.agent.client;
 
 namespace ipsc6.agent.wpfapp.ViewModels
 {
-    class LoginViewModel : Utils.SingletonModelBase<LoginViewModel>
+    class LoginViewModel : Utils.SingletonObservableObject<LoginViewModel>
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(LoginViewModel));
 
@@ -24,7 +24,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public string WorkerNum
         {
             get => workerNum;
-            set => SetField(ref workerNum, value);
+            set => SetProperty(ref workerNum, value);
         }
 
         static int passwordLength;
@@ -42,8 +42,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
         readonly static IRelayCommand loginCommand = new RelayCommand<object>(DoLogin, CanLogin);
         public IRelayCommand LoginCommand => loginCommand;
 
-        static bool _isLogging = false;
-
         static bool CanLogin(object _)
         {
             if (string.IsNullOrEmpty(workerNum)) return false;
@@ -52,11 +50,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
             return true;
         }
 
+        static bool _isLogging = false;
+
         public static async void DoLogin(object parameter)
         {
             _isLogging = true;
             try
             {
+                loginCommand.NotifyCanExecuteChanged();
+
                 var password = (parameter as PasswordBox).Password;
                 bool isOk = false;
 
@@ -87,6 +89,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             finally
             {
                 _isLogging = false;
+                loginCommand.NotifyCanExecuteChanged();
             }
         }
         #endregion

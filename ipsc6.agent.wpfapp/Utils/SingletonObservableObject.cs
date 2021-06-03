@@ -1,14 +1,10 @@
 using System;
 
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 
 namespace ipsc6.agent.wpfapp.Utils
 {
-    /// <summary>
-    /// A base class for the singleton design pattern.
-    /// </summary>
-    /// <typeparam name="T">Class type of the singleton</typeparam>
-
-    public abstract class SingletonModelBase<T> : ModelBase where T : class
+    public abstract class SingletonObservableObject<T> : ObservableObject where T : class
     {
         #region Members
 
