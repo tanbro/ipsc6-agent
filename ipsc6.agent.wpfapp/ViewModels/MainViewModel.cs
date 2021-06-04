@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,10 +16,65 @@ namespace ipsc6.agent.wpfapp.ViewModels
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainViewModel));
 
+        static bool pinned = true;
+        public bool Pinned
+        {
+            get => pinned;
+            set => SetProperty(ref pinned, value);
+        }
+
+        static readonly IRelayCommand pinCommand = new RelayCommand(DoPin);
+        public IRelayCommand PinCommand => pinCommand;
+        static void DoPin()
+        {
+            Instance.Pinned = !pinned;
+        }
+
+        static bool snapped = false;
+        public bool Snapped
+        {
+            get => snapped;
+            set
+            {
+                var win = Application.Current.MainWindow;
+                if (value)
+                {
+                    win.Height = 8;
+                    win.Top = 0;
+                    MainPanelVisibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    win.Height = 80;
+                    MainPanelVisibility = Visibility.Visible;
+                }
+                SetProperty(ref snapped, value);
+            }
+        }
+
+        static double mainWindowHeight;
+        public double MainWindowHeight
+        {
+            get => mainWindowHeight;
+            set => SetProperty(ref mainWindowHeight, value);
+        }
+        static double mainWindowTop;
+        public double MainWindowTop
+        {
+            get => mainWindowTop;
+            set => SetProperty(ref mainWindowTop, value);
+        }
+        static Visibility mainPanelVisibility = Visibility.Visible;
+        public Visibility MainPanelVisibility
+        {
+            get => mainPanelVisibility;
+            set => SetProperty(ref mainPanelVisibility, value);
+        }
+
         public Models.Cti.AgentBasicInfo AgentBasicInfo => Models.Cti.AgentBasicInfo.Instance;
         public Models.Cti.RingInfo RingInfo => Models.Cti.RingInfo.Instance;
 
-        internal void RefreshCanExecute()
+        internal void RefreshAgentExecutables()
         {
             IRelayCommand[] commands =
             {
@@ -144,10 +200,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region Command Offhook
-        static bool doingOffHook = false;
-
         static readonly IRelayCommand offHookCommand = new RelayCommand(DoOffHook, CanOffHook);
         public IRelayCommand OffHookCommand => offHookCommand;
+        static bool doingOffHook = false;
 
         static async void DoOffHook()
         {
@@ -171,8 +226,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (doingOffHook) return false;
             var agent = Controllers.AgentController.Agent;
             if (agent == null) return false;
-            //if (agent.IsOffHookRequesting) return false;
-            if (agent.AgentState != client.AgentState.Idle) return false;
+            if (agent.AgentState != client.AgentState.Idle
+                && agent.AgentState != client.AgentState.Ring) return false;
             if (agent.TeleState == client.TeleState.OffHook) return false;
             return true;
         }
@@ -206,11 +261,74 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var agent = Controllers.AgentController.Agent;
             if (agent == null) return false;
             if (agent.IsOffHookRequesting) return false;
-            if (agent.TeleState == client.TeleState.OnHook) return false;
+            if (agent.TeleState == client.TeleState.OffHook) return true;
+            if (agent.AgentState != client.AgentState.Work
+                && agent.AgentState != client.AgentState.WorkPause
+                && agent.AgentState != client.AgentState.Ring) return false;
+            if (agent.TeleState == client.TeleState.OnHook
+                && agent.AgentState != client.AgentState.Ring) return false;
             return true;
         }
         #endregion
 
+        #region 座席咨询
+        static readonly IRelayCommand xferConsultCommand = new RelayCommand(DoXferConsult);
+        public IRelayCommand XferConsultCommand => xferConsultCommand;
+        static async void DoXferConsult()
+        {
+            var agent = Controllers.AgentController.Agent;
 
+            var dialog = new Dialogs.PromptDialog()
+            {
+                DataContext = new Dictionary<string, object> {
+                    { "Title", "转接" },
+                    { "Label", "输入要转接的目标。格式： 技能组ID:座席工号" }
+                }
+            };
+            if (dialog.ShowDialog() != true) return;
+            var inputText = dialog.InputText;
+
+            string groupId, workerNum = "";
+            var parts = inputText.Split(new char[] { ':' }, 2);
+            if (parts.Length > 0)
+                groupId = parts[0];
+            else
+                return;
+            if (parts.Length > 1)
+                workerNum = parts[1];
+
+            await agent.XferConsult(groupId.Trim(), workerNum.Trim());
+        }
+        #endregion
+
+        #region 座席转移
+        static readonly IRelayCommand xferCommand = new RelayCommand(DoXfer);
+        public IRelayCommand XferCommand => xferCommand;
+        static async void DoXfer()
+        {
+            var agent = Controllers.AgentController.Agent;
+
+            var dialog = new Dialogs.PromptDialog()
+            {
+                DataContext = new Dictionary<string, object> {
+                    { "Title", "转接" },
+                    { "Label", "输入要转接的目标。格式： 技能组ID:座席工号" }
+                }
+            };
+            if (dialog.ShowDialog() != true) return;
+            var inputText = dialog.InputText;
+
+            string groupId, workerNum = "";
+            var parts = inputText.Split(new char[] { ':' }, 2);
+            if (parts.Length > 0)
+                groupId = parts[0];
+            else
+                return;
+            if (parts.Length > 1)
+                workerNum = parts[1];
+
+            await agent.Xfer(agent.WorkingChannel.Channel, groupId.Trim(), workerNum.Trim());
+        }
+        #endregion
     }
 }

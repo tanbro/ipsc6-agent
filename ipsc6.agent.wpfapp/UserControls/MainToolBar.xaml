@@ -100,6 +100,7 @@
 
             <Button Grid.Row="0" Grid.Column="0"
                     Style="{StaticResource OffHookButtonStyle}"
+                    ToolTip="摘机"
                     Command="{Binding OffHookCommand}"
                 >
                 <!--<iconPacks:BootstrapIcons Kind="TelephoneFill" Height="48" Width="48"/>-->
@@ -108,6 +109,7 @@
 
             <Button Grid.Row="0" Grid.Column="1"
                     Style="{StaticResource OnHookButtonStyle}"
+                    ToolTip="挂机"
                     Command="{Binding OnHookCommand}"
                 >
                 <!--
@@ -117,34 +119,41 @@
             </Button>
 
             <Button Grid.Row="0" Grid.Column="2"
-                Style="{StaticResource MyMainButton}"
+                    Style="{StaticResource MyMainButton}"
+                    ToolTip="转座席(咨询转)"
+                    Command="{Binding XferConsultCommand}"
                 >
                 <!--<iconPacks:BootstrapIcons Kind="TelephonePlusFill" Height="48" Width="48"/>-->
                 <Image Source="pack://application:,,,/Icons/64/people-plus.png"/>
             </Button>
 
             <Button Grid.Row="0" Grid.Column="3"
-                Style="{StaticResource MyMainButton}"
+                    Style="{StaticResource MyMainButton}"
+                    ToolTip="转座席(释放转)"
+                    Command="{Binding XferCommand}"
                 >
                 <!--<iconPacks:BootstrapIcons Kind="TelephoneForwardFill" Height="48" Width="48"/>-->
                 <Image Source="pack://application:,,,/Icons/64/telehpone-outgoing.png"/>
             </Button>
 
             <Button Grid.Row="0" Grid.Column="4"
-                Style="{StaticResource MyMainButton}"
+                    Style="{StaticResource MyMainButton}"
+                    ToolTip="转 IVR"
                 >
                 <Image Source="pack://application:,,,/Icons/64/xfer-ivr.png"/>
             </Button>
 
             <Button Grid.Row="0" Grid.Column="5"
-                Style="{StaticResource MyMainButton}"
+                    Style="{StaticResource MyMainButton}"
+                    ToolTip="通话保持"
                 >
                 <!--<iconPacks:BootstrapIcons Kind="PauseFill" Height="48" Width="48"/>-->
                 <Image Source="pack://application:,,,/Icons/64/pause.png"/>
             </Button>
 
             <Button Grid.Row="0" Grid.Column="6"
-                Style="{StaticResource MyMainButton}"
+                    Style="{StaticResource MyMainButton}"
+                    ToolTip="取消通话保持"
                 >
                 <!--<iconPacks:BootstrapIcons Kind="ReplyFill" Height="48" Width="48"/>-->
                 <Image Source="pack://application:,,,/Icons/64/rewind.png"/>

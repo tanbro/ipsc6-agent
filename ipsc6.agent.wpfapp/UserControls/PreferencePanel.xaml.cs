@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +23,7 @@ namespace ipsc6.agent.wpfapp.UserControls
         public PreferencePanel()
         {
             InitializeComponent();
+            DataContext = ViewModels.MainViewModel.Instance;
         }
     }
 }

@@ -45,7 +45,7 @@ namespace ipsc6.agent.wpfapp.Controllers
         {
             var model = Models.Cti.AgentBasicInfo.Instance;
             model.TeleState = e.NewState;
-            ViewModels.MainViewModel.Instance.RefreshCanExecute();
+            ViewModels.MainViewModel.Instance.RefreshAgentExecutables();
         }
 
         private static void Agent_OnSignedGroupsChanged(object sender, EventArgs e)
@@ -62,7 +62,7 @@ namespace ipsc6.agent.wpfapp.Controllers
         {
             var model = Models.Cti.AgentBasicInfo.Instance;
             model.AgentStateWorkType = new AgentStateWorkType(e.NewState.AgentState, e.NewState.WorkType);
-            ViewModels.MainViewModel.Instance.RefreshCanExecute();
+            ViewModels.MainViewModel.Instance.RefreshAgentExecutables();
         }
 
         private static void Agent_OnAgentDisplayNameReceived(object sender, client.AgentDisplayNameReceivedEventArgs e)
@@ -70,6 +70,7 @@ namespace ipsc6.agent.wpfapp.Controllers
             var model = Models.Cti.AgentBasicInfo.Instance;
             model.WorkerNumber = Agent.WorkerNumber;
             model.DisplayName = e.Value;
+            ViewModels.MainViewModel.Instance.RefreshAgentExecutables();
         }
 
         internal static void DisposeAgent()

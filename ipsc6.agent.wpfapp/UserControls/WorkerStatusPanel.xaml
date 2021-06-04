@@ -131,13 +131,11 @@
                                         <DataTemplate>
                                             <Button Margin="4"
                                                     Command="{Binding ElementName=WorkerStatusPannelUserControl, Path=DataContext.SetStateCommand}"
-                                                    CommandParameter="{Binding}"
-                                                    >
+                                                    CommandParameter="{Binding}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock
                                                            Text="{Binding Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
-                                                           Margin="4"
-                                                           />
+                                                           Margin="4"/>
                                                     <Border
                                                         Style="{StaticResource MyStateLightStyle}"
                                                         Background="{Binding Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"

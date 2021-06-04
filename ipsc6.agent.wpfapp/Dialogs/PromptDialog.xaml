@@ -1,0 +1,31 @@
+<Window x:Class="ipsc6.agent.wpfapp.Dialogs.PromptDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ipsc6.agent.wpfapp.Dialogs"
+        mc:Ignorable="d"
+        Height="150" Width="300" WindowStyle="ToolWindow" ResizeMode="NoResize"
+        Title="{Binding Path=[Title], Mode=OneWay, FallbackValue='Prompt'}"
+        FocusManager.FocusedElement="{Binding ElementName=txtInput}"
+        >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="2">
+            <Label Grid.Row="0" Margin="2" Target="{Binding ElementName=txtInput}"
+                   Content="{Binding Path=[Label], Mode=OneWay, FallbackValue='Input:'}" 
+                   />
+            <TextBox x:Name="txtInput" Margin="2" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="2" HorizontalAlignment="Right" >
+            <Button x:Name="btnOk" Content="_Ok" IsDefault="True" Width="64" Margin="2" Click="btnOk_Click"/>
+            <Button x:Name="btnCancel"  Content="_Cancel" IsCancel="True" Width="64" Margin="2" Click="btnCancel_Click"/>
+        </StackPanel>
+
+    </Grid>
+</Window>

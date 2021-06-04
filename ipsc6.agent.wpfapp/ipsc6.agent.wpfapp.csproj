@@ -248,8 +248,12 @@
     <Compile Include="Converters\AgentGroupsToNumberTitleConverter.cs" />
     <Compile Include="Converters\AgentStateToBrushConverter.cs" />
     <Compile Include="Converters\AgentStateToTextConverter.cs" />
+    <Compile Include="Converters\BooleanToPinIconConverter.cs" />
     <Compile Include="DesignData\MainDesignViewModel.cs" />
     <Compile Include="Controllers\AgentController.cs" />
+    <Compile Include="Dialogs\PromptDialog.xaml.cs">
+      <DependentUpon>PromptDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
@@ -290,6 +294,10 @@
     <Compile Include="Utils\SingletonObservableObject.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
+    <Page Include="Dialogs\PromptDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="LoginWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

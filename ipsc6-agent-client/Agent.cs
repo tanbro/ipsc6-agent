@@ -1023,11 +1023,17 @@ namespace ipsc6.agent.client
             throw new NotImplementedException();
         }
 
-        public async Task Xfer(int agentId, int channel, string groupId, string customString = "", bool consultative = false)
+        public async Task Xfer(int channel, string groupId, string workerNum = "", string customString = "")
         {
-            var s = $"{channel}|{groupId}|{customString}";
-            var mt = consultative ? MessageType.REMOTE_MSG_TRANSFER_EX : MessageType.REMOTE_MSG_TRANSFER;
-            var req = new AgentRequestMessage(mt, agentId, s);
+            var s = $"{workerNum}|{channel}|{groupId}|{customString}";
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER, -1, s);
+            await MainConnection.Request(req);
+        }
+
+        public async Task XferConsult(string groupId, string workerNum = "", string customString = "")
+        {
+            var s = $"{workerNum}|{groupId}|{customString}";
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT, -1, s);
             await MainConnection.Request(req);
         }
 
