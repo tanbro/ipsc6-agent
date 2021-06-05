@@ -255,7 +255,7 @@ namespace ipsc6.agent.client
                 {
                     lock (requestLock)
                     {
-                        isResponse = (pendingReqType == msg_.Type);
+                        isResponse = pendingReqType == msg_.Type;
                     }
                     if (isResponse)
                     {
@@ -310,7 +310,7 @@ namespace ipsc6.agent.client
             eventQueue.Enqueue(new ConnectorConnectAttemptFailedEventArgs());
         }
 
-        public readonly Encoding Encoding;
+        public Encoding Encoding { get; }
 
         private readonly object connectLock = new object();
 

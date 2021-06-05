@@ -18,35 +18,6 @@
 
     <UserControl.Resources>
         <converters:AgentGroupsToNumberTitleConverter x:Key="AgentGroupsToNumberTitleConverter"/>
-
-        <Style x:Key="SkillButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="{StaticResource MyInfoTextForeground}"/>
-            <Setter Property="FontSize" Value="24"/>
-            <Setter Property="FontFamily" Value="/Fonts/#Pathway Gothic One"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Grid>
-                            <ContentPresenter x:Name="MyContentPresenter" Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0" />
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="DeepSkyBlue" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Foreground" Value="DarkGreen" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="false">
-                                <Setter Property="Foreground" Value="Gray"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
     </UserControl.Resources>
 
 
@@ -73,8 +44,8 @@
                 Background="{StaticResource MyBackgroud}"
                 CornerRadius="0 0 5 5"
             >
-                <Button Style="{StaticResource SkillButtonStyle}"
-                        Cursor="Hand" Command="{Binding SkillPopupCommand}">
+                <Button Style="{StaticResource ScoreButtonStyle}"
+                        Command="{Binding SkillPopupCommand}">
                     <StackPanel>
                         <TextBlock Text="{Binding AgentBasicInfo.SkillGroups, Mode=OneWay, Converter={StaticResource AgentGroupsToNumberTitleConverter}}"/>
                         <Popup x:Name="SkillPopup" StaysOpen="False"

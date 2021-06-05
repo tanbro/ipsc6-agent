@@ -24,17 +24,21 @@ namespace ipsc6.agent.client
         public string RemoteLocation { get; }
         public string LocalTelnum { get; }
         public string WorkerNum { get; }
-        public QueueInfoType QueueInfoType { get; }
+        public QueueInfoType QueueType { get; }
         public string SkillGroupId { get; }
         public string IvrPath { get; }
         public string CustomString { get; }
 
         public bool IsHeld { get; internal set; }
+        public HoldEventType HoldType { get; internal set; }
+        public bool IsActive { get; internal set; }
 
-        public CallInfo(ConnectionInfo connectionInfo, ServerSentMessage message) : base(connectionInfo)
+        public CallInfo(ConnectionInfo connectionInfo, int channel, string data) : base(connectionInfo)
         {
-            Channel = message.N2;
-            var parts = message.S.Split(Constants.VerticalBarDelimiter, 2);
+            IsHeld = false;
+            IsActive = false;
+            Channel = channel;
+            var parts = data.Split(Constants.VerticalBarDelimiter, 2);
             var values = parts[0].Split(Constants.SemicolonBarDelimiter);
             foreach (var pair in values.Select((s, i) => (s, i)))
             {
@@ -51,25 +55,25 @@ namespace ipsc6.agent.client
                     case 2:
                         CallDirection = (CallDirection)Enum.Parse(typeof(CallDirection), s);
                         break;
-                    case 4:
+                    case 3:
                         RemoteTelnum = s;
                         break;
-                    case 5:
+                    case 4:
                         RemoteLocation = s;
                         break;
-                    case 6:
+                    case 5:
                         LocalTelnum = s;
                         break;
-                    case 7:
+                    case 6:
                         WorkerNum = s;
                         break;
-                    case 8:
-                        QueueInfoType = (QueueInfoType)Enum.Parse(typeof(QueueInfoType), s);
+                    case 7:
+                        QueueType = (QueueInfoType)Enum.Parse(typeof(QueueInfoType), s);
                         break;
-                    case 9:
+                    case 8:
                         SkillGroupId = s;
                         break;
-                    case 10:
+                    case 9:
                         IvrPath = s;
                         break;
                     default:
@@ -95,5 +99,7 @@ namespace ipsc6.agent.client
             && Channel == other.Channel;
         public static bool operator ==(CallInfo left, CallInfo right) => EqualityComparer<CallInfo>.Default.Equals(left, right);
         public static bool operator !=(CallInfo left, CallInfo right) => !(left == right);
+        public override string ToString() =>
+            $"<{GetType().Name} Connection={ConnectionInfo}, Channel={Channel}, IsActive={IsActive}, IsHeld={IsHeld}, HoldType={HoldType}>";
     }
 }

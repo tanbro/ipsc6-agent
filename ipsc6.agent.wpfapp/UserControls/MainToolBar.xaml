@@ -145,6 +145,7 @@
 
             <Button Grid.Row="0" Grid.Column="5"
                     Style="{StaticResource MyMainButton}"
+                    Command="{Binding HoldCommand}"
                     ToolTip="通话保持"
                 >
                 <!--<iconPacks:BootstrapIcons Kind="PauseFill" Height="48" Width="48"/>-->
@@ -153,6 +154,7 @@
 
             <Button Grid.Row="0" Grid.Column="6"
                     Style="{StaticResource MyMainButton}"
+                    Command="{Binding UnHoldCommand}"
                     ToolTip="取消通话保持"
                 >
                 <!--<iconPacks:BootstrapIcons Kind="ReplyFill" Height="48" Width="48"/>-->

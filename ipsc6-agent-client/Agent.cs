@@ -192,43 +192,59 @@ namespace ipsc6.agent.client
         public IReadOnlyCollection<QueueInfo> QueueInfoCollection => queueInfoCollection;
         public event QueueInfoEventHandler OnQueueInfo;
 
-        readonly HashSet<HoldInfo> holdInfoCollection = new HashSet<HoldInfo>();
-        public IReadOnlyCollection<HoldInfo> HoldInfoCollection => holdInfoCollection;
         public event HoldInfoEventHandler OnHoldInfo;
 
         readonly HashSet<CallInfo> callCollection = new HashSet<CallInfo>();
         public IReadOnlyCollection<CallInfo> CallCollection => callCollection;
 
+        public CallInfo ActiveCall => GetActiveCall();
+        public CallInfo GetActiveCall()
+        {
+            lock (this)
+            {
+                return callCollection.FirstOrDefault(x => x.IsActive);
+            }
+        }
+
+
         void Conn_OnServerSend(object sender, ServerSentEventArgs e)
         {
-            var conn = sender as Connection;
-            var msg = e.Message;
-            var index = internalConnections.IndexOf(conn);
-            var connInfo = connectionList[index];
-            switch (msg.Type)
+            try
             {
-                case MessageType.REMOTE_MSG_SETSTATE:
-                    /// 状态改变
-                    ProcessStateChangedMessage(connInfo, msg);
-                    break;
-                case MessageType.REMOTE_MSG_SETTELESTATE:
-                    /// 电话状态改变
-                    ProcessTeleStateChangedMessage(connInfo, msg);
-                    break;
-                case MessageType.REMOTE_MSG_QUEUEINFO:
-                    /// 排队信息
-                    ProcessQueueInfoMessage(connInfo, msg);
-                    break;
-                case MessageType.REMOTE_MSG_HOLDINFO:
-                    /// 保持信息
-                    ProcessHoldInfoMessage(connInfo, msg);
-                    break;
-                case MessageType.REMOTE_MSG_SENDDATA:
-                    /// 其他各种数据
-                    ProcessDataMessage(connInfo, msg);
-                    break;
-                default:
-                    break;
+                var conn = sender as Connection;
+                var msg = e.Message;
+                var index = internalConnections.IndexOf(conn);
+                var connInfo = connectionList[index];
+                switch (msg.Type)
+                {
+                    case MessageType.REMOTE_MSG_SETSTATE:
+                        /// 状态改变
+                        ProcessStateChangedMessage(connInfo, msg);
+                        break;
+                    case MessageType.REMOTE_MSG_SETTELESTATE:
+                        /// 电话状态改变
+                        ProcessTeleStateChangedMessage(connInfo, msg);
+                        break;
+                    case MessageType.REMOTE_MSG_QUEUEINFO:
+                        /// 排队信息
+                        ProcessQueueInfoMessage(connInfo, msg);
+                        break;
+                    case MessageType.REMOTE_MSG_HOLDINFO:
+                        /// 保持信息
+                        ProcessHoldInfoMessage(connInfo, msg);
+                        break;
+                    case MessageType.REMOTE_MSG_SENDDATA:
+                        /// 其他各种数据
+                        ProcessDataMessage(connInfo, msg);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception exce)
+            {
+                logger.ErrorFormat("OnServerSend - {0}: {1}", sender, exce);
+                throw;
             }
         }
 
@@ -299,6 +315,11 @@ namespace ipsc6.agent.client
                     teleState = newState;
                     ev = new TeleStateChangedEventArgs(oldState, newState);
                 }
+                // 如果挂机了， Call List 必须清空
+                if (newState == TeleState.OnHook)
+                {
+                    callCollection.Clear();
+                }
             }
             if (ev != null)
             {
@@ -325,19 +346,21 @@ namespace ipsc6.agent.client
 
         void ProcessHoldInfoMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
-            var holdInfo = new HoldInfo(connInfo, msg);
-            // 记录 HoldInfo
+            var channel = msg.N1;
+            var holdEventType = (HoldEventType)msg.N2;
+            CallInfo callInfo = new CallInfo(connInfo, channel, msg.S)
+            {
+                IsHeld = holdEventType != HoldEventType.Cancel,
+                HoldType = holdEventType,
+            };
+            // 改写 Call Collection
             lock (this)
             {
-                // 修改之前,一律先删除
-                holdInfoCollection.RemoveWhere(m => m == holdInfo);
-                if (holdInfo.EventType != HoldEventType.Cancel)
-                {
-                    holdInfoCollection.Add(holdInfo);
-                }
+                callCollection.RemoveWhere(x => x.ConnectionInfo == connInfo && x.Channel == channel);
+                callCollection.Add(callInfo);
+                logger.DebugFormat("HoldInfoMessage - {0}", callInfo);
             }
-            var ev = new HoldInfoEventArgs(connInfo, holdInfo);
-            OnHoldInfo?.Invoke(this, ev);
+            OnHoldInfo?.Invoke(this, new HoldInfoEventArgs(connInfo, callInfo));
         }
 
         void ProcessDataMessage(ConnectionInfo connInfo, ServerSentMessage msg)
@@ -517,27 +540,25 @@ namespace ipsc6.agent.client
             OnIvrDataReceived?.Invoke(this, evt);
         }
 
-        RingInfo ringInfo;
-        public RingInfo RingInfo => ringInfo;
         public event RingInfoReceivedEventHandler OnRingInfoReceived;
         private void DoOnRing(ConnectionInfo connInfo, ServerSentMessage msg)
         {
-            logger.DebugFormat("OnRing - [{0}]({1})", msg.N2, msg.S);
-            var _workChInfo = new WorkingChannelInfo(msg.N2);
-            var _ringInfo = new RingInfo(connInfo, msg.N2, msg.S);
+            var workChInfo = new WorkingChannelInfo(msg.N2);
+            var callInfo = new CallInfo(connInfo, workChInfo.Channel, msg.S) { IsActive = true };
+            logger.DebugFormat("OnRing - {0}", callInfo);
             lock (this)
             {
-                workingChannelInfo = _workChInfo;
-                ringInfo = _ringInfo;
+                workingChannelInfo = workChInfo;
+                foreach (var m in callCollection)
+                {
+                    m.IsActive = false;
+                }
+                callCollection.Add(callInfo);
             }
-            {
-                var e = new WorkingChannelInfoReceivedEventArgs(connInfo, _workChInfo);
-                OnWorkingChannelInfoReceived?.Invoke(this, e);
-            }
-            {
-                var e = new RingInfoReceivedEventArgs(connInfo, _ringInfo);
-                OnRingInfoReceived?.Invoke(this, e);
-            }
+            OnWorkingChannelInfoReceived?.Invoke(this,
+                new WorkingChannelInfoReceivedEventArgs(connInfo, workChInfo));
+            OnRingInfoReceived?.Invoke(this,
+                new RingInfoReceivedEventArgs(connInfo, callInfo));
         }
 
         WorkingChannelInfo workingChannelInfo;
@@ -549,9 +570,13 @@ namespace ipsc6.agent.client
             lock (this)
             {
                 workingChannelInfo = info;
+                foreach (var callInfo in callCollection)
+                {
+                    callInfo.IsActive = callInfo.ConnectionInfo == connInfo && callInfo.Channel == info.Channel;
+                }
             }
-            var evt = new WorkingChannelInfoReceivedEventArgs(connInfo, info);
-            OnWorkingChannelInfoReceived?.Invoke(this, evt);
+            OnWorkingChannelInfoReceived?.Invoke(this,
+                new WorkingChannelInfoReceivedEventArgs(connInfo, info));
         }
 
         private readonly HashSet<Privilege> privilegeCollection = new HashSet<Privilege>();
@@ -561,7 +586,7 @@ namespace ipsc6.agent.client
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var values = from s in msg.S.Split(Constants.VerticalBarDelimiter)
-                         select (Privilege)int.Parse(s);
+                         select (Privilege)Enum.Parse(typeof(Privilege), s);
             lock (this)
             {
                 privilegeCollection.UnionWith(values);
@@ -1045,10 +1070,10 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task UnHold(HoldInfo holdInfo)
+        public async Task UnHold(CallInfo callInfo)
         {
-            var connObj = GetConnection(holdInfo.ConnectionInfo);
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_RETRIEVE, holdInfo.Channel);
+            var connObj = GetConnection(callInfo.ConnectionInfo);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_RETRIEVE, callInfo.Channel);
             await connObj.Request(req);
         }
 

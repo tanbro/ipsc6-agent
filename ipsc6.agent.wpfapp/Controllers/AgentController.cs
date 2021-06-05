@@ -37,14 +37,41 @@ namespace ipsc6.agent.wpfapp.Controllers
             Agent.OnGroupCollectionReceived += Agent_OnGroupCollectionReceived;
             Agent.OnSignedGroupsChanged += Agent_OnSignedGroupsChanged;
             Agent.OnTeleStateChanged += Agent_OnTeleStateChanged;
+            Agent.OnHoldInfo += Agent_OnHoldInfo;
+            Agent.OnRingInfoReceived += Agent_OnRingInfoReceived;
 
             return Agent;
         }
 
+        private static void Agent_OnRingInfoReceived(object sender, client.RingInfoReceivedEventArgs e)
+        {
+            ReloadCallList();
+        }
+
+        private static void Agent_OnHoldInfo(object sender, client.HoldInfoEventArgs e)
+        {
+            ReloadCallList();
+        }
+
+
+        static void ReloadCallList()
+        {
+            var model = Models.Cti.AgentBasicInfo.Instance;
+            model.CallList = (
+                from item in Agent.CallCollection
+                select item
+            ).ToList();
+            model.HoldList = (
+                from item in Agent.CallCollection
+                where item.IsHeld
+                select item
+            ).ToList();
+        }
         private static void Agent_OnTeleStateChanged(object sender, client.TeleStateChangedEventArgs e)
         {
             var model = Models.Cti.AgentBasicInfo.Instance;
             model.TeleState = e.NewState;
+            ReloadCallList();
             ViewModels.MainViewModel.Instance.RefreshAgentExecutables();
         }
 

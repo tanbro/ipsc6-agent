@@ -16,6 +16,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainViewModel));
 
+        #region 主窗口
         static bool pinned = true;
         public bool Pinned
         {
@@ -70,6 +71,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => mainPanelVisibility;
             set => SetProperty(ref mainPanelVisibility, value);
         }
+        #endregion
 
         public Models.Cti.AgentBasicInfo AgentBasicInfo => Models.Cti.AgentBasicInfo.Instance;
         public Models.Cti.RingInfo RingInfo => Models.Cti.RingInfo.Instance;
@@ -342,8 +344,47 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 保持
-
+        static readonly IRelayCommand holdCommand = new RelayCommand(DoHold);
+        public IRelayCommand HoldCommand => holdCommand;
+        static async void DoHold()
+        {
+            var agent = Controllers.AgentController.Agent;
+            await agent.Hold();
+        }
         #endregion
 
+        #region 取消保持
+        static readonly IRelayCommand unHoldCommand = new RelayCommand<object>(DoUnHold);
+        public IRelayCommand UnHoldCommand => unHoldCommand;
+        static async void DoUnHold(object parameter)
+        {
+            client.CallInfo callInfo = null;
+            var agent = Controllers.AgentController.Agent;
+            if (parameter == null)
+            {
+                callInfo = agent.CallCollection.First(x => x.IsHeld);
+            }
+            else
+            {
+                callInfo = parameter as client.CallInfo;
+            }
+            await agent.UnHold(callInfo);
+        }
+        #endregion
+
+        #region 保持列表
+        static bool isHoldPopupOpened;
+        public bool IsHoldPopupOpened
+        {
+            get => isHoldPopupOpened;
+            set => SetProperty(ref isHoldPopupOpened, value);
+        }
+        static readonly IRelayCommand holdPopupCommand = new RelayCommand(DoHoldPopup);
+        public IRelayCommand HoldPopupCommand => holdPopupCommand;
+        static void DoHoldPopup()
+        {
+            Instance.IsHoldPopupOpened = !isHoldPopupOpened;
+        }
+        #endregion
     }
 }

@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-
 
 namespace ipsc6.agent.wpfapp.Models.Cti
 {
@@ -53,8 +51,15 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetProperty(ref teleState, value);
         }
 
-        IList<client.HoldInfo> holdList = new List<client.HoldInfo>();
-        public IList<client.HoldInfo> HoldList
+        IList<client.CallInfo> callList = new List<client.CallInfo>();
+        public IList<client.CallInfo> CallList
+        {
+            get => callList;
+            set => SetProperty(ref callList, value);
+        }
+
+        IList<client.CallInfo> holdList = new List<client.CallInfo>();
+        public IList<client.CallInfo> HoldList
         {
             get => holdList;
             set => SetProperty(ref holdList, value);

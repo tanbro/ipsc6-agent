@@ -5,8 +5,18 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
              mc:Ignorable="d"
+             xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
+             xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
              Width="42" Height="64"
+             x:Name="HoldPanelUserControl"
              >
+    <UserControl.DataContext>
+        <vm:MainViewModel/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <converters:AgentCallsToNumberTitleConverter x:Key="AgentCallsToNumberTitleConverter"/>
+        <converters:AgentCallToTextConverter x:Key="AgentCallToTextConverter"/>
+    </UserControl.Resources>
 
     <Border Width="42" Height="64"
             BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
@@ -30,9 +40,29 @@
                 Background="{StaticResource MyBackgroud}"
                 CornerRadius="0 0 5 5"
             >
-                <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}">
-                    2
-                </TextBlock>
+                <Button Style="{StaticResource ScoreButtonStyle}" Command="{Binding HoldPopupCommand}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding AgentBasicInfo.CallList, Mode=OneWay, Converter={StaticResource AgentCallsToNumberTitleConverter}}"/>
+                        <Popup x:Name="SkillPopup" StaysOpen="False"
+                               IsOpen="{Binding IsHoldPopupOpened}">
+                            <ContentControl>
+                                <ListBox ItemsSource="{Binding AgentBasicInfo.HoldList, Mode=OneWay}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource AgentCallToTextConverter}}"/>
+                                                <Button Content="找回"
+                                                        Command="{Binding ElementName=HoldPanelUserControl, Path=DataContext.UnHoldCommand}"
+                                                        CommandParameter="{Binding}"
+                                                />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </ContentControl>
+                        </Popup>
+                    </StackPanel>
+                </Button>
             </Border>
         </Grid>
     </Border>

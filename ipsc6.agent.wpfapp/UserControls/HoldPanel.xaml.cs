@@ -23,6 +23,7 @@ namespace ipsc6.agent.wpfapp.UserControls
         public HoldPanel()
         {
             InitializeComponent();
+            DataContext = ViewModels.MainViewModel.Instance;
         }
     }
 }

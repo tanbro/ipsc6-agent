@@ -34,7 +34,7 @@ namespace ipsc6.agent.client
                             var groupObj = refGroups.FirstOrDefault(m => m.Id == id);
                             if (groupObj != null)
                             {
-                                groups.Add(groupObj);
+                                if (!groups.Add(groupObj)) throw new InvalidOperationException();
                             }
                         }
                         break;

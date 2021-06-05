@@ -15,13 +15,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)AgentRunningState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AgentState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AgentStateWorkType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CallDirection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CallInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Connection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ConnectionInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ConnectionState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Events.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Exceptions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)HoldInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HoldEventType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IvrData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IvrInvokeType.cs" />
@@ -29,7 +30,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)QueueInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueueEventType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueueInfoType.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)RingInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ServerSentCustomString.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ServerSentErrorCode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ServerSentMessage.cs" />

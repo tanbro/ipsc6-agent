@@ -13,6 +13,6 @@ namespace ipsc6.agent.wpfapp.Config
 
         public IList<string> ServerList { get; set; }
 
-        public String Name { get; set; }
+        public string Name { get; set; }
     }
 }
