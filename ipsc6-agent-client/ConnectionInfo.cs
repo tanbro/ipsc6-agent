@@ -22,11 +22,6 @@ namespace ipsc6.agent.client
             Port = port;
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         public override string ToString()
         {
             return $"<{GetType().Name} {Host}|{Port}>";
@@ -42,6 +37,14 @@ namespace ipsc6.agent.client
             return other != null
                 && Host == other.Host
                 && Port == other.Port;
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 995452845;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Host);
+            hashCode = hashCode * -1521134295 + Port.GetHashCode();
+            return hashCode;
         }
 
         public static bool operator ==(ConnectionInfo left, ConnectionInfo right)

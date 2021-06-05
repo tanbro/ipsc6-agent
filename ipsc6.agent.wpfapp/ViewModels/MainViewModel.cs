@@ -89,22 +89,33 @@ namespace ipsc6.agent.wpfapp.ViewModels
             });
         }
 
-
-        #region Command 打开状态弹出窗
-        static bool isOpenStatePopup = false;
-        public bool IsOpenStatePopup
+        #region 技能组 Popup
+        static bool isSkillPopupOpened;
+        public bool IsSkillPopupOpened
         {
-            get => isOpenStatePopup;
-            set => SetProperty(ref isOpenStatePopup, value);
+            get => isSkillPopupOpened;
+            set => SetProperty(ref isSkillPopupOpened, value);
+        }
+        static readonly IRelayCommand skillPopupCommand = new RelayCommand(DoSkillPopup);
+        public IRelayCommand SkillPopupCommand => skillPopupCommand;
+        static void DoSkillPopup()
+        {
+            Instance.IsSkillPopupOpened = !isSkillPopupOpened;
         }
         #endregion
 
-        #region OpenStatePopup Command
-        static readonly IRelayCommand openStatePopupCommand = new RelayCommand(DoOpenStatePopup, CanOpenStatePopup);
-        public IRelayCommand OpenStatePopupCommand => openStatePopupCommand;
+        #region Command 打开状态弹出窗
+        static bool isStatePopupOpened;
+        public bool IsStatePopupOpened
+        {
+            get => isStatePopupOpened;
+            set => SetProperty(ref isStatePopupOpened, value);
+        }
+        static readonly IRelayCommand statePopupCommand = new RelayCommand(DoOpenStatePopup, CanOpenStatePopup);
+        public IRelayCommand StatePopupCommand => statePopupCommand;
         static void DoOpenStatePopup()
         {
-            isOpenStatePopup = true;
+            Instance.IsStatePopupOpened = !isStatePopupOpened;
         }
 
         static bool CanOpenStatePopup()
@@ -233,7 +244,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
-
         #region Command Hangup
         static readonly IRelayCommand onHookCommand = new RelayCommand(DoOnHook, CanOnHook);
         public IRelayCommand OnHookCommand => onHookCommand;
@@ -330,5 +340,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
             await agent.Xfer(agent.WorkingChannel.Channel, groupId.Trim(), workerNum.Trim());
         }
         #endregion
+
+        #region 保持
+
+        #endregion
+
     }
 }

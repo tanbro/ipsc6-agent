@@ -24,12 +24,12 @@ namespace ipsc6.agent.client
             Channel = msg.N1;
             Type = (QueueInfoType)msg.N2;
             var parts = msg.S.Split(Constants.SemicolonBarDelimiter);
-            foreach (var part in parts.Select((str, index) => (str, index)))
+            foreach (var pair in parts.Select((str, index) => (str, index)))
             {
-                switch (part.index)
+                switch (pair.index)
                 {
                     case 0:
-                        foreach (var id in part.str.Split(Constants.VerticalBarDelimiter))
+                        foreach (var id in pair.str.Split(Constants.VerticalBarDelimiter))
                         {
                             var groupObj = refGroups.FirstOrDefault(m => m.Id == id);
                             if (groupObj != null)
@@ -39,32 +39,27 @@ namespace ipsc6.agent.client
                         }
                         break;
                     case 1:
-                        EventType = (QueueEventType)int.Parse(part.str);
+                        EventType = (QueueEventType)int.Parse(pair.str);
                         break;
                     case 2:
-                        SessionId = part.str;
+                        SessionId = pair.str;
                         break;
                     case 3:
-                        Id = part.str;
+                        Id = pair.str;
                         break;
                     case 4:
-                        WorkerNum = part.str;
+                        WorkerNum = pair.str;
                         break;
                     case 5:
-                        CallingNo = part.str;
+                        CallingNo = pair.str;
                         break;
                     case 6:
-                        CustomeString = part.str;
+                        CustomeString = pair.str;
                         break;
                     default:
                         break;
                 }
             }
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
         }
 
         public override bool Equals(object obj)
@@ -77,6 +72,14 @@ namespace ipsc6.agent.client
             return other != null &&
                    EqualityComparer<ConnectionInfo>.Default.Equals(ConnectionInfo, other.ConnectionInfo) &&
                    Channel == other.Channel;
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 379874733;
+            hashCode = hashCode * -1521134295 + EqualityComparer<ConnectionInfo>.Default.GetHashCode(ConnectionInfo);
+            hashCode = hashCode * -1521134295 + Channel.GetHashCode();
+            return hashCode;
         }
 
         public static bool operator ==(QueueInfo left, QueueInfo right)

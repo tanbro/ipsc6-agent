@@ -108,8 +108,7 @@
 
                     <Button Grid.Column="0"
                             Style="{StaticResource WorkerStatusButtonStyle}"
-                            Command="{Binding OpenStatePopupCommand}"
-                            Click="ShowOrHideStatePopup"
+                            Command="{Binding StatePopupCommand}"
                             >
                         <StackPanel>
                             <Grid>
@@ -125,7 +124,8 @@
                                     Background="{Binding AgentBasicInfo.AgentStateWorkType, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
                                  />
                             </Grid>
-                            <Popup x:Name="StatePopup" StaysOpen="False">
+                            <Popup x:Name="StatePopup" StaysOpen="False"
+                                   IsOpen="{Binding IsStatePopupOpened}">
                                 <ListBox ItemsSource="{Binding AgentBasicInfo.StateOperationItems}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>

@@ -196,6 +196,9 @@ namespace ipsc6.agent.client
         public IReadOnlyCollection<HoldInfo> HoldInfoCollection => holdInfoCollection;
         public event HoldInfoEventHandler OnHoldInfo;
 
+        readonly HashSet<CallInfo> callCollection = new HashSet<CallInfo>();
+        public IReadOnlyCollection<CallInfo> CallCollection => callCollection;
+
         void Conn_OnServerSend(object sender, ServerSentEventArgs e)
         {
             var conn = sender as Connection;
@@ -447,12 +450,6 @@ namespace ipsc6.agent.client
                                 acc.create(cfg);
                                 sipAccounts.Add(acc);
                             }
-                        }
-                        else
-                        {
-                            // Re-Register
-                            logger.DebugFormat("重注册 SipAccount {0}", uri);
-                            existedAcc.setRegistration(true);
                         }
                     }
                 }

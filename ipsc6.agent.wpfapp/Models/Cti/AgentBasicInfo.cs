@@ -53,5 +53,12 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetProperty(ref teleState, value);
         }
 
+        IList<client.HoldInfo> holdList = new List<client.HoldInfo>();
+        public IList<client.HoldInfo> HoldList
+        {
+            get => holdList;
+            set => SetProperty(ref holdList, value);
+        }
+
     }
 }

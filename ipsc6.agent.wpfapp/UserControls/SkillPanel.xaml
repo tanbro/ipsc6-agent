@@ -74,10 +74,11 @@
                 CornerRadius="0 0 5 5"
             >
                 <Button Style="{StaticResource SkillButtonStyle}"
-                        Cursor="Hand" Click="ShowOrHideSkillPopup">
+                        Cursor="Hand" Command="{Binding SkillPopupCommand}">
                     <StackPanel>
                         <TextBlock Text="{Binding AgentBasicInfo.SkillGroups, Mode=OneWay, Converter={StaticResource AgentGroupsToNumberTitleConverter}}"/>
-                        <Popup x:Name="SkillPopup" StaysOpen="False">
+                        <Popup x:Name="SkillPopup" StaysOpen="False"
+                               IsOpen="{Binding IsSkillPopupOpened}">
                             <ContentControl>
                                 <ListBox ItemsSource="{Binding AgentBasicInfo.SkillGroups, Mode=OneWay}">
                                     <ListBox.ItemTemplate>
