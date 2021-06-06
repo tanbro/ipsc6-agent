@@ -356,7 +356,7 @@ namespace ipsc6.agent.client
             // 改写 Call Collection
             lock (this)
             {
-                callCollection.RemoveWhere(x => x.ConnectionInfo == connInfo && x.Channel == channel);
+                callCollection.RemoveWhere(x => x == callInfo);
                 callCollection.Add(callInfo);
                 logger.DebugFormat("HoldInfoMessage - {0}", callInfo);
             }
