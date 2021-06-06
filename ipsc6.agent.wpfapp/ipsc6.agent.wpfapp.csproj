@@ -245,6 +245,7 @@
     </ApplicationDefinition>
     <Compile Include="Config\Ipsc.cs" />
     <Compile Include="Config\Manager.cs" />
+    <Compile Include="Converters\AgentCallsToHoldPanelTitleConverter.cs" />
     <Compile Include="Converters\AgentCallsToNumberTitleConverter.cs" />
     <Compile Include="Converters\AgentCallToTextConverter.cs" />
     <Compile Include="Converters\AgentGroupsToNumberTitleConverter.cs" />

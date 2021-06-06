@@ -16,6 +16,7 @@
     <UserControl.Resources>
         <converters:AgentCallsToNumberTitleConverter x:Key="AgentCallsToNumberTitleConverter"/>
         <converters:AgentCallToTextConverter x:Key="AgentCallToTextConverter"/>
+        <converters:AgentCallsToHoldPanelTitleConverter x:Key="AgentCallsToHoldPanelTitleConverter"/>
     </UserControl.Resources>
 
     <Border Width="42" Height="64"
@@ -42,7 +43,7 @@
             >
                 <Button Style="{StaticResource ScoreButtonStyle}" Command="{Binding HoldPopupCommand}">
                     <StackPanel>
-                        <TextBlock Text="{Binding AgentBasicInfo.CallList, Mode=OneWay, Converter={StaticResource AgentCallsToNumberTitleConverter}}"/>
+                        <TextBlock Text="{Binding AgentBasicInfo.CallList, Mode=OneWay, Converter={StaticResource AgentCallsToHoldPanelTitleConverter}}"/>
                         <Popup x:Name="SkillPopup" StaysOpen="False"
                                IsOpen="{Binding IsHoldPopupOpened}">
                             <ContentControl>
