@@ -249,6 +249,7 @@
     <Compile Include="Converters\AgentCallsToNumberTitleConverter.cs" />
     <Compile Include="Converters\AgentCallToTextConverter.cs" />
     <Compile Include="Converters\AgentGroupsToNumberTitleConverter.cs" />
+    <Compile Include="Converters\AgentQueueConverters.cs" />
     <Compile Include="Converters\AgentStateToBrushConverter.cs" />
     <Compile Include="Converters\AgentStateToTextConverter.cs" />
     <Compile Include="Converters\BooleanToPinIconConverter.cs" />

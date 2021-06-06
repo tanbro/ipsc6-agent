@@ -12,6 +12,9 @@
     <UserControl.DataContext>
         <vm:MainViewModel/>
     </UserControl.DataContext>
+    <UserControl.Resources>
+        <converters:QueueListToTitleConverter x:Key="QueueListToTitleConverter"/>
+    </UserControl.Resources>
 
     <Border Width="60" Height="64"
             BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
@@ -35,9 +38,9 @@
                 CornerRadius="0 0 5 5"
                 Background="{StaticResource MyBackgroud}"
             >
-                <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}">
-                    99+
-                </TextBlock>
+                <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
+                           Text="{Binding AgentBasicInfo.QueueList, Mode=OneWay, Converter={StaticResource QueueListToTitleConverter}}"
+                           />
             </Border>
         </Grid>
     </Border>

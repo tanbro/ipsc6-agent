@@ -39,8 +39,23 @@ namespace ipsc6.agent.wpfapp.Controllers
             Agent.OnTeleStateChanged += Agent_OnTeleStateChanged;
             Agent.OnHoldInfo += Agent_OnHoldInfo;
             Agent.OnRingInfoReceived += Agent_OnRingInfoReceived;
+            Agent.OnQueueInfo += Agent_OnQueueInfo;
 
             return Agent;
+        }
+
+        private static void Agent_OnQueueInfo(object sender, client.QueueInfoEventArgs e)
+        {
+            ReloadQueueList();
+        }
+
+        private static void ReloadQueueList()
+        {
+            var model = Models.Cti.AgentBasicInfo.Instance;
+            model.QueueList = (
+                from m in Agent.QueueInfoCollection
+                select m
+            ).ToList();
         }
 
         private static void Agent_OnRingInfoReceived(object sender, client.RingInfoReceivedEventArgs e)

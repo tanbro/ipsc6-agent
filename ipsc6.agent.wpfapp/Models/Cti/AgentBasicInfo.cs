@@ -65,5 +65,12 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetProperty(ref holdList, value);
         }
 
+        IList<client.QueueInfo> queueList = new List<client.QueueInfo>();
+        public IList<client.QueueInfo> QueueList
+        {
+            get => queueList;
+            set => SetProperty(ref queueList, value);
+        }
+
     }
 }
