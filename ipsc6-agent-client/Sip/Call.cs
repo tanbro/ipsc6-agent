@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ipsc6.agent.client.Sip
 {
-    class Call : org.pjsip.pjsua2.Call
+    public class Call : org.pjsip.pjsua2.Call
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Call));
 

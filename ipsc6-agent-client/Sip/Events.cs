@@ -3,9 +3,9 @@ using System;
 
 namespace ipsc6.agent.client.Sip
 {
-    delegate void RegisterStateChangedEventHandler(object sender, EventArgs e);
+    public delegate void RegisterStateChangedEventHandler(object sender, EventArgs e);
 
-    class IncomingCallEventArgs : EventArgs
+    public class IncomingCallEventArgs : EventArgs
     {
         public Call Call { get; }
         public IncomingCallEventArgs(Call call) : base()
@@ -13,8 +13,8 @@ namespace ipsc6.agent.client.Sip
             Call = call;
         }
     }
-    delegate void IncomingCallEventHandler(object sender, IncomingCallEventArgs e);
+    public delegate void IncomingCallEventHandler(object sender, IncomingCallEventArgs e);
 
-    delegate void CallDisconnectedEventHandler(object sender, EventArgs e);
+    public delegate void CallDisconnectedEventHandler(object sender, EventArgs e);
 
 }

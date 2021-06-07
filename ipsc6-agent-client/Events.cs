@@ -21,6 +21,7 @@ namespace ipsc6.agent.client
     public delegate void IvrDataReceivedEventHandler(object sender, IvrDataReceivedEventArgs e);
     public delegate void CustomStringReceivedEventArgsReceivedEventHandler(object sender, CustomStringReceivedEventArgs e);
     public delegate void SipRegistrarListReceivedEventHandler(object sender, SipRegistrarListReceivedEventArgs e);
+    public delegate void SipRegisterStateChangedEventHandler(object sender, EventArgs e);
 
     public class ServerSentEventArgs : EventArgs
     {

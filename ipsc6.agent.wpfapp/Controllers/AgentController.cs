@@ -40,8 +40,20 @@ namespace ipsc6.agent.wpfapp.Controllers
             Agent.OnHoldInfo += Agent_OnHoldInfo;
             Agent.OnRingInfoReceived += Agent_OnRingInfoReceived;
             Agent.OnQueueInfo += Agent_OnQueueInfo;
+            Agent.OnSipRegisterStateChanged += Agent_OnSipRegisterStateChanged;
 
             return Agent;
+        }
+
+        private static void Agent_OnSipRegisterStateChanged(object sender, EventArgs e)
+        {
+            ReloadSipAccountList();
+        }
+
+        static void ReloadSipAccountList()
+        {
+            var model = Models.Cti.AgentBasicInfo.Instance;
+            model.SipAccountList = Agent.SipAccountCollection.ToList();
         }
 
         private static void Agent_OnQueueInfo(object sender, client.QueueInfoEventArgs e)

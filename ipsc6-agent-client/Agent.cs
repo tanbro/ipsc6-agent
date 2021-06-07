@@ -434,6 +434,7 @@ namespace ipsc6.agent.client
         }
 
         public event SipRegistrarListReceivedEventHandler OnSipRegistrarListReceived;
+        public event SipRegisterStateChangedEventHandler OnSipRegisterStateChanged;
         private void DoOnSipRegistrarList(ConnectionInfo connectionInfo, ServerSentMessage msg)
         {
             var connectionIndex = GetConnetionIndex(connectionInfo);
@@ -475,10 +476,20 @@ namespace ipsc6.agent.client
                             }
                         }
                     }
+                    ReloadSipAccountCollection();
                 }
             }).Wait();
 
             OnSipRegistrarListReceived?.Invoke(this, evt);
+        }
+
+        private void ReloadSipAccountCollection()
+        {
+
+            sipAccountCollection = new HashSet<SipAccountInfo>(
+                from acc in sipAccounts
+                select new SipAccountInfo(acc)
+            );
         }
 
         private void Acc_OnCallDisconnected(object sender, EventArgs e)
@@ -490,7 +501,14 @@ namespace ipsc6.agent.client
 
         private void Acc_OnRegisterStateChanged(object sender, EventArgs e)
         {
-            logger.Debug("Acc_OnRegisterStateChanged");
+            SyncFactory.StartNew(() =>
+            {
+                lock (this)
+                {
+                    ReloadSipAccountCollection();
+                }
+            }).Wait();
+            OnSipRegisterStateChanged?.Invoke(this, new EventArgs());
         }
 
         private void Acc_OnIncomingCall(object sender, Sip.IncomingCallEventArgs e)
@@ -1229,6 +1247,8 @@ namespace ipsc6.agent.client
         }
 
         readonly HashSet<Sip.Account> sipAccounts = new HashSet<Sip.Account>();
+        HashSet<SipAccountInfo> sipAccountCollection = new HashSet<SipAccountInfo>();
+        public IReadOnlyCollection<SipAccountInfo> SipAccountCollection => sipAccountCollection;
 
     }
 }

@@ -72,5 +72,15 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetProperty(ref queueList, value);
         }
 
+        IList<client.SipAccountInfo> sipAccountList = new List<client.SipAccountInfo>();
+        public IList<client.SipAccountInfo> SipAccountList
+        {
+            get => sipAccountList;
+            set
+            {
+                SetProperty(ref sipAccountList, value);
+                OnPropertyChanged("TeleState");
+            }
+        }
     }
 }

@@ -26,7 +26,6 @@ namespace ipsc6.agent.wpfapp.Converters
             if (v.Count < 900) return "800+";
             if (v.Count < 1000) return "900+";
             return "1K+";
-
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

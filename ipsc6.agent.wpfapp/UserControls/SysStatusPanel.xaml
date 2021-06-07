@@ -5,8 +5,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2010" 
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
+             xmlns:conv="clr-namespace:ipsc6.agent.wpfapp.Converters"
              mc:Ignorable="d" 
              Height="64" Width="80">
+    <UserControl.DataContext>
+        <vm:MainViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <conv:AgentTeleStateToMaterialIconConverter x:Key="AgentTeleStateToMaterialIconConverter"/>
+        <conv:AgentTeleStateToBrushConverters x:Key="AgentTeleStateToBrushConverters"/>
+    </UserControl.Resources>
+
     <Border Width="80" Height="64"
             BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
             HorizontalAlignment="Left" VerticalAlignment="Top">
@@ -26,8 +37,7 @@
                             CornerRadius="12"
                             Width="24" Height="24"
                             Background="Green"/>
-                <TextBlock Grid.Column="1"
-                           HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
                     就绪
                 </TextBlock>
             </Grid>
@@ -37,13 +47,12 @@
                     <ColumnDefinition Width="32"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <ContentControl
-                    Grid.Column="0"
-                    HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Foreground="DeepSkyBlue">
-                    <iconPacks:BootstrapIcons Height="24" Width="24"
-                                              Kind="TelephoneFill"
-                                              />
+                <ContentControl Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Foreground="{Binding AgentBasicInfo.TeleState, Mode=OneWay, Converter={StaticResource AgentTeleStateToBrushConverters}}"
+                                >
+                    <iconPacks:PackIconMaterial Height="24" Width="24"
+                        Kind="{Binding AgentBasicInfo.TeleState, Mode=OneWay, Converter={StaticResource AgentTeleStateToMaterialIconConverter}}"
+                    />
                 </ContentControl>
                 <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
                     摘机

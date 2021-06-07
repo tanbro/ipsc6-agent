@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace ipsc6.agent.client.Sip
 {
-    class Account : org.pjsip.pjsua2.Account
+    public class Account : org.pjsip.pjsua2.Account
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Account));
         public int ConnectionIndex { get; }

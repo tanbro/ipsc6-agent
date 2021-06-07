@@ -252,6 +252,7 @@
     <Compile Include="Converters\AgentQueueConverters.cs" />
     <Compile Include="Converters\AgentStateToBrushConverter.cs" />
     <Compile Include="Converters\AgentStateToTextConverter.cs" />
+    <Compile Include="Converters\AgentTeleStateConverters.cs" />
     <Compile Include="Converters\BooleanToPinIconConverter.cs" />
     <Compile Include="DesignData\MainDesignViewModel.cs" />
     <Compile Include="Controllers\AgentController.cs" />
