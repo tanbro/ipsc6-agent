@@ -18,7 +18,7 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             new AgentStateWorkType(client.AgentState.Pause, client.WorkType.PauseTrain),
         };
 
-        public IList<AgentStateWorkType> Items => items;
+        public IReadOnlyCollection<AgentStateWorkType> Items => items;
 
     }
 }

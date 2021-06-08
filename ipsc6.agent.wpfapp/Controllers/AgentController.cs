@@ -64,10 +64,7 @@ namespace ipsc6.agent.wpfapp.Controllers
         private static void ReloadQueueList()
         {
             var model = Models.Cti.AgentBasicInfo.Instance;
-            model.QueueList = (
-                from m in Agent.QueueInfoCollection
-                select m
-            ).ToList();
+            model.QueueList = Agent.QueueInfoCollection.ToList();
         }
 
         private static void Agent_OnRingInfoReceived(object sender, client.RingInfoReceivedEventArgs e)
@@ -84,15 +81,8 @@ namespace ipsc6.agent.wpfapp.Controllers
         static void ReloadCallList()
         {
             var model = Models.Cti.AgentBasicInfo.Instance;
-            model.CallList = (
-                from item in Agent.CallCollection
-                select item
-            ).ToList();
-            model.HoldList = (
-                from item in Agent.CallCollection
-                where item.IsHeld
-                select item
-            ).ToList();
+            model.CallList = Agent.CallCollection.ToList();
+            model.HoldList = Agent.HeldCallCollection.ToList();
         }
         private static void Agent_OnTeleStateChanged(object sender, client.TeleStateChangedEventArgs e)
         {
@@ -139,11 +129,7 @@ namespace ipsc6.agent.wpfapp.Controllers
         static void ResetSkillGroup()
         {
             var model = Models.Cti.AgentBasicInfo.Instance;
-            model.SkillGroups = (
-                from obj in Agent.GroupCollection
-                orderby obj.Id
-                select obj.Clone() as client.AgentGroup
-            ).ToList();
+            model.SkillGroups = Agent.GroupCollection.ToList();
         }
 
         public static async Task StartupAgent(string workerNumber, string password)

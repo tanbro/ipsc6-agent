@@ -41,10 +41,10 @@ namespace ipsc6.agent.client.Sip
             switch (callInfo.state)
             {
                 case org.pjsip.pjsua2.pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED:
-                    // /* Schedule/Dispatch call deletion to another thread here */
+                    OnCallDisconnected?.Invoke(this, new EventArgs());
+                    /* Schedule/Dispatch call deletion to another thread here */
                     Task.Run(() =>
                     {
-                        OnCallDisconnected?.Invoke(this, new EventArgs());
                         Dispose();
                     });
                     break;

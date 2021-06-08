@@ -30,15 +30,15 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetProperty(ref agentStateWorkType, value);
         }
 
-        IList<client.AgentGroup> skillsGroup = new List<client.AgentGroup>();
-        public IList<client.AgentGroup> SkillGroups
+        IReadOnlyCollection<client.AgentGroup> skillsGroup = new List<client.AgentGroup>();
+        public IReadOnlyCollection<client.AgentGroup> SkillGroups
         {
             get => skillsGroup;
             set => SetProperty(ref skillsGroup, value);
         }
 
-        IList<AgentStateWorkType> stateOperationItems = AgentStateOperations.Instance.Items;
-        public IList<AgentStateWorkType> StateOperationItems
+        IReadOnlyCollection<AgentStateWorkType> stateOperationItems = AgentStateOperations.Instance.Items;
+        public IReadOnlyCollection<AgentStateWorkType> StateOperationItems
         {
             get => stateOperationItems;
             set => SetProperty(ref stateOperationItems, value);
@@ -51,22 +51,22 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetProperty(ref teleState, value);
         }
 
-        IList<client.CallInfo> callList = new List<client.CallInfo>();
-        public IList<client.CallInfo> CallList
+        IReadOnlyCollection<client.CallInfo> callList = new HashSet<client.CallInfo>();
+        public IReadOnlyCollection<client.CallInfo> CallList
         {
             get => callList;
             set => SetProperty(ref callList, value);
         }
 
-        IList<client.CallInfo> holdList = new List<client.CallInfo>();
-        public IList<client.CallInfo> HoldList
+        IReadOnlyCollection<client.CallInfo> holdList = new HashSet<client.CallInfo>();
+        public IReadOnlyCollection<client.CallInfo> HoldList
         {
             get => holdList;
             set => SetProperty(ref holdList, value);
         }
 
-        IList<client.QueueInfo> queueList = new List<client.QueueInfo>();
-        public IList<client.QueueInfo> QueueList
+        IReadOnlyCollection<client.QueueInfo> queueList = new HashSet<client.QueueInfo>();
+        public IReadOnlyCollection<client.QueueInfo> QueueList
         {
             get => queueList;
             set => SetProperty(ref queueList, value);

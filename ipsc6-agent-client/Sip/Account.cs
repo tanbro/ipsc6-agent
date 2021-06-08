@@ -48,10 +48,7 @@ namespace ipsc6.agent.client.Sip
         {
             logger.DebugFormat("RegState - {0} : {1}", getInfo().uri, param.code);
             MakeString();
-            Task.Run(() =>
-            {
-                OnRegisterStateChanged?.Invoke(this, new EventArgs());
-            });
+            OnRegisterStateChanged?.Invoke(this, new EventArgs());
         }
 
         public override void onIncomingCall(org.pjsip.pjsua2.OnIncomingCallParam param)
@@ -59,20 +56,14 @@ namespace ipsc6.agent.client.Sip
             var call = new Call(this, param.callId);
             call.OnCallDisconnected += Call_OnCallDisconnected;
             logger.DebugFormat("IncomingCall - {0} : {1}", this, call);
-            Task.Run(() =>
-            {
-                OnIncomingCall?.Invoke(this, new IncomingCallEventArgs(call));
-            });
+            OnIncomingCall?.Invoke(this, new IncomingCallEventArgs(call));
         }
 
         private void Call_OnCallDisconnected(object sender, EventArgs e)
         {
             var call = sender as Call;
             logger.DebugFormat("CallDisconnected - {0} : {1}", this, call);
-            Task.Run(() =>
-            {
-                OnCallDisconnected?.Invoke(call, new EventArgs());
-            });
+            OnCallDisconnected?.Invoke(call, new EventArgs());
         }
 
         public override string ToString()
