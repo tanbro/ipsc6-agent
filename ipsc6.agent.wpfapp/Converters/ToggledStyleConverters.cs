@@ -5,20 +5,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Windows.Media;
+using MahApps.Metro.IconPacks;
+
 
 namespace ipsc6.agent.wpfapp.Converters
 {
-    [ValueConversion(typeof(IReadOnlyCollection<client.QueueInfo>), typeof(string))]
-    public class QueueListToTitleConverter : IValueConverter
+    [ValueConversion(typeof(bool), typeof(PackIconMaterialKind))]
+    class ToggledBooleanToMaterialIconConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return "0";
-            var v = value as IReadOnlyCollection<client.QueueInfo>;
-            if (v.Count < 100) return $"{v.Count}";
-            if (v.Count < 1000) return $"{v.Count / 100}00+";
-            if (v.Count < 10000) return $"{v.Count / 1000}K+";
-            return $"...";
+            bool v = value != null && (bool)value;
+            if (v)
+                return PackIconMaterialKind.ToggleSwitch;
+            else
+                return PackIconMaterialKind.ToggleSwitchOffOutline;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -27,14 +29,18 @@ namespace ipsc6.agent.wpfapp.Converters
         }
     }
 
-    [ValueConversion(typeof(client.QueueInfo), typeof(string))]
-    public class QueueToStringConverter : IValueConverter
+    [ValueConversion(typeof(bool), typeof(SolidColorBrush))]
+    class ToggledBooleanToBrushConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return "";
-            var v = value as client.QueueInfo;
-            return v.ToString();
+            bool v = value != null && (bool)value;
+            Color color;
+            if (v)
+                color = Colors.Green;
+            else
+                color = Colors.Gray;
+            return new SolidColorBrush(color);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

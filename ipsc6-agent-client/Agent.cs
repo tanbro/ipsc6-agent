@@ -283,7 +283,7 @@ namespace ipsc6.agent.client
                     AgentStateWorkType = newState;
                 }
                 // 如果是工作状态且主连接不是当前的，需要切换！
-                if (workingState.Any(m => m == newState.AgentState) && currIndex != mainConnectionIndex)
+                if (workingState.Any(x => x == newState.AgentState) && currIndex != mainConnectionIndex)
                 {
                     oldMainConnObj = MainConnection;
                     // 先修改 index
@@ -338,43 +338,41 @@ namespace ipsc6.agent.client
         void ProcessQueueInfoMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             var queueInfo = new QueueInfo(connInfo, msg, groupCollection);
+            logger.DebugFormat("QueueInfoMessage - {0}", queueInfo);
+            QueueEventType[] enumsNoRemove = { QueueEventType.Join, QueueEventType.Wait };
             // 记录 QueueInfo
             lock (this)
             {
                 // 修改之前,一律先删除
-                queueInfoCollection.RemoveWhere(m => m == queueInfo);
-                if (queueInfo.EventType != QueueEventType.Cancel)
-                {
+                queueInfoCollection.RemoveWhere(x => x == queueInfo);
+                if (enumsNoRemove.Any(x => x == queueInfo.EventType))
                     queueInfoCollection.Add(queueInfo);
-                }
             }
-            var ev = new QueueInfoEventArgs(connInfo, queueInfo);
-            OnQueueInfo?.Invoke(this, ev);
+            OnQueueInfo?.Invoke(this, new QueueInfoEventArgs(connInfo, queueInfo));
         }
 
         void ProcessHoldInfoMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             var channel = msg.N1;
             var holdEventType = (HoldEventType)msg.N2;
-            CallInfo callInfo = new CallInfo(connInfo, channel, msg.S)
+            var callInfo = new CallInfo(connInfo, channel, msg.S)
             {
                 IsHeld = holdEventType != HoldEventType.Cancel,
                 HoldType = holdEventType,
             };
+            logger.DebugFormat("HoldInfoMessage - {0}", callInfo);
             // 改写 Call Collection
             lock (this)
             {
                 callCollection.RemoveWhere(x => x == callInfo);
                 callCollection.Add(callInfo);
-                logger.DebugFormat("HoldInfoMessage - {0}", callInfo);
             }
             OnHoldInfo?.Invoke(this, new HoldInfoEventArgs(connInfo, callInfo));
         }
 
         void ProcessDataMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
-            var type_ = (ServerSentMessageSubType)(msg.N1);
-            switch (type_)
+            switch ((ServerSentMessageSubType)msg.N1)
             {
                 case ServerSentMessageSubType.AgentId:
                     DoOnAgentId(connInfo, msg);
@@ -458,7 +456,7 @@ namespace ipsc6.agent.client
                     {
                         logger.DebugFormat("处理 SipAccount 地址 {0} ...", addr);
                         var uri = $"sip:{workerNumber}@{addr}";
-                        // 这个地址是不是已经注册了? 如果是的，重新注册一次！
+                        // 这个地址是不是已经注册了? 如果是的，目前暂定不要重新注册?
                         var existedAcc = (
                             from acc in sipAccounts
                             where acc.isValid()
@@ -474,7 +472,6 @@ namespace ipsc6.agent.client
                             {
                                 cfg.regConfig.registrarUri = $"sip:{addr}";
                                 cfg.sipConfig.authCreds.Add(sipAuthCred);
-                                logger.DebugFormat("新建 SipAccount {0}", uri);
                                 var acc = new Sip.Account(connectionIndex);
                                 acc.OnIncomingCall += Acc_OnIncomingCall;
                                 acc.OnRegisterStateChanged += Acc_OnRegisterStateChanged;
@@ -522,7 +519,7 @@ namespace ipsc6.agent.client
             if (currentCall != null)
             {
                 logger.WarnFormat("新来的呼叫 - 因为当前呼叫已经存在，所以拒绝新来的呼叫 {0}", call);
-                using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_DECLINE })
+                using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_BUSY_HERE })
                 {
                     call.hangup(cop);
                 }
@@ -995,7 +992,7 @@ namespace ipsc6.agent.client
 
         }
 
-        public bool HasPendingRequest => internalConnections.Any(conn => conn.HasPendingRequest);
+        public bool HasPendingRequest => internalConnections.Any(x => x.HasPendingRequest);
 
         public async Task<ServerSentMessage> Request(AgentRequestMessage args, int timeout = Connection.DefaultRequestTimeoutMilliseconds)
         {
@@ -1057,28 +1054,49 @@ namespace ipsc6.agent.client
             throw new NotImplementedException();
         }
 
-        public void Dial()
+
+        public async Task Xfer(string groupId, string workerNum = "", string customString = "")
         {
-            throw new NotImplementedException();
+            int channel = workingChannelInfo.Channel;
+            var s = $"{workerNum}|{groupId}|{customString}";
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER, channel, s);
+            await MainConnection.Request(req);
         }
 
-        public async Task Xfer(int channel, string groupId, string workerNum = "", string customString = "")
+        public async Task Xfer(CallInfo callInfo, string groupId, string workerNum = "", string customString = "")
         {
-            var s = $"{workerNum}|{channel}|{groupId}|{customString}";
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER, -1, s);
+            int channel = callInfo.Channel;
+            var s = $"{workerNum}|{groupId}|{customString}";
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER, channel, s);
             await MainConnection.Request(req);
         }
 
         public async Task XferConsult(string groupId, string workerNum = "", string customString = "")
         {
             var s = $"{workerNum}|{groupId}|{customString}";
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT, -1, s);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT, 0, s);
             await MainConnection.Request(req);
         }
 
-        public void XferExt()
+        public async Task Dial(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
-            throw new NotImplementedException();
+            var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_DIAL, 0, s);
+            await MainConnection.Request(req);
+        }
+
+        public async Task XferExt(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        {
+            var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER_EX, 0, s);
+            await MainConnection.Request(req);
+        }
+
+        public async Task XferExtConsult(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        {
+            var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT_EX, -1, s);
+            await MainConnection.Request(req);
         }
 
         public async Task Hold()
@@ -1104,13 +1122,7 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task OnHook()
-        {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HANGUP);
-            await MainConnection.Request(req);
-        }
-
-        public async Task OnHook(int agentId)
+        public async Task OnHook(int agentId = 0)
         {
             if (currentCall == null)
             {

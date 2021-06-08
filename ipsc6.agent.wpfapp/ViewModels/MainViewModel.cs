@@ -339,7 +339,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (parts.Length > 1)
                 workerNum = parts[1];
 
-            await agent.Xfer(agent.WorkingChannel.Channel, groupId.Trim(), workerNum.Trim());
+            await agent.Xfer(groupId.Trim(), workerNum.Trim());
         }
         #endregion
 
@@ -384,6 +384,88 @@ namespace ipsc6.agent.wpfapp.ViewModels
         static void DoHoldPopup()
         {
             Instance.IsHoldPopupOpened = !isHoldPopupOpened;
+        }
+        #endregion
+
+        #region 排队列表
+        static bool isQueuePopupOpened;
+        public bool IsQueuePopupOpened
+        {
+            get => isQueuePopupOpened;
+            set => SetProperty(ref isQueuePopupOpened, value);
+        }
+        static readonly IRelayCommand queuePopupCommand = new RelayCommand(DoQueuePopup);
+        public IRelayCommand QueuePopupCommand => queuePopupCommand;
+        static void DoQueuePopup()
+        {
+            Instance.IsQueuePopupOpened = !isQueuePopupOpened;
+        }
+
+        static readonly IRelayCommand dequeueCommand = new RelayCommand<object>(DoDequeue);
+        public IRelayCommand DequeueCommand => dequeueCommand;
+        static async void DoDequeue(object paramter)
+        {
+            var queueInfo = paramter as client.QueueInfo;
+            var agent = Controllers.AgentController.Agent;
+            await agent.Dequeue(queueInfo);
+        }
+        #endregion
+
+        #region 外乎
+        static readonly IRelayCommand dialCommand = new RelayCommand(DoDial);
+        public IRelayCommand DialCommand => dialCommand;
+        static async void DoDial()
+        {
+            var agent = Controllers.AgentController.Agent;
+
+            var dialog = new Dialogs.PromptDialog()
+            {
+                DataContext = new Dictionary<string, object> {
+                    { "Title", "拨号" },
+                    { "Label", "输入拨打的号码" }
+                }
+            };
+            if (dialog.ShowDialog() != true) return;
+            var inputText = dialog.InputText;
+            await agent.Dial(inputText);
+        }
+        #endregion
+
+        #region 外转
+        static readonly IRelayCommand xferExtCommand = new RelayCommand(DoXferExt);
+        public IRelayCommand XferExtCommand => xferExtCommand;
+        static async void DoXferExt()
+        {
+            var agent = Controllers.AgentController.Agent;
+            var dialog = new Dialogs.PromptDialog()
+            {
+                DataContext = new Dictionary<string, object> {
+                    { "Title", "向外转移" },
+                    { "Label", "输入拨打的号码" }
+                }
+            };
+            if (dialog.ShowDialog() != true) return;
+            var inputText = dialog.InputText;
+            await agent.XferExt(inputText);
+        }
+        #endregion
+
+        #region 外咨
+        static readonly IRelayCommand xferExtConsultCommand = new RelayCommand(DoXferExtConsult);
+        public IRelayCommand XferExtConsultCommand => xferExtConsultCommand;
+        static async void DoXferExtConsult()
+        {
+            var agent = Controllers.AgentController.Agent;
+            var dialog = new Dialogs.PromptDialog()
+            {
+                DataContext = new Dictionary<string, object> {
+                    { "Title", "向外咨询" },
+                    { "Label", "输入拨打的号码" }
+                }
+            };
+            if (dialog.ShowDialog() != true) return;
+            var inputText = dialog.InputText;
+            await agent.XferExtConsult(inputText);
         }
         #endregion
     }

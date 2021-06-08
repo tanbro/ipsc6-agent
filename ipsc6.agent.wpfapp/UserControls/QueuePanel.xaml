@@ -8,12 +8,14 @@
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
              Width="60" Height="64"
+             x:Name="QueuePanelUserControl"
              >
     <UserControl.DataContext>
         <vm:MainViewModel/>
     </UserControl.DataContext>
     <UserControl.Resources>
         <converters:QueueListToTitleConverter x:Key="QueueListToTitleConverter"/>
+        <converters:QueueToStringConverter x:Key="QueueToStringConverter"/>
     </UserControl.Resources>
 
     <Border Width="60" Height="64"
@@ -34,13 +36,31 @@
                     排队
                 </TextBlock>
             </Border>
-            <Border Grid.Row="1"
-                CornerRadius="0 0 5 5"
-                Background="{StaticResource MyBackgroud}"
-            >
-                <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
+            <Border Grid.Row="1" CornerRadius="0 0 5 5" Background="{StaticResource MyBackgroud}">
+                <Button Style="{StaticResource ScoreButtonStyle}"
+                        Command="{Binding QueuePopupCommand}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
                            Text="{Binding AgentBasicInfo.QueueList, Mode=OneWay, Converter={StaticResource QueueListToTitleConverter}}"
                            />
+                        <Popup x:Name="QueuePopup" StaysOpen="False" IsOpen="{Binding IsQueuePopupOpened}">
+                            <ContentControl>
+                                <ListBox ItemsSource="{Binding AgentBasicInfo.QueueList, Mode=OneWay}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource QueueToStringConverter}}"/>
+                                                <Button Content="Dequeue"
+                                                        Command="{Binding ElementName=QueuePanelUserControl, Path=DataContext.DequeueCommand}"
+                                                        CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </ContentControl>
+                        </Popup>
+                    </StackPanel>
+                </Button>
             </Border>
         </Grid>
     </Border>

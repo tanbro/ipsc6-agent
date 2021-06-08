@@ -10,9 +10,9 @@ namespace ipsc6.agent.client
     {
         public int Channel { get; }
         public string Id { get; }
-        public QueueInfoType Type { get; }
         public QueueEventType EventType { get; }
-        public string SessionId { get; }
+        public QueueInfoType Type { get; }
+        public long ProcessId { get; }
         public string CallingNo { get; }
         public string WorkerNum { get; }
         public string CustomeString { get; }
@@ -22,14 +22,16 @@ namespace ipsc6.agent.client
         public QueueInfo(ConnectionInfo connectionInfo, ServerSentMessage msg, IReadOnlyCollection<AgentGroup> refGroups) : base(connectionInfo)
         {
             Channel = msg.N1;
-            Type = (QueueInfoType)msg.N2;
+            EventType = (QueueEventType)msg.N2;
             var parts = msg.S.Split(Constants.SemicolonBarDelimiter);
-            foreach (var pair in parts.Select((str, index) => (str, index)))
+            foreach (var pair in parts.Select((s, i) => (s, i)))
             {
-                switch (pair.index)
+                var i = pair.i;
+                var s = pair.s;
+                switch (i)
                 {
                     case 0:
-                        foreach (var id in pair.str.Split(Constants.VerticalBarDelimiter))
+                        foreach (var id in s.Split(Constants.VerticalBarDelimiter))
                         {
                             var groupObj = refGroups.FirstOrDefault(m => m.Id == id);
                             if (groupObj != null)
@@ -39,22 +41,22 @@ namespace ipsc6.agent.client
                         }
                         break;
                     case 1:
-                        EventType = (QueueEventType)int.Parse(pair.str);
+                        Type = (QueueInfoType)Enum.Parse(typeof(QueueInfoType), s);
                         break;
                     case 2:
-                        SessionId = pair.str;
+                        ProcessId = long.Parse(s);
                         break;
                     case 3:
-                        Id = pair.str;
+                        Id = s;
                         break;
                     case 4:
-                        WorkerNum = pair.str;
+                        WorkerNum = s;
                         break;
                     case 5:
-                        CallingNo = pair.str;
+                        CallingNo = s;
                         break;
                     case 6:
-                        CustomeString = pair.str;
+                        CustomeString = s;
                         break;
                     default:
                         break;
@@ -91,5 +93,7 @@ namespace ipsc6.agent.client
         {
             return !(left == right);
         }
+        public override string ToString() =>
+            $"<{GetType().Name} Connection={ConnectionInfo}, Channel={Channel}, EventType={EventType}, Type={Type}, ProcessId={ProcessId}, CallingNo={CallingNo}>";
     }
 }

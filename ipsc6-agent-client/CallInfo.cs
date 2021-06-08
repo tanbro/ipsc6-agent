@@ -33,12 +33,12 @@ namespace ipsc6.agent.client
         public HoldEventType HoldType { get; internal set; }
         public bool IsActive { get; internal set; }
 
-        public CallInfo(ConnectionInfo connectionInfo, int channel, string data) : base(connectionInfo)
+        public CallInfo(ConnectionInfo connectionInfo, int channel, string dataString) : base(connectionInfo)
         {
             IsHeld = false;
             IsActive = false;
             Channel = channel;
-            var parts = data.Split(Constants.VerticalBarDelimiter, 2);
+            var parts = dataString.Split(Constants.VerticalBarDelimiter, 2);
             var values = parts[0].Split(Constants.SemicolonBarDelimiter);
             foreach (var pair in values.Select((s, i) => (s, i)))
             {
@@ -100,6 +100,6 @@ namespace ipsc6.agent.client
         public static bool operator ==(CallInfo left, CallInfo right) => EqualityComparer<CallInfo>.Default.Equals(left, right);
         public static bool operator !=(CallInfo left, CallInfo right) => !(left == right);
         public override string ToString() =>
-            $"<{GetType().Name} Connection={ConnectionInfo}, Channel={Channel}, IsActive={IsActive}, IsHeld={IsHeld}, HoldType={HoldType}>";
+            $"<{GetType().Name} Connection={ConnectionInfo}, Channel={Channel}, IsActive={IsActive}, IsHeld={IsHeld}, HoldType={HoldType}, CallDirection={CallDirection}, RemoteTelnum={RemoteTelnum}>";
     }
 }

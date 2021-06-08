@@ -14,8 +14,9 @@ namespace ipsc6.agent.wpfapp.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null) return "<null>";
-            var ci = value as client.CallInfo;
-            return $"[{ci.Channel}] ({ci.RemoteTelnum})=>({ci.LocalTelnum})";
+            var v = value as client.CallInfo;
+            //return $"[{ci.Channel}] ({ci.RemoteTelnum})=>({ci.LocalTelnum})";
+            return v.ToString();
 
         }
 

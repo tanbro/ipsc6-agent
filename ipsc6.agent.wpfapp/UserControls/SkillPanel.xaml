@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2010" 
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
-             xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
+             xmlns:conv="clr-namespace:ipsc6.agent.wpfapp.Converters"
              xmlns:dd="clr-namespace:ipsc6.agent.wpfapp.DesignData"
              xmlns:iconpacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
@@ -17,10 +17,10 @@
     </UserControl.DataContext>
 
     <UserControl.Resources>
-        <converters:AgentGroupsToNumberTitleConverter x:Key="AgentGroupsToNumberTitleConverter"/>
+        <conv:AgentGroupsToNumberTitleConverter x:Key="AgentGroupsToNumberTitleConverter"/>
+        <conv:ToggledBooleanToMaterialIconConverter x:Key="ToggledBooleanToMaterialIconConverter"/>
+        <conv:ToggledBooleanToBrushConverter x:Key="ToggledBooleanToBrushConverter"/>
     </UserControl.Resources>
-
-
 
     <Border Width="60" Height="64"
             BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
@@ -54,19 +54,16 @@
                                 <ListBox ItemsSource="{Binding AgentBasicInfo.SkillGroups, Mode=OneWay}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid>
+                                            <Grid Background="{StaticResource MyBackgroud}">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="32"/>
-                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="48"/>
+                                                    <ColumnDefinition/>
                                                 </Grid.ColumnDefinitions>
-                                                <CheckBox Grid.Column="0"
-                                                          Margin="2"
-                                                          HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                          Foreground="{StaticResource MyInfoTextForeground}"
-                                                          IsChecked="{Binding Signed, Mode=OneWay}"
-                                                          Command="{Binding ElementName=SkillPanelUserControl, Path=DataContext.SkillSignCommand}"
-                                                          CommandParameter="{Binding Id}">
-                                                </CheckBox>
+                                                <ToggleButton Grid.Column="0" Margin="2"
+                                                              Style="{StaticResource MyToggleButton}"
+                                                              IsChecked="{Binding Signed, Mode=OneWay}"
+                                                              Command="{Binding ElementName=SkillPanelUserControl, Path=DataContext.SkillSignCommand}"
+                                                              CommandParameter="{Binding Id}"/>
                                                 <TextBlock Grid.Column="1" Text="{Binding Name, Mode=OneWay}" Margin="2"/>
                                             </Grid>
                                         </DataTemplate>

@@ -6,21 +6,14 @@ using System.Windows.Data;
 
 namespace ipsc6.agent.wpfapp.Converters
 {
-
-    [ValueConversion(typeof(IList<client.AgentGroup>), typeof(string))]
+    [ValueConversion(typeof(IReadOnlyCollection<client.AgentGroup>), typeof(string))]
     public class AgentGroupsToNumberTitleConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return "";
-            var groups = value as IList<client.AgentGroup>;
-            var totalCount = groups.Count;
-            var signedCount = (
-                from m in groups
-                where m.Signed
-                select 1
-            ).Count();
-            return $"{signedCount}/{totalCount}";
+            if (value == null) return "0/0";
+            var v = value as IReadOnlyCollection<client.AgentGroup>;
+            return $"{v.Count(x => x.Signed)}/{v.Count}";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

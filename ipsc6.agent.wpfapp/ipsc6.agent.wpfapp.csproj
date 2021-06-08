@@ -245,6 +245,7 @@
     </ApplicationDefinition>
     <Compile Include="Config\Ipsc.cs" />
     <Compile Include="Config\Manager.cs" />
+    <Compile Include="Converters\AgentCallDirectionConverters.cs" />
     <Compile Include="Converters\AgentCallsToHoldPanelTitleConverter.cs" />
     <Compile Include="Converters\AgentCallsToNumberTitleConverter.cs" />
     <Compile Include="Converters\AgentCallToTextConverter.cs" />
@@ -276,6 +277,7 @@
     <Compile Include="UserControls\SysStatusPanel.xaml.cs">
       <DependentUpon>SysStatusPanel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\ToggledStyleConverters.cs" />
     <Compile Include="UserControls\WorkerStatusPanel.xaml.cs">
       <DependentUpon>WorkerStatusPanel.xaml</DependentUpon>
     </Compile>
