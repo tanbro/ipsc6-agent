@@ -34,8 +34,8 @@ namespace ipsc6.agent.client
         }
 
         #region IDisposable
-        // Flag: Has Dispose already been called?
-        private bool disposed = false;
+
+        private bool disposedValue = false;
 
         public void Dispose()
         {
@@ -45,26 +45,22 @@ namespace ipsc6.agent.client
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!disposedValue)
             {
-                logger.InfoFormat("{0} Dispose", this);
-                // Check to see if Dispose has already been called.
-                if (disposed)
+                if (disposing)
                 {
-                    logger.ErrorFormat("{0} Dispose has already been called.", this);
-                }
-                else
-                {
+                    // 释放托管状态(托管对象)
                     logger.DebugFormat("{0} Dispose - Stop event thread", this);
                     eventThreadCancelSource.Cancel();
                     eventThread.Join();
                     eventThreadCancelSource.Dispose();
-                    logger.DebugFormat("{0} Dispose - Deallocate connector", this);
-                    network.Connector.DeallocateInstance(connector);
-                    // Note disposing has been done.
-                    disposed = true;
-                    logger.DebugFormat("{0} Dispose - disposed", this);
                 }
+
+                // 释放未托管的资源(未托管的对象)并重写终结器
+                // 将大型字段设置为 null
+                logger.DebugFormat("{0} Dispose - Deallocate connector", this);
+                network.Connector.DeallocateInstance(connector);
+                disposedValue = true;
             }
         }
         #endregion
@@ -259,7 +255,7 @@ namespace ipsc6.agent.client
                 {
                     lock (requestLock)
                     {
-                        isResponse = (pendingReqType == msg_.Type);
+                        isResponse = pendingReqType == msg_.Type;
                     }
                     if (isResponse)
                     {
@@ -314,7 +310,7 @@ namespace ipsc6.agent.client
             eventQueue.Enqueue(new ConnectorConnectAttemptFailedEventArgs());
         }
 
-        public readonly Encoding Encoding;
+        public Encoding Encoding { get; }
 
         private readonly object connectLock = new object();
 
@@ -453,6 +449,8 @@ namespace ipsc6.agent.client
 
         private static readonly object requestLock = new object();
 
+        public bool HasPendingRequest => pendingReqType != MessageType.NONE;
+
         public async Task<ServerSentMessage> Request(AgentRequestMessage args, int millisecondsTimeout = DefaultRequestTimeoutMilliseconds)
         {
             lock (connectLock)
@@ -466,7 +464,7 @@ namespace ipsc6.agent.client
             {
                 if (pendingReqType != MessageType.NONE)
                 {
-                    throw new InvalidOperationException($"A pending request exists: {pendingReqType}");
+                    throw new RequestNotCompleteError($"A pending request exists: {pendingReqType}");
                 }
                 pendingReqType = args.Type;
             }

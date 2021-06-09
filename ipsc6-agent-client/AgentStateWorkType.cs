@@ -31,9 +31,9 @@ namespace ipsc6.agent.client
 
         public bool Equals(AgentStateWorkType other)
         {
-            return other != null &&
-                   AgentState == other.AgentState &&
-                   WorkType == other.WorkType;
+            return other != null
+                && AgentState == other.AgentState
+                && WorkType == other.WorkType;
         }
 
         public static bool operator ==(AgentStateWorkType left, AgentStateWorkType right)
@@ -44,6 +44,11 @@ namespace ipsc6.agent.client
         public static bool operator !=(AgentStateWorkType left, AgentStateWorkType right)
         {
             return !(left == right);
+        }
+
+        public override string ToString()
+        {
+            return $"<{GetType().Name} {AgentState}|{WorkType}>";
         }
     }
 }

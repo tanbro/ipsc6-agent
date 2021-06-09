@@ -58,6 +58,13 @@ namespace ipsc6.agent.client
         public BaseRequestError(string message, Exception inner) : base(message, inner) { }
     }
 
+    public class RequestNotCompleteError : BaseRequestError
+    {
+        public RequestNotCompleteError() { }
+        public RequestNotCompleteError(string message) : base(message) { }
+        public RequestNotCompleteError(string message, Exception inner) : base(message, inner) { }
+    }
+
     public class RequestTimeoutError : BaseRequestError
     {
         public RequestTimeoutError() { }

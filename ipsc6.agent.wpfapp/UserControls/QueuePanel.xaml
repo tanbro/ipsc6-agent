@@ -1,0 +1,67 @@
+<UserControl x:Class="ipsc6.agent.wpfapp.UserControls.QueuePanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
+             mc:Ignorable="d"
+             xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
+             xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
+             Width="60" Height="64"
+             x:Name="QueuePanelUserControl"
+             >
+    <UserControl.DataContext>
+        <vm:MainViewModel/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <converters:QueueListToTitleConverter x:Key="QueueListToTitleConverter"/>
+        <converters:QueueToStringConverter x:Key="QueueToStringConverter"/>
+    </UserControl.Resources>
+
+    <Border Width="60" Height="64"
+            BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
+            HorizontalAlignment="Left" VerticalAlignment="Top">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+
+            <Border Grid.Row="0"
+                CornerRadius="5 5 0 0"
+                Background="{StaticResource MyGroupTitleBackground}" 
+            >
+                <TextBlock Style="{StaticResource MyScoreBoardTitleTextStyle}">
+                    排队
+                </TextBlock>
+            </Border>
+            <Border Grid.Row="1" CornerRadius="0 0 5 5" Background="{StaticResource MyBackgroud}">
+                <Button Style="{StaticResource ScoreButtonStyle}"
+                        Command="{Binding QueuePopupCommand}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
+                           Text="{Binding AgentBasicInfo.QueueList, Mode=OneWay, Converter={StaticResource QueueListToTitleConverter}}"
+                           />
+                        <Popup x:Name="QueuePopup" StaysOpen="False" IsOpen="{Binding IsQueuePopupOpened}">
+                            <ContentControl>
+                                <ListBox ItemsSource="{Binding AgentBasicInfo.QueueList, Mode=OneWay}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource QueueToStringConverter}}"/>
+                                                <Button Content="Dequeue"
+                                                        Command="{Binding ElementName=QueuePanelUserControl, Path=DataContext.DequeueCommand}"
+                                                        CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </ContentControl>
+                        </Popup>
+                    </StackPanel>
+                </Button>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

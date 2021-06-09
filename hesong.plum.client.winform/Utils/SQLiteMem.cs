@@ -1,4 +1,4 @@
-﻿//Copyright (C) Innocall Corporation
+//Copyright (C) Innocall Corporation
 //All rights reserved.
 //author:       wulei
 //version:      1.0
@@ -157,8 +157,10 @@ namespace hesong.plum.client.Utils
             SQLiteCommand cmd = null;
             try
             {
-                cmd = new SQLiteCommand(queryString, conn);
-                cmd.CommandTimeout = _CommandTimeout;
+                cmd = new SQLiteCommand(queryString, conn)
+                {
+                    CommandTimeout = _CommandTimeout
+                };
                 foreach (SQLiteParameter para in paras)
                     cmd.Parameters.Add(para);
                 da = new SQLiteDataAdapter(cmd);

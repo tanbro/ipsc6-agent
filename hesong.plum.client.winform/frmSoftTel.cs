@@ -121,33 +121,41 @@ namespace hesong.plum.client
         bool closing = false;
         private async void frmSoftTel_FormClosing(object sender, FormClosingEventArgs e)
         {
+            // caller returns and window stays open !!!
             if (closing)
             {
                 return;
             }
             Enabled = false;
             closing = true;
-            e.Cancel = true;
+            e.Cancel = true;          
 
-            // caller returns and window stays open
-
-            if (G.agent != null)
+            try
             {
-                Logger.Log("agent.ShutDown()...");
-                await G.agent.ShutDown();
-
-                Logger.Log("agent.Dispose()...");
-                G.agent.Dispose();
-
-                G.agent = null;
+                if (G.agent != null)
+                {
+                    try
+                    {
+                        Logger.Log("agent.ShutDown()...");
+                        await G.agent.ShutDown();
+                    }
+                    finally
+                    {
+                        Logger.Log("agent.Dispose()...");
+                        G.agent.Dispose();
+                        G.agent = null;
+                        Logger.Log("ipsc6.agent.network Release...");
+                        Connector.Release();
+                    }
+                }
             }
-            Logger.Log("ipsc6.agent.network Release...");
-            Connector.Release();
-
-            // doesn't matter if it's closed
-            Close();
-            Enabled = true;
-            
+            finally
+            {
+                // doesn't matter if it's closed
+                Close();
+                Enabled = true;
+            }
         }
     }
+
 }

@@ -1,0 +1,65 @@
+<UserControl x:Class="ipsc6.agent.wpfapp.UserControls.DialPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2010" 
+             xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
+             mc:Ignorable="d"
+             Width="96" Height="64"
+             >
+
+    <Border BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
+            Width="96" Height="64"
+            HorizontalAlignment="Left" VerticalAlignment="Top">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="32"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="32"/>
+                    <ColumnDefinition Width="32"/>
+                    <ColumnDefinition Width="32"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        ToolTip="拨号"
+                        Style="{StaticResource MyTinyButton}"
+                        Command="{Binding DialCommand}"
+                    >
+                    <!--<iconPacks:BootstrapIcons Kind="TelephoneFill"/>-->
+                    <Image Source="pack://application:,,,/Icons/24/telehpone-outgoing-star.png"/>
+                </Button>
+                <Button Grid.Column="1"
+                        ToolTip="咨询到外线"
+                        Style="{StaticResource MyTinyButton}"
+                        Command="{Binding XferExtCommand}"
+                    >
+                    <Image Source="pack://application:,,,/Icons/24/people-plus-star.png"/>
+                </Button>
+
+                <Button Grid.Column="2"
+                        ToolTip="转移到外线"
+                        Style="{StaticResource MyTinyButton}"
+                        Command="{Binding XferExtConsultCommand}"
+                    >
+                    <Image Source="pack://application:,,,/Icons/24/telehpone-outgoing-star.png"/>
+                </Button>
+
+            </Grid>
+
+            <TextBox Grid.Row="1" Margin="4 0 4 5"
+                     BorderThickness="0"
+                     Background="LightBlue"
+                     FontFamily="/Fonts/#Pathway Gothic One" FontSize="20"
+                     VerticalAlignment="Center" MaxLength="11"
+                     TextAlignment="Right">
+                19012345678
+            </TextBox>
+
+        </Grid>
+    </Border>
+
+</UserControl>

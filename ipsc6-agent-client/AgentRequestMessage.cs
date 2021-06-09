@@ -36,10 +36,7 @@ namespace ipsc6.agent.client
 
         public override string ToString()
         {
-            return string.Format(
-                "<{0} at 0x{1:x8} CommandType={2}, N={3}, S=\"{4}\">",
-                GetType().Name, GetHashCode(), Type, N, S
-            );
+            return $"<{GetType().Name}@{GetHashCode():x8} Command={Type}, N={N}, S=\"{S}\">";
         }
     }
 }

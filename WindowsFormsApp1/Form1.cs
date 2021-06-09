@@ -652,7 +652,7 @@ namespace WindowsFormsApp1
 
         private async void button_hangup_Click(object sender, EventArgs e)
         {
-            await agent.HangUp();
+            await agent.OnHook();
         }
 
         private async void UnHoldToolStripMenuItem_Click(object sender, EventArgs e)

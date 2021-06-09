@@ -1,0 +1,93 @@
+<UserControl x:Class="ipsc6.agent.wpfapp.UserControls.HoldPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
+             mc:Ignorable="d"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
+             xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
+             Width="42" Height="64"
+             x:Name="HoldPanelUserControl"
+             >
+    <UserControl.DataContext>
+        <vm:MainViewModel/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:AgentCallsToNumberTitleConverter x:Key="AgentCallsToNumberTitleConverter"/>
+        <converters:AgentCallToTextConverter x:Key="AgentCallToTextConverter"/>
+        <converters:AgentCallsToHoldPanelTitleConverter x:Key="AgentCallsToHoldPanelTitleConverter"/>
+        <converters:AgentCallDirectionToMaterialIconConverter x:Key="AgentCallDirectionToMaterialIconConverter"/>
+        <converters:AgentCallDirectionToStringConverter x:Key="AgentCallDirectionToStringConverter"/>
+    </UserControl.Resources>
+
+    <Border Width="42" Height="64"
+            BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
+            HorizontalAlignment="Left" VerticalAlignment="Top">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+
+            <Border Grid.Row="0"
+                CornerRadius="5 5 0 0"
+                Background="{StaticResource MyGroupTitleBackground}" 
+            >
+                <TextBlock Style="{StaticResource MyScoreBoardTitleTextStyle}">
+                    保持
+                </TextBlock>
+            </Border>
+            <Border Grid.Row="1"
+                Background="{StaticResource MyBackgroud}"
+                CornerRadius="0 0 5 5">
+                <Button Style="{StaticResource ScoreButtonStyle}" Command="{Binding HoldPopupCommand}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding AgentBasicInfo.HoldList.Count, Mode=OneWay}"/>
+                        <Popup StaysOpen="False" IsOpen="{Binding IsHoldPopupOpened}">
+                            <ContentControl>
+                                <ListBox ItemsSource="{Binding AgentBasicInfo.HoldList, Mode=OneWay}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Background="{StaticResource MyBackgroud}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="160"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid Grid.Column="0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="24"/>
+                                                        <ColumnDefinition/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <ContentControl Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <iconPacks:PackIconMaterial
+                                                            Foreground="DarkBlue"
+                                                            ToolTip="{Binding CallDirection, Mode=OneWay, Converter={StaticResource AgentCallDirectionToStringConverter}}"
+                                                            Kind="{Binding CallDirection, Mode=OneWay, Converter={StaticResource AgentCallDirectionToMaterialIconConverter}}"/>
+                                                    </ContentControl>
+                                                    <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                                               Foreground="DarkBlue"
+                                                               Text="{Binding RemoteTelnum}"/>
+                                                </Grid>
+                                                <Button Grid.Column="1" Style="{StaticResource MyCommonButton}"
+                                                        Margin="4" Height="48" Width="48"
+                                                        ToolTip="取消该通话的保持状态(恢复通话)"
+                                                        Command="{Binding ElementName=HoldPanelUserControl, Path=DataContext.UnHoldCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <iconPacks:PackIconMaterial Kind="PhoneReturn" Height="36" Width="36"/>
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </ContentControl>
+                        </Popup>
+                    </StackPanel>
+                </Button>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

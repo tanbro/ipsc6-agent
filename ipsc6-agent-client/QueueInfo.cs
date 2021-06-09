@@ -10,11 +10,11 @@ namespace ipsc6.agent.client
     {
         public int Channel { get; }
         public string Id { get; }
-        public QueueInfoType Type { get; }
         public QueueEventType EventType { get; }
-        public string SessionId { get; }
+        public QueueInfoType Type { get; }
+        public long ProcessId { get; }
         public string CallingNo { get; }
-        public string Username { get; }
+        public string WorkerNum { get; }
         public string CustomeString { get; }
         private readonly HashSet<AgentGroup> groups = new HashSet<AgentGroup>();
         public IReadOnlyCollection<AgentGroup> Groups => groups;
@@ -22,49 +22,46 @@ namespace ipsc6.agent.client
         public QueueInfo(ConnectionInfo connectionInfo, ServerSentMessage msg, IReadOnlyCollection<AgentGroup> refGroups) : base(connectionInfo)
         {
             Channel = msg.N1;
-            Type = (QueueInfoType)msg.N2;
+            EventType = (QueueEventType)msg.N2;
             var parts = msg.S.Split(Constants.SemicolonBarDelimiter);
-            foreach (var part in parts.Select((str, index) => new { str, index }))
+            foreach (var pair in parts.Select((s, i) => (s, i)))
             {
-                switch (part.index)
+                var i = pair.i;
+                var s = pair.s;
+                switch (i)
                 {
                     case 0:
-                        foreach (var id in part.str.Split(Constants.VerticalBarDelimiter))
+                        foreach (var id in s.Split(Constants.VerticalBarDelimiter))
                         {
                             var groupObj = refGroups.FirstOrDefault(m => m.Id == id);
                             if (groupObj != null)
                             {
-                                groups.Add(groupObj);
+                                if (!groups.Add(groupObj)) throw new InvalidOperationException();
                             }
                         }
                         break;
                     case 1:
-                        EventType = (QueueEventType)Convert.ToInt32(part.str);
+                        Type = (QueueInfoType)Enum.Parse(typeof(QueueInfoType), s);
                         break;
                     case 2:
-                        SessionId = part.str;
+                        ProcessId = long.Parse(s);
                         break;
                     case 3:
-                        Id = part.str;
+                        Id = s;
                         break;
                     case 4:
-                        Username = part.str;
+                        WorkerNum = s;
                         break;
                     case 5:
-                        CallingNo = part.str;
+                        CallingNo = s;
                         break;
                     case 6:
-                        CustomeString = part.str;
+                        CustomeString = s;
                         break;
                     default:
                         break;
                 }
             }
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
         }
 
         public override bool Equals(object obj)
@@ -79,6 +76,14 @@ namespace ipsc6.agent.client
                    Channel == other.Channel;
         }
 
+        public override int GetHashCode()
+        {
+            int hashCode = 379874733;
+            hashCode = hashCode * -1521134295 + EqualityComparer<ConnectionInfo>.Default.GetHashCode(ConnectionInfo);
+            hashCode = hashCode * -1521134295 + Channel.GetHashCode();
+            return hashCode;
+        }
+
         public static bool operator ==(QueueInfo left, QueueInfo right)
         {
             return EqualityComparer<QueueInfo>.Default.Equals(left, right);
@@ -88,5 +93,7 @@ namespace ipsc6.agent.client
         {
             return !(left == right);
         }
+        public override string ToString() =>
+            $"<{GetType().Name} Connection={ConnectionInfo}, Channel={Channel}, EventType={EventType}, Type={Type}, ProcessId={ProcessId}, CallingNo={CallingNo}>";
     }
 }

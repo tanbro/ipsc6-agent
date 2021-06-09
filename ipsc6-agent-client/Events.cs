@@ -21,6 +21,7 @@ namespace ipsc6.agent.client
     public delegate void IvrDataReceivedEventHandler(object sender, IvrDataReceivedEventArgs e);
     public delegate void CustomStringReceivedEventArgsReceivedEventHandler(object sender, CustomStringReceivedEventArgs e);
     public delegate void SipRegistrarListReceivedEventHandler(object sender, SipRegistrarListReceivedEventArgs e);
+    public delegate void SipRegisterStateChangedEventHandler(object sender, EventArgs e);
 
     public class ServerSentEventArgs : EventArgs
     {
@@ -96,9 +97,9 @@ namespace ipsc6.agent.client
         public QueueInfoEventArgs(ConnectionInfo connectionInfo, QueueInfo value) : base(connectionInfo, value) { }
     }
 
-    public class HoldInfoEventArgs : BaseCtiEventArgs<HoldInfo>
+    public class HoldInfoEventArgs : BaseCtiEventArgs<CallInfo>
     {
-        public HoldInfoEventArgs(ConnectionInfo connectionInfo, HoldInfo value) : base(connectionInfo, value) { }
+        public HoldInfoEventArgs(ConnectionInfo connectionInfo, CallInfo value) : base(connectionInfo, value) { }
     }
 
     public struct AgentIdName
@@ -127,9 +128,9 @@ namespace ipsc6.agent.client
         public WorkingChannelInfoReceivedEventArgs(ConnectionInfo connectionInfo, WorkingChannelInfo value) : base(connectionInfo, value) { }
     }
 
-    public class RingInfoReceivedEventArgs : BaseCtiEventArgs<RingInfo>
+    public class RingInfoReceivedEventArgs : BaseCtiEventArgs<CallInfo>
     {
-        public RingInfoReceivedEventArgs(ConnectionInfo connectionInfo, RingInfo value) : base(connectionInfo, value) { }
+        public RingInfoReceivedEventArgs(ConnectionInfo connectionInfo, CallInfo value) : base(connectionInfo, value) { }
     }
 
     public class IvrDataReceivedEventArgs : BaseCtiEventArgs<IvrData>

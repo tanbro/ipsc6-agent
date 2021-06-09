@@ -15,10 +15,14 @@ namespace ipsc6.agent.client
         PauseBusy = 10,
         PauseLeave = 11,
         PauseTyping = 12,
-        Pause01 = 13,
-        Pause02 = 14,
-        Pause03 = 15,
-        Pause04 = 16,
-        Pause05 = 17,
+        PauseForce = 13,
+        PauseDisconnect = 14,
+        PauseSnooze = 15,
+        PauseDinner = 16,
+        PauseTrain = 17,
+        /// <summary>
+        /// 在客户端主动请求“摘机”（服务器发起对客户端的呼叫）后，该呼叫被接通
+        /// </summary>
+        OffHooked = 20,
     }
 }
