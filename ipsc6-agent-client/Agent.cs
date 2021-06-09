@@ -1088,7 +1088,7 @@ namespace ipsc6.agent.client
         public async Task XferExt(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
             var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER_EX, 0, s);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER_EX, -1, s);
             await MainConnection.Request(req);
         }
 
