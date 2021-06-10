@@ -1,5 +1,5 @@
 using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace ipsc6.agent.client.Sip
 {
@@ -51,9 +51,13 @@ namespace ipsc6.agent.client.Sip
             OnRegisterStateChanged?.Invoke(this, new EventArgs());
         }
 
+        private HashSet<Call> calls = new HashSet<Call>();
+        public IReadOnlyCollection<Call> Calls => calls;
+
         public override void onIncomingCall(org.pjsip.pjsua2.OnIncomingCallParam param)
         {
             var call = new Call(this, param.callId);
+            if (!calls.Add(call)) throw new InvalidOperationException();
             call.OnCallDisconnected += Call_OnCallDisconnected;
             logger.DebugFormat("IncomingCall - {0} : {1}", this, call);
             OnIncomingCall?.Invoke(this, new IncomingCallEventArgs(call));
@@ -62,6 +66,7 @@ namespace ipsc6.agent.client.Sip
         private void Call_OnCallDisconnected(object sender, EventArgs e)
         {
             var call = sender as Call;
+            if (!calls.Remove(call)) throw new InvalidOperationException();
             logger.DebugFormat("CallDisconnected - {0} : {1}", this, call);
             OnCallDisconnected?.Invoke(call, new EventArgs());
         }

@@ -139,6 +139,7 @@
             <Button Grid.Row="0" Grid.Column="4"
                     Style="{StaticResource MyMainButton}"
                     ToolTip="转 IVR"
+                    Command="{Binding CallIvrCommand}"
                 >
                 <Image Source="pack://application:,,,/Icons/64/xfer-ivr.png"/>
             </Button>

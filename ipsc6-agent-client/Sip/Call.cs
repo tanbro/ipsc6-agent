@@ -7,17 +7,13 @@ namespace ipsc6.agent.client.Sip
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Call));
 
-        public readonly Account Account;
-
         public Call(org.pjsip.pjsua2.Account acc) : base(acc)
         {
-            Account = acc as Account;
             MakeString();
         }
 
         public Call(org.pjsip.pjsua2.Account acc, int call_id) : base(acc, call_id)
         {
-            Account = acc as Account;
             MakeString();
         }
 
@@ -26,7 +22,7 @@ namespace ipsc6.agent.client.Sip
         string MakeString()
         {
             var info = getInfo();
-            _string = $"<{GetType().Name}@{GetHashCode():x8} Id={info.id}, Account={Account}, RemoteUri={info.remoteUri}, State={info.state}>";
+            _string = $"<{GetType().Name}@{GetHashCode():x8} Id={info.id}, RemoteUri={info.remoteUri}, State={info.state}>";
             return _string;
         }
 

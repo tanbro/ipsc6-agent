@@ -160,8 +160,8 @@ namespace ipsc6.agent.client
         string displayName;
         public string DisplayName => displayName;
 
-        int channel = -1;
-        public int Channel => channel;
+        int agentChannel = -1;
+        public int AgentChannel => agentChannel;
 
         AgentState agentState = AgentState.NotExist;
         WorkType workType = WorkType.Unknown;
@@ -190,15 +190,6 @@ namespace ipsc6.agent.client
 
         readonly HashSet<CallInfo> callCollection = new HashSet<CallInfo>();
         public IReadOnlyCollection<CallInfo> CallCollection => callCollection;
-
-        public CallInfo ActiveCall => GetActiveCall();
-        public CallInfo GetActiveCall()
-        {
-            lock (this)
-            {
-                return callCollection.FirstOrDefault(x => x.IsActive);
-            }
-        }
 
         public IReadOnlyCollection<CallInfo> HeldCallCollection
         {
@@ -335,17 +326,19 @@ namespace ipsc6.agent.client
             }
         }
 
+        readonly static QueueEventType[] aliveQueueEventTypes = { QueueEventType.Join, QueueEventType.Wait };
+
         void ProcessQueueInfoMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             var queueInfo = new QueueInfo(connInfo, msg, groupCollection);
+            bool isAlive = aliveQueueEventTypes.Any(x => x == queueInfo.EventType);
             logger.DebugFormat("QueueInfoMessage - {0}", queueInfo);
-            QueueEventType[] enumsNoRemove = { QueueEventType.Join, QueueEventType.Wait };
             // 记录 QueueInfo
             lock (this)
             {
                 // 修改之前,一律先删除
                 queueInfoCollection.RemoveWhere(x => x == queueInfo);
-                if (enumsNoRemove.Any(x => x == queueInfo.EventType))
+                if (isAlive)
                     queueInfoCollection.Add(queueInfo);
             }
             OnQueueInfo?.Invoke(this, new QueueInfoEventArgs(connInfo, queueInfo));
@@ -360,7 +353,7 @@ namespace ipsc6.agent.client
                 IsHeld = holdEventType != HoldEventType.Cancel,
                 HoldType = holdEventType,
             };
-            logger.DebugFormat("HoldInfoMessage - {0}", callInfo);
+            logger.DebugFormat("HoldInfoMessage - {0}: {1}", callInfo.IsHeld ? "UnHold" : "Hold", callInfo);
             // 改写 Call Collection
             lock (this)
             {
@@ -377,11 +370,11 @@ namespace ipsc6.agent.client
                 case ServerSentMessageSubType.AgentId:
                     DoOnAgentId(connInfo, msg);
                     break;
-                case ServerSentMessageSubType.SipRegistrarList:
-                    DoOnSipRegistrarList(connInfo, msg);
-                    break;
                 case ServerSentMessageSubType.Channel:
                     DoOnChannel(connInfo, msg);
+                    break;
+                case ServerSentMessageSubType.SipRegistrarList:
+                    DoOnSipRegistrarList(connInfo, msg);
                     break;
                 case ServerSentMessageSubType.GroupIdList:
                     DoOnGroupIdList(connInfo, msg);
@@ -466,18 +459,34 @@ namespace ipsc6.agent.client
                         ).FirstOrDefault();
                         if (existedAcc == null)
                         {
-                            logger.DebugFormat("未找到 SipAccount 帐户 {0}，新建 ...", uri);
+                            logger.DebugFormat("SipAccount 帐户 {0} 尚不存在，新建 ...", uri);
                             using (var sipAuthCred = new AuthCredInfo("digest", "*", workerNumber, 0, "hesong"))
                             using (var cfg = new AccountConfig { idUri = uri })
                             {
+                                cfg.regConfig.timeoutSec = 60;
+                                cfg.regConfig.retryIntervalSec = 30;
+                                cfg.regConfig.randomRetryIntervalSec = 10;
+                                cfg.regConfig.firstRetryIntervalSec = 15;
                                 cfg.regConfig.registrarUri = $"sip:{addr}";
                                 cfg.sipConfig.authCreds.Add(sipAuthCred);
                                 var acc = new Sip.Account(connectionIndex);
-                                acc.OnIncomingCall += Acc_OnIncomingCall;
                                 acc.OnRegisterStateChanged += Acc_OnRegisterStateChanged;
+                                acc.OnIncomingCall += Acc_OnIncomingCall;
                                 acc.OnCallDisconnected += Acc_OnCallDisconnected;
                                 acc.create(cfg);
                                 sipAccounts.Add(acc);
+                            }
+                        }
+                        else
+                        {
+                            logger.DebugFormat("SipAccount 帐户 {0} 已经存在，重注册 ...", uri);
+                            try
+                            {
+                                existedAcc.setRegistration(true);
+                            }
+                            catch (Exception exce)
+                            {
+                                logger.ErrorFormat("SipAccount 帐户 {0} 重注册错误:\r\n{1}", uri, exce);
                             }
                         }
                     }
@@ -491,18 +500,12 @@ namespace ipsc6.agent.client
         private void ReloadSipAccountCollection()
         {
             sipAccountCollection.Clear();
-            sipAccountCollection.UnionWith(new HashSet<SipAccountInfo>(
+            sipAccountCollection.UnionWith(
                 from m in sipAccounts
                 select new SipAccountInfo(m)
-            ));
+            );
         }
 
-        private void Acc_OnCallDisconnected(object sender, EventArgs e)
-        {
-            logger.Debug("呼叫断开，清空 “当前呼叫” 变量");
-            isOffHookRequesting = false;
-            currentCall = null;
-        }
 
         private void Acc_OnRegisterStateChanged(object sender, EventArgs e)
         {
@@ -527,14 +530,35 @@ namespace ipsc6.agent.client
             }
             logger.DebugFormat("新来的呼叫 - 设置当前呼叫为 {0}", call);
             currentCall = e.Call;
-            if (isOffHookRequesting)
+            bool isInRequest = false;
+            lock (this)
+            {
+                if (isOffHookRequesting)
+                {
+                    isOffHookRequesting = false;
+                    isInRequest = true;
+                }
+                if (isInRequest)
+                {
+                    isOffHookRequesting = false;
+                    logger.DebugFormat("新来的呼叫 - IsOffHookRequesting is true, 主动应答 {0}", call);
+                    using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
+                    {
+                        currentCall.answer(cop);
+                    }
+                }
+                ReloadSipAccountCollection();
+            }
+        }
+
+        private void Acc_OnCallDisconnected(object sender, EventArgs e)
+        {
+            logger.Debug("呼叫断开，清空 “当前呼叫” 变量");
+            currentCall = null;
+            lock (this)
             {
                 isOffHookRequesting = false;
-                logger.DebugFormat("新来的呼叫 - IsOffHookRequesting is true, 主动应答 {0}", call);
-                using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
-                {
-                    currentCall.answer(cop);
-                }
+                ReloadSipAccountCollection();
             }
         }
 
@@ -558,15 +582,11 @@ namespace ipsc6.agent.client
         private void DoOnRing(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             var workChInfo = new WorkingChannelInfo(msg.N2);
-            var callInfo = new CallInfo(connInfo, workChInfo.Channel, msg.S) { IsActive = true };
+            var callInfo = new CallInfo(connInfo, workChInfo.Channel, msg.S);
             logger.DebugFormat("OnRing - {0}", callInfo);
             lock (this)
             {
                 workingChannelInfo = workChInfo;
-                foreach (var m in callCollection)
-                {
-                    m.IsActive = false;
-                }
                 callCollection.Add(callInfo);
             }
             OnWorkingChannelInfoReceived?.Invoke(this,
@@ -581,13 +601,10 @@ namespace ipsc6.agent.client
         private void DoOnWorkingChannel(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             var info = new WorkingChannelInfo(msg.N2, msg.S);
+            logger.DebugFormat("OnWorkingChannel - {0}: {1}", connInfo, info.Channel);
             lock (this)
             {
                 workingChannelInfo = info;
-                foreach (var callInfo in callCollection)
-                {
-                    callInfo.IsActive = callInfo.ConnectionInfo == connInfo && callInfo.Channel == info.Channel;
-                }
             }
             OnWorkingChannelInfoReceived?.Invoke(this,
                 new WorkingChannelInfoReceivedEventArgs(connInfo, info));
@@ -658,7 +675,7 @@ namespace ipsc6.agent.client
             var evt = new ChannelAssignedEventArgs(connInfo, msg.N2);
             lock (this)
             {
-                channel = evt.Value;
+                agentChannel = evt.Value;
             }
             OnChannelAssigned?.Invoke(this, evt);
         }
@@ -1054,30 +1071,6 @@ namespace ipsc6.agent.client
             throw new NotImplementedException();
         }
 
-
-        public async Task Xfer(string groupId, string workerNum = "", string customString = "")
-        {
-            int channel = workingChannelInfo.Channel;
-            var s = $"{workerNum}|{groupId}|{customString}";
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER, channel, s);
-            await MainConnection.Request(req);
-        }
-
-        public async Task Xfer(CallInfo callInfo, string groupId, string workerNum = "", string customString = "")
-        {
-            int channel = callInfo.Channel;
-            var s = $"{workerNum}|{groupId}|{customString}";
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER, channel, s);
-            await MainConnection.Request(req);
-        }
-
-        public async Task XferConsult(string groupId, string workerNum = "", string customString = "")
-        {
-            var s = $"{workerNum}|{groupId}|{customString}";
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT, 0, s);
-            await MainConnection.Request(req);
-        }
-
         public async Task Dial(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
             var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
@@ -1085,31 +1078,159 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
+        public async Task Xfer(ConnectionInfo connectionInfo, int channel, string groupId, string workerNum = "", string customString = "")
+        {
+            var conn = GetConnection(connectionInfo);
+            var s = $"{workerNum}|{groupId}|{customString}";
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER, channel, s);
+            await conn.Request(req);
+        }
+
+        public async Task Xfer(int connectionIndex, int channel, string groupId, string workerNum = "", string customString = "")
+        {
+            var connectionInfo = connectionList[connectionIndex];
+            await Xfer(connectionInfo, channel, groupId, workerNum, customString);
+        }
+
+        public async Task Xfer(CallInfo callInfo, string groupId, string workerNum = "", string customString = "")
+        {
+            await Xfer(callInfo.ConnectionInfo, callInfo.Channel, groupId, workerNum, customString);
+        }
+
+        public async Task Xfer(string groupId, string workerNum = "", string customString = "")
+        {
+            CallInfo callInfo = HeldCallCollection.First();
+            await Xfer(callInfo, groupId, workerNum, customString);
+        }
+
+        public async Task XferConsult(string groupId, string workerNum = "", string customString = "")
+        {
+            CallInfo callInfo = HeldCallCollection.FirstOrDefault();
+            var conn = (callInfo == null) ? MainConnection : GetConnection(callInfo.ConnectionInfo);
+            var s = $"{workerNum}|{groupId}|{customString}";
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT, -1, s);
+            await conn.Request(req);
+        }
+
+        public async Task XferExt(ConnectionInfo connectionInfo, int channel, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        {
+            var conn = GetConnection(connectionInfo);
+            var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER_EX, channel, s);
+            await conn.Request(req);
+        }
+        public async Task XferExt(int connectionIndex, int channel, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        {
+            var connectionInfo = connectionList[connectionIndex];
+            await XferExt(connectionInfo, channel, calledTelnum, callingTelnum, channelGroup, option);
+        }
+
+        public async Task XferExt(CallInfo callInfo, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        {
+            var connectionInfo = callInfo.ConnectionInfo;
+            var channel = callInfo.Channel;
+            await XferExt(connectionInfo, channel, calledTelnum, callingTelnum, channelGroup, option);
+        }
+
         public async Task XferExt(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
-            var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER_EX, -1, s);
-            await MainConnection.Request(req);
+            CallInfo callInfo = HeldCallCollection.First();
+            await XferExt(callInfo, calledTelnum, callingTelnum, channelGroup, option);
         }
 
         public async Task XferExtConsult(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
+            CallInfo callInfo = HeldCallCollection.First();
+            var conn = GetConnection(callInfo.ConnectionInfo);
             var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT_EX, -1, s);
-            await MainConnection.Request(req);
+            await conn.Request(req);
+        }
+
+        public async Task CallIvr(ConnectionInfo connectionInfo, int channel, string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
+        {
+            var conn = GetConnection(connectionInfo);
+            var s = $"{ivrId}|{(int)invokeType}|{customString}";
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CALLSUBFLOW, channel, s);
+            await conn.Request(req);
+        }
+
+        public async Task CallIvr(int connectionIndex, int channel, string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
+        {
+            var connectionInfo = connectionList[connectionIndex];
+            await CallIvr(connectionInfo, channel, ivrId, invokeType, customString);
+        }
+
+        public async Task CallIvr(CallInfo callInfo, string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
+        {
+            var connectionInfo = callInfo.ConnectionInfo;
+            var channel = callInfo.Channel;
+            await CallIvr(connectionInfo, channel, ivrId, invokeType, customString);
+        }
+
+        public async Task CallIvr(string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
+        {
+            CallInfo callInfo;
+            lock (this)
+            {
+                callInfo = (
+                    from item in callCollection
+                    where !item.IsHeld
+                    select item
+                ).FirstOrDefault();
+            }
+            if (callInfo == null)
+            {
+                await CallIvr(MainConnectionInfo, agentChannel, ivrId, invokeType, customString);
+            }
+            else
+            {
+                await CallIvr(callInfo, ivrId, invokeType, customString);
+            }
         }
 
         public async Task Hold()
         {
+            CallInfo callInfo;
+            lock (this)
+            {
+                callInfo = (
+                    from item in callCollection
+                    where !item.IsHeld
+                    select item
+                ).First();
+            }
+            var conn = GetConnection(callInfo.ConnectionInfo);
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HOLD);
-            await MainConnection.Request(req);
+            await conn.Request(req);
+        }
+
+        public async Task UnHold(ConnectionInfo connectionInfo, int channel)
+        {
+            var conn = GetConnection(connectionInfo);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_RETRIEVE, channel);
+            await conn.Request(req);
+        }
+
+        public async Task UnHold(int connectionIndex, int channel)
+        {
+            var connectionInfo = connectionList[connectionIndex];
+            await UnHold(connectionInfo, channel);
         }
 
         public async Task UnHold(CallInfo callInfo)
         {
-            var connObj = GetConnection(callInfo.ConnectionInfo);
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_RETRIEVE, callInfo.Channel);
-            await connObj.Request(req);
+            var connectionInfo = callInfo.ConnectionInfo;
+            var channel = callInfo.Channel;
+            await UnHold(connectionInfo, channel);
+        }
+
+        public async Task UnHold()
+        {
+            var callInfo = HeldCallCollection.First();
+            var connectionInfo = callInfo.ConnectionInfo;
+            var channel = callInfo.Channel;
+            await UnHold(connectionInfo, channel);
         }
 
         public async Task Break(int channel = -1, string customString = "")
@@ -1122,21 +1243,14 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task OnHook(int agentId = 0)
+        public async Task OnHook()
         {
-            if (currentCall == null)
+            logger.Debug("OnHook - 本地呼叫拆线");
+            await SyncFactory.StartNew(SipEndpoint.hangupAllCalls);
+            // 主动挂机了， Call List 也来一个清空动作
+            lock (this)
             {
-                logger.Debug("OnHook - 请求服务端挂断");
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEHANGUP, agentId);
-                await MainConnection.Request(req);
-            }
-            else
-            {
-                logger.Debug("OnHook - 本地呼叫拆线");
-                await SyncFactory.StartNew(() =>
-                {
-                    SipEndpoint.hangupAllCalls();
-                });
+                callCollection.Clear();
             }
         }
 
@@ -1145,10 +1259,15 @@ namespace ipsc6.agent.client
 
         public async Task OffHook()
         {
+            logger.Debug("OffHook - 请求服务端回呼");
             if (currentCall == null)
             {
-                logger.Debug("OffHook - 请求服务端回呼");
-                isOffHookRequesting = true;
+                lock (this)
+                {
+                    if (isOffHookRequesting)
+                        throw new InvalidOperationException();
+                    isOffHookRequesting = true;
+                }
                 try
                 {
                     var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
@@ -1156,7 +1275,10 @@ namespace ipsc6.agent.client
                 }
                 catch
                 {
-                    isOffHookRequesting = false;
+                    lock (this)
+                    {
+                        isOffHookRequesting = false;
+                    }
                     throw;
                 }
             }
@@ -1171,6 +1293,13 @@ namespace ipsc6.agent.client
                     }
                 });
             }
+        }
+
+        public async Task Dequeue(QueueInfo queueInfo)
+        {
+            var conn = GetConnection(queueInfo.ConnectionInfo);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, queueInfo.Channel);
+            await conn.Request(req);
         }
 
         public async Task Interrupt(int agentId)
@@ -1191,12 +1320,6 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task Dequeue(QueueInfo queueInfo)
-        {
-            var connObj = GetConnection(queueInfo.ConnectionInfo);
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, queueInfo.Channel);
-            await connObj.Request(req);
-        }
 
         public async Task Block(int agentId)
         {
@@ -1219,13 +1342,6 @@ namespace ipsc6.agent.client
         public async Task SignOut(int agentId, string groupId)
         {
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCESIGNOFF, agentId, groupId);
-            await MainConnection.Request(req);
-        }
-
-        public async Task CallIvr(int channel, string ivrName, IvrInvokeType invokeType, string customString)
-        {
-            var s = $"{ivrName}|{(int)invokeType}|{customString}";
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CALLSUBFLOW, channel, s);
             await MainConnection.Request(req);
         }
 

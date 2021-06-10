@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Collections.Generic;
 
 
 namespace ipsc6.agent.client
@@ -23,11 +25,17 @@ namespace ipsc6.agent.client
                 IsRegisterActive = info.regIsActive;
                 LastRegisterError = info.regLastErr;
             }
+            Calls = new HashSet<SipCallInfo>(
+                from call in account.Calls
+                select new SipCallInfo(call)
+            );
         }
 
-        public int Id { get; private set; }
-        public bool IsValid { get; private set; }
-        public bool IsRegisterActive { get; private set; }
-        public int LastRegisterError { get; private set; }
+        public int Id { get; }
+        public bool IsValid { get; }
+        public bool IsRegisterActive { get; }
+        public int LastRegisterError { get; }
+
+        public IReadOnlyCollection<SipCallInfo> Calls { get; }
     }
 }

@@ -37,6 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ServerSentMessageSubType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ServerSideData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SipAccountInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SipCallInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sip\Account.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sip\Call.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sip\Events.cs" />

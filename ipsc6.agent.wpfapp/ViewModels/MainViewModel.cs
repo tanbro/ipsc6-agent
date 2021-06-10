@@ -242,7 +242,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (agent.AgentState != client.AgentState.Idle
                 && agent.AgentState != client.AgentState.Ring) return false;
             if (agent.TeleState == client.TeleState.OffHook) return false;
-            return true;
+
+            var callsCount = agent.SipAccountCollection.SelectMany(x => x.Calls).Count();
+            return callsCount == 0;
         }
         #endregion
 
@@ -272,14 +274,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (doingOnHook) return false;
             var agent = Controllers.AgentController.Agent;
             if (agent == null) return false;
-            if (agent.IsOffHookRequesting) return false;
-            if (agent.TeleState == client.TeleState.OffHook) return true;
-            if (agent.AgentState != client.AgentState.Work
-                && agent.AgentState != client.AgentState.WorkPause
-                && agent.AgentState != client.AgentState.Ring) return false;
-            if (agent.TeleState == client.TeleState.OnHook
-                && agent.AgentState != client.AgentState.Ring) return false;
-            return true;
+            var callsCount = agent.SipAccountCollection.SelectMany(x => x.Calls).Count();
+            return callsCount > 0;
+
+            //if (agent.IsOffHookRequesting) return false;
+            //if (agent.TeleState == client.TeleState.OnHook) return false;
+            //if (agent.AgentState != client.AgentState.Work
+            //    && agent.AgentState != client.AgentState.WorkPause
+            //    && agent.AgentState != client.AgentState.Ring) return false;
+            //if (agent.TeleState == client.TeleState.OnHook
+            //    && agent.AgentState != client.AgentState.Ring) return false;
+            //return true;
         }
         #endregion
 
@@ -358,17 +363,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public IRelayCommand UnHoldCommand => unHoldCommand;
         static async void DoUnHold(object parameter)
         {
-            client.CallInfo callInfo = null;
             var agent = Controllers.AgentController.Agent;
             if (parameter == null)
             {
-                callInfo = agent.CallCollection.First(x => x.IsHeld);
+                await agent.UnHold();
             }
             else
             {
-                callInfo = parameter as client.CallInfo;
+                await agent.UnHold(parameter as client.CallInfo);
             }
-            await agent.UnHold(callInfo);
         }
         #endregion
 
@@ -466,6 +469,57 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (dialog.ShowDialog() != true) return;
             var inputText = dialog.InputText;
             await agent.XferExtConsult(inputText);
+        }
+        #endregion
+
+        #region 转 IVR
+        static readonly IRelayCommand callIvrCommand = new RelayCommand(DoCallIvr);
+        public IRelayCommand CallIvrCommand => callIvrCommand;
+        static async void DoCallIvr()
+        {
+            var agent = Controllers.AgentController.Agent;
+
+            string ivrId;
+            client.IvrInvokeType ivrType;
+            string ivrString;
+
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "转 IVR" },
+                        { "Label", "输入 IVR 的 ID" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                ivrId = dialog.InputText;
+            }
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "转 IVR" },
+                        { "Label", "输入 IVR 的 类型。 0 or Keep: (Default)不释放; 1 or Over: 释放" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                if (string.IsNullOrWhiteSpace(dialog.InputText))
+                    ivrType = client.IvrInvokeType.Keep;
+                else
+                    ivrType = (client.IvrInvokeType)Enum.Parse(typeof(client.IvrInvokeType), dialog.InputText);
+            }
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "转 IVR" },
+                        { "Label", "输入 IVR 的 文本参数" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                ivrString = dialog.InputText;
+            }
+            await agent.CallIvr(ivrId, ivrType, ivrString);
         }
         #endregion
     }
