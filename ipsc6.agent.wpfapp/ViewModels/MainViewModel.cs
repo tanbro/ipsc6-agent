@@ -240,19 +240,20 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var agent = Controllers.AgentController.Agent;
             if (agent == null) return false;
 
-            if (agent.AgentState != client.AgentState.Idle
-                && agent.AgentState != client.AgentState.Ring)
-                return false;
+            client.AgentState[] allowStates = { client.AgentState.Idle, client.AgentState.Ring };
+            if (!allowStates.Any(x => x == agent.AgentState)) return false;
 
             if (agent.TeleState == client.TeleState.OffHook) return false;
 
-            if (agent.AgentState != client.AgentState.Ring
-                && agent.SipAccountCollection.SelectMany(x => x.Calls).Count() > 0)
-                return false;
-
-            if (agent.AgentState == client.AgentState.Ring
-                && agent.SipAccountCollection.SelectMany(x => x.Calls).Count() == 0)
-                return false;
+            var callCount = agent.SipAccountCollection.SelectMany(x => x.Calls).Count();
+            if (agent.AgentState == client.AgentState.Ring)
+            {
+                if (callCount == 0) return false;
+            }
+            else
+            {
+                if (callCount > 0) return false;
+            }
 
             return true;
         }
