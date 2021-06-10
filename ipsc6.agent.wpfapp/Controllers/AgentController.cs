@@ -41,8 +41,15 @@ namespace ipsc6.agent.wpfapp.Controllers
             Agent.OnRingInfoReceived += Agent_OnRingInfoReceived;
             Agent.OnQueueInfo += Agent_OnQueueInfo;
             Agent.OnSipRegisterStateChanged += Agent_OnSipRegisterStateChanged;
+            Agent.OnSipCallStateChanged += Agent_OnSipCallStateChanged;
 
             return Agent;
+        }
+
+        private static void Agent_OnSipCallStateChanged(object sender, EventArgs e)
+        {
+            var vm = ViewModels.MainViewModel.Instance;
+            vm.RefreshAgentExecutables();
         }
 
         private static void Agent_OnSipRegisterStateChanged(object sender, EventArgs e)
@@ -76,7 +83,6 @@ namespace ipsc6.agent.wpfapp.Controllers
         {
             ReloadCallList();
         }
-
 
         static void ReloadCallList()
         {

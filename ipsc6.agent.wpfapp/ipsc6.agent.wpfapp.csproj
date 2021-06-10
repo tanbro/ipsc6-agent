@@ -414,6 +414,10 @@
       <Project>{62d33297-c37d-44a8-8a97-13425e0d54d5}</Project>
       <Name>ipsc6.agent.client.netframework</Name>
     </ProjectReference>
+    <ProjectReference Include="..\org.pjsip.pjsua2.netframework\org.pjsip.pjsua2.netframework.csproj">
+      <Project>{56b2fbca-189d-403c-909e-b22093122e2c}</Project>
+      <Name>org.pjsip.pjsua2.netframework</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\64\people-plus.png" />

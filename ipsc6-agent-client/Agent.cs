@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using org.pjsip.pjsua2;
@@ -80,8 +81,6 @@ namespace ipsc6.agent.client
 
         internal static Endpoint SipEndpoint;
         internal static TaskFactory SyncFactory;
-
-        internal Sip.Call currentCall;
 
         public static void Initial()
         {
@@ -267,7 +266,6 @@ namespace ipsc6.agent.client
             Connection oldMainConnObj = null;
             lock (this)
             {
-                isOffHookRequesting = false;  // 请求服务器摘机的过程结束
                 if (AgentStateWorkType != newState)
                 {
                     oldState = AgentStateWorkType.Clone() as AgentStateWorkType;
@@ -434,6 +432,7 @@ namespace ipsc6.agent.client
 
         public event SipRegistrarListReceivedEventHandler OnSipRegistrarListReceived;
         public event SipRegisterStateChangedEventHandler OnSipRegisterStateChanged;
+        public event EventHandler OnSipCallStateChanged;
         private void DoOnSipRegistrarList(ConnectionInfo connectionInfo, ServerSentMessage msg)
         {
             var connectionIndex = GetConnetionIndex(connectionInfo);
@@ -473,6 +472,7 @@ namespace ipsc6.agent.client
                                 acc.OnRegisterStateChanged += Acc_OnRegisterStateChanged;
                                 acc.OnIncomingCall += Acc_OnIncomingCall;
                                 acc.OnCallDisconnected += Acc_OnCallDisconnected;
+                                acc.OnCallStateChanged += Acc_OnCallStateChanged;
                                 acc.create(cfg);
                                 sipAccounts.Add(acc);
                             }
@@ -506,7 +506,6 @@ namespace ipsc6.agent.client
             );
         }
 
-
         private void Acc_OnRegisterStateChanged(object sender, EventArgs e)
         {
             lock (this)
@@ -516,50 +515,49 @@ namespace ipsc6.agent.client
             OnSipRegisterStateChanged?.Invoke(this, new EventArgs());
         }
 
-        private void Acc_OnIncomingCall(object sender, Sip.IncomingCallEventArgs e)
+        private void Acc_OnIncomingCall(object sender, Sip.CallEventArgs e)
         {
-            var call = e.Call;
-            if (currentCall != null)
-            {
-                logger.WarnFormat("新来的呼叫 - 因为当前呼叫已经存在，所以拒绝新来的呼叫 {0}", call);
-                using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_BUSY_HERE })
-                {
-                    call.hangup(cop);
-                }
-                return;
-            }
-            logger.DebugFormat("新来的呼叫 - 设置当前呼叫为 {0}", call);
-            currentCall = e.Call;
-            bool isInRequest = false;
             lock (this)
             {
-                if (isOffHookRequesting)
+                if (offHookTcs != null)
                 {
-                    isOffHookRequesting = false;
-                    isInRequest = true;
-                }
-                if (isInRequest)
-                {
-                    isOffHookRequesting = false;
-                    logger.DebugFormat("新来的呼叫 - IsOffHookRequesting is true, 主动应答 {0}", call);
+                    logger.WarnFormat("OffHooking: 自动接听: {0}", e.Call);
                     using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
                     {
-                        currentCall.answer(cop);
+                        e.Call.answer(cop);
                     }
                 }
                 ReloadSipAccountCollection();
             }
+            OnSipCallStateChanged?.Invoke(this, new EventArgs());
+        }
+
+        private void Acc_OnCallStateChanged(object sender, Sip.CallEventArgs e)
+        {
+            lock (this)
+            {
+                ReloadSipAccountCollection();
+
+                if (offHookTcs != null)
+                {
+                    var info = e.Call.getInfo();
+                    if (info.state == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED)
+                    {
+                        offHookTcs.SetResult(null);
+                        logger.DebugFormat("Offhooking: 自动接听成功: {0}", e.Call);
+                    }
+                }
+            }
+            OnSipCallStateChanged?.Invoke(this, new EventArgs());
         }
 
         private void Acc_OnCallDisconnected(object sender, EventArgs e)
         {
-            logger.Debug("呼叫断开，清空 “当前呼叫” 变量");
-            currentCall = null;
             lock (this)
             {
-                isOffHookRequesting = false;
                 ReloadSipAccountCollection();
             }
+            OnSipCallStateChanged?.Invoke(this, new EventArgs());
         }
 
         public event CustomStringReceivedEventArgsReceivedEventHandler OnCustomStringReceived;
@@ -1081,6 +1079,7 @@ namespace ipsc6.agent.client
         {
             var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
             var req = new AgentRequestMessage(MessageType.REMOTE_MSG_DIAL, 0, s);
+            await OffHook(MainConnectionInfo);
             await MainConnection.Request(req);
         }
 
@@ -1249,9 +1248,30 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task OnHook()
+        public async Task Answer()
         {
-            logger.Debug("OnHook - 本地呼叫拆线");
+            logger.Debug("Answer");
+            await SyncFactory.StartNew(() =>
+            {
+                lock (this)
+                {
+                    var call = (
+                        from c in sipAccounts.SelectMany(x => x.Calls)
+                        let ci = c.getInfo()
+                        where ci.state == pjsip_inv_state.PJSIP_INV_STATE_INCOMING
+                        select c
+                    ).First();
+                    using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
+                    {
+                        call.answer(cop);
+                    }
+                }
+            });
+        }
+
+        public async Task Hangup()
+        {
+            logger.Debug("Hangup");
             await SyncFactory.StartNew(SipEndpoint.hangupAllCalls);
             // 主动挂机了， Call List 也来一个清空动作
             lock (this)
@@ -1260,45 +1280,54 @@ namespace ipsc6.agent.client
             }
         }
 
-        private bool isOffHookRequesting = false;
-        public bool IsOffHookRequesting => isOffHookRequesting;
+        private TaskCompletionSource<object> offHookTcs = null;
+        public bool IsOffHooking => offHookTcs != null;
 
-        public async Task OffHook()
+        public const int DefaultOffHookTimeoutMilliSeconds = 10000;
+        internal async Task OffHook(ConnectionInfo connectionInfo, int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
         {
-            logger.Debug("OffHook - 请求服务端回呼");
-            if (currentCall == null)
+            logger.DebugFormat("OffHook - 服务节点 [{0}] 回呼请求开始", connectionInfo);
+            lock (this)
+            {
+                if (offHookTcs != null)
+                    throw new InvalidOperationException();
+                offHookTcs = new TaskCompletionSource<object>();
+            }
+            try
+            {
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
+                var conn = GetConnection(connectionInfo);
+                await conn.Request(req);
+                var cst = new CancellationTokenSource();
+                var task = await Task.WhenAny(offHookTcs.Task, Task.Delay(millisecondsTimeout, cst.Token));
+                if (task == offHookTcs.Task)
+                {
+                    offHookTcs.SetCanceled();
+                    logger.ErrorFormat("OffHook - 服务节点 [{0}] 回呼超时", connectionInfo);
+                    throw new TimeoutException();
+                }
+                cst.Cancel();
+                logger.DebugFormat("OffHook - 服务节点 [{0}] 回呼成功", connectionInfo);
+            }
+            finally
             {
                 lock (this)
                 {
-                    if (isOffHookRequesting)
-                        throw new InvalidOperationException();
-                    isOffHookRequesting = true;
-                }
-                try
-                {
-                    var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
-                    await MainConnection.Request(req);
-                }
-                catch
-                {
-                    lock (this)
-                    {
-                        isOffHookRequesting = false;
-                    }
-                    throw;
+                    offHookTcs = null;
                 }
             }
-            else
-            {
-                logger.Debug("OffHook - 本地呼叫应答");
-                await SyncFactory.StartNew(() =>
-                {
-                    using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
-                    {
-                        currentCall.answer(cop);
-                    }
-                });
-            }
+        }
+
+        internal async Task OffHook(int connectionIndex, int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
+        {
+            var connectionInfo = connectionList[connectionIndex];
+            await OffHook(connectionInfo, millisecondsTimeout);
+        }
+
+        internal async Task OffHook(int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
+        {
+            var connectionInfo = MainConnectionInfo;
+            await OffHook(connectionInfo, millisecondsTimeout);
         }
 
         public async Task Dequeue(QueueInfo queueInfo)
@@ -1314,9 +1343,13 @@ namespace ipsc6.agent.client
             await MainConnection.Request(req);
         }
 
-        public async Task Monitor(int agentId)
+        public async Task Monitor(string workerNum)
         {
-            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_LISTEN, agentId);
+            var req = new AgentRequestMessage(MessageType.REMOTE_MSG_LISTEN, -1, workerNum);
+            // 首先要求服务器呼叫
+            {
+
+            }
             await MainConnection.Request(req);
         }
 

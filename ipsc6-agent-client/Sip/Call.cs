@@ -32,18 +32,15 @@ namespace ipsc6.agent.client.Sip
 
             MakeString();
             var callInfo = getInfo();
-            switch (callInfo.state)
+            OnStateChanged?.Invoke(this, new EventArgs());
+            if (callInfo.state == org.pjsip.pjsua2.pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED)
             {
-                case org.pjsip.pjsua2.pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED:
-                    OnCallDisconnected?.Invoke(this, new EventArgs());
-                    /* Schedule/Dispatch call deletion to another thread here */
-                    Task.Run(() =>
-                    {
-                        Dispose();
-                    });
-                    break;
-                default:
-                    break;
+                OnDisconnected?.Invoke(this, new EventArgs());
+                /* Schedule/Dispatch call deletion to another thread here */
+                Task.Run(() =>
+                {
+                    Dispose();
+                });
             }
         }
 
@@ -84,7 +81,8 @@ namespace ipsc6.agent.client.Sip
             */
         }
 
-        public event CallDisconnectedEventHandler OnCallDisconnected;
+        public event EventHandler OnDisconnected;
+        public event EventHandler OnStateChanged;
 
         public override string ToString()
         {

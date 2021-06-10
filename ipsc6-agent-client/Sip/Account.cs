@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ipsc6.agent.client.Sip
 {
@@ -22,6 +23,7 @@ namespace ipsc6.agent.client.Sip
         public event RegisterStateChangedEventHandler OnRegisterStateChanged;
         public event IncomingCallEventHandler OnIncomingCall;
         public event CallDisconnectedEventHandler OnCallDisconnected;
+        public event CallStateChangedEventHandler OnCallStateChanged;
 
         string _string;
         string MakeString()
@@ -58,17 +60,24 @@ namespace ipsc6.agent.client.Sip
         {
             var call = new Call(this, param.callId);
             if (!calls.Add(call)) throw new InvalidOperationException();
-            call.OnCallDisconnected += Call_OnCallDisconnected;
+            call.OnDisconnected += Call_OnDisconnected;
+            call.OnStateChanged += Call_OnStateChanged;
             logger.DebugFormat("IncomingCall - {0} : {1}", this, call);
-            OnIncomingCall?.Invoke(this, new IncomingCallEventArgs(call));
+            OnIncomingCall?.Invoke(this, new CallEventArgs(call));
         }
 
-        private void Call_OnCallDisconnected(object sender, EventArgs e)
+        private void Call_OnStateChanged(object sender, EventArgs e)
+        {
+            var call = sender as Call;
+            OnCallStateChanged?.Invoke(this, new CallEventArgs(call));
+        }
+
+        private void Call_OnDisconnected(object sender, EventArgs e)
         {
             var call = sender as Call;
             if (!calls.Remove(call)) throw new InvalidOperationException();
             logger.DebugFormat("CallDisconnected - {0} : {1}", this, call);
-            OnCallDisconnected?.Invoke(call, new EventArgs());
+            OnCallDisconnected?.Invoke(call, new CallEventArgs(call));
         }
 
         public override string ToString()

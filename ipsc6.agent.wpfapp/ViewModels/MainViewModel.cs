@@ -80,7 +80,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             IRelayCommand[] commands =
             {
-                onHookCommand, offHookCommand, setStateCommand, skillSignCommand
+                answerCommand, hangupCommand, setStateCommand, skillSignCommand
             };
             App.TaskFactory.StartNew(() =>
             {
@@ -212,81 +212,82 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
-        #region Command Offhook
-        static readonly IRelayCommand offHookCommand = new RelayCommand(DoOffHook, CanOffHook);
-        public IRelayCommand OffHookCommand => offHookCommand;
-        static bool doingOffHook = false;
+        #region Dial
+        static readonly IRelayCommand answerCommand = new RelayCommand(DoAnswer, CanAnswer);
+        public IRelayCommand AnswerCommand => answerCommand;
+        static bool doingAnswer = false;
 
-        static async void DoOffHook()
+        static async void DoAnswer()
         {
-            doingOffHook = true;
+            doingAnswer = true;
             try
             {
-                offHookCommand.NotifyCanExecuteChanged();
+                answerCommand.NotifyCanExecuteChanged();
                 logger.Debug("摘机");
                 var agent = Controllers.AgentController.Agent;
-                await agent.OffHook();
+                await agent.Answer();
             }
             finally
             {
-                doingOffHook = false;
-                offHookCommand.NotifyCanExecuteChanged();
+                doingAnswer = false;
+                answerCommand.NotifyCanExecuteChanged();
             }
         }
 
-        static bool CanOffHook()
+        static bool CanAnswer()
         {
-            if (doingOffHook) return false;
+            if (doingAnswer) return false;
             var agent = Controllers.AgentController.Agent;
             if (agent == null) return false;
 
-            client.AgentState[] allowStates = { client.AgentState.Idle, client.AgentState.Ring };
-            if (!allowStates.Any(x => x == agent.AgentState)) return false;
-
-            if (agent.TeleState == client.TeleState.OffHook) return false;
-
-            var callCount = agent.SipAccountCollection.SelectMany(x => x.Calls).Count();
-            if (agent.AgentState == client.AgentState.Ring)
-            {
-                if (callCount == 0) return false;
-            }
-            else
-            {
-                if (callCount > 0) return false;
-            }
+            var cnt = (
+                from c in agent.SipAccountCollection.SelectMany(x => x.Calls)
+                where c.State == org.pjsip.pjsua2.pjsip_inv_state.PJSIP_INV_STATE_INCOMING
+                select c
+            ).Count();
+            if (cnt < 1) return false;
 
             return true;
         }
         #endregion
 
         #region Command Hangup
-        static readonly IRelayCommand onHookCommand = new RelayCommand(DoOnHook, CanOnHook);
-        public IRelayCommand OnHookCommand => onHookCommand;
-        static bool doingOnHook = false;
-        static async void DoOnHook()
+        static readonly IRelayCommand hangupCommand = new RelayCommand(DoHangup, CanHangup);
+        public IRelayCommand HangupCommand => hangupCommand;
+        static bool doingHangup = false;
+        static async void DoHangup()
         {
-            doingOnHook = true;
+            doingHangup = true;
             try
             {
-                onHookCommand.NotifyCanExecuteChanged();
+                hangupCommand.NotifyCanExecuteChanged();
                 logger.Debug("挂机");
                 var agent = Controllers.AgentController.Agent;
-                await agent.OnHook();
+                await agent.Hangup();
             }
             finally
             {
-                doingOnHook = false;
-                onHookCommand.NotifyCanExecuteChanged();
+                doingHangup = false;
+                hangupCommand.NotifyCanExecuteChanged();
             }
         }
 
-        static bool CanOnHook()
+        static bool CanHangup()
         {
-            if (doingOnHook) return false;
+            if (doingHangup) return false;
             var agent = Controllers.AgentController.Agent;
             if (agent == null) return false;
-            var callsCount = agent.SipAccountCollection.SelectMany(x => x.Calls).Count();
-            return callsCount > 0;
+
+            var callCnt = (
+                from c in agent.SipAccountCollection.SelectMany(x => x.Calls)
+                select c
+            ).Count();
+            if (callCnt < 1) return false;
+
+            return true;
+
+            //var callsCount = agent.SipAccountCollection.SelectMany(x => x.Calls).Count();
+            //return callsCount > 0;
 
             //if (agent.IsOffHookRequesting) return false;
             //if (agent.TeleState == client.TeleState.OnHook) return false;

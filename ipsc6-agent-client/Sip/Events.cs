@@ -5,16 +5,20 @@ namespace ipsc6.agent.client.Sip
 {
     public delegate void RegisterStateChangedEventHandler(object sender, EventArgs e);
 
-    public class IncomingCallEventArgs : EventArgs
+    public class CallEventArgs : EventArgs
     {
         public Call Call { get; }
-        public IncomingCallEventArgs(Call call) : base()
+        public CallEventArgs(Call call) : base()
         {
             Call = call;
         }
     }
-    public delegate void IncomingCallEventHandler(object sender, IncomingCallEventArgs e);
 
-    public delegate void CallDisconnectedEventHandler(object sender, EventArgs e);
+    public delegate void IncomingCallEventHandler(object sender, CallEventArgs e);
+
+    public delegate void CallDisconnectedEventHandler(object sender, CallEventArgs e);
+    public delegate void CallStateChangedEventHandler(object sender, CallEventArgs e);
+
+
 
 }

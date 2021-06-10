@@ -101,7 +101,7 @@
             <Button Grid.Row="0" Grid.Column="0"
                     Style="{StaticResource OffHookButtonStyle}"
                     ToolTip="摘机"
-                    Command="{Binding OffHookCommand}"
+                    Command="{Binding AnswerCommand}"
                 >
                 <!--<iconPacks:BootstrapIcons Kind="TelephoneFill" Height="48" Width="48"/>-->
                 <Image Source="pack://application:,,,/Icons/64/telephone-offhook.png"/>
@@ -110,7 +110,7 @@
             <Button Grid.Row="0" Grid.Column="1"
                     Style="{StaticResource OnHookButtonStyle}"
                     ToolTip="挂机"
-                    Command="{Binding OnHookCommand}"
+                    Command="{Binding HangupCommand}"
                 >
                 <!--
                 <iconPacks:BootstrapIcons Kind="TelephoneFill" Height="48" Width="48" RotationAngle="135"/>
