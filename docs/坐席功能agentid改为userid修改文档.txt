@@ -1,0 +1,97 @@
+ 8 	# 拦截
+原参数：	nParam  	agentid
+	strParam 	
+新参数：	nParam  	-1
+	strParam 	userid
+
+9 	# 拨号
+13 	# 咨询到外线
+参数：	nParam  	0
+	strParam 	calledno|callingno|callchgroup|option
+	注：calledno 被叫是必填的，其他参数允许为""
+
+11 	# 转移到外线
+参数：	nParam  	exch
+	strParam 	calledno|callingno|callchgroup|option
+	注：calledno 被叫是必填的，其他参数允许为""
+
+10 	# 转移到坐席
+原参数：	nParam  	agentid
+	strParam	exch|agentgroupid|custom_str
+新参数：	nParam  	exch
+	strParam	userid|agentgroupid|custom_str
+	注：userid 可以是空串
+
+12 	# 咨询到坐席
+原参数：	nParam  	agentid
+	strParam	agentgroupid|custom_str
+新参数：	nParam  	-1
+	strParam	userid|agentgroupid|custom_str
+	注：userid 可以是空串
+
+19 	# 强插
+原参数：	nParam  	agentid
+	strParam 	
+新参数：	nParam  	-1
+	strParam 	userid
+
+20 	# 强拆其它坐席
+原参数：	nParam  	agentid
+	strParam 	
+新参数：	nParam  	-1
+	strParam 	userid
+
+23 	# 监听
+原参数：	nParam  	agentid
+	strParam 	
+新参数：	nParam  	-1
+	strParam 	userid
+
+26 	# 闭塞其它坐席
+原参数：	nParam  	agentid
+	strParam 	
+新参数：	nParam  	-1
+	strParam 	userid
+
+27 	# 解闭其它坐席
+原参数：	nParam  	agentid
+	strParam 	
+新参数：	nParam  	-1
+	strParam 	userid
+
+28 	# 强行注销
+原参数：	nParam  	agentid
+	strParam 	
+新参数：	nParam  	-1
+	strParam 	userid
+
+29 	# 强行签出
+原参数：	nParam  	agentid
+	strParam 	
+新参数：	nParam  	-1
+	strParam 	userid
+
+37 	# 强制空闲
+原参数：	nParam  	agentid
+	strParam 	
+新参数：	nParam  	-1
+	strParam 	userid
+
+34 	 修改权限（自己、他人）
+原参数：	nParam  	agentid
+	strParam 	powerstr
+新参数：	nParam  	-1
+	strParam 	userid|powerstr
+
+35 	# 修改扩展权限
+原参数：	nParam  	agentid
+	strParam 	powerexstr
+新参数：	nParam  	-1
+	strParam 	userid|powerexstr
+
+36 	# 强制暂停
+原参数：	nParam  	agentid
+	strParam 	pause_worktype
+新参数：	nParam  	-1
+	strParam 	userid|pause_worktype
+

@@ -5,7 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2010" 
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
              mc:Ignorable="d" 
+             xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              Width="60" Height="64">
+    <UserControl.DataContext>
+        <vm:MainViewModel/>
+    </UserControl.DataContext>
+
     <Border Width="60" Height="64"
             BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
             HorizontalAlignment="Left" VerticalAlignment="Top">
@@ -28,9 +33,10 @@
                 Background="{StaticResource MyBackgroud}"
                 CornerRadius="0 0 5 5"
             >
-                <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}">
-                    999
-                </TextBlock>
+                <Button Style="{StaticResource ScoreButtonStyle}"
+                        Command="{Binding AdvCommand}">
+                    btnAdv
+                </Button>
             </Border>
 
         </Grid>

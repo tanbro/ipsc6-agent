@@ -1011,6 +1011,12 @@ namespace ipsc6.agent.client
 
         public bool HasPendingRequest => internalConnections.Any(x => x.HasPendingRequest);
 
+        public async Task<ServerSentMessage> Request(int connectionIndex, AgentRequestMessage args, int timeout = Connection.DefaultRequestTimeoutMilliseconds)
+        {
+            var conn = internalConnections[connectionIndex];
+            return await conn.Request(args, timeout);
+        }
+
         public async Task<ServerSentMessage> Request(AgentRequestMessage args, int timeout = Connection.DefaultRequestTimeoutMilliseconds)
         {
             return await MainConnection.Request(args, timeout);

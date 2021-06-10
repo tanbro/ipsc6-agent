@@ -239,12 +239,22 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (doingOffHook) return false;
             var agent = Controllers.AgentController.Agent;
             if (agent == null) return false;
+
             if (agent.AgentState != client.AgentState.Idle
-                && agent.AgentState != client.AgentState.Ring) return false;
+                && agent.AgentState != client.AgentState.Ring)
+                return false;
+
             if (agent.TeleState == client.TeleState.OffHook) return false;
 
-            var callsCount = agent.SipAccountCollection.SelectMany(x => x.Calls).Count();
-            return callsCount == 0;
+            if (agent.AgentState != client.AgentState.Ring
+                && agent.SipAccountCollection.SelectMany(x => x.Calls).Count() > 0)
+                return false;
+
+            if (agent.AgentState == client.AgentState.Ring
+                && agent.SipAccountCollection.SelectMany(x => x.Calls).Count() == 0)
+                return false;
+
+            return true;
         }
         #endregion
 
@@ -520,6 +530,75 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 ivrString = dialog.InputText;
             }
             await agent.CallIvr(ivrId, ivrType, ivrString);
+        }
+        #endregion
+
+        #region btnAdv
+        static readonly IRelayCommand advCommand = new RelayCommand(DoAdvCommand);
+        public IRelayCommand AdvCommand => advCommand;
+        static async void DoAdvCommand()
+        {
+            var agent = Controllers.AgentController.Agent;
+
+            int connIndex;
+            client.MessageType msgTyp;
+            int n;
+            string s;
+
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "发送 CTI 命令" },
+                        { "Label", "输入 CTI 服务器节点序号" },
+                        { "InputText", "0" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                connIndex = int.Parse(dialog.InputText);
+            }
+
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "发送 CTI 命令" },
+                        { "Label", "输入 CTI 命令名称" },
+                        { "InputText", "REMOTE_MSG_LISTEN" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                msgTyp = (client.MessageType)Enum.Parse(typeof(client.MessageType), dialog.InputText);
+            }
+
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "发送 CTI 命令" },
+                        { "Label", "输入 CTI 命令参数的整数部分" },
+                        { "InputText", "0" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                n = int.Parse(dialog.InputText);
+            }
+
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "发送 CTI 命令" },
+                        { "Label", "输入 CTI 命令参数的字符串部分" },
+                        { "InputText", "" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                s = dialog.InputText;
+            }
+
+            var req = new client.AgentRequestMessage(msgTyp, n, s);
+            await agent.Request(connIndex, req);
         }
         #endregion
     }
