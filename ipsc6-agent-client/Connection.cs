@@ -125,14 +125,23 @@ namespace ipsc6.agent.client
         private void EventThreadStarter(object obj)
         {
             var token = (CancellationToken)obj;
-            while (!token.IsCancellationRequested)
+            SpinWait.SpinUntil(() =>
             {
+                if (token.IsCancellationRequested)
+                    return true;
                 while (eventQueue.TryDequeue(out object msg))
                 {
-                    ProcessEventMessage(msg);
+                    try
+                    {
+                        ProcessEventMessage(msg);
+                    }
+                    catch (Exception exce)
+                    {
+                        logger.ErrorFormat("EventThreadStarter - {0}", exce);
+                    }
                 }
-                Thread.Sleep(50);
-            }
+                return false;
+            }, Timeout.Infinite);
         }
 
         private void ProcessEventMessage(object msg)
@@ -364,6 +373,7 @@ namespace ipsc6.agent.client
             var task = await Task.WhenAny(logInTcs.Task, timeoutTask);
             if (task == timeoutTask)
             {
+                logInTcs.SetCanceled();
                 logger.ErrorFormat("{0} Log-in timeout", this, workerNumber);
                 lock (connectLock)
                 {
@@ -377,10 +387,14 @@ namespace ipsc6.agent.client
                 var task2 = Task.WhenAny(disconnectTcs.Task, timeoutTask2);
                 if (task2 != timeoutTask2)
                 {
-                    cst2.Cancel();
-                    logger.DebugFormat("{0} Log-in timeout : ForceClose Timeout", this);
+                    disconnectTcs.SetCanceled();
+                    logger.WarnFormat("{0} Log-in timeout : ForceClose Timeout", this);
                 }
-                logger.DebugFormat("{0} Log-in timeout : ForceClose Ok", this);
+                else
+                {
+                    cst2.Cancel();
+                    logger.DebugFormat("{0} Log-in timeout : ForceClose Ok", this);
+                }
                 throw new ConnectionTimeoutException();
             }
             else
@@ -426,9 +440,13 @@ namespace ipsc6.agent.client
                 var task = await Task.WhenAny(logOutTcs.Task, disconnectTcs.Task, timeoutTask);
                 if (task == timeoutTask)
                 {
+                    logOutTcs.SetCanceled();
+                    disconnectTcs.SetCanceled();
                     throw new DisconnectionTimeoutException();
                 }
                 cst.Cancel();
+                if (task == logOutTcs.Task) disconnectTcs.SetCanceled();
+                if (task == disconnectTcs.Task) logOutTcs.SetCanceled();
                 await task;
             }
             else
@@ -440,6 +458,7 @@ namespace ipsc6.agent.client
                 var task = await Task.WhenAny(disconnectTcs.Task, timeoutTask);
                 if (task == timeoutTask)
                 {
+                    disconnectTcs.SetCanceled();
                     throw new ConnectionTimeoutException();
                 }
                 cst.Cancel();
@@ -477,6 +496,7 @@ namespace ipsc6.agent.client
                 var task = await Task.WhenAny(reqTcs.Task, Task.Delay(millisecondsTimeout, cst.Token));
                 if (task != reqTcs.Task)
                 {
+                    reqTcs.SetCanceled();
                     throw new RequestTimeoutError();
                 }
                 cst.Cancel();

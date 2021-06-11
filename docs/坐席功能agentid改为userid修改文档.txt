@@ -69,7 +69,8 @@
 原参数：	nParam  	agentid
 	strParam 	
 新参数：	nParam  	-1
-	strParam 	userid
+	strParam 	userid|agentgroupid
+	注：如果agentgroupid 为空串，则表示签出所有技能组
 
 37 	# 强制空闲
 原参数：	nParam  	agentid

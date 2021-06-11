@@ -55,6 +55,7 @@ namespace ipsc6.agent.wpfapp.Controllers
         private static void Agent_OnSipRegisterStateChanged(object sender, EventArgs e)
         {
             ReloadSipAccountList();
+            ViewModels.MainViewModel.Instance.RefreshAgentExecutables();
         }
 
         static void ReloadSipAccountList()
@@ -66,6 +67,7 @@ namespace ipsc6.agent.wpfapp.Controllers
         private static void Agent_OnQueueInfo(object sender, client.QueueInfoEventArgs e)
         {
             ReloadQueueList();
+            ViewModels.MainViewModel.Instance.RefreshAgentExecutables();
         }
 
         private static void ReloadQueueList()
@@ -77,15 +79,19 @@ namespace ipsc6.agent.wpfapp.Controllers
         private static void Agent_OnRingInfoReceived(object sender, client.RingInfoReceivedEventArgs e)
         {
             ReloadCallList();
+            ViewModels.MainViewModel.Instance.RefreshAgentExecutables();
         }
 
         private static void Agent_OnHoldInfo(object sender, client.HoldInfoEventArgs e)
         {
-            ReloadCallList();
+            logger.Debug("Agent_OnHoldInfo");
+            ReloadCallList();            
+            ViewModels.MainViewModel.Instance.RefreshAgentExecutables();
         }
 
         static void ReloadCallList()
         {
+            logger.Debug("ReloadCallList");
             var model = Models.Cti.AgentBasicInfo.Instance;
             model.CallList = Agent.CallCollection.ToList();
             model.HoldList = Agent.HeldCallCollection.ToList();
@@ -101,11 +107,13 @@ namespace ipsc6.agent.wpfapp.Controllers
         private static void Agent_OnSignedGroupsChanged(object sender, EventArgs e)
         {
             ResetSkillGroup();
+            ViewModels.MainViewModel.Instance.RefreshAgentExecutables();
         }
 
         private static void Agent_OnGroupCollectionReceived(object sender, EventArgs e)
         {
             ResetSkillGroup();
+            ViewModels.MainViewModel.Instance.RefreshAgentExecutables();
         }
 
         private static void Agent_OnAgentStateChanged(object sender, client.AgentStateChangedEventArgs e)
