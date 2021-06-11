@@ -635,7 +635,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     DataContext = new Dictionary<string, object> {
                         { "Title", "发送 CTI 命令" },
                         { "Label", "输入 CTI 命令参数的整数部分" },
-                        { "InputText", "0" },
+                        { "InputText", "-1" },
                     }
                 };
                 if (dialog.ShowDialog() != true) return;
