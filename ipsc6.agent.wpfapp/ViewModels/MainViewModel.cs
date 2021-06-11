@@ -664,10 +664,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     await agent.UnMonitor(connIndex, s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCEIDLE:
-                    {
-                        var parts = s.Split(new char[] { '|' });
-                        await agent.SignOut(parts[0], parts[1]);
-                    }
+                    await agent.SetIdle(s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCEPAUSE:
                     {

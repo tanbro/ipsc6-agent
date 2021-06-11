@@ -1518,12 +1518,11 @@ namespace ipsc6.agent.client
             }
         }
 
-        public async Task KickOut(string workerNum, WorkType workType = WorkType.PauseBusy)
+        public async Task KickOut(string workerNum)
         {
             using (RequestGuard.TryEnter())
             {
-                var s = $"{workerNum}|{(int)workType}";
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_KICKOUT, -1, s);
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_KICKOUT, -1, workerNum);
                 await MainConnection.Request(req);
             }
         }
