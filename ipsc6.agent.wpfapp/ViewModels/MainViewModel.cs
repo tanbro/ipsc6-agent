@@ -85,7 +85,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 skillSignCommand,
                 holdCommand, unHoldCommand,
             };
-            App.TaskFactory.StartNew(() =>
+            var _ = App.TaskFactory.StartNew(() =>
             {
                 foreach (var command in commands)
                 {
@@ -120,19 +120,20 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 技能组 签入/出
-        static readonly IRelayCommand skillSignCommand = new RelayCommand<object>(DoSkillSign, CanSkillSign);
+        static readonly IRelayCommand skillSignCommand = new AsyncRelayCommand<object>(DoSkillSignAsync, CanSkillSign);
         public IRelayCommand SkillSignCommand => skillSignCommand;
         static bool doingSkillSign = false;
 
-        static async void DoSkillSign(object parameter)
+        static async Task DoSkillSignAsync(object parameter)
         {
+            var agent = Controllers.AgentController.Agent;
+            var model = Instance.AgentBasicInfo;
             doingSkillSign = true;
             try
             {
                 skillSignCommand.NotifyCanExecuteChanged();
                 var skillId = parameter as string;
-                var agent = Controllers.AgentController.Agent;
-                var sg = agent.GroupCollection.First((m) => m.Id == skillId);
+                var sg = model.SkillGroups.First((m) => m.Id == skillId);
                 if (sg.Signed)
                 {
                     logger.DebugFormat("签出技能 [{0}]({1})", sg.Id, sg.Name);
@@ -186,10 +187,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region Command 修改状态
-        static readonly IRelayCommand setStateCommand = new RelayCommand<object>(DoSetState, CanSetState);
+        static readonly IRelayCommand setStateCommand = new AsyncRelayCommand<object>(DoSetStateAsync, CanSetState);
         public IRelayCommand SetStateCommand => setStateCommand;
         static bool doingSetState = false;
-        static async void DoSetState(object parameter)
+        static async Task DoSetStateAsync(object parameter)
         {
             doingSetState = true;
             try
@@ -237,11 +238,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region Answer
-        static readonly IRelayCommand answerCommand = new RelayCommand(DoAnswer, CanAnswer);
+        static readonly IRelayCommand answerCommand = new AsyncRelayCommand(DoAnswerAsync, CanAnswer);
         public IRelayCommand AnswerCommand => answerCommand;
         static bool doingAnswer = false;
 
-        static async void DoAnswer()
+        static async Task DoAnswerAsync()
         {
             doingAnswer = true;
             try
@@ -276,10 +277,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region Command Hangup
-        static readonly IRelayCommand hangupCommand = new RelayCommand(DoHangup, CanHangup);
+        static readonly IRelayCommand hangupCommand = new AsyncRelayCommand(DoHangupAsync, CanHangup);
         public IRelayCommand HangupCommand => hangupCommand;
         static bool doingHangup = false;
-        static async void DoHangup()
+        static async Task DoHangupAsync()
         {
             doingHangup = true;
             try
@@ -312,9 +313,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 座席咨询
-        static readonly IRelayCommand xferConsultCommand = new RelayCommand(DoXferConsult);
+        static readonly IRelayCommand xferConsultCommand = new AsyncRelayCommand(DoXferConsultAsync);
         public IRelayCommand XferConsultCommand => xferConsultCommand;
-        static async void DoXferConsult()
+        static async Task DoXferConsultAsync()
         {
             var agent = Controllers.AgentController.Agent;
 
@@ -342,9 +343,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 座席转移
-        static readonly IRelayCommand xferCommand = new RelayCommand(DoXfer);
+        static readonly IRelayCommand xferCommand = new AsyncRelayCommand(DoXferAsync);
         public IRelayCommand XferCommand => xferCommand;
-        static async void DoXfer()
+        static async Task DoXferAsync()
         {
             var agent = Controllers.AgentController.Agent;
 
@@ -372,9 +373,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 保持
-        static readonly IRelayCommand holdCommand = new RelayCommand(DoHold, CanHold);
+        static readonly IRelayCommand holdCommand = new AsyncRelayCommand(DoHoldAsync, CanHold);
         public IRelayCommand HoldCommand => holdCommand;
-        static async void DoHold()
+        static async Task DoHoldAsync()
         {
             var agent = Controllers.AgentController.Agent;
             await agent.Hold();
@@ -395,9 +396,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 取消保持
-        static readonly IRelayCommand unHoldCommand = new RelayCommand<object>(DoUnHold, CanUnHold);
+        static readonly IRelayCommand unHoldCommand = new AsyncRelayCommand<object>(DoUnHoldAsync, CanUnHold);
         public IRelayCommand UnHoldCommand => unHoldCommand;
-        static async void DoUnHold(object parameter)
+        static async Task DoUnHoldAsync(object parameter)
         {
             var agent = Controllers.AgentController.Agent;
             if (parameter == null)
@@ -457,9 +458,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
             Instance.IsQueuePopupOpened = !isQueuePopupOpened;
         }
 
-        static readonly IRelayCommand dequeueCommand = new RelayCommand<object>(DoDequeue);
+        static readonly IRelayCommand dequeueCommand = new AsyncRelayCommand<object>(DoDequeueAsync);
         public IRelayCommand DequeueCommand => dequeueCommand;
-        static async void DoDequeue(object paramter)
+        static async Task DoDequeueAsync(object paramter)
         {
             var queueInfo = paramter as client.QueueInfo;
             var agent = Controllers.AgentController.Agent;
@@ -468,9 +469,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 外乎
-        static readonly IRelayCommand dialCommand = new RelayCommand(DoDial);
+        static readonly IRelayCommand dialCommand = new AsyncRelayCommand(DoDialAsync);
         public IRelayCommand DialCommand => dialCommand;
-        static async void DoDial()
+        static async Task DoDialAsync()
         {
             var agent = Controllers.AgentController.Agent;
             var dialog = new Dialogs.PromptDialog()
@@ -487,9 +488,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 外转
-        static readonly IRelayCommand xferExtCommand = new RelayCommand(DoXferExt);
+        static readonly IRelayCommand xferExtCommand = new AsyncRelayCommand(DoXferExtAsync);
         public IRelayCommand XferExtCommand => xferExtCommand;
-        static async void DoXferExt()
+        static async Task DoXferExtAsync()
         {
             var agent = Controllers.AgentController.Agent;
             var dialog = new Dialogs.PromptDialog()
@@ -506,9 +507,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 外咨
-        static readonly IRelayCommand xferExtConsultCommand = new RelayCommand(DoXferExtConsult);
+        static readonly IRelayCommand xferExtConsultCommand = new AsyncRelayCommand(DoXferExtConsultAsync);
         public IRelayCommand XferExtConsultCommand => xferExtConsultCommand;
-        static async void DoXferExtConsult()
+        static async Task DoXferExtConsultAsync()
         {
             var agent = Controllers.AgentController.Agent;
             var dialog = new Dialogs.PromptDialog()
@@ -525,9 +526,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 转 IVR
-        static readonly IRelayCommand callIvrCommand = new RelayCommand(DoCallIvr);
+        static readonly IRelayCommand callIvrCommand = new AsyncRelayCommand(DoCallIvrAsync);
         public IRelayCommand CallIvrCommand => callIvrCommand;
-        static async void DoCallIvr()
+        static async Task DoCallIvrAsync()
         {
             var agent = Controllers.AgentController.Agent;
 
@@ -576,9 +577,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region btnAdv
-        static readonly IRelayCommand advCommand = new RelayCommand(DoAdvCommand);
+        static readonly IRelayCommand advCommand = new AsyncRelayCommand(DoAdvCommandAsync);
         public IRelayCommand AdvCommand => advCommand;
-        static async void DoAdvCommand()
+        static async Task DoAdvCommandAsync()
         {
             var agent = Controllers.AgentController.Agent;
 

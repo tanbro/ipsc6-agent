@@ -30,11 +30,11 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetProperty(ref agentStateWorkType, value);
         }
 
-        IReadOnlyCollection<client.AgentGroup> skillsGroup = new List<client.AgentGroup>();
-        public IReadOnlyCollection<client.AgentGroup> SkillGroups
+        IReadOnlyList<client.AgentGroup> skillGroups = new List<client.AgentGroup>();
+        public IReadOnlyList<client.AgentGroup> SkillGroups
         {
-            get => skillsGroup;
-            set => SetProperty(ref skillsGroup, value);
+            get => skillGroups;
+            set => SetProperty(ref skillGroups, value);
         }
 
         IReadOnlyCollection<AgentStateWorkType> stateOperationItems = AgentStateOperations.Instance.Items;

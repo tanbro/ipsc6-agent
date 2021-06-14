@@ -133,7 +133,7 @@ namespace ipsc6.agent.client
         string password;
 
         readonly List<ConnectionInfo> connectionList = new List<ConnectionInfo>();
-        public IReadOnlyCollection<ConnectionInfo> ConnectionList => connectionList;
+        public IReadOnlyList<ConnectionInfo> ConnectionList => connectionList;
         public int GetConnetionIndex(ConnectionInfo connectionInfo) => connectionList.IndexOf(connectionInfo);
         private Connection GetConnection(int index) => internalConnections[index];
         private Connection GetConnection(ConnectionInfo connectionInfo) => internalConnections[GetConnetionIndex(connectionInfo)];
@@ -246,6 +246,8 @@ namespace ipsc6.agent.client
             }
         }
 
+        private AgentStateWorkType cachedStateWorkType;
+
         void ProcessStateChangedMessage(ConnectionInfo connInfo, ServerSentMessage msg)
         {
             AgentState[] workingState = { AgentState.Ring, AgentState.Work };
@@ -270,6 +272,25 @@ namespace ipsc6.agent.client
                 {
                     oldState = AgentStateWorkType.Clone() as AgentStateWorkType;
                     AgentStateWorkType = newState;
+                    // 缓存状态
+                    if (!isEverLostAllConnections)
+                    {
+                        AgentState[] agentStates = { AgentState.Idle, AgentState.Pause };
+                        WorkType[] workTypes = {
+                            WorkType.PauseBusy,
+                            WorkType.PauseLeave,
+                            WorkType.PauseTyping,
+                            //WorkType.PauseForce,
+                            //WorkType.PauseDisconnect,
+                            WorkType.PauseSnooze,
+                            WorkType.PauseDinner,
+                            WorkType.PauseTrain,
+                        };
+                        if (agentStates.Any(x => x == newState.AgentState) && workTypes.Any(x => x == newState.WorkType))
+                        {
+                            cachedStateWorkType = newState;
+                        }
+                    }
                 }
                 // 如果是工作状态且主连接不是当前的，需要切换！
                 if (workingState.Any(x => x == newState.AgentState) && currIndex != mainConnectionIndex)
@@ -280,6 +301,7 @@ namespace ipsc6.agent.client
                     logger.InfoFormat("切换主服务节点到 {0}", MainConnection);
                 }
             }
+
             if (oldMainConnObj != null)
             {
                 // 通知原来的主，无论能否通知成功
@@ -318,17 +340,17 @@ namespace ipsc6.agent.client
                     callCollection.Clear();
                 }
                 // Offhook 请求的对应的自动摘机
-                if (offHookTcs != null)
+                if (IsOffHooking)
                 {
                     switch (newState)
                     {
                         case TeleState.OffHook:
-                            logger.DebugFormat("Offhooking: 自动接听成功: {0}", msg);
-                            offHookTcs.SetResult(null);
+                            logger.Debug("TeleStateChangedMessage - Server side Offhooking Succees");
+                            offHookServerTcs.SetResult(null);
                             break;
                         default:
-                            logger.ErrorFormat("Offhooking: 自动接听失败: {0}", msg);
-                            offHookTcs.SetException(new InvalidOperationException());
+                            logger.Debug("TeleStateChangedMessage - Server side Offhooking Fail");
+                            offHookServerTcs.SetCanceled();
                             break;
                     }
                 }
@@ -519,12 +541,22 @@ namespace ipsc6.agent.client
         {
             lock (this)
             {
-                if (offHookTcs != null)
+                if (IsOffHooking)
                 {
-                    logger.WarnFormat("OffHooking: 自动接听: {0}", e.Call);
-                    using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
+                    logger.Debug("TeleStateChangedMessage - Client side Offhooking: Answer ...");
+                    try
                     {
-                        e.Call.answer(cop);
+                        using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
+                        {
+                            e.Call.answer(cop);
+                        }
+                        logger.Debug("TeleStateChangedMessage - Client side Offhooking: Answer ok");
+                        offHookClientTcs.SetResult(null);
+                    }
+                    catch (Exception exce)
+                    {
+                        offHookClientTcs.SetException(exce);
+                        throw;
                     }
                 }
                 ReloadSipAccountCollection();
@@ -629,8 +661,11 @@ namespace ipsc6.agent.client
         }
 
         readonly List<AgentGroup> groupCollection = new List<AgentGroup>();
-        public IReadOnlyCollection<AgentGroup> GroupCollection => groupCollection;
+        public IReadOnlyList<AgentGroup> GroupCollection => groupCollection;
         public event EventHandler OnGroupCollectionReceived;
+
+        IList<AgentGroup> cachedGroups = new List<AgentGroup>();
+
         void DoOnGroupIdList(ConnectionInfo _, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
@@ -647,14 +682,60 @@ namespace ipsc6.agent.client
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var names = msg.S.Split(Constants.VerticalBarDelimiter);
+            bool isRestore = false;
             lock (this)
             {
                 foreach (var pair in groupCollection.Zip(names, (first, second) => (first, second)))
                 {
                     pair.first.Name = pair.second;
                 }
+                if (isEverLostAllConnections)
+                {
+                    isRestore = true;
+                    isEverLostAllConnections = false;
+                }
             }
             OnGroupCollectionReceived?.Invoke(this, new EventArgs());
+            if (isRestore)
+            {
+                var groupIdList = (
+                    from m in cachedGroups
+                    where (
+                        m.Signed
+                        && groupCollection.Any(n => n.Id == m.Id && !n.Signed)
+                    )
+                    select m.Id
+                ).ToList();
+                if (groupIdList.Count > 0)
+                {
+                    logger.Info("DoOnGroupNameList - 从丢失全部 CTI 节点的连接的情况中恢复，还原之前的技能与状态");
+                    AgentStateWorkType stateWorkType = null;
+                    if (cachedStateWorkType != null)
+                        stateWorkType = cachedStateWorkType.Clone() as AgentStateWorkType;
+                    Task.Run(async () =>
+                    {
+                        logger.Debug("还原技能");
+                        await SignIn(groupIdList);
+                        if (stateWorkType != null)
+                        {
+                            if (stateWorkType.AgentState == AgentState.Idle)
+                            {
+                                logger.Debug("还原示闲");
+                                await SetIdle();
+                            }
+                            else if (stateWorkType.AgentState == AgentState.Pause)
+                            {
+                                logger.DebugFormat("还原示忙 {0}", stateWorkType.WorkType);
+                                await SetBusy(stateWorkType.WorkType);
+                            }
+                        }
+                    });
+                }
+            }
+            else
+            {
+                cachedGroups = groupCollection.ToList();
+            }
         }
 
         public event ChannelAssignedEventHandler OnChannelAssigned;
@@ -680,6 +761,8 @@ namespace ipsc6.agent.client
         }
 
         public event ConnectionInfoStateChangedEventHandler OnConnectionStateChanged;
+
+        private bool isEverLostAllConnections = false;
         void Conn_OnConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
         {
             ConnectionState[] disconntedStates = { ConnectionState.Lost, ConnectionState.Failed, ConnectionState.Closed };
@@ -694,6 +777,17 @@ namespace ipsc6.agent.client
             logger.DebugFormat("{0}: {1} --> {2}", conn, e.OldState, e.NewState);
             lock (this)
             {
+                if (runningState == AgentRunningState.Started)
+                {
+                    if (!isEverLostAllConnections)
+                    {
+                        if (internalConnections.All(x => !x.Connected))
+                        {
+                            isEverLostAllConnections = true;
+                            logger.Warn("丢失了所有 CTI 服务节点的连接!");
+                        }
+                    }
+                }
                 //////////
                 // 断线处理
                 if (disconntedStates.Any(x => x == e.NewState))
@@ -1279,7 +1373,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        static SemaphoreSlim sipSemaphore = new SemaphoreSlim(1);
+        static readonly SemaphoreSlim sipSemaphore = new SemaphoreSlim(1);
 
         public async Task Answer()
         {
@@ -1329,8 +1423,9 @@ namespace ipsc6.agent.client
             }
         }
 
-        private TaskCompletionSource<object> offHookTcs;
-        public bool IsOffHooking => offHookTcs != null;
+        TaskCompletionSource<object> offHookServerTcs;
+        TaskCompletionSource<object> offHookClientTcs;
+        public bool IsOffHooking { get; private set; }
 
         public const int DefaultOffHookTimeoutMilliSeconds = 5000;
 
@@ -1339,32 +1434,38 @@ namespace ipsc6.agent.client
             logger.DebugFormat("OffHook - 服务节点 [{0}] 回呼请求开始", connection);
             lock (this)
             {
-                if (offHookTcs != null)
+                if (IsOffHooking)
                     throw new InvalidOperationException();
-                offHookTcs = new TaskCompletionSource<object>();
+                IsOffHooking = true;
+                offHookServerTcs = new TaskCompletionSource<object>();
+                offHookClientTcs = new TaskCompletionSource<object>();
             }
             try
             {
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
                 await connection.Request(req);
-                var cst = new CancellationTokenSource();
-                var task = await Task.WhenAny(offHookTcs.Task, Task.Delay(millisecondsTimeout, cst.Token));
-                if (task != offHookTcs.Task)
+                var timeoutTask = Task.Delay(millisecondsTimeout);
+                Task[] waitingTasks = { offHookServerTcs.Task, offHookClientTcs.Task };
+                var completeTask = Task.WhenAll(offHookServerTcs.Task, offHookClientTcs.Task);
+                var task = await Task.WhenAny(completeTask, timeoutTask);
+                if (task == timeoutTask)
                 {
-                    offHookTcs.SetCanceled();
                     logger.ErrorFormat("OffHook - 服务节点 [{0}] 回呼超时", connection);
+                    offHookServerTcs.TrySetCanceled();
+                    offHookClientTcs.TrySetCanceled();
                     throw new TimeoutException();
                 }
-                cst.Cancel();
                 await task;
+                if (waitingTasks.Any(x => x.Status != TaskStatus.RanToCompletion))
+                {
+                    logger.ErrorFormat("OffHook - 服务节点 [{0}] 回呼失败", connection);
+                    throw new InvalidOperationException();
+                }
                 logger.DebugFormat("OffHook - 服务节点 [{0}] 回呼成功", connection);
             }
             finally
             {
-                lock (this)
-                {
-                    offHookTcs = null;
-                }
+                IsOffHooking = false;
             }
         }
 

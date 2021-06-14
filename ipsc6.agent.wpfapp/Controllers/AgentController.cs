@@ -32,6 +32,7 @@ namespace ipsc6.agent.wpfapp.Controllers
 
             Agent = new client.Agent(options.ServerList, options.LocalPort, options.LocalAddress);
 
+            Agent.OnConnectionStateChanged += Agent_OnConnectionStateChanged;
             Agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
             Agent.OnAgentStateChanged += Agent_OnAgentStateChanged;
             Agent.OnGroupCollectionReceived += Agent_OnGroupCollectionReceived;
@@ -44,6 +45,11 @@ namespace ipsc6.agent.wpfapp.Controllers
             Agent.OnSipCallStateChanged += Agent_OnSipCallStateChanged;
 
             return Agent;
+        }
+
+        private static void Agent_OnConnectionStateChanged(object sender, client.ConnectionInfoStateChangedEventArgs e)
+        {
+
         }
 
         private static void Agent_OnSipCallStateChanged(object sender, EventArgs e)
@@ -86,7 +92,7 @@ namespace ipsc6.agent.wpfapp.Controllers
         private static void Agent_OnHoldInfo(object sender, client.HoldInfoEventArgs e)
         {
             logger.Debug("Agent_OnHoldInfo");
-            ReloadCallList();            
+            ReloadCallList();
             ViewModels.MainViewModel.Instance.RefreshAgentExecutables();
         }
 
@@ -122,6 +128,27 @@ namespace ipsc6.agent.wpfapp.Controllers
             var model = Models.Cti.AgentBasicInfo.Instance;
             model.AgentStateWorkType = new AgentStateWorkType(e.NewState.AgentState, e.NewState.WorkType);
             ViewModels.MainViewModel.Instance.RefreshAgentExecutables();
+
+            //// 刚刚连接上来的
+            //{
+            //    client.AgentState[] states = { client.AgentState.NotExist, client.AgentState.OffLine };
+            //    if (e.OldState.AgentState == client.AgentState.Idle)
+            //    {
+
+            //    }
+            //}
+
+            //{
+            //    client.AgentState[] agentStates = { client.AgentState.Idle, client.AgentState.Pause };
+            //    client.WorkType[] workTypes = {
+            //        client.WorkType.PauseBusy, client.WorkType.PauseLeave, client.WorkType.PauseTyping,
+            //        client.WorkType.PauseDinner, client.WorkType.PauseSnooze, client.WorkType.PauseTrain
+            //    };
+            //    if (agentStates.Any(x => x == e.NewState.AgentState) && workTypes.Any(x => x == e.NewState.WorkType))
+            //    {
+            //        modifiedAgentStateWorkType = e.NewState;
+            //    }
+            //}
         }
 
         private static void Agent_OnAgentDisplayNameReceived(object sender, client.AgentDisplayNameReceivedEventArgs e)
@@ -147,12 +174,15 @@ namespace ipsc6.agent.wpfapp.Controllers
             model.SkillGroups = Agent.GroupCollection.ToList();
         }
 
-        public static async Task StartupAgent(string workerNumber, string password)
+        internal static bool AgentStartupFlag = false;
+
+        public static async Task StartupAgentAsync(string workerNumber, string password)
         {
             //Models.Cti.AgentBasicInfo.Instance.WorkerNumber = workerNumber;
             try
             {
                 await Agent.StartUp(workerNumber, password);
+                AgentStartupFlag = true;
                 logger.Info("主服务节点连接成功");
             }
             catch (client.ConnectionException err)

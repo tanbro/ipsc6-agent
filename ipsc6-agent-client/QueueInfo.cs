@@ -34,10 +34,8 @@ namespace ipsc6.agent.client
                         foreach (var id in s.Split(Constants.VerticalBarDelimiter))
                         {
                             var groupObj = refGroups.FirstOrDefault(m => m.Id == id);
-                            if (groupObj != null)
-                            {
-                                if (!groups.Add(groupObj)) throw new InvalidOperationException();
-                            }
+                            if (groupObj != null && !groups.Add(groupObj))
+                                throw new InvalidOperationException();
                         }
                         break;
                     case 1:
