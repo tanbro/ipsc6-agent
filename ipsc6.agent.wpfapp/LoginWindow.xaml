@@ -37,7 +37,7 @@
             <Border CornerRadius="32" Background="White" Width="64" Height="64" VerticalAlignment="Top" HorizontalAlignment="Center"  Margin="0 8 0 0">
                 <Canvas Name="svg2" Width="50" Height="50">
                     <Canvas.RenderTransform>
-                        <TranslateTransform X="0" Y="-1.6544224"/>
+                        <TranslateTransform X="0" Y="0"/>
                     </Canvas.RenderTransform>
                     <Path Fill="#FF0060AB" Stretch="Fill" Height="48" Width="48">
                         <Path.Data>
@@ -58,64 +58,86 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
+            <Grid Grid.Row="0" FocusManager.FocusedElement="{Binding ElementName=textboxName}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="50"/>
                 </Grid.RowDefinitions>
 
-                <TextBox x:Name="textboxName" Grid.Row="0" Margin="16 8 16 8" FontSize="14"
-                         Text="{Binding WorkerNum}">
-                    <TextBox.Style>
-                        <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
-                            <Style.Resources>
-                                <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
-                                    <VisualBrush.Visual>
-                                        <Label Content="输入工号" Foreground="Gray" />
-                                    </VisualBrush.Visual>
-                                </VisualBrush>
-                            </Style.Resources>
-                            <Style.Triggers>
-                                <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
-                                    <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                                </Trigger>
-                                <Trigger Property="Text" Value="{x:Null}">
-                                    <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                                </Trigger>
-                                <Trigger Property="IsKeyboardFocused" Value="True">
-                                    <Setter Property="Background" Value="White" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBox.Style>
-                </TextBox>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
 
-                <PasswordBox 
-                    x:Name="textboxPassword"
-                    Grid.Row="1" Margin="16 8 16 8" FontSize="14"
-                    PasswordChanged="PasswordChanged"
-                    >
-                    <PasswordBox.Style>
-                        <Style xmlns:sys="clr-namespace:System;assembly=mscorlib" TargetType="{x:Type PasswordBox}">
-                            <Style.Resources>
-                                <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
-                                    <VisualBrush.Visual>
-                                        <Label Content="输入密码" Foreground="Gray"/>
-                                    </VisualBrush.Visual>
-                                </VisualBrush>
-                            </Style.Resources>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Password}" Value="{x:Null}">
-                                    <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                                </DataTrigger>
-                                <Trigger Property="IsKeyboardFocused" Value="True">
-                                    <Setter Property="Background" Value="White"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </PasswordBox.Style>
-                </PasswordBox>
+                    <Label Target="{Binding ElementName=textboxName}"
+                           VerticalAlignment="Center" Margin="8">
+                        登录工号(_N)
+                    </Label>
+
+                    <TextBox x:Name="textboxName" Grid.Column="1" Margin="16 8 16 8" FontSize="14"
+                         Text="{Binding WorkerNum}">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                <Style.Resources>
+                                    <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                                        <VisualBrush.Visual>
+                                            <Label Content="输入工号" Foreground="Gray" />
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Style.Resources>
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
+                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="Text" Value="{x:Null}">
+                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="IsKeyboardFocused" Value="True">
+                                        <Setter Property="Background" Value="White" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Target="{Binding ElementName=textboxPassword}"
+                           VerticalAlignment="Center" Margin="8">
+                        登录密码(_P)
+                    </Label>
+
+                    <PasswordBox  x:Name="textboxPassword"
+                                  Grid.Column="1" Margin="16 8 16 8" FontSize="14" PasswordChanged="PasswordChanged">
+                        <PasswordBox.Style>
+                            <Style xmlns:sys="clr-namespace:System;assembly=mscorlib" TargetType="{x:Type PasswordBox}">
+                                <Style.Resources>
+                                    <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                                        <VisualBrush.Visual>
+                                            <Label Content="输入密码" Foreground="Gray"/>
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Style.Resources>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Password}" Value="{x:Null}">
+                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                    </DataTrigger>
+                                    <Trigger Property="IsKeyboardFocused" Value="True">
+                                        <Setter Property="Background" Value="White"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </PasswordBox.Style>
+                    </PasswordBox>
+                </Grid>
+
 
                 <CheckBox x:Name="checkboxSavePassword" Grid.Row="2"
                           Margin="16 8 16 8"
@@ -126,6 +148,7 @@
 
             <Grid Grid.Row="2">
                 <Button Style="{StaticResource MyCommonButton}"
+                        IsDefault="True"
                         FontSize="20" FontWeight="Bold" Margin="16 8 16 8"
                         Content="登&#160;&#160;&#160;&#160;录"
                         Command="{Binding LoginCommand}"

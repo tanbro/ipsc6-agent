@@ -317,6 +317,21 @@ namespace ipsc6.agent.client
                 {
                     callCollection.Clear();
                 }
+                // Offhook 请求的对应的自动摘机
+                if (offHookTcs != null)
+                {
+                    switch (newState)
+                    {
+                        case TeleState.OffHook:
+                            logger.DebugFormat("Offhooking: 自动接听成功: {0}", msg);
+                            offHookTcs.SetResult(null);
+                            break;
+                        default:
+                            logger.ErrorFormat("Offhooking: 自动接听失败: {0}", msg);
+                            offHookTcs.SetException(new InvalidOperationException());
+                            break;
+                    }
+                }
             }
             if (ev != null)
             {
@@ -448,46 +463,31 @@ namespace ipsc6.agent.client
                     {
                         logger.DebugFormat("处理 SipAccount 地址 {0} ...", addr);
                         var uri = $"sip:{workerNumber}@{addr}";
-                        // 这个地址是不是已经注册了? 如果是的，目前暂定不要重新注册?
-                        var existedAcc = (
-                            from acc in sipAccounts
-                            where acc.isValid()
-                            let accInfo = acc.getInfo()
-                            where accInfo.regIsConfigured && accInfo.uri == uri
-                            select acc
-                        ).FirstOrDefault();
-                        if (existedAcc == null)
+                        Sip.Account sipAcc;
+                        sipAcc = sipAccounts.FirstOrDefault(x => x.getInfo().uri == uri);
+                        if (sipAcc != null)
                         {
-                            logger.DebugFormat("SipAccount 帐户 {0} 尚不存在，新建 ...", uri);
-                            using (var sipAuthCred = new AuthCredInfo("digest", "*", workerNumber, 0, "hesong"))
-                            using (var cfg = new AccountConfig { idUri = uri })
-                            {
-                                cfg.regConfig.timeoutSec = 60;
-                                cfg.regConfig.retryIntervalSec = 30;
-                                cfg.regConfig.randomRetryIntervalSec = 10;
-                                cfg.regConfig.firstRetryIntervalSec = 15;
-                                cfg.regConfig.registrarUri = $"sip:{addr}";
-                                cfg.sipConfig.authCreds.Add(sipAuthCred);
-                                var acc = new Sip.Account(connectionIndex);
-                                acc.OnRegisterStateChanged += Acc_OnRegisterStateChanged;
-                                acc.OnIncomingCall += Acc_OnIncomingCall;
-                                acc.OnCallDisconnected += Acc_OnCallDisconnected;
-                                acc.OnCallStateChanged += Acc_OnCallStateChanged;
-                                acc.create(cfg);
-                                sipAccounts.Add(acc);
-                            }
+                            logger.DebugFormat("SipAccount 释放已存在帐户 {0} ...", uri);
+                            sipAccounts.Remove(sipAcc);
+                            sipAcc.Dispose();
                         }
-                        else
+                        logger.DebugFormat("SipAccount 新建帐户 {0} ...", uri);
+                        using (var sipAuthCred = new AuthCredInfo("digest", "*", workerNumber, 0, "hesong"))
+                        using (var cfg = new AccountConfig { idUri = uri })
                         {
-                            logger.DebugFormat("SipAccount 帐户 {0} 已经存在，重注册 ...", uri);
-                            try
-                            {
-                                existedAcc.setRegistration(true);
-                            }
-                            catch (Exception exce)
-                            {
-                                logger.ErrorFormat("SipAccount 帐户 {0} 重注册错误:\r\n{1}", uri, exce);
-                            }
+                            cfg.regConfig.timeoutSec = 60;
+                            cfg.regConfig.retryIntervalSec = 30;
+                            cfg.regConfig.randomRetryIntervalSec = 10;
+                            cfg.regConfig.firstRetryIntervalSec = 15;
+                            cfg.regConfig.registrarUri = $"sip:{addr}";
+                            cfg.sipConfig.authCreds.Add(sipAuthCred);
+                            var acc = new Sip.Account(connectionIndex);
+                            acc.OnRegisterStateChanged += Acc_OnRegisterStateChanged;
+                            acc.OnIncomingCall += Acc_OnIncomingCall;
+                            acc.OnCallDisconnected += Acc_OnCallDisconnected;
+                            acc.OnCallStateChanged += Acc_OnCallStateChanged;
+                            acc.create(cfg);
+                            sipAccounts.Add(acc);
                         }
                     }
                     ReloadSipAccountCollection();
@@ -537,16 +537,6 @@ namespace ipsc6.agent.client
             lock (this)
             {
                 ReloadSipAccountCollection();
-
-                if (offHookTcs != null)
-                {
-                    var info = e.Call.getInfo();
-                    if (info.state == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED)
-                    {
-                        offHookTcs.SetResult(null);
-                        logger.DebugFormat("Offhooking: 自动接听成功: {0}", e.Call);
-                    }
-                }
             }
             OnSipCallStateChanged?.Invoke(this, new EventArgs());
         }

@@ -81,7 +81,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             IRelayCommand[] commands =
             {
                 answerCommand, hangupCommand,
-                setStateCommand, skillSignCommand,
+                statePopupCommand, setStateCommand,
+                skillSignCommand,
                 holdCommand, unHoldCommand,
             };
             App.TaskFactory.StartNew(() =>
@@ -173,17 +174,13 @@ namespace ipsc6.agent.wpfapp.ViewModels
         static void DoOpenStatePopup()
         {
             Instance.IsStatePopupOpened = !isStatePopupOpened;
-            if (Instance.IsStatePopupOpened)
-            {
-                Instance.RefreshAgentExecutables();
-            }
         }
 
         static bool CanOpenStatePopup()
         {
-            if (doingSetState) return false;
             var agent = Controllers.AgentController.Agent;
-            if (agent == null) return false;
+            client.AgentState[] allowedAgentStates = { client.AgentState.Idle, client.AgentState.Pause, client.AgentState.Leave };
+            if (!allowedAgentStates.Any(x => x == agent.AgentState)) return false;
             return true;
         }
         #endregion
@@ -214,13 +211,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     await agent.SetBusy();
                 }
             }
-            catch (client.BaseRequestError err)
-            {
-                MessageBox.Show($"{err}", "坐席客户端远程调用失败");
-            }
             finally
             {
                 doingSetState = false;
+                Instance.IsStatePopupOpened = false;
                 setStateCommand.NotifyCanExecuteChanged();
             }
         }
@@ -270,12 +264,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var agent = Controllers.AgentController.Agent;
             if (agent == null) return false;
 
-            var cnt = (
+            var callCnt = (
                 from c in agent.SipAccountCollection.SelectMany(x => x.Calls)
                 where c.State == org.pjsip.pjsua2.pjsip_inv_state.PJSIP_INV_STATE_INCOMING
                 select c
             ).Count();
-            if (cnt < 1) return false;
+            if (callCnt < 1) return false;
 
             return true;
         }
@@ -305,28 +299,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
         static bool CanHangup()
         {
             if (doingHangup) return false;
-            var agent = Controllers.AgentController.Agent;
-            if (agent == null) return false;
 
+            var sipAccountList = Instance.AgentBasicInfo.SipAccountList;
             var callCnt = (
-                from c in agent.SipAccountCollection.SelectMany(x => x.Calls)
+                from c in sipAccountList.SelectMany(x => x.Calls)
                 select c
             ).Count();
             if (callCnt < 1) return false;
 
             return true;
-
-            //var callsCount = agent.SipAccountCollection.SelectMany(x => x.Calls).Count();
-            //return callsCount > 0;
-
-            //if (agent.IsOffHookRequesting) return false;
-            //if (agent.TeleState == client.TeleState.OnHook) return false;
-            //if (agent.AgentState != client.AgentState.Work
-            //    && agent.AgentState != client.AgentState.WorkPause
-            //    && agent.AgentState != client.AgentState.Ring) return false;
-            //if (agent.TeleState == client.TeleState.OnHook
-            //    && agent.AgentState != client.AgentState.Ring) return false;
-            //return true;
         }
         #endregion
 
@@ -404,8 +385,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var agent = Controllers.AgentController.Agent;
             if (agent.IsRequesting) return false;
             if (agent.AgentState != client.AgentState.Work) return false;
-            if (agent.CallCollection.Count == 0) return false;
-            if (agent.CallCollection.All(x => x.IsHeld)) return false;
+
+            var calls = Instance.AgentBasicInfo.CallList;
+
+            if (calls.Count == 0) return false;
+            if (calls.All(x => x.IsHeld)) return false;
             return true;
         }
         #endregion

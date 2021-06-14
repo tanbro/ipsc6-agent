@@ -49,6 +49,7 @@ namespace ipsc6.agent.wpfapp.Controllers
         private static void Agent_OnSipCallStateChanged(object sender, EventArgs e)
         {
             var vm = ViewModels.MainViewModel.Instance;
+            ReloadSipAccountList();
             vm.RefreshAgentExecutables();
         }
 
