@@ -10,12 +10,20 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
@@ -29,10 +37,10 @@
 
   <!-- local projects -->
   <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
-    <ProjectReference Include="..\ipsc6.agent.network.net5.0\ipsc6.agent.network.net5.0.vcxproj" />
+    <ProjectReference Include="..\ipsc6.agent.network-net5.0\ipsc6.agent.network-net5.0.vcxproj" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' Or  '$(TargetFramework)' == 'net48' ">
-    <ProjectReference Include="..\ipsc6.agent.network.net461\ipsc6.agent.network.net461.vcxproj" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' Or '$(TargetFramework)' == 'net48' ">
+    <ProjectReference Include="..\ipsc6.agent.network-net461\ipsc6.agent.network-net461.vcxproj" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
