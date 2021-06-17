@@ -1109,18 +1109,22 @@ namespace ipsc6.agent.client
 
         public async Task<ServerSentMessage> Request(AgentRequestMessage args, int timeout = Connection.DefaultRequestTimeoutMilliseconds)
         {
-            return await MainConnection.Request(args, timeout);
+            using (requestGuard.TryEnter())
+            {
+                return await MainConnection.Request(args, timeout);
+            }
         }
 
         public async Task SignIn()
         {
             await SignIn(Array.Empty<string>());
         }
+        
         public async Task SignIn(string id)
         {
-            var ids = new string[] { id };
-            await SignIn(ids);
+            await SignIn(new string[] { id });
         }
+
         public async Task SignIn(IEnumerable<string> ids)
         {
             using (requestGuard.TryEnter())
@@ -1135,11 +1139,12 @@ namespace ipsc6.agent.client
         {
             await SignOut(Array.Empty<string>());
         }
+
         public async Task SignOut(string id)
         {
-            var ids = new string[] { id };
-            await SignOut(ids);
+            await SignOut(new string[] { id });
         }
+
         public async Task SignOut(IEnumerable<string> ids)
         {
             using (requestGuard.TryEnter())
@@ -1234,6 +1239,7 @@ namespace ipsc6.agent.client
                 await conn.Request(req);
             }
         }
+
         public async Task XferExt(int connectionIndex, int channel, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
             var connectionInfo = connectionList[connectionIndex];
@@ -1347,17 +1353,13 @@ namespace ipsc6.agent.client
 
         public async Task UnHold(CallInfo callInfo)
         {
-            var connectionInfo = callInfo.ConnectionInfo;
-            var channel = callInfo.Channel;
-            await UnHold(connectionInfo, channel);
+            await UnHold(callInfo.ConnectionInfo, callInfo.Channel);
         }
 
         public async Task UnHold()
         {
             var callInfo = HeldCallCollection.First();
-            var connectionInfo = callInfo.ConnectionInfo;
-            var channel = callInfo.Channel;
-            await UnHold(connectionInfo, channel);
+            await UnHold(callInfo);
         }
 
         public async Task Break(int channel = -1, string customString = "")
