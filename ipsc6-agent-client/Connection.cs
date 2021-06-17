@@ -106,8 +106,8 @@ namespace ipsc6.agent.client
         private TaskCompletionSource<object> logOutTcs;
         private MessageType pendingReqType = MessageType.NONE;
         private TaskCompletionSource<ServerSentMessage> reqTcs;
-        private readonly ConcurrentQueue<object> eventQueue = new ConcurrentQueue<object>();
-        private readonly CancellationTokenSource eventThreadCancelSource = new CancellationTokenSource();
+        private readonly ConcurrentQueue<object> eventQueue = new();
+        private readonly CancellationTokenSource eventThreadCancelSource = new();
         private readonly Thread eventThread;
 
         string remoteHost;
@@ -321,7 +321,7 @@ namespace ipsc6.agent.client
 
         public Encoding Encoding { get; }
 
-        private readonly object connectLock = new object();
+        private readonly object connectLock = new();
 
         public void Send(AgentRequestMessage value)
         {
@@ -466,7 +466,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        private static readonly object requestLock = new object();
+        private static readonly object requestLock = new();
 
         public bool HasPendingRequest => pendingReqType != MessageType.NONE;
 

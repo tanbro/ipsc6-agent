@@ -3,12 +3,16 @@ using System.Threading;
 
 namespace ipsc6.agent.client
 {
-    class RequestGuard : IDisposable
+    class DisposableSingleSemaphore : IDisposable
     {
-        private readonly static SemaphoreSlim semaphore = new SemaphoreSlim(1);
+        private readonly SemaphoreSlim _semaphoreSlim;
+
+        public DisposableSingleSemaphore(SemaphoreSlim semaphore)
+        {
+            _semaphoreSlim = semaphore;
+        }
 
         private bool disposedValue;
-
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -16,7 +20,7 @@ namespace ipsc6.agent.client
                 if (disposing)
                 {
                     // 释放托管状态(托管对象)
-                    semaphore.Release();
+                    _semaphoreSlim.Release();
                 }
                 // 释放未托管的资源(未托管的对象)并重写终结器
                 // 将大型字段设置为 null
@@ -25,7 +29,7 @@ namespace ipsc6.agent.client
         }
 
         // // TODO: 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
-        // ~AgentRequestSemaphore()
+        // ~DisposableSingleSemaphore()
         // {
         //     // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
         //     Dispose(disposing: false);
@@ -37,16 +41,20 @@ namespace ipsc6.agent.client
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+    }
 
-        private RequestGuard() { }
+    class RequestGuard
+    {
+        private readonly SemaphoreSlim semaphore = new(1);
 
-        public static RequestGuard TryEnter()
+        public IDisposable TryEnter()
         {
             if (!semaphore.Wait(0))
                 throw new RequestNotCompleteError();
-            return new RequestGuard();
+            return new DisposableSingleSemaphore(semaphore);
         }
 
-        public static bool IsEntered => semaphore.CurrentCount == 0;
+        public bool IsEntered => semaphore.CurrentCount == 0;
     }
+
 }

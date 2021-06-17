@@ -125,6 +125,8 @@ namespace ipsc6.agent.client
             SipEndpoint.Dispose();
         }
 
+        private readonly RequestGuard requestGuard = new();
+
         private AgentRunningState runningState = AgentRunningState.Stopped;
         public AgentRunningState RunningState => runningState;
 
@@ -132,7 +134,7 @@ namespace ipsc6.agent.client
         public string WorkerNumber => workerNumber;
         string password;
 
-        readonly List<ConnectionInfo> connectionList = new List<ConnectionInfo>();
+        readonly List<ConnectionInfo> connectionList = new();
         public IReadOnlyList<ConnectionInfo> ConnectionList => connectionList;
         public int GetConnetionIndex(ConnectionInfo connectionInfo) => connectionList.IndexOf(connectionInfo);
         private Connection GetConnection(int index) => internalConnections[index];
@@ -144,7 +146,7 @@ namespace ipsc6.agent.client
             return internalConnections[index].State;
         }
 
-        readonly List<Connection> internalConnections = new List<Connection>();
+        readonly List<Connection> internalConnections = new();
 
         int mainConnectionIndex = -1;
         public int MainConnectionIndex => mainConnectionIndex;
@@ -168,7 +170,7 @@ namespace ipsc6.agent.client
         public WorkType WorkType => workType;
         public AgentStateWorkType AgentStateWorkType
         {
-            get => new AgentStateWorkType(agentState, workType);
+            get => new(agentState, workType);
             private set
             {
                 agentState = value.AgentState;
@@ -181,13 +183,13 @@ namespace ipsc6.agent.client
         public TeleState TeleState => teleState;
         public event TeleStateChangedEventHandler OnTeleStateChanged;
 
-        readonly HashSet<QueueInfo> queueInfoCollection = new HashSet<QueueInfo>();
+        readonly HashSet<QueueInfo> queueInfoCollection = new();
         public IReadOnlyCollection<QueueInfo> QueueInfoCollection => queueInfoCollection;
         public event QueueInfoEventHandler OnQueueInfo;
 
         public event HoldInfoEventHandler OnHoldInfo;
 
-        readonly HashSet<CallInfo> callCollection = new HashSet<CallInfo>();
+        readonly HashSet<CallInfo> callCollection = new();
         public IReadOnlyCollection<CallInfo> CallCollection => callCollection;
 
         public IReadOnlyCollection<CallInfo> HeldCallCollection
@@ -494,23 +496,21 @@ namespace ipsc6.agent.client
                             sipAcc.Dispose();
                         }
                         logger.DebugFormat("SipAccount 新建帐户 {0} ...", uri);
-                        using (var sipAuthCred = new AuthCredInfo("digest", "*", workerNumber, 0, "hesong"))
-                        using (var cfg = new AccountConfig { idUri = uri })
-                        {
-                            cfg.regConfig.timeoutSec = 60;
-                            cfg.regConfig.retryIntervalSec = 30;
-                            cfg.regConfig.randomRetryIntervalSec = 10;
-                            cfg.regConfig.firstRetryIntervalSec = 15;
-                            cfg.regConfig.registrarUri = $"sip:{addr}";
-                            cfg.sipConfig.authCreds.Add(sipAuthCred);
-                            var acc = new Sip.Account(connectionIndex);
-                            acc.OnRegisterStateChanged += Acc_OnRegisterStateChanged;
-                            acc.OnIncomingCall += Acc_OnIncomingCall;
-                            acc.OnCallDisconnected += Acc_OnCallDisconnected;
-                            acc.OnCallStateChanged += Acc_OnCallStateChanged;
-                            acc.create(cfg);
-                            sipAccounts.Add(acc);
-                        }
+                        using var sipAuthCred = new AuthCredInfo("digest", "*", workerNumber, 0, "hesong");
+                        using var cfg = new AccountConfig { idUri = uri };
+                        cfg.regConfig.timeoutSec = 60;
+                        cfg.regConfig.retryIntervalSec = 30;
+                        cfg.regConfig.randomRetryIntervalSec = 10;
+                        cfg.regConfig.firstRetryIntervalSec = 15;
+                        cfg.regConfig.registrarUri = $"sip:{addr}";
+                        cfg.sipConfig.authCreds.Add(sipAuthCred);
+                        var acc = new Sip.Account(connectionIndex);
+                        acc.OnRegisterStateChanged += Acc_OnRegisterStateChanged;
+                        acc.OnIncomingCall += Acc_OnIncomingCall;
+                        acc.OnCallDisconnected += Acc_OnCallDisconnected;
+                        acc.OnCallStateChanged += Acc_OnCallStateChanged;
+                        acc.create(cfg);
+                        sipAccounts.Add(acc);
                     }
                     ReloadSipAccountCollection();
                 }
@@ -630,7 +630,7 @@ namespace ipsc6.agent.client
                 new WorkingChannelInfoReceivedEventArgs(connInfo, info));
         }
 
-        private readonly HashSet<Privilege> privilegeCollection = new HashSet<Privilege>();
+        private readonly HashSet<Privilege> privilegeCollection = new();
         public IReadOnlyCollection<Privilege> PrivilegeCollection => privilegeCollection;
         public event EventHandler OnPrivilegeCollectionReceived;
         private void DoOnPrivilegeList(ConnectionInfo _, ServerSentMessage msg)
@@ -645,7 +645,7 @@ namespace ipsc6.agent.client
             OnPrivilegeCollectionReceived?.Invoke(this, new EventArgs());
         }
 
-        private readonly HashSet<int> privilegeExternCollection = new HashSet<int>();
+        private readonly HashSet<int> privilegeExternCollection = new();
         public IReadOnlyCollection<int> PrivilegeExternCollection => privilegeExternCollection;
         public event EventHandler OnPrivilegeExternCollectionReceived;
         private void DoOnPrivilegeExternList(ConnectionInfo _, ServerSentMessage msg)
@@ -660,11 +660,11 @@ namespace ipsc6.agent.client
             OnPrivilegeExternCollectionReceived?.Invoke(this, new EventArgs());
         }
 
-        readonly List<AgentGroup> groupCollection = new List<AgentGroup>();
+        readonly List<AgentGroup> groupCollection = new();
         public IReadOnlyList<AgentGroup> GroupCollection => groupCollection;
         public event EventHandler OnGroupCollectionReceived;
 
-        IList<AgentGroup> cachedGroups = new List<AgentGroup>();
+        List<AgentGroup> cachedGroups = new();
 
         void DoOnGroupIdList(ConnectionInfo _, ServerSentMessage msg)
         {
@@ -947,7 +947,7 @@ namespace ipsc6.agent.client
 
         public async Task StartUp(string workerNumber, string password)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 AgentRunningState savedRunningState;
                 IEnumerable<int> minorIndices;
@@ -1002,7 +1002,7 @@ namespace ipsc6.agent.client
 
         public async Task ShutDown(bool force = false)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 AgentRunningState savedRunningState;
                 var graceful = !force;
@@ -1096,11 +1096,11 @@ namespace ipsc6.agent.client
             }
         }
 
-        public bool IsRequesting => RequestGuard.IsEntered;
+        public bool IsRequesting => requestGuard.IsEntered;
 
         public async Task<ServerSentMessage> Request(int connectionIndex, AgentRequestMessage args, int timeout = Connection.DefaultRequestTimeoutMilliseconds)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var conn = internalConnections[connectionIndex];
                 return await conn.Request(args, timeout);
@@ -1123,7 +1123,7 @@ namespace ipsc6.agent.client
         }
         public async Task SignIn(IEnumerable<string> ids)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var s = string.Join("|", ids);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNON, s);
@@ -1142,7 +1142,7 @@ namespace ipsc6.agent.client
         }
         public async Task SignOut(IEnumerable<string> ids)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var s = string.Join("|", ids);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNOFF, s);
@@ -1152,7 +1152,7 @@ namespace ipsc6.agent.client
 
         public async Task SetIdle()
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONTINUE);
                 await MainConnection.Request(req);
@@ -1161,7 +1161,7 @@ namespace ipsc6.agent.client
 
         public async Task SetBusy(WorkType workType = WorkType.PauseBusy)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 if (workType < WorkType.PauseBusy)
                 {
@@ -1174,7 +1174,7 @@ namespace ipsc6.agent.client
 
         public async Task Dial(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var conn = MainConnection;
                 var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
@@ -1186,7 +1186,7 @@ namespace ipsc6.agent.client
 
         public async Task Xfer(ConnectionInfo connectionInfo, int channel, string groupId, string workerNum = "", string customString = "")
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var s = $"{workerNum}|{groupId}|{customString}";
@@ -1214,7 +1214,7 @@ namespace ipsc6.agent.client
 
         public async Task XferConsult(string groupId, string workerNum = "", string customString = "")
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 CallInfo callInfo = HeldCallCollection.FirstOrDefault();
                 var conn = (callInfo == null) ? MainConnection : GetConnection(callInfo.ConnectionInfo);
@@ -1226,7 +1226,7 @@ namespace ipsc6.agent.client
 
         public async Task XferExt(ConnectionInfo connectionInfo, int channel, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
@@ -1255,7 +1255,7 @@ namespace ipsc6.agent.client
 
         public async Task XferExtConsult(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 CallInfo callInfo = HeldCallCollection.First();
                 var conn = GetConnection(callInfo.ConnectionInfo);
@@ -1267,7 +1267,7 @@ namespace ipsc6.agent.client
 
         public async Task CallIvr(ConnectionInfo connectionInfo, int channel, string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var s = $"{ivrId}|{(int)invokeType}|{customString}";
@@ -1312,7 +1312,7 @@ namespace ipsc6.agent.client
 
         public async Task Hold()
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 CallInfo callInfo;
                 lock (this)
@@ -1331,7 +1331,7 @@ namespace ipsc6.agent.client
 
         public async Task UnHold(ConnectionInfo connectionInfo, int channel)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_RETRIEVE, channel);
@@ -1362,7 +1362,7 @@ namespace ipsc6.agent.client
 
         public async Task Break(int channel = -1, string customString = "")
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 if (channel < 0)
                 {
@@ -1373,7 +1373,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        static readonly SemaphoreSlim sipSemaphore = new SemaphoreSlim(1);
+        static readonly SemaphoreSlim sipSemaphore = new(1);
 
         public async Task Answer()
         {
@@ -1391,10 +1391,8 @@ namespace ipsc6.agent.client
                             where ci.state == pjsip_inv_state.PJSIP_INV_STATE_INCOMING
                             select c
                         ).First();
-                        using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
-                        {
-                            call.answer(cop);
-                        }
+                        using var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK };
+                        call.answer(cop);
                     }
                 });
             }
@@ -1489,7 +1487,7 @@ namespace ipsc6.agent.client
 
         public async Task Dequeue(QueueInfo queueInfo)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(queueInfo.ConnectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, queueInfo.Channel);
@@ -1499,7 +1497,7 @@ namespace ipsc6.agent.client
 
         public async Task Monitor(ConnectionInfo connectionInfo, string workerNum)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_LISTEN, -1, workerNum);
@@ -1517,7 +1515,7 @@ namespace ipsc6.agent.client
 
         public async Task Intercept(ConnectionInfo connectionInfo, string workerNum)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_INTERCEPT, -1, workerNum);
@@ -1533,7 +1531,7 @@ namespace ipsc6.agent.client
 
         public async Task UnMonitor(ConnectionInfo connectionInfo, string workerNum)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_STOPLISTEN, workerNum);
@@ -1549,7 +1547,7 @@ namespace ipsc6.agent.client
 
         public async Task Interrupt(ConnectionInfo connectionInfo, string workerNum)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEINSERT, -1, workerNum);
@@ -1566,7 +1564,7 @@ namespace ipsc6.agent.client
 
         public async Task Hangup(ConnectionInfo connectionInfo, string workerNum)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEHANGUP, workerNum);
@@ -1582,7 +1580,7 @@ namespace ipsc6.agent.client
 
         public async Task SignOut(string workerNum, string groupId)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var s = $"{workerNum}|{groupId}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCESIGNOFF, -1, s);
@@ -1592,7 +1590,7 @@ namespace ipsc6.agent.client
 
         public async Task SetIdle(string workerNum)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEIDLE, -1, workerNum);
                 await MainConnection.Request(req);
@@ -1601,7 +1599,7 @@ namespace ipsc6.agent.client
 
         public async Task SetBusy(string workerNum, WorkType workType = WorkType.PauseBusy)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var s = $"{workerNum}|{(int)workType}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEPAUSE, -1, s);
@@ -1611,7 +1609,7 @@ namespace ipsc6.agent.client
 
         public async Task KickOut(string workerNum)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_KICKOUT, -1, workerNum);
                 await MainConnection.Request(req);
@@ -1620,7 +1618,7 @@ namespace ipsc6.agent.client
 
         public async Task TakenAway(int index)
         {
-            using (RequestGuard.TryEnter())
+            using (requestGuard.TryEnter())
             {
                 Connection connObj;
                 // 先修改 index
@@ -1649,8 +1647,8 @@ namespace ipsc6.agent.client
             }
         }
 
-        readonly HashSet<Sip.Account> sipAccounts = new HashSet<Sip.Account>();
-        readonly HashSet<SipAccountInfo> sipAccountCollection = new HashSet<SipAccountInfo>();
+        readonly HashSet<Sip.Account> sipAccounts = new();
+        readonly HashSet<SipAccountInfo> sipAccountCollection = new();
         public IReadOnlyCollection<SipAccountInfo> SipAccountCollection => sipAccountCollection;
 
     }
