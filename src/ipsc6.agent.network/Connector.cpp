@@ -132,28 +132,22 @@ void Connector::Disconnect(bool force) {
 }
 
 void Connector::ReceiveThreadProc() {
-    bool stopping = false;
     receiveThreadStarted->Set();
-    while (true) {
-        int receiveCount = 0;
-        do {
-            lock l(connectors);
-            // 检查是否可以退出了?
-            stopping = receiveThreadStopping;
-            if (stopping) {
-                break;
-            }
-            //
-            for each (auto connector in connectors) {
-                receiveCount += connector->Receive();
-            }
-        } while (0);
-        if (stopping) {
-            break;
-        }
-        // 睡眠，死循环
-        Thread::Sleep(receiveCount > 0 ? 0 : 50);
+    System::Threading::SpinWait::SpinUntil(
+        gcnew System::Func<bool>(ReceiveAll),
+        System::Threading::Timeout::Infinite);
+}
+
+Boolean Connector::ReceiveAll() {
+    lock l(connectors);
+    // 检查是否可以退出了?
+    if (receiveThreadStopping)
+        return true;
+    // 如果不退出，就处理之
+    for each (auto connector in connectors) {
+        connector->Receive();
     }
+    return false;
 }
 
 void Connector::StartUp() {

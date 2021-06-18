@@ -32,6 +32,7 @@ ref class Connector {
     static Thread ^ receiveThread;
     static Boolean receiveThreadStopping;
     static void ReceiveThreadProc();
+    static Boolean ReceiveAll();
 
     String ^ _address;
     unsigned short _localPort;
