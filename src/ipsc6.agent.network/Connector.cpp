@@ -152,7 +152,7 @@ void Connector::ReceiveThreadProc() {
             break;
         }
         // 睡眠，死循环
-        Thread::Sleep(receiveCount > 0 ? 0 : 1000);
+        Thread::Sleep(receiveCount > 0 ? 0 : 50);
     }
 }
 
