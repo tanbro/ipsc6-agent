@@ -50,12 +50,14 @@ namespace ipsc6.agent.client
                 if (disposing)
                 {
                     // 释放托管状态(托管对象)
-                    logger.DebugFormat("{0} Dispose - Stop event thread", this);
-                    eventThreadCancelSource.Cancel();
-                    eventThread.Join();
-                    eventThreadCancelSource.Dispose();
+                    if (Interlocked.Add(ref _count, -1) == 0)
+                    {
+                        logger.DebugFormat("Stop event thread");
+                        eventThreadCancelSource.Cancel();
+                        eventThread.Join();
+                        eventThreadCancelSource.Dispose();
+                    }
                 }
-
                 // 释放未托管的资源(未托管的对象)并重写终结器
                 // 将大型字段设置为 null
                 logger.DebugFormat("{0} Dispose - Deallocate connector", this);
@@ -73,23 +75,18 @@ namespace ipsc6.agent.client
             connector.OnDisconnected += Connector_OnDisconnected;
             connector.OnConnectionLost += Connector_OnConnectionLost;
             connector.OnAgentMessageReceived += Connector_OnAgentMessageReceived;
-            eventThread.Start(eventThreadCancelSource.Token);
+            if (Interlocked.Increment(ref _count) == 1)
+            {
+                eventThreadCancelSource = new CancellationTokenSource();
+                eventThread.Start(eventThreadCancelSource.Token);
+            }
+
         }
 
         private readonly network.Connector connector;
 
         int agentId = -1;
-        public int AgentId
-        {
-            get
-            {
-                if (state != ConnectionState.Ok)
-                {
-                    throw new InvalidOperationException($"Invalid state: {state}");
-                }
-                return agentId;
-            }
-        }
+        public int AgentId => agentId;
 
         private ConnectionState state = ConnectionState.Init;
         public ConnectionState State => state;
@@ -106,9 +103,6 @@ namespace ipsc6.agent.client
         private TaskCompletionSource<object> logOutTcs;
         private MessageType pendingReqType = MessageType.NONE;
         private TaskCompletionSource<ServerSentMessage> reqTcs;
-        private readonly ConcurrentQueue<object> eventQueue = new();
-        private readonly CancellationTokenSource eventThreadCancelSource = new();
-        private readonly Thread eventThread;
 
         string remoteHost;
         public string RemoteHost => remoteHost;
@@ -122,18 +116,23 @@ namespace ipsc6.agent.client
         public event LostEventHandler OnLost;
         public event ConnectionStateChangedEventHandler OnConnectionStateChanged;
 
-        private void EventThreadStarter(object obj)
+        static int _count = 0;
+        static CancellationTokenSource eventThreadCancelSource;
+        static readonly ConcurrentQueue<EventQueueItem> eventQueue = new();
+        static Thread eventThread = new(EventThreadStarter);
+
+        static void EventThreadStarter(object obj)
         {
             var token = (CancellationToken)obj;
             SpinWait.SpinUntil(() =>
             {
                 if (token.IsCancellationRequested)
                     return true;
-                while (eventQueue.TryDequeue(out object msg))
+                while (eventQueue.TryDequeue(out EventQueueItem item))
                 {
                     try
                     {
-                        ProcessEventMessage(msg);
+                        item.Connection.ProcessEventMessage(item.Data);
                     }
                     catch (Exception exce)
                     {
@@ -292,31 +291,31 @@ namespace ipsc6.agent.client
         {
             var data = new ServerSentMessage(e, Encoding);
             logger.DebugFormat("{0} AgentMessageReceived: {1}", this, data);
-            eventQueue.Enqueue(data);
+            eventQueue.Enqueue(new EventQueueItem(this, data));
         }
 
         private void Connector_OnConnectionLost(object sender, EventArgs e)
         {
             logger.ErrorFormat("{0} OnConnectionLost", this);
-            eventQueue.Enqueue(new ConnectorConnectionLostEventArgs());
+            eventQueue.Enqueue(new EventQueueItem(this, new ConnectorConnectionLostEventArgs()));
         }
 
         private void Connector_OnDisconnected(object sender, EventArgs e)
         {
             logger.WarnFormat("{0} OnDisconnected", this);
-            eventQueue.Enqueue(new ConnectorDisconnectedEventArgs());
+            eventQueue.Enqueue(new EventQueueItem(this, new ConnectorDisconnectedEventArgs()));
         }
 
         private void Connector_OnConnected(object sender, network.ConnectedEventArgs e)
         {
             logger.InfoFormat("{0} OnConnected", this);
-            eventQueue.Enqueue(new ConnectorConnectedEventArgs());
+            eventQueue.Enqueue(new EventQueueItem(this, new ConnectorConnectedEventArgs()));
         }
 
         private void Connector_OnConnectAttemptFailed(object sender, EventArgs e)
         {
             logger.ErrorFormat("{0} OnConnectAttemptFailed", this);
-            eventQueue.Enqueue(new ConnectorConnectAttemptFailedEventArgs());
+            eventQueue.Enqueue(new EventQueueItem(this, new ConnectorConnectAttemptFailedEventArgs()));
         }
 
         public Encoding Encoding { get; }
@@ -517,4 +516,16 @@ namespace ipsc6.agent.client
         }
 
     }
+
+    class EventQueueItem
+    {
+        public Connection Connection { get; }
+        public object Data { get; }
+        public EventQueueItem(Connection connection, object data)
+        {
+            Connection = connection;
+            Data = data;
+        }
+    }
+
 }
