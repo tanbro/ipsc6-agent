@@ -5,7 +5,11 @@
     <RAKNET_ROOT>$(ProjectDir.TrimEnd('\'))\..\submodules\RakNet</RAKNET_ROOT>
     <RAKNET_LIB_SUFFIX>DLL</RAKNET_LIB_SUFFIX>
   </PropertyGroup>
-  <PropertyGroup />
+  <PropertyGroup>
+    <TargetName>$(ProjectName)-$(PlatformShortName)</TargetName>
+    <IntDir>$(PlatformShortName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(PlatformShortName)\$(Configuration)\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir);$(RAKNET_ROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -14,10 +18,10 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;RakNet$(RAKNET_LIB_SUFFIX).lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(RAKNET_ROOT)\build\Lib\$(RAKNET_LIB_SUFFIX)\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(RAKNET_ROOT)\build\$(PlatformName)\Lib\$(RAKNET_LIB_SUFFIX)\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y "$(RAKNET_ROOT)\build\Lib\DLL\$(ConfigurationName)\RakNetDLL.dll" "$(OutDir)"</Command>
+      <Command>copy /y "$(RAKNET_ROOT)\build\$(PlatformName)\Lib\DLL\$(ConfigurationName)\RakNetDLL.dll" "$(OutDir)"</Command>
       <Message>Copy native libraries to output directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>

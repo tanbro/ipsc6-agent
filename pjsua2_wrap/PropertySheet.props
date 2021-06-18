@@ -6,6 +6,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <TargetName>pjsua2</TargetName>
+    <OutDir>$(SolutionDir)$(PlatformShortName)\$(Configuration)\</OutDir>
+    <IntDir>$(PlatformShortName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(Platform)'=='Win32' ">
