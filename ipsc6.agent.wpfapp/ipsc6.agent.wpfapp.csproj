@@ -274,6 +274,14 @@
       <Project>{c0c4df43-fda0-4da8-92c5-71cd62f7c47b}</Project>
       <Name>ipsc6.agent.client</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ipsc6.agent.server\ipsc6.agent.server.csproj">
+      <Project>{490aa7b3-d4e9-47d0-96b4-9e27cb53696e}</Project>
+      <Name>ipsc6.agent.server</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ipsc6.agent.services\ipsc6.agent.services.csproj">
+      <Project>{fb1a1667-3820-4f2e-b40c-7cef4014e6c1}</Project>
+      <Name>ipsc6.agent.services</Name>
+    </ProjectReference>
     <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj">
       <Project>{8c33211b-00b7-414f-af11-1262899195fb}</Project>
       <Name>org.pjsip.pjsua2</Name>

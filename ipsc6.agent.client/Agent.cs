@@ -310,7 +310,7 @@ namespace ipsc6.agent.client
                 Task.Run(async () =>
                 {
                     var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKENAWAY);
-                    await oldMainConnObj.Request(req);
+                    await oldMainConnObj.RequestAsync(req);
                 });
                 // fire the event
                 OnMainConnectionChanged?.Invoke(this, new EventArgs());
@@ -715,18 +715,18 @@ namespace ipsc6.agent.client
                     Task.Run(async () =>
                     {
                         logger.Debug("还原技能");
-                        await SignIn(groupIdList);
+                        await SignInAsync(groupIdList);
                         if (stateWorkType != null)
                         {
                             if (stateWorkType.AgentState == AgentState.Idle)
                             {
                                 logger.Debug("还原示闲");
-                                await SetIdle();
+                                await SetIdleAsync();
                             }
                             else if (stateWorkType.AgentState == AgentState.Pause)
                             {
                                 logger.DebugFormat("还原示忙 {0}", stateWorkType.WorkType);
-                                await SetBusy(stateWorkType.WorkType);
+                                await SetBusyAsync(stateWorkType.WorkType);
                             }
                         }
                     });
@@ -873,7 +873,7 @@ namespace ipsc6.agent.client
                                     logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, connInfo);
                                     try
                                     {
-                                        await conn.Open(connInfo.Host, connInfo.Port, workerNumber, password, flag: 0);
+                                        await conn.OpenAsync(connInfo.Host, connInfo.Port, workerNumber, password, flag: 0);
                                         logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, connInfo);
                                     }
                                     catch (ConnectionException ex)
@@ -891,7 +891,7 @@ namespace ipsc6.agent.client
                                     logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接 ... ", connIdx, connInfo);
                                     try
                                     {
-                                        await conn.Open(connInfo.Host, connInfo.Port, workerNumber, password, flag: 1);
+                                        await conn.OpenAsync(connInfo.Host, connInfo.Port, workerNumber, password, flag: 1);
                                         logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接成功", connIdx, connInfo);
                                     }
                                     catch (ConnectionException ex)
@@ -919,7 +919,7 @@ namespace ipsc6.agent.client
                                 logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, connInfo);
                                 try
                                 {
-                                    await conn.Open(connInfo.Host, connInfo.Port, workerNumber, password, flag: 0);
+                                    await conn.OpenAsync(connInfo.Host, connInfo.Port, workerNumber, password, flag: 0);
                                     logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, connInfo);
                                 }
                                 catch (ConnectionException ex)
@@ -945,7 +945,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        public async Task StartUp(string workerNumber, string password)
+        public async Task StartUpAsync(string workerNumber, string password)
         {
             using (requestGuard.TryEnter())
             {
@@ -971,7 +971,7 @@ namespace ipsc6.agent.client
                     this.workerNumber = workerNumber;
                     this.password = password;
                     logger.InfoFormat("主服务节点 [{0}]({1}|{2}) 首次连接 ... ", mainConnectionIndex, MainConnectionInfo.Host, MainConnectionInfo.Port);
-                    await MainConnection.Open(
+                    await MainConnection.OpenAsync(
                         MainConnectionInfo.Host, MainConnectionInfo.Port,
                         workerNumber, password,
                         flag: 1
@@ -991,7 +991,7 @@ namespace ipsc6.agent.client
                 }
                 // 然后其他节点
                 var tasks = from i in minorIndices
-                            select internalConnections[i].Open(
+                            select internalConnections[i].OpenAsync(
                                 connectionList[i].Host, connectionList[i].Port,
                                 workerNumber, password,
                                 flag: 0
@@ -1000,7 +1000,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        public async Task ShutDown(bool force = false)
+        public async Task ShutDownAsync(bool force = false)
         {
             using (requestGuard.TryEnter())
             {
@@ -1027,7 +1027,7 @@ namespace ipsc6.agent.client
                     else
                     {
                         logger.DebugFormat("关闭主节点连接 {0} graceful={1}...", MainConnection, graceful);
-                        await MainConnection.Close(graceful, flag: 1);
+                        await MainConnection.CloseAsync(graceful, flag: 1);
                         logger.DebugFormat("关闭主节点连接 {0} graceful={1} 完毕.", MainConnection, graceful);
                     }
 
@@ -1045,7 +1045,7 @@ namespace ipsc6.agent.client
                                 try
                                 {
                                     logger.DebugFormat("关闭从节点连接 {0} graceful={1}...", conn, graceful);
-                                    await conn.Close(graceful, flag: 0);
+                                    await conn.CloseAsync(graceful, flag: 0);
                                     logger.DebugFormat("关闭从节点连接 {0} graceful={1} 完毕.", conn, graceful);
                                 }
                                 catch (Exception exce)
@@ -1056,7 +1056,7 @@ namespace ipsc6.agent.client
                                         case ErrorResponse _:
                                         case InvalidOperationException _:
                                             logger.DebugFormat("关闭从节点连接 {0} 失败, 将强行关闭: {1}", conn, exce);
-                                            await conn.Close(graceful: false, flag: 0);
+                                            await conn.CloseAsync(graceful: false, flag: 0);
                                             break;
                                         default:
                                             throw;
@@ -1065,7 +1065,7 @@ namespace ipsc6.agent.client
                             }
                             else
                             {
-                                await conn.Close(graceful: false, flag: 0);
+                                await conn.CloseAsync(graceful: false, flag: 0);
                             }
                         })
                     );
@@ -1098,73 +1098,73 @@ namespace ipsc6.agent.client
 
         public bool IsRequesting => requestGuard.IsEntered;
 
-        public async Task<ServerSentMessage> Request(int connectionIndex, AgentRequestMessage args, int timeout = Connection.DefaultRequestTimeoutMilliseconds)
+        public async Task<ServerSentMessage> RequestAsync(int connectionIndex, AgentRequestMessage args, int timeout = Connection.DefaultRequestTimeoutMilliseconds)
         {
             using (requestGuard.TryEnter())
             {
                 var conn = internalConnections[connectionIndex];
-                return await conn.Request(args, timeout);
+                return await conn.RequestAsync(args, timeout);
             }
         }
 
-        public async Task<ServerSentMessage> Request(AgentRequestMessage args, int timeout = Connection.DefaultRequestTimeoutMilliseconds)
+        public async Task<ServerSentMessage> RequestAsync(AgentRequestMessage args, int timeout = Connection.DefaultRequestTimeoutMilliseconds)
         {
             using (requestGuard.TryEnter())
             {
-                return await MainConnection.Request(args, timeout);
+                return await MainConnection.RequestAsync(args, timeout);
             }
         }
 
-        public async Task SignIn()
+        public async Task SignInAsync()
         {
-            await SignIn(Array.Empty<string>());
+            await SignInAsync(Array.Empty<string>());
         }
         
-        public async Task SignIn(string id)
+        public async Task SignInAsync(string id)
         {
-            await SignIn(new string[] { id });
+            await SignInAsync(new string[] { id });
         }
 
-        public async Task SignIn(IEnumerable<string> ids)
+        public async Task SignInAsync(IEnumerable<string> ids)
         {
             using (requestGuard.TryEnter())
             {
                 var s = string.Join("|", ids);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNON, s);
-                await MainConnection.Request(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
-        public async Task SignOut()
+        public async Task SignOutAsync()
         {
-            await SignOut(Array.Empty<string>());
+            await SignOutAsync(Array.Empty<string>());
         }
 
-        public async Task SignOut(string id)
+        public async Task SignOutAsync(string id)
         {
-            await SignOut(new string[] { id });
+            await SignOutAsync(new string[] { id });
         }
 
-        public async Task SignOut(IEnumerable<string> ids)
+        public async Task SignOutAsync(IEnumerable<string> ids)
         {
             using (requestGuard.TryEnter())
             {
                 var s = string.Join("|", ids);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNOFF, s);
-                await MainConnection.Request(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
-        public async Task SetIdle()
+        public async Task SetIdleAsync()
         {
             using (requestGuard.TryEnter())
             {
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONTINUE);
-                await MainConnection.Request(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
-        public async Task SetBusy(WorkType workType = WorkType.PauseBusy)
+        public async Task SetBusyAsync(WorkType workType = WorkType.PauseBusy)
         {
             using (requestGuard.TryEnter())
             {
@@ -1173,51 +1173,51 @@ namespace ipsc6.agent.client
                     throw new ArgumentOutOfRangeException(nameof(workType), $"Invalid work type {workType}");
                 }
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_PAUSE, (int)workType);
-                await MainConnection.Request(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
-        public async Task Dial(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        public async Task DialAsync(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
             using (requestGuard.TryEnter())
             {
                 var conn = MainConnection;
                 var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_DIAL, 0, s);
-                await OffHook(conn);
-                await conn.Request(req);
+                await OffHookAsync(conn);
+                await conn.RequestAsync(req);
             }
         }
 
-        public async Task Xfer(ConnectionInfo connectionInfo, int channel, string groupId, string workerNum = "", string customString = "")
+        public async Task XferAsync(ConnectionInfo connectionInfo, int channel, string groupId, string workerNum = "", string customString = "")
         {
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var s = $"{workerNum}|{groupId}|{customString}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER, channel, s);
-                await conn.Request(req);
+                await conn.RequestAsync(req);
             }
         }
 
-        public async Task Xfer(int connectionIndex, int channel, string groupId, string workerNum = "", string customString = "")
+        public async Task XferAsync(int connectionIndex, int channel, string groupId, string workerNum = "", string customString = "")
         {
             var connectionInfo = connectionList[connectionIndex];
-            await Xfer(connectionInfo, channel, groupId, workerNum, customString);
+            await XferAsync(connectionInfo, channel, groupId, workerNum, customString);
         }
 
         public async Task Xfer(CallInfo callInfo, string groupId, string workerNum = "", string customString = "")
         {
-            await Xfer(callInfo.ConnectionInfo, callInfo.Channel, groupId, workerNum, customString);
+            await XferAsync(callInfo.ConnectionInfo, callInfo.Channel, groupId, workerNum, customString);
         }
 
-        public async Task Xfer(string groupId, string workerNum = "", string customString = "")
+        public async Task XferAsync(string groupId, string workerNum = "", string customString = "")
         {
             CallInfo callInfo = HeldCallCollection.First();
             await Xfer(callInfo, groupId, workerNum, customString);
         }
 
-        public async Task XferConsult(string groupId, string workerNum = "", string customString = "")
+        public async Task XferConsultAsync(string groupId, string workerNum = "", string customString = "")
         {
             using (requestGuard.TryEnter())
             {
@@ -1225,41 +1225,41 @@ namespace ipsc6.agent.client
                 var conn = (callInfo == null) ? MainConnection : GetConnection(callInfo.ConnectionInfo);
                 var s = $"{workerNum}|{groupId}|{customString}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT, -1, s);
-                await conn.Request(req);
+                await conn.RequestAsync(req);
             }
         }
 
-        public async Task XferExt(ConnectionInfo connectionInfo, int channel, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        public async Task XferExtAsync(ConnectionInfo connectionInfo, int channel, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER_EX, channel, s);
-                await conn.Request(req);
+                await conn.RequestAsync(req);
             }
         }
 
-        public async Task XferExt(int connectionIndex, int channel, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        public async Task XferExtAsync(int connectionIndex, int channel, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
             var connectionInfo = connectionList[connectionIndex];
-            await XferExt(connectionInfo, channel, calledTelnum, callingTelnum, channelGroup, option);
+            await XferExtAsync(connectionInfo, channel, calledTelnum, callingTelnum, channelGroup, option);
         }
 
-        public async Task XferExt(CallInfo callInfo, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        public async Task XferExtAsync(CallInfo callInfo, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
             var connectionInfo = callInfo.ConnectionInfo;
             var channel = callInfo.Channel;
-            await XferExt(connectionInfo, channel, calledTelnum, callingTelnum, channelGroup, option);
+            await XferExtAsync(connectionInfo, channel, calledTelnum, callingTelnum, channelGroup, option);
         }
 
-        public async Task XferExt(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        public async Task XferExtAsync(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
             CallInfo callInfo = HeldCallCollection.First();
-            await XferExt(callInfo, calledTelnum, callingTelnum, channelGroup, option);
+            await XferExtAsync(callInfo, calledTelnum, callingTelnum, channelGroup, option);
         }
 
-        public async Task XferExtConsult(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        public async Task XferExtConsultAsync(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
             using (requestGuard.TryEnter())
             {
@@ -1267,35 +1267,35 @@ namespace ipsc6.agent.client
                 var conn = GetConnection(callInfo.ConnectionInfo);
                 var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT_EX, -1, s);
-                await conn.Request(req);
+                await conn.RequestAsync(req);
             }
         }
 
-        public async Task CallIvr(ConnectionInfo connectionInfo, int channel, string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
+        public async Task CallIvrAsync(ConnectionInfo connectionInfo, int channel, string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
         {
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var s = $"{ivrId}|{(int)invokeType}|{customString}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CALLSUBFLOW, channel, s);
-                await conn.Request(req);
+                await conn.RequestAsync(req);
             }
         }
 
-        public async Task CallIvr(int connectionIndex, int channel, string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
+        public async Task CallIvrAsync(int connectionIndex, int channel, string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
         {
             var connectionInfo = connectionList[connectionIndex];
-            await CallIvr(connectionInfo, channel, ivrId, invokeType, customString);
+            await CallIvrAsync(connectionInfo, channel, ivrId, invokeType, customString);
         }
 
-        public async Task CallIvr(CallInfo callInfo, string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
+        public async Task CallIvrAsync(CallInfo callInfo, string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
         {
             var connectionInfo = callInfo.ConnectionInfo;
             var channel = callInfo.Channel;
-            await CallIvr(connectionInfo, channel, ivrId, invokeType, customString);
+            await CallIvrAsync(connectionInfo, channel, ivrId, invokeType, customString);
         }
 
-        public async Task CallIvr(string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
+        public async Task CallIvrAsync(string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
         {
             CallInfo callInfo;
             lock (this)
@@ -1308,15 +1308,15 @@ namespace ipsc6.agent.client
             }
             if (callInfo == null)
             {
-                await CallIvr(MainConnectionInfo, agentChannel, ivrId, invokeType, customString);
+                await CallIvrAsync(MainConnectionInfo, agentChannel, ivrId, invokeType, customString);
             }
             else
             {
-                await CallIvr(callInfo, ivrId, invokeType, customString);
+                await CallIvrAsync(callInfo, ivrId, invokeType, customString);
             }
         }
 
-        public async Task Hold()
+        public async Task HoldAsync()
         {
             using (requestGuard.TryEnter())
             {
@@ -1331,38 +1331,38 @@ namespace ipsc6.agent.client
                 }
                 var conn = GetConnection(callInfo.ConnectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HOLD);
-                await conn.Request(req);
+                await conn.RequestAsync(req);
             }
         }
 
-        public async Task UnHold(ConnectionInfo connectionInfo, int channel)
+        public async Task UnHoldAsync(ConnectionInfo connectionInfo, int channel)
         {
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_RETRIEVE, channel);
-                await conn.Request(req);
+                await conn.RequestAsync(req);
             }
         }
 
-        public async Task UnHold(int connectionIndex, int channel)
+        public async Task UnHoldAsync(int connectionIndex, int channel)
         {
             var connectionInfo = connectionList[connectionIndex];
-            await UnHold(connectionInfo, channel);
+            await UnHoldAsync(connectionInfo, channel);
         }
 
         public async Task UnHold(CallInfo callInfo)
         {
-            await UnHold(callInfo.ConnectionInfo, callInfo.Channel);
+            await UnHoldAsync(callInfo.ConnectionInfo, callInfo.Channel);
         }
 
-        public async Task UnHold()
+        public async Task UnHoldAsync()
         {
             var callInfo = HeldCallCollection.First();
             await UnHold(callInfo);
         }
 
-        public async Task Break(int channel = -1, string customString = "")
+        public async Task BreakAsync(int channel = -1, string customString = "")
         {
             using (requestGuard.TryEnter())
             {
@@ -1371,13 +1371,13 @@ namespace ipsc6.agent.client
                     channel = workingChannelInfo.Channel;
                 }
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_BREAK_SESS, channel, customString);
-                await MainConnection.Request(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
         static readonly SemaphoreSlim sipSemaphore = new(1);
 
-        public async Task Answer()
+        public async Task AnswerAsync()
         {
             logger.Debug("Answer");
             await sipSemaphore.WaitAsync();
@@ -1404,7 +1404,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        public async Task Hangup()
+        public async Task HangupAsync()
         {
             logger.Debug("Hangup");
             await sipSemaphore.WaitAsync();
@@ -1429,7 +1429,7 @@ namespace ipsc6.agent.client
 
         public const int DefaultOffHookTimeoutMilliSeconds = 5000;
 
-        internal async Task OffHook(Connection connection, int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
+        internal async Task OffHookAsync(Connection connection, int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
         {
             logger.DebugFormat("OffHook - 服务节点 [{0}] 回呼请求开始", connection);
             lock (this)
@@ -1443,7 +1443,7 @@ namespace ipsc6.agent.client
             try
             {
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
-                await connection.Request(req);
+                await connection.RequestAsync(req);
                 var timeoutTask = Task.Delay(millisecondsTimeout);
                 Task[] waitingTasks = { offHookServerTcs.Task, offHookClientTcs.Task };
                 var completeTask = Task.WhenAll(offHookServerTcs.Task, offHookClientTcs.Task);
@@ -1469,156 +1469,156 @@ namespace ipsc6.agent.client
             }
         }
 
-        internal async Task OffHook(ConnectionInfo connectionInfo, int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
+        internal async Task OffHookAsync(ConnectionInfo connectionInfo, int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
         {
             var connection = GetConnection(connectionInfo);
-            await OffHook(connection, millisecondsTimeout);
+            await OffHookAsync(connection, millisecondsTimeout);
         }
 
-        internal async Task OffHook(int connectionIndex, int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
+        internal async Task OffHookAsync(int connectionIndex, int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
         {
             var connection = GetConnection(connectionIndex);
-            await OffHook(connection, millisecondsTimeout);
+            await OffHookAsync(connection, millisecondsTimeout);
         }
 
-        internal async Task OffHook(int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
+        internal async Task OffHookAsync(int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
         {
             var connectionInfo = MainConnectionInfo;
-            await OffHook(connectionInfo, millisecondsTimeout);
+            await OffHookAsync(connectionInfo, millisecondsTimeout);
         }
 
-        public async Task Dequeue(QueueInfo queueInfo)
+        public async Task DequeueAsync(QueueInfo queueInfo)
         {
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(queueInfo.ConnectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, queueInfo.Channel);
-                await conn.Request(req);
+                await conn.RequestAsync(req);
             }
         }
 
-        public async Task Monitor(ConnectionInfo connectionInfo, string workerNum)
+        public async Task MonitorAsync(ConnectionInfo connectionInfo, string workerNum)
         {
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_LISTEN, -1, workerNum);
-                await OffHook(conn);
-                await conn.Request(req);
+                await OffHookAsync(conn);
+                await conn.RequestAsync(req);
             }
         }
 
 
-        public async Task Monitor(int connectionIndex, string workerNum)
+        public async Task MonitorAsync(int connectionIndex, string workerNum)
         {
             var connectionInfo = connectionList[connectionIndex];
-            await Monitor(connectionInfo, workerNum);
+            await MonitorAsync(connectionInfo, workerNum);
         }
 
-        public async Task Intercept(ConnectionInfo connectionInfo, string workerNum)
+        public async Task InterceptAsync(ConnectionInfo connectionInfo, string workerNum)
         {
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_INTERCEPT, -1, workerNum);
-                await conn.Request(req);
+                await conn.RequestAsync(req);
             }
         }
 
-        public async Task Intercept(int connectionIndex, string workerNum)
+        public async Task InterceptAsync(int connectionIndex, string workerNum)
         {
             var connectionInfo = connectionList[connectionIndex];
-            await Intercept(connectionInfo, workerNum);
+            await InterceptAsync(connectionInfo, workerNum);
         }
 
-        public async Task UnMonitor(ConnectionInfo connectionInfo, string workerNum)
+        public async Task UnMonitorAsync(ConnectionInfo connectionInfo, string workerNum)
         {
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_STOPLISTEN, workerNum);
-                await conn.Request(req);
+                await conn.RequestAsync(req);
             }
         }
 
-        public async Task UnMonitor(int connectionIndex, string workerNum)
+        public async Task UnMonitorAsync(int connectionIndex, string workerNum)
         {
             var connectionInfo = connectionList[connectionIndex];
-            await UnMonitor(connectionInfo, workerNum);
+            await UnMonitorAsync(connectionInfo, workerNum);
         }
 
-        public async Task Interrupt(ConnectionInfo connectionInfo, string workerNum)
+        public async Task InterruptAsync(ConnectionInfo connectionInfo, string workerNum)
         {
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEINSERT, -1, workerNum);
-                await OffHook(conn);
-                await conn.Request(req);
+                await OffHookAsync(conn);
+                await conn.RequestAsync(req);
             }
         }
 
-        public async Task Interrupt(int connectionIndex, string workerNum)
+        public async Task InterruptAsync(int connectionIndex, string workerNum)
         {
             var connectionInfo = connectionList[connectionIndex];
-            await Interrupt(connectionInfo, workerNum);
+            await InterruptAsync(connectionInfo, workerNum);
         }
 
-        public async Task Hangup(ConnectionInfo connectionInfo, string workerNum)
+        public async Task HangupAsync(ConnectionInfo connectionInfo, string workerNum)
         {
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEHANGUP, workerNum);
-                await conn.Request(req);
+                await conn.RequestAsync(req);
             }
         }
 
-        public async Task Hangup(int connectionIndex, string workerNum)
+        public async Task HangupAsync(int connectionIndex, string workerNum)
         {
             var connectionInfo = connectionList[connectionIndex];
-            await Hangup(connectionInfo, workerNum);
+            await HangupAsync(connectionInfo, workerNum);
         }
 
-        public async Task SignOut(string workerNum, string groupId)
+        public async Task SignOutAsync(string workerNum, string groupId)
         {
             using (requestGuard.TryEnter())
             {
                 var s = $"{workerNum}|{groupId}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCESIGNOFF, -1, s);
-                await MainConnection.Request(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
-        public async Task SetIdle(string workerNum)
+        public async Task SetIdleAsync(string workerNum)
         {
             using (requestGuard.TryEnter())
             {
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEIDLE, -1, workerNum);
-                await MainConnection.Request(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
-        public async Task SetBusy(string workerNum, WorkType workType = WorkType.PauseBusy)
+        public async Task SetBusyAsync(string workerNum, WorkType workType = WorkType.PauseBusy)
         {
             using (requestGuard.TryEnter())
             {
                 var s = $"{workerNum}|{(int)workType}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEPAUSE, -1, s);
-                await MainConnection.Request(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
-        public async Task KickOut(string workerNum)
+        public async Task KickOutAsync(string workerNum)
         {
             using (requestGuard.TryEnter())
             {
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_KICKOUT, -1, workerNum);
-                await MainConnection.Request(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
-        public async Task TakenAway(int index)
+        public async Task TakenAwayAsync(int index)
         {
             using (requestGuard.TryEnter())
             {
@@ -1645,7 +1645,7 @@ namespace ipsc6.agent.client
                 OnMainConnectionChanged?.Invoke(this, new EventArgs());
                 // 再通知原来的主，无论能否通知成功
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKENAWAY);
-                await connObj.Request(req);
+                await connObj.RequestAsync(req);
             }
         }
 

@@ -181,7 +181,7 @@ namespace ipsc6.agent.wpfapp.Controllers
             //Models.Cti.AgentBasicInfo.Instance.WorkerNumber = workerNumber;
             try
             {
-                await Agent.StartUp(workerNumber, password);
+                await Agent.StartUpAsync(workerNumber, password);
                 AgentStartupFlag = true;
                 logger.Info("主服务节点连接成功");
             }

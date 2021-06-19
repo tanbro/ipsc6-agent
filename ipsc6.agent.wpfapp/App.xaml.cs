@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -58,12 +59,16 @@ namespace ipsc6.agent.wpfapp
                 return;
             }
 
+            var jsonRpcWsCanceller = new CancellationTokenSource();
+
             try
             {
-                logger.Debug("client.Agent.Initial()");
-                client.Agent.Initial();
+                logger.Debug("Initial()");
+                services.Service.Initial();
                 try
                 {
+                    var jsonRpcWs = new server.Server(() => new services.Service());
+                    var jsonRpcWsTask = Task.Run(() => jsonRpcWs.RunAsync(jsonRpcWsCanceller.Token));
                     try
                     {
                         if (new LoginWindow().ShowDialog() == true)
@@ -73,13 +78,17 @@ namespace ipsc6.agent.wpfapp
                     }
                     finally
                     {
-                        Controllers.AgentController.DisposeAgent();
+                        jsonRpcWsCanceller.Cancel();
+#pragma warning disable VSTHRD002
+                        jsonRpcWsTask.Wait();
+#pragma warning restore VSTHRD002
+                        services.Service.DestroyAgent();
                     }
                 }
                 finally
                 {
-                    logger.Debug("client.Agent.Release()");
-                    client.Agent.Release();
+                    logger.Debug("Release()");
+                    services.Service.Release();
                 }
 
             }

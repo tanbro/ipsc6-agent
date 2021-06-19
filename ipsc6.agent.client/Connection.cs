@@ -331,7 +331,7 @@ namespace ipsc6.agent.client
         public const int DefaultRequestTimeoutMilliseconds = 5000;
         public const int DefaultKeepAliveTimeoutMilliseconds = 5000;
 
-        public async Task<int> Open(string remoteHost, ushort remotePort, string workerNumber, string password, uint keepAliveTimeout = DefaultKeepAliveTimeoutMilliseconds, int flag = 0)
+        public async Task<int> OpenAsync(string remoteHost, ushort remotePort, string workerNumber, string password, uint keepAliveTimeout = DefaultKeepAliveTimeoutMilliseconds, int flag = 0)
         {
             ConnectionState[] allowStates = { ConnectionState.Init, ConnectionState.Closed, ConnectionState.Failed, ConnectionState.Lost };
             lock (connectLock)
@@ -405,12 +405,12 @@ namespace ipsc6.agent.client
             }
         }
 
-        public async Task<int> Open(string remoteHost, string workerNumber, string password, uint keepAliveTimeout = DefaultKeepAliveTimeoutMilliseconds, int flag = 0)
+        public async Task<int> OpenAsync(string remoteHost, string workerNumber, string password, uint keepAliveTimeout = DefaultKeepAliveTimeoutMilliseconds, int flag = 0)
         {
-            return await Open(remoteHost, 0, workerNumber, password, keepAliveTimeout, flag);
+            return await OpenAsync(remoteHost, 0, workerNumber, password, keepAliveTimeout, flag);
         }
 
-        public async Task Close(bool graceful = true, int requestTimeout = DefaultRequestTimeoutMilliseconds, int flag = 0)
+        public async Task CloseAsync(bool graceful = true, int requestTimeout = DefaultRequestTimeoutMilliseconds, int flag = 0)
         {
             ConnectionState[] closedStates = { ConnectionState.Closed, ConnectionState.Failed, ConnectionState.Lost };
             ConnectionState[] allowedStates = { ConnectionState.Opening, ConnectionState.Ok };
@@ -469,7 +469,7 @@ namespace ipsc6.agent.client
 
         public bool HasPendingRequest => pendingReqType != MessageType.NONE;
 
-        public async Task<ServerSentMessage> Request(AgentRequestMessage args, int millisecondsTimeout = DefaultRequestTimeoutMilliseconds)
+        public async Task<ServerSentMessage> RequestAsync(AgentRequestMessage args, int millisecondsTimeout = DefaultRequestTimeoutMilliseconds)
         {
             lock (connectLock)
             {

@@ -137,12 +137,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 if (sg.Signed)
                 {
                     logger.DebugFormat("签出技能 [{0}]({1})", sg.Id, sg.Name);
-                    await agent.SignOut(skillId);
+                    await agent.SignOutAsync(skillId);
                 }
                 else
                 {
                     logger.DebugFormat("签入技能 [{0}]({1})", sg.Id, sg.Name);
-                    await agent.SignIn(skillId);
+                    await agent.SignInAsync(skillId);
                 }
             }
             finally
@@ -201,15 +201,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 var agent = Controllers.AgentController.Agent;
                 if (st.Item1 == client.AgentState.Idle)
                 {
-                    await agent.SetIdle();
+                    await agent.SetIdleAsync();
                 }
                 else if (st.Item1 == client.AgentState.Pause)
                 {
-                    await agent.SetBusy(st.Item2);
+                    await agent.SetBusyAsync(st.Item2);
                 }
                 else if (st.Item1 == client.AgentState.Leave)
                 {
-                    await agent.SetBusy();
+                    await agent.SetBusyAsync();
                 }
             }
             finally
@@ -250,7 +250,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 answerCommand.NotifyCanExecuteChanged();
                 logger.Debug("摘机");
                 var agent = Controllers.AgentController.Agent;
-                await agent.Answer();
+                await agent.AnswerAsync();
             }
             finally
             {
@@ -288,7 +288,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 hangupCommand.NotifyCanExecuteChanged();
                 logger.Debug("挂机");
                 var agent = Controllers.AgentController.Agent;
-                await agent.Hangup();
+                await agent.HangupAsync();
             }
             finally
             {
@@ -338,7 +338,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (parts.Length > 1)
                 workerNum = parts[1];
 
-            await agent.XferConsult(groupId.Trim(), workerNum.Trim());
+            await agent.XferConsultAsync(groupId.Trim(), workerNum.Trim());
         }
         #endregion
 
@@ -368,7 +368,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (parts.Length > 1)
                 workerNum = parts[1];
 
-            await agent.Xfer(groupId.Trim(), workerNum.Trim());
+            await agent.XferAsync(groupId.Trim(), workerNum.Trim());
         }
         #endregion
 
@@ -378,7 +378,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         static async Task DoHoldAsync()
         {
             var agent = Controllers.AgentController.Agent;
-            await agent.Hold();
+            await agent.HoldAsync();
             Instance.RefreshAgentExecutables();
         }
         static bool CanHold()
@@ -403,7 +403,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var agent = Controllers.AgentController.Agent;
             if (parameter == null)
             {
-                await agent.UnHold();
+                await agent.UnHoldAsync();
             }
             else
             {
@@ -464,7 +464,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             var queueInfo = paramter as client.QueueInfo;
             var agent = Controllers.AgentController.Agent;
-            await agent.Dequeue(queueInfo);
+            await agent.DequeueAsync(queueInfo);
         }
         #endregion
 
@@ -483,7 +483,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             };
             if (dialog.ShowDialog() != true) return;
             var inputText = dialog.InputText;
-            await agent.Dial(inputText);
+            await agent.DialAsync(inputText);
         }
         #endregion
 
@@ -502,7 +502,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             };
             if (dialog.ShowDialog() != true) return;
             var inputText = dialog.InputText;
-            await agent.XferExt(inputText);
+            await agent.XferExtAsync(inputText);
         }
         #endregion
 
@@ -521,7 +521,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             };
             if (dialog.ShowDialog() != true) return;
             var inputText = dialog.InputText;
-            await agent.XferExtConsult(inputText);
+            await agent.XferExtConsultAsync(inputText);
         }
         #endregion
 
@@ -572,7 +572,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 if (dialog.ShowDialog() != true) return;
                 ivrString = dialog.InputText;
             }
-            await agent.CallIvr(ivrId, ivrType, ivrString);
+            await agent.CallIvrAsync(ivrId, ivrType, ivrString);
         }
         #endregion
 
@@ -643,37 +643,37 @@ namespace ipsc6.agent.wpfapp.ViewModels
             switch (msgTyp)
             {
                 case client.MessageType.REMOTE_MSG_LISTEN:
-                    await agent.Monitor(connIndex, s);
+                    await agent.MonitorAsync(connIndex, s);
                     break;
                 case client.MessageType.REMOTE_MSG_STOPLISTEN:
-                    await agent.UnMonitor(connIndex, s);
+                    await agent.UnMonitorAsync(connIndex, s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCEIDLE:
-                    await agent.SetIdle(s);
+                    await agent.SetIdleAsync(s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCEPAUSE:
                     {
                         var parts = s.Split(new char[] { '|' });
-                        await agent.SetBusy(
+                        await agent.SetBusyAsync(
                             parts[0],
                             (client.WorkType)Enum.Parse(typeof(client.WorkType), parts[1])
                         );
                     }
                     break;
                 case client.MessageType.REMOTE_MSG_INTERCEPT:
-                    await agent.Intercept(connIndex, s);
+                    await agent.InterceptAsync(connIndex, s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCEINSERT:
-                    await agent.Interrupt(connIndex, s);
+                    await agent.InterruptAsync(connIndex, s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCEHANGUP:
-                    await agent.Hangup(connIndex, s);
+                    await agent.HangupAsync(connIndex, s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCESIGNOFF:
-                    await agent.SignOut(s);
+                    await agent.SignOutAsync(s);
                     break;
                 case client.MessageType.REMOTE_MSG_KICKOUT:
-                    await agent.KickOut(s);
+                    await agent.KickOutAsync(s);
                     break;
                 default:
                     MessageBox.Show($"还没有实现 {msgTyp}");

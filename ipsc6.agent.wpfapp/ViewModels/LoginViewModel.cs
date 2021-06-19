@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.ComponentModel;
+using Microsoft.Extensions.Configuration;
 
 using Microsoft.Toolkit.Mvvm.Input;
 
@@ -62,18 +63,25 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 var password = (parameter as PasswordBox).Password;
                 bool isOk = false;
 
-                logger.InfoFormat("登录开始: {0}", workerNum);
-
-                var agent = Controllers.AgentController.CreateAgent();
+                var cfg = Config.Manager.ConfigurationRoot;
+                var options = new Config.Ipsc();
+                cfg.GetSection(nameof(Config.Ipsc)).Bind(options);
+                logger.InfoFormat(
+                    "CreateAgent - ServerList: {0}, LocalPort: {1}, LocalAddress: \"{2}\"",
+                    (options.ServerList == null) ? "<null>" : $"\"{string.Join(",", options.ServerList)}\"",
+                    options.LocalPort,
+                    options.LocalAddress
+                );
+                services.Service.CreateAgent(options.ServerList, options.LocalPort, options.LocalAddress);
                 try
                 {
-                    await Controllers.AgentController.StartupAgentAsync(workerNum, password);
+                    await services.Service.LogInAsync(workerNum, password);
                     logger.InfoFormat("登录成功");
                     isOk = true;
                 }
                 catch (ConnectionException err)
                 {
-                    Controllers.AgentController.DisposeAgent();
+                    services.Service.DestroyAgent();
                     MessageBox.Show(
                         $"登录失败\r\n\r\n{err}",
                         Application.Current.MainWindow.Title,
