@@ -17,7 +17,7 @@ using Nerdbank.Streams;
 using EmbedIO.WebSockets;
 
 
-namespace ipsc6.agent.ews
+namespace ipsc6.agent.services
 {
     public class EmbedIOWebSocketJsonRpcMessageHandlerSendEventArgs : EventArgs
     {

@@ -8,7 +8,7 @@ using System.Collections.Concurrent;
 using EmbedIO.WebSockets;
 using StreamJsonRpc;
 
-namespace ipsc6.agent.ews
+namespace ipsc6.agent.services
 {
     // <summary>
     /// Defines a very simple JsonRpc server.
