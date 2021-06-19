@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
 
-namespace ipsc6.agent.wpfapp
+namespace ipsc6.agent.wpfapp.Views
 {
     /// <summary>
     /// Login.xaml 的交互逻辑

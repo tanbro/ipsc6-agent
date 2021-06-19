@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ipsc6.agent.wpfapp
+namespace ipsc6.agent.wpfapp.Views
 {
     /// <summary>
     /// MainWindow.xaml 的交互逻辑

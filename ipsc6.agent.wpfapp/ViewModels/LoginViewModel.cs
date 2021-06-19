@@ -18,8 +18,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(LoginViewModel));
 
-        static LoginWindow window;
-        public LoginWindow Window { set => window = value; }
+        static Views.LoginWindow window;
+        public Views.LoginWindow Window { set => window = value; }
 
         static string workerNum;
         public string WorkerNum

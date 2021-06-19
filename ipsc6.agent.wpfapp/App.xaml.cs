@@ -71,9 +71,9 @@ namespace ipsc6.agent.wpfapp
                     var jsonRpcWsTask = Task.Run(() => jsonRpcWs.RunAsync(jsonRpcWsCanceller.Token));
                     try
                     {
-                        if (new LoginWindow().ShowDialog() == true)
+                        if (new Views.LoginWindow().ShowDialog() == true)
                         {
-                            new MainWindow().ShowDialog();
+                            new Views.MainWindow().ShowDialog();
                         }
                     }
                     finally

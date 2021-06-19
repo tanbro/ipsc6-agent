@@ -41,6 +41,12 @@ namespace ipsc6.agent.services
         {
             if (agent != null) throw new InvalidOperationException();
             agent = new client.Agent(addresses, localPort, localAddress);
+            agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
+        }
+
+        private static void Agent_OnAgentDisplayNameReceived(object sender, client.AgentDisplayNameReceivedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         internal static void DestroyAgent()
@@ -54,6 +60,12 @@ namespace ipsc6.agent.services
         {
             await agent.StartUpAsync(workerNumber, password);
         }
+
+        public static async Task SignIn(string skillId)
+        {
+            await agent.SignInAsync(skillId);
+        }
+
         #endregion
     }
 #pragma warning restore VSTHRD200
