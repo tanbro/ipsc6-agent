@@ -96,6 +96,15 @@ theme:
 markdown_extensions:
     # pymdownx Extensions
     - pymdownx.extra
+# pymdownx.extra replaces markdown.extensions.extra, Here is the full list of included extensions:
+# pymdownx.betterem
+# pymdownx.superfences
+# markdown.extensions.footnotes
+# markdown.extensions.attr_list
+# markdown.extensions.def_list
+# markdown.extensions.tables
+# markdown.extensions.abbr
+# markdown.extensions.md_in_html
     - pymdownx.highlight
     - pymdownx.saneheaders
     - pymdownx.smartsymbols

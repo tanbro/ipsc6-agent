@@ -1,7 +1,7 @@
 # JSONRPC
 
-座席程序的对外可编程接口采用 *[JSONRPC][] over Websocket* 的形式。
-它的 RPC 传送协议大体上遵照 [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) 的定义[^1]。
+座席程序的对外可编程接口采用 _JSONRPC over Websocket_ 的形式。
+它的 RPC 传送协议大体上遵照 _[JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)_ 的定义[^1]。
 
 在本文的后续部分，我们将使用类似面向过程语言的函数定义形式，说明 API 接口。
 
@@ -94,7 +94,7 @@ function logIn(workerNum, password) {
 
     -   **Result**: `null`
 
-        没有返回值，但受限于 [JSONRPC][] 规定，此处统一返回 `null`。
+        没有返回值，但受限于 JSONRPC 规定，此处统一返回 `null`。
 
         回复数据的 JSON 格式形如:
 
@@ -158,7 +158,7 @@ function logIn(workerNum, password) {
 
 ## 事件通知举例
 
-我们以座席状态变化事件举例：当登录成功后，座席状态会发生变化，座席程序会把状态变化事件以 [JSONRPC][] 的形式通知给与它相连的 WebSocket 客户端。
+我们以座席状态变化事件举例：当登录成功后，座席状态会发生变化，座席程序会把状态变化事件以 JSONRPC 的形式通知给与它相连的 WebSocket 客户端。
 
 座席客户端发出的事件通知相当于反向的 RPC，且消息的 JSON 对象没有 `id` 属性，不需要回复。
 
@@ -212,8 +212,8 @@ deactivate 用户程序
 ```
 
 !!! note
-    `logIn` 的回复和 `onAgentStatusChanged` 事件通知**没有**时序性。
-    也就是说，它们之中，哪个消息先被收到是不确定的。
+`logIn` 的回复和 `onAgentStatusChanged` 事件通知**没有**时序性。
+也就是说，它们之中，哪个消息先被收到是不确定的。
 
 现在，我们可以补充上一个小节的 HTML 代码片段，把这个事件的处理加上:
 
@@ -251,7 +251,7 @@ deactivate 用户程序
 </script>
 ```
 
-[^1]: 座席程序的 RPC 接口基本支持常见的 [JSONRPC][] 使用方式，但是有所限制:
+[^1]: 座席程序的 RPC 接口基本支持常见的 JSONRPC 使用方式，但是有所限制:
 
     -   不支持 [`Batch`](https://www.jsonrpc.org/specification#batch) 方式
     -   在一个 RPC 完成之前，不接受新的请求
@@ -259,4 +259,4 @@ deactivate 用户程序
 [座席状态]: ../enums/agent_state.md
 [工作类型]: ../enums/agent_work_type.md
 
-[jsonrpc]: https://www.jsonrpc.org/specification "JSON-RPC is a stateless, light-weight remote procedure call (RPC) protocol."
+--8<-- "src/docs/includes/glossary.md"

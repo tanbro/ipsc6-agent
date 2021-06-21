@@ -1,0 +1,254 @@
+@startuml "Classes Diagram"
+
+skinparam DefaultFontSize 14
+
+class BaseAgent {
+    AgentId: string
+    WorkerNumber: string
+    DisplayName: string
+    State: AgentState
+    WorkType: WorkType
+    TeleState: TeleState
+}
+note left: 坐席客户端基本信息
+
+class Workmate
+note right: 工友的坐席信息
+
+class WorkmateList << (S, Orange) Singleton >> {
+    Items: Workmate[]
+}
+note top: \
+    工友列表\n\
+    在进行转等操作时，在这里个列表类型的 Singleton 对象中放置其它坐席的信息。
+
+class ConnectionInfo {
+    Host: string
+    Port: ushort
+}
+note left: 坐席客户端与CTI服务器之间的网络连接到信息
+
+enum Privilege
+{
+    AUTO_CALLOUT = 3
+    BLOCK = 13
+    BREAK_SESS = 20
+    CALLIN = 1
+    CONSULT = 7
+    CONSULT_EX = 8
+    DES_CALLIN = 2
+    FORCEBREAK = 12
+    FORCEIDLE = 21
+    FORCEINSERT = 11
+    FORCEPAUSE = 22
+    FORCESIGNOFF = 16
+    GREETVOICE = 23
+    INTERCEPT = 6
+    KICKOUT = 15
+    LISTEN = 17
+    MAN_CALLOUT = 5
+    MAN_CONSULT = 30
+    MODIFYPOWER = 24
+    MODIFYPOWER_EX = 25
+    RECORD = 18
+    RECORD2 = 19
+    SYS_CALLOUT = 4
+    TRANSFER = 9
+    TRANSFER_EX = 10
+    UNBLOCK = 14
+}
+note bottom: 坐席的权限枚举
+
+class AgentGroup {
+    Id: string
+    Name: string
+    Checked: bool
+}
+note left: 坐席组
+
+class Agent << (S, Orange) Singleton >> {
+    ConnectionList: List<ConnectionInfo>
+    PrivilegeList: List<Privilege>
+    PrivilegeExternList: int[]
+    GroupSet: Set<AgentGroup>
+
+}
+note top: 坐席客户端。一个客户端程序有且只有一个坐席对象。
+
+class Connection {
+    LocalAddress: string
+    ServerAddress: string
+    State: ConnectionState
+    QueueInfoList: QueueInfo[]
+    HoldInfoList: HoldInfo[]
+    WorkingCall: WorkingCallInfo
+}
+note top: 坐席客户端与服务器之间的网络连接
+
+enum ConnectionState{
+    Unknown = 0
+    Connecting = 1
+    Connected = 1
+    ConnectFailed = 2
+    Disconnected = 3
+    ConnectionLost = 4
+}
+note bottom: 连接状态
+
+enum AgentState {
+    NotExist = -2
+    OffLine = -1
+    OnLine = 0
+    Block = 1
+    Pause = 2
+    Leave = 3
+    Idle = 4
+    Ring = 5
+    Work = 6
+    WorkPause = 7
+}
+note bottom: 坐席状态枚举
+
+enum WorkType {
+    Unknown = 0
+    CallIn = 1
+    Transfer = 2
+    SysCall = 3
+    HandCall = 4
+    Consult = 5
+    Flow = 6
+    ForceInsert = 7
+    Listen = 8
+    Hold = 9
+    PauseBusy = 10
+    PauseLeave = 11
+    PauseTyping = 12
+    .. 自定义暂停状态 ..
+    Pause01 = 13
+    Pause02 = 14
+    Pause03 = 15
+    Pause04 = 16
+    Pause05 = 17
+}
+note left: 工作状态枚举
+
+enum HoldInfoType { 
+    Normal = 0
+    Consult = 1
+    Cancel = 2
+}
+note bottom: 被保持通话的信息类型
+
+enum QueueInfoType {
+    Join = 0
+    Wait = 1
+    PitchOn = 2
+    TimeOut = 3
+    Cancel = 4
+}
+note bottom: 队列类型枚举
+
+enum TeleState {
+    HangUp = 0
+    OffHook = 1
+}
+note bottom: 摘机/挂机状态
+note right of TeleState::HangUp
+    摘机
+endnote
+note right of TeleState::OffHook
+    挂机
+endnote
+
+class QueueInfo {
+    Type: QueueInfoType
+    BegtinTime: DateTime
+}
+note bottom: 排队电话
+
+class HoldInfo {
+    Type: HoldInfoType
+}
+note bottom: 被保持的通话
+
+enum WorkingCallDir {
+    Incoming = 0
+    Outgoing = 1
+}
+
+class WorkingCallInfo {
+    Connection: Connection
+    ProcessId: string
+    Channel: int
+    WorkChannel: int
+    AgentSessionId: string
+    GroupId: string
+    GroupName: string
+    AgentId: string
+    AgentWorkerNumber: string
+    AgentDisplayName: string
+    Dir: WorkingCallDir
+    BegtinTime: DateTime
+    CallingNo: string
+    CalledNo: string
+    Content: string
+}
+note bottom: 坐席的来电振铃信息
+
+WorkingCallInfo::Dir .. WorkingCallDir: 呼叫的方向 >
+QueueInfo ..|> WorkingCallInfo: inherits >
+HoldInfo ..|> WorkingCallInfo: inherits >
+
+enum SipUacInvState {
+  Unknown=0
+  Calling=1
+  Incoming=2
+  Early=3
+  Connecting=4
+  Confirmed=5
+  Disconnected=6
+}
+note left: 本地 SIP UAC 的呼叫状态枚举
+
+class LocalSipUacInfo {
+    RegistrarUri: string
+    RegisterIsActive: bool
+    RegisterStatus: int
+    CallState: SipUacInvState
+}
+note left: 本地 SIP UAC 的状态/信息
+
+BaseAgent::State .. AgentState: 坐席状态 >
+BaseAgent::TeleState .. TeleState: 话机状态 >
+    note on link: 话机在服务器上的状态
+
+Workmate ..|> BaseAgent: inherits >
+
+WorkmateList::items "1" *-- "0,1..n" Workmate: has >
+
+Agent ..|> BaseAgent: inherits >
+
+Agent::Connections "1" *-- "1..n" Connection: 连接到多个CTI服务器 >
+note left of Agent::Connections
+    一个客户端具有多个到CTI服务器端连接，用于支持集群。
+endnote
+
+Agent::SipUacs "1" *-- "1..n" LocalSipUacInfo: 注册到多个 SIP Registrar >
+note left of Agent::SipUacs
+    一个客户端注册到多个 SIP Registrar，用于支持集群。
+endnote
+Agent::Privileges "1" *-- "0,1..n" Privilege: 坐席的权限 >
+Agent::WorkType .. WorkType: 工作状态 >
+
+Connection::State .. ConnectionState: 连接状态 >
+Connection::QueueInfoList "1" *-- "0,1..n" QueueInfo::Connection:  坐席在该服务器中可以看到的排队列表 >
+Connection::HoldInfoList "1" *-- "0,1..n" HoldInfo::Connection:  坐席在该服务器中的通话保持列表 >
+Connection::WorkingCall .. WorkingCallInfo::Connection: 当前工作呼叫的信息 >
+
+QueueInfo::Type .. QueueInfoType: 排队类型 >
+
+HoldInfo::Type .. HoldInfoType: 保持类型 >
+
+LocalSipUacInfo::CallState .. SipUacInvState: 呼叫状态 >
+
+@enduml
