@@ -15,7 +15,16 @@ nav:
     - API 参考:
         - JSONRPC over WebSocket:
             - docs/api/jsonrpc_websocket/jsonrpc.md
-            - docs/api/jsonrpc_websocket/minxed_content.md
+            - docs/api/jsonrpc_websocket/mixed_content.md
+
+        - 类型:
+            - docs/api/types/class_overview.md
+            - docs/api/types/cti_server.md
+            - docs/api/types/skill_group.md
+            - docs/api/types/call.md
+            - docs/api/types/queue.md
+            - docs/api/types/sip_account.md
+            - docs/api/types/enums.md
 
         - 方法:
             - 基础方法:
@@ -47,22 +56,6 @@ nav:
             - docs/api/events/skill_groups_changed.md
             - docs/api/events/hold_list_changed.md
 
-        - 对象:
-            - docs/api/objects/index.md
-            - docs/api/objects/skill_group.md
-            - docs/api/objects/call.md
-            - docs/api/objects/agent.md
-            - docs/api/objects/ring_info.md
-            - docs/api/objects/phone_account_info.md
-            - docs/api/objects/hold_info.md
-            - docs/api/objects/queue_info.md
-
-        - 枚举:
-            - docs/api/enums/agent_state.md
-            - docs/api/enums/agent_work_type.md
-            - docs/api/enums/client_connect_state.md
-            - docs/api/enums/queue_type.md
-
 plugins:
     - search
     - with-pdf:
@@ -74,7 +67,7 @@ plugins:
 theme:
     name: material
     language: zh
-    font: false
+    # font: false
     features:
         - navigation.tabs
         - navigation.top

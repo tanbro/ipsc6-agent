@@ -259,4 +259,4 @@ deactivate 用户程序
 [座席状态]: ../enums/agent_state.md
 [工作类型]: ../enums/agent_work_type.md
 
---8<-- "src/docs/includes/glossary.md"
+--8<-- "src/includes/glossary.md"
