@@ -14,8 +14,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ipsc6.agent.client", "ipsc6.agent.client\ipsc6.agent.client.csproj", "{C0C4DF43-FDA0-4DA8-92C5-71CD62F7C47B}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "pjsua2_csharp", "pjsua2_csharp\pjsua2_csharp.shproj", "{18D2F11F-5340-4F31-9736-F4247F199251}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ipsc6.agent.wpfapp", "ipsc6.agent.wpfapp\ipsc6.agent.wpfapp.csproj", "{132CDCA4-E2E0-4D4F-A131-3C8AF8E17A95}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ipsc6.agent.network-net461", "ipsc6.agent.network-net461\ipsc6.agent.network-net461.vcxproj", "{F3A6CEAA-81EA-4F7E-978E-10639C21186B}"
@@ -27,9 +25,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ipsc6.agent.server", "ipsc6.agent.server\ipsc6.agent.server.csproj", "{490AA7B3-D4E9-47D0-96B4-9E27CB53696E}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		pjsua2_csharp\pjsua2_csharp.projitems*{18d2f11f-5340-4f31-9736-f4247f199251}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
