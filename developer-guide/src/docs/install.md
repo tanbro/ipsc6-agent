@@ -24,13 +24,31 @@
 
 ### 依赖软件
 
-- Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019 (x86).
+- 适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++ 可再发行软件包
 
-    下载地址: <https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0>
+    下载地址: <https://support.microsoft.com/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0>
 
-- .NET Framework 4.6.1 ~ 4.8
+    !!! note
+        目前，我们分别提供座席程序 x86 和 x64 版本。
+        x86 版本可以在 Win32 环境下以及 Win64 环境下以运行，x84 版本只能在 Win64 环境下运行。
+        安装Microsoft Visual C++ 可再发行软件包时要选择对应的版本。
+
+- .NET Framework 4.6.1 及以上
 
     下载地址: <https://dotnet.microsoft.com/download/dotnet-framework>
+
+    !!! note
+        座席程序所需的是 `.NET Framework`，而**不是** `.NET` 或 `.NET Core`。
+
+## 操作系统权限
+
+座席程序需要以下操作系统权限:
+
+- 音频采集
+- 音频播放
+- 新建和写入日志文件
+- 使用网络发送和接收数据
+- 打开网络端口进行监听
 
 ## 直接使用文件
 
