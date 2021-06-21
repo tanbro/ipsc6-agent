@@ -12,7 +12,7 @@ namespace ipsc6.agent.wpfapp.Utils
         /// Static instance. Needs to use lambda expression
         /// to construct an instance (since constructor is private).
         /// </summary>
-        private static readonly Lazy<T> instance = new Lazy<T>(() => CreateInstanceOfT());
+        private static readonly Lazy<T> instance = new(CreateInstanceOfT);
 
         #endregion
 
@@ -21,7 +21,7 @@ namespace ipsc6.agent.wpfapp.Utils
         /// <summary>
         /// Gets the instance of this singleton.
         /// </summary>
-        public static T Instance { get { return instance.Value; } }
+        public static T Instance => instance.Value;
 
         #endregion
 
