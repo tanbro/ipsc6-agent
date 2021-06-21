@@ -1,6 +1,7 @@
 # JSONRPC
 
-座席程序的接口采用 RPC 方式，大体上遵照 [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) 的定义[^1]。
+座席程序的对外可编程接口采用 *[JSONRPC][] over Websocket* 的形式。
+它的 RPC 传送协议大体上遵照 [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) 的定义[^1]。
 
 在本文的后续部分，我们将使用类似面向过程语言的函数定义形式，说明 API 接口。
 
@@ -128,7 +129,7 @@ function logIn(workerNum, password) {
 
     <script>
         // 全局 WebSocket 对象
-        const sock = new WebSocket("ws://localhost:9876/ws");
+        const sock = new WebSocket("ws://localhost:9696/jsonrpc");
 
         // 输出收到的 Response
         sock.onmessage = (event) => {
@@ -211,7 +212,6 @@ deactivate 用户程序
 ```
 
 !!! note
-
     `logIn` 的回复和 `onAgentStatusChanged` 事件通知**没有**时序性。
     也就是说，它们之中，哪个消息先被收到是不确定的。
 
@@ -222,7 +222,7 @@ deactivate 用户程序
 
 <script>
     // 全局 WebSocket 对象
-    const sock = new WebSocket("ws://localhost:9876/ws");
+    const sock = new WebSocket("ws://localhost:9696/jsonrpc");
 
     // 输出收到的 Response
     sock.onmessage = (event) => {
@@ -256,6 +256,7 @@ deactivate 用户程序
     -   不支持 [`Batch`](https://www.jsonrpc.org/specification#batch) 方式
     -   在一个 RPC 完成之前，不接受新的请求
 
-[jsonrpc]: https://www.jsonrpc.org/specification
 [座席状态]: ../enums/agent_state.md
 [工作类型]: ../enums/agent_work_type.md
+
+[jsonrpc]: https://www.jsonrpc.org/specification "JSON-RPC is a stateless, light-weight remote procedure call (RPC) protocol."

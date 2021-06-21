@@ -17,7 +17,7 @@
 1. `IPSC6AGENT_` 为前缀的环境变量
 1. 传入到座席程序的命令启动参数
 
-顺序靠后的将覆盖顺序考前的配置参数。
+靠后的配置参数覆盖之前的。
 
 座席程序的配置支持两级分层的键值对形式，我们用 `:` 作为键的层次分隔符。
 
@@ -35,7 +35,7 @@
         "ServerList": ["192.168.2.207", "192.168.2.108"]
     },
     "WebServer": {
-        "ListenPort": 9876
+        "ListenPort": 9696
     },
     "Phone": {
         "LocalSipPort": 5060
@@ -50,7 +50,20 @@
     "Ipsc:ServerList": ["192.168.2.207", "192.168.2.108"],
     "Ipsc:LocalPort": 0,
     "Ipsc:LocalAddress": "0.0.0.0",
-    "WebServer:ListenPort": 9876,
+    "WebServer:ListenPort": 9696,
+    "Phone:LocalSipPort": 5060
+}
+```
+
+或
+
+```json
+{
+    "Ipsc:ServerList:0": "192.168.2.207",
+    "Ipsc:ServerList:1": "192.168.2.108",
+    "Ipsc:LocalPort": 0,
+    "Ipsc:LocalAddress": "0.0.0.0",
+    "WebServer:ListenPort": 9696,
     "Phone:LocalSipPort": 5060
 }
 ```
@@ -114,8 +127,7 @@ ipsc6.agent.wpfapp.exe --Ipsc:ServerList:0 "192.168.2.100" --Ipsc:ServerList:1 "
     ```
 
 !!! warning
-
-    在同一命令中，请勿将使用 `=` 的命令行参数键值对与使用空格的键值对混合使用。
+在同一命令中，请勿将使用 `=` 的命令行参数键值对与使用空格的键值对混合使用。
 
 ## 配置项列表
 
@@ -149,15 +161,17 @@ ipsc6.agent.wpfapp.exe --Ipsc:ServerList:0 "192.168.2.100" --Ipsc:ServerList:1 "
     | ------------------- | -------------- | -------- | ------- |
     | `Ipsc:LocalAddress` | `List<String>` | ✔️       |         |
 
-## 内嵌 Web 服务器配置
+### 内嵌 Web 服务器配置
 
 -   Web 服务网络端口
 
     | key                    | type      | required | default |
     | ---------------------- | --------- | -------- | ------- |
-    | `WebServer:ListenPort` | `Integer` | ✔️       |         |
+    | `WebServer:ListenPort` | `Integer` |          | `0`     |
 
     座席程序的嵌入 WebServer 模块在本地回环地址上打开这个端口，作为 HTTP 服务器进行网络通信。
+
+    如设置 `0`，座席程序将使用 `9696` 端口。
 
 ### 软电话配置
 

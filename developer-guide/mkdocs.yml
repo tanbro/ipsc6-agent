@@ -48,6 +48,7 @@ nav:
             - docs/api/events/hold_list_changed.md
 
         - 对象:
+            - docs/api/objects/index.md
             - docs/api/objects/skill_group.md
             - docs/api/objects/call.md
             - docs/api/objects/agent.md
@@ -86,7 +87,7 @@ theme:
             name: 切换到暗色模式
         - media: "(prefers-color-scheme: dark)"
           scheme: slate
-          primary: light blue
+          primary: dark blue
           accent: light blue
           toggle:
             icon: material/lightbulb
@@ -115,5 +116,5 @@ markdown_extensions:
         slugify: !!python/name:pymdownx.slugs.uslugify
     # 3rd extensions
     - plantuml_markdown:
-        #   server: http://www.plantuml.com/plantuml
-          format: svg
+        # server: http://www.plantuml.com/plantuml
+        format: svg

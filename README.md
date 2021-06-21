@@ -1,7 +1,5 @@
 # IPSC 6 呼叫中心系统 的 Agent Windows 桌面客户端程序
 
-这个项目依赖于许多 Native 代码。为了兼容 32bit 系统，我们统一采用 Win32 构建。
-
 ## pjproject
 
 这个依赖项目作为 `git submodule` 存放在 `submodules/pjproject`，如果尚未初始化这个 `git` 子模块，应执行：

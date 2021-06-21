@@ -29,7 +29,6 @@ EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		pjsua2_csharp\pjsua2_csharp.projitems*{18d2f11f-5340-4f31-9736-f4247f199251}*SharedItemsImports = 13
-		pjsua2_csharp\pjsua2_csharp.projitems*{8c33211b-00b7-414f-af11-1262899195fb}*SharedItemsImports = 5
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

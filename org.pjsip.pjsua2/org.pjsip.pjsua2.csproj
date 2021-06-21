@@ -33,6 +33,4 @@
     <Exec Command="copy /y &quot;$(TargetDir)$(ProjectName).dll&quot; $(SolutionDir)$(Configuration)" />
   </Target>
 
-  <Import Project="..\pjsua2_csharp\pjsua2_csharp.projitems" Label="Shared" />
-
 </Project>
