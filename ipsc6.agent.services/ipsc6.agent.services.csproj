@@ -3,15 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net461;net48;net5.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
-    <Platforms>AnyCPU;x86;x64</Platforms>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Platforms>x86;x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
