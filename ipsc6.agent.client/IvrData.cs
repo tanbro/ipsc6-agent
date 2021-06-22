@@ -4,7 +4,7 @@ namespace ipsc6.agent.client
     {
         public int N { get; }
         public string S { get; }
-        public IvrData(ConnectionInfo connectionInfo, int n, string s) : base(connectionInfo)
+        public IvrData(CtiServer connectionInfo, int n, string s) : base(connectionInfo)
         {
             N = n;
             S = s;

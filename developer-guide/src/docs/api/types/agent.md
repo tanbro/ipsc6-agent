@@ -17,14 +17,14 @@
 
     系统中，每个座席的工号都是唯一的。
 
-### ctiServerCollection
+### ctiServers
 
-`ctiServerCollection`
+`ctiServers`
 : CTI 服务器连接数组
 
-    |       Attribute       |  Type   |            Remark             |
-    | --------------------- | ------- | ----------------------------- |
-    | `ctiServerCollection` | `Array` | 数组元素是 [CtiServer][] 对象 |
+    |  Attribute   |  Type   |            Remark             |
+    | ------------ | ------- | ----------------------------- |
+    | `ctiServers` | `Array` | 数组元素是 [CtiServer][] 对象 |
 
     座席客户端可同时连接多个 CTI 服务器节点。该数组属性存放一个或多个服务连接的信息对象实例。
 
@@ -56,31 +56,40 @@
     -   当座席处理“工作状态”(正在进行通话)时：表示通话的类型和状态，如呼出、通话保持
     -   当座席处理“非工作状态”(没有进行通话)时：表示“示忙”的类型，如离开、小休等
 
-### callCollection
+### groups
 
-`callCollection`
+`groups`
+: 座席组
+
+    | Attribute |  Type   |          Remark           |
+    | --------- | ------- | ------------------------- |
+    | `groups`  | `Array` | 数组元素是 [Group][] 对象 |
+
+### calls
+
+`calls`
 : 与该座席相关的呼叫数组
 
-    |    Attribute     |  Type   |          Remark          |
-    | ---------------- | ------- | ------------------------ |
-    | `callCollection` | `Array` | 数组元素是 [Call][] 对象 |
+    | Attribute |  Type   |          Remark          |
+    | --------- | ------- | ------------------------ |
+    | `calls`   | `Array` | 数组元素是 [Call][] 对象 |
 
     !!! important
 
         每当座席相关的呼叫信息发生变化，如来电振铃、通话结束、通话保持、外呼等，该数组中的数据会改变。
 
         但是，只要座席的通话不结束，这个数组中的元素就不会被移除。只有当座席的所有通话都结束，状态改变为“非工作”时，这个列表才会清空。
-        
+
         例如：座席正在进行通话，同时还有一个通话被保持。此时，如果保持的通话挂断，这个通话对应的对象不会从数组中移除。
 
-### sipAccountCollection
+### sipAccounts
 
-`sipAccountCollection`
+`sipAccounts`
 : 与该座席相关的呼叫数组
 
-    |       Attribute        |  Type   |             Remark             |
-    | ---------------------- | ------- | ------------------------------ |
-    | `sipAccountCollection` | `Array` | 数组元素是 [SipAccount][] 对象 |
+    |   Attribute   |  Type   |             Remark             |
+    | ------------- | ------- | ------------------------------ |
+    | `sipAccounts` | `Array` | 数组元素是 [SipAccount][] 对象 |
 
     每当座席 SIP 注册状态发生变化，该数组中的数据会改变。
 
@@ -89,6 +98,7 @@
 [ctiserver]: cti_server.md
 [agentstate]: enums.md#座席状态
 [worktype]: enums.md#座席工作类型
+[group]: group.md
 [call]: call.md
 [sipaccount]: sip_account.md
 [sipcall]: sip_call.md

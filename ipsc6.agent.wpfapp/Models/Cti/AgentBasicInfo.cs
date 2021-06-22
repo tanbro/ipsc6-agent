@@ -30,8 +30,8 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetProperty(ref agentStateWorkType, value);
         }
 
-        IReadOnlyList<client.AgentGroup> skillGroups = new List<client.AgentGroup>();
-        public IReadOnlyList<client.AgentGroup> SkillGroups
+        IReadOnlyList<client.Group> skillGroups = new List<client.Group>();
+        public IReadOnlyList<client.Group> SkillGroups
         {
             get => skillGroups;
             set => SetProperty(ref skillGroups, value);
@@ -51,15 +51,15 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetProperty(ref teleState, value);
         }
 
-        IReadOnlyCollection<client.CallInfo> callList = new HashSet<client.CallInfo>();
-        public IReadOnlyCollection<client.CallInfo> CallList
+        IReadOnlyCollection<client.Call> callList = new HashSet<client.Call>();
+        public IReadOnlyCollection<client.Call> CallList
         {
             get => callList;
             set => SetProperty(ref callList, value);
         }
 
-        IReadOnlyCollection<client.CallInfo> holdList = new HashSet<client.CallInfo>();
-        public IReadOnlyCollection<client.CallInfo> HoldList
+        IReadOnlyCollection<client.Call> holdList = new HashSet<client.Call>();
+        public IReadOnlyCollection<client.Call> HoldList
         {
             get => holdList;
             set => SetProperty(ref holdList, value);

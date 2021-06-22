@@ -115,7 +115,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         static bool CanSkillPopup()
         {
             var agent = Controllers.AgentController.Agent;
-            return agent.GroupCollection.Count > 0;
+            return agent.Groups.Count > 0;
         }
         #endregion
 
@@ -134,7 +134,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 skillSignCommand.NotifyCanExecuteChanged();
                 var skillId = parameter as string;
                 var sg = model.SkillGroups.First((m) => m.Id == skillId);
-                if (sg.Signed)
+                if (sg.IsSigned)
                 {
                     logger.DebugFormat("签出技能 [{0}]({1})", sg.Id, sg.Name);
                     await agent.SignOutAsync(skillId);
@@ -266,7 +266,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (agent == null) return false;
 
             var callCnt = (
-                from c in agent.SipAccountCollection.SelectMany(x => x.Calls)
+                from c in agent.SipAccounts.SelectMany(x => x.Calls)
                 where c.State == org.pjsip.pjsua2.pjsip_inv_state.PJSIP_INV_STATE_INCOMING
                 select c
             ).Count();
@@ -407,7 +407,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
             else
             {
-                await agent.UnHold(parameter as client.CallInfo);
+                await agent.UnHold(parameter as client.Call);
             }
             Instance.RefreshAgentExecutables();
         }
@@ -418,11 +418,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (agent.AgentState != client.AgentState.Work) return false;
             if (parameter == null)
             {
-                if (agent.HeldCallCollection.Count == 0) return false;
+                if (agent.HeldCalls.Count == 0) return false;
             }
             else
             {
-                var callInfo = parameter as client.CallInfo;
+                var callInfo = parameter as client.Call;
                 if (!callInfo.IsHeld) return false;
             }
             return true;

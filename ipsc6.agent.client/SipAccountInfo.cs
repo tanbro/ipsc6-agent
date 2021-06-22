@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace ipsc6.agent.client
 {
-    public class SipAccountInfo
+    public struct SipAccountInfo
     {
         public SipAccountInfo(Sip.Account account)
         {
@@ -13,29 +13,32 @@ namespace ipsc6.agent.client
             {
                 throw new ArgumentNullException(nameof(account));
             }
+            IsRegisterActive = false;
+            LastRegisterError = 0;
+            calls = new HashSet<SipCallInfo>();
             Id = account.getId();
             IsValid = account.isValid();
-            if (!IsValid)
+            if (IsValid)
             {
-                return;
+                var info = account.getInfo();
+                if (info.regIsConfigured)
+                {
+                    IsRegisterActive = info.regIsActive;
+                    LastRegisterError = info.regLastErr;
+                }
+                calls.UnionWith(
+                    from call in account.Calls
+                    select new SipCallInfo(call)
+                );
             }
-            var info = account.getInfo();
-            if (info.regIsConfigured)
-            {
-                IsRegisterActive = info.regIsActive;
-                LastRegisterError = info.regLastErr;
-            }
-            Calls = new HashSet<SipCallInfo>(
-                from call in account.Calls
-                select new SipCallInfo(call)
-            );
+
         }
 
         public int Id { get; }
         public bool IsValid { get; }
         public bool IsRegisterActive { get; }
         public int LastRegisterError { get; }
-
-        public IReadOnlyCollection<SipCallInfo> Calls { get; }
+        private readonly HashSet<SipCallInfo> calls;
+        public IReadOnlyCollection<SipCallInfo> Calls => calls;
     }
 }

@@ -14,15 +14,15 @@ namespace ipsc6.agent.client
     //     完整格式：ProcessId;AgentSessionId;呼叫方向;用户电话号码;号码归属地;系统本地电话号码;坐席工号;排队类型;排队技能组ID;IVR路径|InValueStr(原来格式的排队数据)
     //     样例：10000156512848000;10000156512848003;0;18600001111;广州;10050;1001;1;Group1;;|ABCD|123
     */
-    public class CallInfo : ServerSideData, IEquatable<CallInfo>
+    public class Call : ServerSideData, IEquatable<Call>
     {
         public int Channel { get; }
         public long ProcessId { get; }
         public long AgentSessionId { get; }
         public CallDirection CallDirection { get; }
-        public string RemoteTelnum { get; }
+        public string RemoteTelNum { get; }
         public string RemoteLocation { get; }
-        public string LocalTelnum { get; }
+        public string LocalTelNum { get; }
         public string WorkerNum { get; }
         public QueueInfoType QueueType { get; }
         public string SkillGroupId { get; }
@@ -32,7 +32,7 @@ namespace ipsc6.agent.client
         public bool IsHeld { get; internal set; }
         public HoldEventType HoldType { get; internal set; }
 
-        public CallInfo(ConnectionInfo connectionInfo, int channel, string dataString) : base(connectionInfo)
+        public Call(CtiServer connectionInfo, int channel, string dataString) : base(connectionInfo)
         {
             Channel = channel;
             IsHeld = false;
@@ -45,22 +45,26 @@ namespace ipsc6.agent.client
                 switch (i)
                 {
                     case 0:
+#pragma warning disable CA1305
                         ProcessId = long.Parse(s);
+#pragma warning restore CA1305
                         break;
                     case 1:
+#pragma warning disable CA1305
                         AgentSessionId = long.Parse(s);
+#pragma warning restore CA1305
                         break;
                     case 2:
                         CallDirection = (CallDirection)Enum.Parse(typeof(CallDirection), s);
                         break;
                     case 3:
-                        RemoteTelnum = s;
+                        RemoteTelNum = s;
                         break;
                     case 4:
                         RemoteLocation = s;
                         break;
                     case 5:
-                        LocalTelnum = s;
+                        LocalTelNum = s;
                         break;
                     case 6:
                         WorkerNum = s;
@@ -87,17 +91,17 @@ namespace ipsc6.agent.client
         public override int GetHashCode()
         {
             int hashCode = 1152885954;
-            hashCode = hashCode * -1521134295 + EqualityComparer<ConnectionInfo>.Default.GetHashCode(ConnectionInfo);
+            hashCode = hashCode * -1521134295 + EqualityComparer<CtiServer>.Default.GetHashCode(ConnectionInfo);
             hashCode = hashCode * -1521134295 + Channel.GetHashCode();
             return hashCode;
         }
-        public override bool Equals(object obj) => Equals(obj as CallInfo);
-        public bool Equals(CallInfo other) => other != null
-            && EqualityComparer<ConnectionInfo>.Default.Equals(ConnectionInfo, other.ConnectionInfo)
+        public override bool Equals(object obj) => Equals(obj as Call);
+        public bool Equals(Call other) => other != null
+            && EqualityComparer<CtiServer>.Default.Equals(ConnectionInfo, other.ConnectionInfo)
             && Channel == other.Channel;
-        public static bool operator ==(CallInfo left, CallInfo right) => EqualityComparer<CallInfo>.Default.Equals(left, right);
-        public static bool operator !=(CallInfo left, CallInfo right) => !(left == right);
+        public static bool operator ==(Call left, Call right) => EqualityComparer<Call>.Default.Equals(left, right);
+        public static bool operator !=(Call left, Call right) => !(left == right);
         public override string ToString() =>
-            $"<{GetType().Name} Connection={ConnectionInfo}, Channel={Channel}, IsHeld={IsHeld}, HoldType={HoldType}, CallDirection={CallDirection}, RemoteTelnum={RemoteTelnum}>";
+            $"<{GetType().Name} Connection={ConnectionInfo}, Channel={Channel}, IsHeld={IsHeld}, HoldType={HoldType}, CallDirection={CallDirection}, RemoteTelnum={RemoteTelNum}>";
     }
 }

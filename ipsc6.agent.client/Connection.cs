@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ipsc6.agent.client
 {
-    public class Connection : IDisposable
+    internal class Connection : IDisposable
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Connection));
 
@@ -28,8 +28,10 @@ namespace ipsc6.agent.client
             Initialize();
         }
 
+        // 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
         ~Connection()
         {
+            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
             Dispose(false);
         }
 
@@ -50,9 +52,9 @@ namespace ipsc6.agent.client
                 if (disposing)
                 {
                     // 释放托管状态(托管对象)
-                    if (Interlocked.Add(ref _count, -1) == 0)
+                    if (Interlocked.Add(ref _ref, -1) == 0)
                     {
-                        logger.DebugFormat("Stop event thread");
+                        logger.Debug("Stop event thread");
                         eventThreadCancelSource.Cancel();
                         eventThread.Join();
                         eventThreadCancelSource.Dispose();
@@ -75,7 +77,7 @@ namespace ipsc6.agent.client
             connector.OnDisconnected += Connector_OnDisconnected;
             connector.OnConnectionLost += Connector_OnConnectionLost;
             connector.OnAgentMessageReceived += Connector_OnAgentMessageReceived;
-            if (Interlocked.Increment(ref _count) == 1)
+            if (Interlocked.Increment(ref _ref) == 1)
             {
                 eventThreadCancelSource = new CancellationTokenSource();
                 eventThread.Start(eventThreadCancelSource.Token);
@@ -94,7 +96,7 @@ namespace ipsc6.agent.client
         {
             var e = new ConnectionStateChangedEventArgs(state, newState);
             state = newState;
-            Task.Run(() => OnConnectionStateChanged?.Invoke(this, e));
+            _ = Task.Run(() => OnConnectionStateChanged?.Invoke(this, e));
         }
 
         private TaskCompletionSource<object> connectTcs;
@@ -116,7 +118,7 @@ namespace ipsc6.agent.client
         public event LostEventHandler OnLost;
         public event ConnectionStateChangedEventHandler OnConnectionStateChanged;
 
-        static int _count = 0;
+        private static int _ref = 0;
         static CancellationTokenSource eventThreadCancelSource;
         static readonly ConcurrentQueue<EventQueueItem> eventQueue = new();
         static Thread eventThread = new(EventThreadStarter);
@@ -127,7 +129,9 @@ namespace ipsc6.agent.client
             SpinWait.SpinUntil(() =>
             {
                 if (token.IsCancellationRequested)
+                {
                     return true;
+                }
                 while (eventQueue.TryDequeue(out EventQueueItem item))
                 {
                     try
@@ -158,7 +162,7 @@ namespace ipsc6.agent.client
                 }
                 connectTcs.SetException(new ConnectionFailedException());
             }
-            else if ((msg is ConnectorDisconnectedEventArgs) || (msg is ConnectorConnectionLostEventArgs))
+            else if (msg is ConnectorDisconnectedEventArgs or ConnectorConnectionLostEventArgs)
             {
                 ConnectionState prevState;
                 lock (connectLock)
@@ -173,7 +177,6 @@ namespace ipsc6.agent.client
                         SetState(ConnectionState.Lost);
                     }
                 }
-
                 if (msg is ConnectorDisconnectedEventArgs)
                 {
                     OnClosed?.Invoke(this, new EventArgs());
@@ -215,16 +218,15 @@ namespace ipsc6.agent.client
             else if (msg is ServerSentMessage)
             {
                 var msg_ = msg as ServerSentMessage;
-
                 if (msg_.Type == MessageType.REMOTE_MSG_LOGIN)
                 {
                     if (msg_.N1 < 1)
                     {
+                        // 登录失败算一种连接失败
                         var err = new ErrorResponse(msg_);
                         logger.ErrorFormat("Login failed: {0}. Connector will be closed.", err);
                         logInTcs.SetException(new ErrorResponse(msg_));
                         connector.Disconnect();
-                        // 登录失败算一种连接失败
                         lock (connectLock)
                         {
                             SetState(ConnectionState.Failed);
@@ -232,6 +234,7 @@ namespace ipsc6.agent.client
                     }
                     else
                     {
+                        // 登录成功
                         lock (connectLock)
                         {
                             agentId = msg_.N2;
@@ -517,7 +520,7 @@ namespace ipsc6.agent.client
 
     }
 
-    class EventQueueItem
+    internal struct EventQueueItem
     {
         public Connection Connection { get; }
         public object Data { get; }

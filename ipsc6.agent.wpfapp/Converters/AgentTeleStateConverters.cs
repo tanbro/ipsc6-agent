@@ -23,7 +23,7 @@ namespace ipsc6.agent.wpfapp.Converters
                 var agent = Controllers.AgentController.Agent;
                 if (agent != null)
                 {
-                    if (agent.SipAccountCollection.Any(x => x.IsRegisterActive))  // 有注册了的
+                    if (agent.SipAccounts.Any(x => x.IsRegisterActive))  // 有注册了的
                     {
                         switch (teleState)
                         {

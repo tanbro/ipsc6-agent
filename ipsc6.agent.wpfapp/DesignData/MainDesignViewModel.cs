@@ -17,11 +17,11 @@ namespace ipsc6.agent.wpfapp.DesignData
             AgentBasicInfo.DisplayName = "阿猫阿狗";
             AgentBasicInfo.AgentStateWorkType = new Tuple<client.AgentState, client.WorkType>(client.AgentState.Pause, client.WorkType.PauseSnooze);
 
-            AgentBasicInfo.SkillGroups = new List<client.AgentGroup>
+            AgentBasicInfo.SkillGroups = new List<client.Group>
             {
-                new client.AgentGroup("skill_01", "Skill 01"),
-                new client.AgentGroup("skill_02", "Skill 02"),
-                new client.AgentGroup("skill_03", "Skill 03")
+                new client.Group("skill_01", "Skill 01"),
+                new client.Group("skill_02", "Skill 02"),
+                new client.Group("skill_03", "Skill 03")
             };
 
             RingInfo.TeleNum = "未知归号码";

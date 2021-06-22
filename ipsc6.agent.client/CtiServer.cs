@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace ipsc6.agent.client
 {
-    public class ConnectionInfo : IEquatable<ConnectionInfo>
+    public class CtiServer : IEquatable<CtiServer>
     {
         public string Host { get; }
         public ushort Port { get; }
 
-        public ConnectionInfo(string address)
+        public CtiServer(string address)
         {
             var parts = address.Split(new char[] { ':' }, 2);
             Host = parts[0];
@@ -16,7 +16,7 @@ namespace ipsc6.agent.client
                 Port = ushort.Parse(parts[1]);
         }
 
-        public ConnectionInfo(string host, ushort port)
+        public CtiServer(string host, ushort port)
         {
             Host = host;
             Port = port;
@@ -29,10 +29,10 @@ namespace ipsc6.agent.client
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as ConnectionInfo);
+            return Equals(obj as CtiServer);
         }
 
-        public bool Equals(ConnectionInfo other)
+        public bool Equals(CtiServer other)
         {
             return other != null
                 && Host == other.Host
@@ -47,12 +47,12 @@ namespace ipsc6.agent.client
             return hashCode;
         }
 
-        public static bool operator ==(ConnectionInfo left, ConnectionInfo right)
+        public static bool operator ==(CtiServer left, CtiServer right)
         {
-            return EqualityComparer<ConnectionInfo>.Default.Equals(left, right);
+            return EqualityComparer<CtiServer>.Default.Equals(left, right);
         }
 
-        public static bool operator !=(ConnectionInfo left, ConnectionInfo right)
+        public static bool operator !=(CtiServer left, CtiServer right)
         {
             return !(left == right);
         }

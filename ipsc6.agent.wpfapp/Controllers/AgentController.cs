@@ -35,12 +35,12 @@ namespace ipsc6.agent.wpfapp.Controllers
             Agent.OnConnectionStateChanged += Agent_OnConnectionStateChanged;
             Agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
             Agent.OnAgentStateChanged += Agent_OnAgentStateChanged;
-            Agent.OnGroupCollectionReceived += Agent_OnGroupCollectionReceived;
+            Agent.OnGroupReceived += Agent_OnGroupCollectionReceived;
             Agent.OnSignedGroupsChanged += Agent_OnSignedGroupsChanged;
             Agent.OnTeleStateChanged += Agent_OnTeleStateChanged;
-            Agent.OnHoldInfo += Agent_OnHoldInfo;
+            Agent.OnHoldInfoReceived += Agent_OnHoldInfo;
             Agent.OnRingInfoReceived += Agent_OnRingInfoReceived;
-            Agent.OnQueueInfo += Agent_OnQueueInfo;
+            Agent.OnQueueInfoReceived += Agent_OnQueueInfo;
             Agent.OnSipRegisterStateChanged += Agent_OnSipRegisterStateChanged;
             Agent.OnSipCallStateChanged += Agent_OnSipCallStateChanged;
 
@@ -68,7 +68,7 @@ namespace ipsc6.agent.wpfapp.Controllers
         static void ReloadSipAccountList()
         {
             var model = Models.Cti.AgentBasicInfo.Instance;
-            model.SipAccountList = Agent.SipAccountCollection.ToList();
+            model.SipAccountList = Agent.SipAccounts.ToList();
         }
 
         private static void Agent_OnQueueInfo(object sender, client.QueueInfoEventArgs e)
@@ -80,7 +80,7 @@ namespace ipsc6.agent.wpfapp.Controllers
         private static void ReloadQueueList()
         {
             var model = Models.Cti.AgentBasicInfo.Instance;
-            model.QueueList = Agent.QueueInfoCollection.ToList();
+            model.QueueList = Agent.QueueInfos.ToList();
         }
 
         private static void Agent_OnRingInfoReceived(object sender, client.RingInfoReceivedEventArgs e)
@@ -100,8 +100,8 @@ namespace ipsc6.agent.wpfapp.Controllers
         {
             logger.Debug("ReloadCallList");
             var model = Models.Cti.AgentBasicInfo.Instance;
-            model.CallList = Agent.CallCollection.ToList();
-            model.HoldList = Agent.HeldCallCollection.ToList();
+            model.CallList = Agent.Calls.ToList();
+            model.HoldList = Agent.HeldCalls.ToList();
         }
         private static void Agent_OnTeleStateChanged(object sender, client.TeleStateChangedEventArgs e)
         {
@@ -171,7 +171,7 @@ namespace ipsc6.agent.wpfapp.Controllers
         static void ResetSkillGroup()
         {
             var model = Models.Cti.AgentBasicInfo.Instance;
-            model.SkillGroups = Agent.GroupCollection.ToList();
+            model.SkillGroups = Agent.Groups.ToList();
         }
 
         internal static bool AgentStartupFlag = false;
