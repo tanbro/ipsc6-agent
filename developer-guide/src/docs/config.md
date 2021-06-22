@@ -27,46 +27,52 @@
 
 下面是一个具有各种配置设置的示例 settings.json 文件：
 
-```json
-{
-    "Ipsc": {
-        "LocalPort": 0,
-        "LocalAddress": "0.0.0.0",
-        "ServerList": ["192.168.2.207", "192.168.2.108"]
-    },
-    "WebServer": {
-        "ListenPort": 9696
-    },
-    "Phone": {
-        "LocalSipPort": 5060
+!!!example
+
+    ```json
+    {
+        "Ipsc": {
+            "LocalPort": 0,
+            "LocalAddress": "0.0.0.0",
+            "ServerList": ["192.168.2.207", "192.168.2.108"]
+        },
+        "WebServer": {
+            "ListenPort": 9696
+        },
+        "Phone": {
+            "LocalSipPort": 5060
+        }
     }
-}
-```
+    ```
 
 其中的多层键值，也可以采用非嵌套的方式书写，如:
 
-```json
-{
-    "Ipsc:ServerList": ["192.168.2.207", "192.168.2.108"],
-    "Ipsc:LocalPort": 0,
-    "Ipsc:LocalAddress": "0.0.0.0",
-    "WebServer:ListenPort": 9696,
-    "Phone:LocalSipPort": 5060
-}
-```
+!!!example
+
+    ```json
+    {
+        "Ipsc:ServerList": ["192.168.2.207", "192.168.2.108"],
+        "Ipsc:LocalPort": 0,
+        "Ipsc:LocalAddress": "0.0.0.0",
+        "WebServer:ListenPort": 9696,
+        "Phone:LocalSipPort": 5060
+    }
+    ```
 
 或
 
-```json
-{
-    "Ipsc:ServerList:0": "192.168.2.207",
-    "Ipsc:ServerList:1": "192.168.2.108",
-    "Ipsc:LocalPort": 0,
-    "Ipsc:LocalAddress": "0.0.0.0",
-    "WebServer:ListenPort": 9696,
-    "Phone:LocalSipPort": 5060
-}
-```
+!!!example
+
+    ```json
+    {
+        "Ipsc:ServerList:0": "192.168.2.207",
+        "Ipsc:ServerList:1": "192.168.2.108",
+        "Ipsc:LocalPort": 0,
+        "Ipsc:LocalAddress": "0.0.0.0",
+        "WebServer:ListenPort": 9696,
+        "Phone:LocalSipPort": 5060
+    }
+    ```
 
 ### 环境变量配置
 
@@ -76,17 +82,21 @@
 
 假设我们使用环境变量配置本地 Web 服务器端口 `WebServer:ListenPort` 选项为`8080`，则应这样设定环境变量:
 
-```bat
-set IPSC6AGENT_WebServer__ListenPort=8080
-```
+!!!example
+
+    ```bat
+    set IPSC6AGENT_WebServer__ListenPort=8080
+    ```
 
 数组选项比较特殊，我们需要把数组的索引值视为键名。
 例如，我们可以这样设置 `0`, `1` 两个要连接的 CTI 服务器地址:
 
-```bat
-set IPSC6AGENT_Ipsc__ServerList__0="192.168.2.100"
-set IPSC6AGENT_Ipsc__ServerList__1="192.168.2.200"
-```
+!!!example
+
+    ```bat
+    set IPSC6AGENT_Ipsc__ServerList__0="192.168.2.100"
+    set IPSC6AGENT_Ipsc__ServerList__1="192.168.2.200"
+    ```
 
 ### 命令行参数配置
 
@@ -97,9 +107,11 @@ set IPSC6AGENT_Ipsc__ServerList__1="192.168.2.200"
 
 假设我们使用命令行参数配置 CTI 服务器地址列表为 192.168.2.100 与 192.168.2.101，那么启动命令应是：
 
-```powershell
-ipsc6.agent.wpfapp.exe --Ipsc:ServerList:0 "192.168.2.100" --Ipsc:ServerList:1 "192.168.2.101"
-```
+!!!example
+
+    ```powershell
+    ipsc6.agent.wpfapp.exe --Ipsc:ServerList:0 "192.168.2.100" --Ipsc:ServerList:1 "192.168.2.101"
+    ```
 
 命令行参数中的配置项键值对有多种写法，其规则是：
 
@@ -108,26 +120,29 @@ ipsc6.agent.wpfapp.exe --Ipsc:ServerList:0 "192.168.2.100" --Ipsc:ServerList:1 "
 
 例如：
 
--   以下命令使用 `=` 设置键和值：
+!!!example
 
-    ```powershell
-    app.exe SecretKey="Secret key from command line"
-    ```
+    -   以下命令使用 `=` 设置键和值：
 
--   以下命令使用 `/` 设置键和值：
+        ```powershell
+        app.exe SomeKey="Some key from command line"
+        ```
 
-    ```powershell
-    app.exe /SecretKey "Secret key set from forward slash"
-    ```
+    -   以下命令使用 `/` 设置键和值：
 
--   以下命令使用 `--` 设置键和值：
+        ```powershell
+        app.exe /SomeKey "Some key set from forward slash"
+        ```
 
-    ```powershell
-    app.exe --SecretKey "Secret key set from double hyphen"
-    ```
+    -   以下命令使用 `--` 设置键和值：
+
+        ```powershell
+        app.exe --SomeKey "Some key set from double hyphen"
+        ```
 
 !!! warning
-在同一命令中，请勿将使用 `=` 的命令行参数键值对与使用空格的键值对混合使用。
+
+    在同一命令中，请勿将使用 `=` 的命令行参数键值对与使用空格的键值对混合使用。
 
 ## 配置项列表
 
@@ -157,9 +172,11 @@ ipsc6.agent.wpfapp.exe --Ipsc:ServerList:0 "192.168.2.100" --Ipsc:ServerList:1 "
 
     座席要连接的 CTI 服务器地址列表
 
-    | key                 | type           | required | default |
-    | ------------------- | -------------- | -------- | ------- |
-    | `Ipsc:LocalAddress` | `List<String>` | ✔️       |         |
+    | key                 | type    | required | default |
+    | ------------------- | ------- | -------- | ------- |
+    | `Ipsc:LocalAddress` | `Array` | ✔️       |         |
+
+    数组元素的类型是 `String`
 
 ### 内嵌 Web 服务器配置
 

@@ -5,3 +5,5 @@
 ```plantuml
 --8<-- "src/diagrams/class_overview.puml"
 ```
+
+--8<-- "includes/glossary.md"

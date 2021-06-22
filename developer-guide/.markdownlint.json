@@ -1,0 +1,8 @@
+{
+    "line-length": false,
+    "ul-indent": {
+        "indent": 4
+    },
+    "no-hard-tabs": false,
+    "list-marker-space": false
+}

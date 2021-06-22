@@ -1,20 +1,24 @@
-# 排队信息对象
+# 排队
 
 ## 概述
 
-座席程序用这个类型记录 CTI 服务器上与该座席有关的呼叫数据
+座席程序用这个类型记录 CTI 服务器上与该座席有关的排队数据
 
 ## 属性
 
-|   Attribute    |       Type        |        Description        |
-| -------------- | ----------------- | ------------------------- |
-| `index`        | `Integer`         | 呼叫对应的CTI服务器索引值 |
-| `channel`      | `Integer`         | 呼叫的通道号              |
-| `id`           | `String`          | 排队的ID                  |
-| `sessionId`    | `String`          | 排队的会话ID              |
-| `type`         | [排队类型][] 枚举 | 排队的类型                |
-| `CallingNo`    | `String`          | 主叫号码                  |
-| `workerNum`    | `String`          | 排队的目标工号            |
-| `customString` | `String`          | 随路数据                  |
+| Attribute             | Type      | Description             |
+| --------------------- | --------- | ----------------------- |
+| `ctiIndex`            | `Integer` | 所属的 CTI 服务器索引值 |
+| `id`                  | `String`  | ID                      |
+| `queueType`           | `Integer` | [排队类型][]枚举值      |
+| `workerNum`           | `String`  | 座席工号                |
+| `skipGroupCollection` | `Array`   | 技能组数组              |
+| `customString`        | `String`  | 随路数据                |
 
-[排队类型]: ../enums/queue_type.md
+`skipGroupCollection`
+: 这次排队相关的技能组数组，数组元素是 [SkillGroup][] 对象。如果是指定座席而不是按技能排的，数组为空。
+
+[排队类型]: enums.md#排队类型
+[skillgroup]: skill_group.md
+
+--8<-- "includes/glossary.md"

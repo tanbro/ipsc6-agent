@@ -3,7 +3,7 @@ site_author: 刘雪彦
 copyright: 广州市和声信息技术有限公司 © 2021
 
 docs_dir: src
-use_directory_urls: true
+use_directory_urls: false
 
 nav:
     - index.md
@@ -13,56 +13,58 @@ nav:
     - docs/startup.md
 
     - API 参考:
-        - JSONRPC over WebSocket:
-            - docs/api/jsonrpc_websocket/jsonrpc.md
-            - docs/api/jsonrpc_websocket/mixed_content.md
+          - JSONRPC over WebSocket:
+                - docs/api/jsonrpc_websocket/jsonrpc.md
+                - docs/api/jsonrpc_websocket/mixed_content.md
 
-        - 类型:
-            - docs/api/types/class_overview.md
-            - docs/api/types/cti_server.md
-            - docs/api/types/skill_group.md
-            - docs/api/types/call.md
-            - docs/api/types/queue.md
-            - docs/api/types/sip_account.md
-            - docs/api/types/enums.md
+          - 类型:
+                - docs/api/types/class_overview.md
+                - docs/api/types/agent.md
+                - docs/api/types/cti_server.md
+                - docs/api/types/skill_group.md
+                - docs/api/types/call.md
+                - docs/api/types/queue.md
+                - docs/api/types/sip_account.md
+                - docs/api/types/sip_call.md
+                - docs/api/types/enums.md
 
-        - 方法:
-            - 基础方法:
-                - docs/api/methods/basic/log_in_out.md
-                - docs/api/methods/basic/agent_status.md
-                - docs/api/methods/basic/skill_groups.md
-                - docs/api/methods/basic/connect_state.md
+          - 方法:
+                - 基础方法:
+                      - docs/api/methods/basic/log_in_out.md
+                      - docs/api/methods/basic/agent_status.md
+                      - docs/api/methods/basic/skill_groups.md
+                      - docs/api/methods/basic/connect_state.md
 
-            - docs/api/methods/phone.md
+                - docs/api/methods/phone.md
 
-            - 呼叫:
-                - docs/api/methods/call/current_call.md
-                - docs/api/methods/call/dial.md
-                - docs/api/methods/call/call_agent.md
-                - docs/api/methods/call/hold.md
-                - docs/api/methods/call/xfer.md
+                - 呼叫:
+                      - docs/api/methods/call/current_call.md
+                      - docs/api/methods/call/dial.md
+                      - docs/api/methods/call/call_agent.md
+                      - docs/api/methods/call/hold.md
+                      - docs/api/methods/call/xfer.md
 
-            - docs/api/methods/queue.md
+                - docs/api/methods/queue.md
 
-            - docs/api/methods/call_manage.md
+                - docs/api/methods/call_manage.md
 
-            - docs/api/methods/manage.md
+                - docs/api/methods/manage.md
 
-        - 事件:
-            - docs/api/events/client_connection_state_changed.md
-            - docs/api/events/agent_status_changed.md
-            - docs/api/events/sip_register_state_changed.md
-            - docs/api/events/ring_received.md
-            - docs/api/events/skill_groups_changed.md
-            - docs/api/events/hold_list_changed.md
+          - 事件:
+                - docs/api/events/client_connection_state_changed.md
+                - docs/api/events/agent_status_changed.md
+                - docs/api/events/sip_register_state_changed.md
+                - docs/api/events/ring_received.md
+                - docs/api/events/skill_groups_changed.md
+                - docs/api/events/hold_list_changed.md
 
 plugins:
     - search
     - with-pdf:
-        enabled_if_env: ENABLE_PDF_EXPORT
-        toc_title: 目录
-        cover_title: "IPSC 座席客户端"
-        cover_subtitle: "开发人员指南"
+          enabled_if_env: ENABLE_PDF_EXPORT
+          toc_title: 目录
+          cover_title: "IPSC 座席客户端"
+          cover_subtitle: "开发人员指南"
 
 theme:
     name: material
@@ -76,47 +78,47 @@ theme:
         - media: "(prefers-color-scheme: light)"
           scheme: default
           toggle:
-            icon: material/lightbulb-outline
-            name: 切换到暗色模式
+              icon: material/lightbulb-outline
+              name: 切换到暗色模式
         - media: "(prefers-color-scheme: dark)"
           scheme: slate
-          primary: dark blue
-          accent: light blue
+          primary: red
+          accent: red
           toggle:
-            icon: material/lightbulb
-            name: 切换到亮色模式
+              icon: material/lightbulb
+              name: 切换到亮色模式
 
 markdown_extensions:
-    # pymdownx Extensions
     - pymdownx.extra
-# pymdownx.extra replaces markdown.extensions.extra, Here is the full list of included extensions:
-# pymdownx.betterem
-# pymdownx.superfences
-# markdown.extensions.footnotes
-# markdown.extensions.attr_list
-# markdown.extensions.def_list
-# markdown.extensions.tables
-# markdown.extensions.abbr
-# markdown.extensions.md_in_html
+    ### pymdownx.extra replaces markdown.extensions.extra, Here is the full list of included extensions:
+    ## pymdownx.betterem
+    ## pymdownx.superfences
+    ## markdown.extensions.footnotes
+    ## markdown.extensions.attr_list
+    ## markdown.extensions.def_list
+    ## markdown.extensions.tables
+    ## markdown.extensions.abbr
+    ## markdown.extensions.md_in_html
     - pymdownx.highlight
+    - pymdownx.details
     - pymdownx.saneheaders
     - pymdownx.smartsymbols
     - pymdownx.critic:
-        mode: view
+          mode: view
     - pymdownx.snippets
     - pymdownx.caret
     - pymdownx.mark
     - pymdownx.tilde
     - pymdownx.smartsymbols
     # Officially Supported Extensions
-    - admonition:
-    - meta:
+    - admonition
+    - meta
     # - sane_lists:
     # - smarty:
     - toc:
-        permalink: true
-        slugify: !!python/name:pymdownx.slugs.uslugify
+          permalink: true
+          slugify: !!python/name:pymdownx.slugs.uslugify
     # 3rd extensions
     - plantuml_markdown:
-        # server: http://www.plantuml.com/plantuml
-        format: svg
+        #   server: http://www.plantuml.com/plantuml
+          format: svg
