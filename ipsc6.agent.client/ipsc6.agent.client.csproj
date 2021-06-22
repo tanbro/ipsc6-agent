@@ -45,4 +45,7 @@
   <ItemGroup>
     <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
   </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy &quot;$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*&quot; &quot;$(OutDir)&quot; /D /Y&#xD;&#xA;xcopy &quot;$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*&quot; &quot;$(OutDir)&quot; /D /Y" />
+  </Target>
 </Project>

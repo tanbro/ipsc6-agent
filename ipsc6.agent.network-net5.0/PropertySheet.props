@@ -27,8 +27,9 @@
       </AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Message>Copy native libraries to output directory</Message>
-      <Command>copy /y "$(RAKNET_ROOT)\build\$(PlatformName)\Lib\DLL\$(ConfigurationName)\RakNetDLL.dll" "$(OutDir)"</Command>
+      <Message>
+      </Message>
+      <Command>xcopy "$(RAKNET_ROOT)\build\$(PlatformName)\Lib\$(RAKNET_LIB_SUFFIX)\$(ConfigurationName)\RAKNET$(RAKNET_LIB_SUFFIX).*" "$(OutDir)" /D /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

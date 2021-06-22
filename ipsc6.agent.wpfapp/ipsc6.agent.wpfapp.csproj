@@ -265,10 +265,10 @@
     <Folder Include="SampleData\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ipsc6.agent.client\ipsc6.agent.client.csproj"/>
-    <ProjectReference Include="..\ipsc6.agent.server\ipsc6.agent.server.csproj"/>
-    <ProjectReference Include="..\ipsc6.agent.services\ipsc6.agent.services.csproj"/>
-    <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj"/>
+    <ProjectReference Include="..\ipsc6.agent.client\ipsc6.agent.client.csproj" />
+    <ProjectReference Include="..\ipsc6.agent.server\ipsc6.agent.server.csproj" />
+    <ProjectReference Include="..\ipsc6.agent.services\ipsc6.agent.services.csproj" />
+    <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\64\people-plus.png" />
@@ -314,4 +314,8 @@
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*" "$(OutDir)" /D /Y
+xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*" "$(OutDir)" /D /Y</PostBuildEvent>
+  </PropertyGroup>
 </Project>

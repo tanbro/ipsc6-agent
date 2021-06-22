@@ -35,6 +35,11 @@
     <ProjectReference Include="..\ipsc6.agent.client\ipsc6.agent.client.csproj" />
   </ItemGroup>
 
+  <!-- NuGet -->
+  <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.12" />
+  </ItemGroup>
+
   <ItemGroup>
     <Folder Include="Models\" />
   </ItemGroup>

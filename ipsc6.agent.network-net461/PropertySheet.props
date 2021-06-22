@@ -21,8 +21,9 @@
       <AdditionalLibraryDirectories>$(RAKNET_ROOT)\build\$(PlatformName)\Lib\$(RAKNET_LIB_SUFFIX)\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y "$(RAKNET_ROOT)\build\$(PlatformName)\Lib\DLL\$(ConfigurationName)\RakNetDLL.dll" "$(OutDir)"</Command>
-      <Message>Copy native libraries to output directory</Message>
+      <Command>xcopy "$(RAKNET_ROOT)\build\$(PlatformName)\Lib\$(RAKNET_LIB_SUFFIX)\$(ConfigurationName)\RAKNET$(RAKNET_LIB_SUFFIX).*" "$(OutDir)" /D /Y</Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
