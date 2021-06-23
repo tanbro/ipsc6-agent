@@ -15,10 +15,10 @@ CTI 服务器在座席客户端登录后，告知其一个或多个 SIP 账户�
 | `uri`               | `String`  | 账户的 SIP URI                    |
 | `isRegisterActive`  | `Boolean` | 账户的注册会话是否存活            |
 | `lastRegisterError` | `Integer` | 最近的注册错误码。`0`表示注册成功 |
-| `callCollection`    | `Array`   | 该 SIP 账户在本地的活动呼叫数组   |
+| `calls`             | `Array`   | 该 SIP 账户在本地的活动呼叫数组   |
 
-`callCollection`
-: 数组元素是 [SipCall][] 的对象实例。
+`calls`
+: 数组元素是 [SipCall][] 对象
 
     !!!info
 

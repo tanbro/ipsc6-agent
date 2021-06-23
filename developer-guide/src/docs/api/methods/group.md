@@ -1,4 +1,4 @@
-# 座席组
+# 座席组相关方法
 
 ## 获取座席组列表
 
@@ -23,7 +23,7 @@
     | `id`       | `String`, `Array` | `""`    | 要签入或签出的组 ID 或 ID 数组。空数组或空字符串表示签入或签出所有的组 |
     | `isSignIn` | `Boolean`         | `true`  | `true`: 签入; `false`: 签出                                                      |
 
--   **Result**: 无
+-   **Result**: `null`
 
 [group]: ../types/group.md
 

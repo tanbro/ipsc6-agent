@@ -1,4 +1,4 @@
-# CTI 服务器连接
+# CTI 服务器连接相关方法
 
 ## 获取连接列表
 
@@ -12,6 +12,6 @@
 
     数组元素是 [CtiServer][] 对象
 
-[CtiServer]: ../types/cti_server.md
+[ctiserver]: ../types/cti_server.md
 
 --8<-- "includes/glossary.md"

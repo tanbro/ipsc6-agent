@@ -30,7 +30,7 @@
 
 - **Method**: `setIdle`
 - **Params**: 无
-- **Result**: 无
+- **Result**: `null`
 
 ## 示忙
 
@@ -42,7 +42,7 @@
     | ---------- | --------- | ------- | ---------------------------------- |
     | `workType` | `Integer` | `10`    | 忙碌的种类，是 [工作类型][] 枚举值 |
 
-- **Result**: 无
+- **Result**: `null`
 
 [座席状态]: ../../enums/agent_state.md
 [工作类型]: ../../enums/agent_work_type.md

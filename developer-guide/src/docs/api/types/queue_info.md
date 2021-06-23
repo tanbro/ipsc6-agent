@@ -9,6 +9,7 @@
 | Attribute      | Type      | Description             |
 | -------------- | --------- | ----------------------- |
 | `ctiIndex`     | `Integer` | 所属的 CTI 服务器索引值 |
+| `channel`      | `Integer` | 通话的通道号            |
 | `id`           | `String`  | ID                      |
 | `queueType`    | `Integer` | [排队类型][]枚举值      |
 | `workerNum`    | `String`  | 座席工号                |

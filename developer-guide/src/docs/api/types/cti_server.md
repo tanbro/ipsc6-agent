@@ -15,6 +15,6 @@
 | `isMain`  | `Boolean` | 是否主连接                               |
 | `state`   | `Integer` | [连接状态][]枚举值                           |
 
-[连接状态]: ./enums.md#CTI%20服务器连接状态
+[连接状态]: ./enums.md#CTI-服务器连接状态
 
 --8<-- "includes/glossary.md"

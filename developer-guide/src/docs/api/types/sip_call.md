@@ -15,7 +15,12 @@
 | `id`        | `Integer` | SIP 呼叫的内部 ID |
 | `localUri`  | `String`  | 本地 SIP URI      |
 | `remoteUri` | `Boolean` | 远端 SIP URL      |
+| `state`     | `Integer` | 呼叫状态          |
+
+`state`
+: [本地 SIP 呼叫状态][] 枚举值
 
 [call]: call.md
+[本地 sip 呼叫状态]: enums.md#本地-sip-呼叫状态
 
 --8<-- "includes/glossary.md"

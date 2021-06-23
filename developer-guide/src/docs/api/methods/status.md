@@ -1,4 +1,4 @@
-# 座席状态
+# 座席状态相关方法
 
 ## 获取座席状态
 
@@ -10,9 +10,9 @@
 
 -   **Params**: 无
 
--   **Result**:
+-   **Result**: `Array`
 
-    返回值是一维数组。数组元素有两个，第一个是 [AgentState][] 枚举值，第二个是 [WorkType][] 枚举值。
+    返回一维数组。数组元素有两个，第一个是 [AgentState][] 枚举值，第二个是 [WorkType][] 枚举值。
 
 ## 座席示忙
 
@@ -24,13 +24,13 @@
     | ---------- | --------- | ------- | ------------------------------- |
     | `workType` | `Integer` | `10`    | 忙碌的种类: [WorkType][] 枚举值 |
 
--   **Result**: 无
+-   **Result**: `null`
 
 ## 座席示闲
 
 -   **Method**: `setIdle`
 -   **Params**: 无
--   **Result**: 无
+-   **Result**: `null`
 
 [agentstate]: ../types/enums.md#座席状态
 [worktype]: ../types/enums.md#座席工作类型
