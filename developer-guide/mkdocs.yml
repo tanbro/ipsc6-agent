@@ -32,10 +32,13 @@ nav:
         - docs/api/methods/cti_server.md
         - docs/api/methods/group.md
         - docs/api/methods/status.md
+        - docs/api/methods/sip.md
+        - docs/api/methods/dial.md
         - docs/api/methods/call.md
         - docs/api/methods/queue.md
-        - docs/api/methods/sip.md
-    #   - 事件:
+        - docs/api/methods/manage.md
+        - docs/api/methods/gui.md
+    - 事件: []
     #       - docs/api/events/client_connection_state_changed.md
     #       - docs/api/events/agent_status_changed.md
     #       - docs/api/events/sip_register_state_changed.md
