@@ -1,3 +1,8 @@
+<!--
+Footnotes for abbreviations and glossary
+
+https://squidfunk.github.io/mkdocs-material/reference/abbreviations/#adding-abbreviations
+-->
 
 *[JSON]: JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。
 
