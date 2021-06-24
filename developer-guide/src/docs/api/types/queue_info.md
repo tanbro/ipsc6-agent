@@ -11,15 +11,15 @@
 | `ctiIndex`     | `Integer` | 所属的 CTI 服务器索引值 |
 | `channel`      | `Integer` | 通话的通道号            |
 | `id`           | `String`  | ID                      |
-| `queueType`    | `Integer` | [排队类型][]枚举值      |
+| `queueType`    | `Integer` | [QueueInfoType][]枚举值 |
 | `workerNum`    | `String`  | 座席工号                |
-| `skills`       | `Array`   | 技能组数组              |
+| `groups`       | `Array`   | 座席组数组              |
 | `customString` | `String`  | 随路数据                |
 
-`skills`
-: 这次排队相关的技能组数组，数组元素是 [Skill][] 对象。如果是指定座席而不是按技能排的，数组为空。
+`groups`
+: 这次排队相关的技能组数组，数组元素是 [Group][] 对象。如果该排队是指定座席的而不是指定组的，则此数组为空。
 
-[排队类型]: enums.md#排队类型
-[skill]: skill.md
+[queueinfotype]: enums.md#排队信息类型
+[group]: group.md
 
 --8<-- "includes/glossary.md"

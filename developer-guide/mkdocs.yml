@@ -14,28 +14,28 @@ nav:
   - API 参考:
       - 概述:
           - docs/api/abstract/json_rpc.md
-          - docs/api/abstract/mixed_content.md
+          - docs/api/abstract/browser_security.md
 
       - 方法:
           - docs/api/methods/cti_server.md
-          - docs/api/methods/group.md
           - docs/api/methods/status.md
+          - docs/api/methods/group.md
           - docs/api/methods/sip.md
           - docs/api/methods/dial_xfer.md
-          - docs/api/methods/call_info.md
+          - docs/api/methods/call.md
           - docs/api/methods/queue.md
           - docs/api/methods/manage.md
           - docs/api/methods/gui.md
 
-      - 事件: []
-    #       - docs/api/events/client_connection_state_changed.md
-    #       - docs/api/events/agent_status_changed.md
-    #       - docs/api/events/sip_register_state_changed.md
-    #       - docs/api/events/ring_received.md
-    #       - docs/api/events/skill_groups_changed.md
-    #       - docs/api/events/hold_list_changed.md
+      - 事件:
+          - docs/api/events/cti_server.md
+          - docs/api/events/status.md
+          - docs/api/events/group.md
+          - docs/api/events/call.md
+          - docs/api/events/queue_info.md
+          - docs/api/events/sip.md
 
-      - 数据类型:
+      - 数据类型定义:
           - docs/api/types/class_overview.md
           - docs/api/types/agent.md
           - docs/api/types/cti_server.md

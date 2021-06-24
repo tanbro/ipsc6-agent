@@ -21,4 +21,4 @@ https://squidfunk.github.io/mkdocs-material/reference/abbreviations/#adding-abbr
 
 *[WebSocket]: The WebSocket Protocol enables two-way communication between a client running untrusted code in a controlled environment to a remote host that has opted-in to communications from that code.
 
-[websocket]: https://datatracker.ietf.org/doc/html/rfc6455
+[websocket]: https://www.w3.org/TR/websockets/

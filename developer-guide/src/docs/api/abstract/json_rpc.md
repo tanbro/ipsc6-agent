@@ -164,7 +164,7 @@ function logIn(workerNum, password) {
 
 我们用类似方法调用文档的形式描述它:
 
--   **Method**: `onAgentStatusChanged`
+-   **Method**: `onStatusChanged`
 
     登录、注销，签入、签出技能组，示闲、示忙，来电接听等操作均可导致座席状态的改变。
 
@@ -172,17 +172,17 @@ function logIn(workerNum, password) {
 
 -   **Params**:
 
-    | Argument     | Type      | Default | Description         |
-    | ------------ | --------- | ------- | ------------------- |
-    | `agentState` | `Integer` | -       | [座席状态][] 枚举值 |
-    | `workType`   | `Integer` | -       | [工作类型][] 枚举值 |
+    | Argument   | Type      | Default | Description           |
+    | ---------- | --------- | ------- | --------------------- |
+    | `state`    | `Integer` | -       | [AgentState][] 枚举值 |
+    | `workType` | `Integer` | -       | [WorkType][] 枚举值   |
 
 这个事件的 JSON 数据形如：
 
 ```json
 {
     "jsonrpc": "2.0",
-    "method": "onAgentStatusChanged",
+    "method": "onStatusChanged",
     "params": [0, 0]
 }
 ```
@@ -193,7 +193,7 @@ function logIn(workerNum, password) {
 
 WebSocket 客户端不应回复这个通知消息。
 
-登录时，一旦 `logIn` 调用成功， `onAgentStatusChanged` 事件就会被触发。
+登录时，一旦 `logIn` 调用成功， `onStatusChanged` 事件就会被触发。
 这个过程可以用下面的时序图表示：
 
 ```plantuml
@@ -208,7 +208,7 @@ activate 坐席客户端
 activate CTI服务器
 CTI服务器 -> CTI服务器: 身份验证
 return: 连接成功
-用户程序 <<-o 坐席客户端: onAgentStatusChanged
+用户程序 <<-o 坐席客户端: onStatusChanged
 return: null
 deactivate 用户程序
 
@@ -217,7 +217,7 @@ deactivate 用户程序
 
 !!! info
 
-    `logIn` 的回复和 `onAgentStatusChanged` 事件通知**没有**时序性。也就是说，它们之中，哪个消息先被收到是不确定的。
+    `logIn` 的回复和 `onStatusChanged` 事件通知**没有**时序性。也就是说，它们之中，哪个消息先被收到是不确定的。
 
 现在，我们可以补充上一个小节的 HTML 代码片段，把这个事件的处理加上:
 
@@ -260,7 +260,7 @@ deactivate 用户程序
     -   不支持 [`Batch`](https://www.jsonrpc.org/specification#batch) 方式
     -   在一个 RPC 完成之前，不接受新的请求
 
-[座席状态]: ../enums/agent_state.md
-[工作类型]: ../enums/agent_work_type.md
+[agentstate]: ../types/enums.md#座席状态
+[worktype]: ../types/enums.md#座席工作类型
 
 --8<-- "includes/glossary.md"

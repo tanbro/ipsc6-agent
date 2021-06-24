@@ -4,10 +4,10 @@
 
 它们按顺序分别是:
 
-1. 程序工作目录的 `Config/settings.json` 文件
+1. 程序工作目录的 `Config\settings.json` 文件
 
     这个配置文件是**必须**的，应在分发时与可执行文件一同打包。
-    系统级的用户无关设置，如服务器地址等，可以放在这里。
+    修改可能性较小的系统级设置，如服务器地址，可以存放在这个文件中。
 
 1. 当前 Windows 账户的 `%LOCALAPPDATA%\ipsc6.agent.wpfapp\User\settings.json` 文件
 
@@ -15,7 +15,7 @@
     用户个性化的设置，如首选放音设备，可以放在这里。
 
 1. `IPSC6AGENT_` 为前缀的环境变量
-1. 传入到座席程序的命令启动参数
+1. 传入到座席客户端可执行程序的进程启动参数
 
 靠后的配置参数覆盖之前的。
 
@@ -206,17 +206,17 @@
 
     如设置为空字符串，座席程序将使用系统默认音频输入设备。
 
-    | key                      | type     | required | default |
-    | ------------------------ | -------- | -------- | ------- |
-    | `Phone:AudioInputDevice` | `String` |          | `""`    |
+    | key                   | type     | required | default |
+    | --------------------- | -------- | -------- | ------- |
+    | `Phone:CaptureDevice` | `String` |          | `""`    |
 
 -   默认音频输出设备
 
     如设置为空字符串，座席程序将使用系统默认音频输出设备。
 
-    | key                       | type     | required | default |
-    | ------------------------- | -------- | -------- | ------- |
-    | `Phone:AudioOutputDevice` | `String` |          | `""`    |
+    | key                    | type     | required | default |
+    | ---------------------- | -------- | -------- | ------- |
+    | `Phone:PlaybackDevice` | `String` |          | `""`    |
 
 ### 其它设置
 
