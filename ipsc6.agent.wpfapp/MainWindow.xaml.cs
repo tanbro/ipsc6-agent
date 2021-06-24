@@ -48,7 +48,7 @@ namespace ipsc6.agent.wpfapp
                 {
                     logger.Debug("开始吸附判断delay");
                     await Task.Delay(2500);
-                    if (Top<=0)
+                    if (Top <= 0)
                     {
                         /// 吸附！！！
                         logger.Debug("吸附！！！");
@@ -60,7 +60,7 @@ namespace ipsc6.agent.wpfapp
             }
             else
             {
-                if (snapCts!=null)
+                if (snapCts != null)
                 {
                     snapCts.Cancel();
                     snapCts = null;

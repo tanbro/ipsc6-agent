@@ -1,27 +1,40 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>net461;net48;net5.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Platforms>AnyCPU;x86;x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
+  <!-- NuGet -->
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.12" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
   </ItemGroup>
 
+  <!-- local projects -->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
+    <ProjectReference Include="..\ipsc6.agent.network.net5.0\ipsc6.agent.network.net5.0.vcxproj" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' Or  '$(TargetFramework)' == 'net48' ">
+    <ProjectReference Include="..\ipsc6.agent.network.net461\ipsc6.agent.network.net461.vcxproj" />
+  </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ipsc6.agent.network\ipsc6.agent.network.vcxproj" />
     <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
   </ItemGroup>
-
-  <Import Project="..\ipsc6-agent-client\ipsc6-agent-client.projitems" Label="Shared" />
-
 </Project>

@@ -80,9 +80,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             IRelayCommand[] commands =
             {
-                onHookCommand, offHookCommand, setStateCommand, skillSignCommand
+                answerCommand, hangupCommand,
+                statePopupCommand, setStateCommand,
+                skillSignCommand,
+                holdCommand, unHoldCommand,
             };
-            App.TaskFactory.StartNew(() =>
+            var _ = App.TaskFactory.StartNew(() =>
             {
                 foreach (var command in commands)
                 {
@@ -98,12 +101,66 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => isSkillPopupOpened;
             set => SetProperty(ref isSkillPopupOpened, value);
         }
-        static readonly IRelayCommand skillPopupCommand = new RelayCommand(DoSkillPopup);
+        static readonly IRelayCommand skillPopupCommand = new RelayCommand(DoSkillPopup, CanSkillPopup);
         public IRelayCommand SkillPopupCommand => skillPopupCommand;
         static void DoSkillPopup()
         {
             Instance.IsSkillPopupOpened = !isSkillPopupOpened;
+            if (Instance.IsSkillPopupOpened)
+            {
+                Instance.RefreshAgentExecutables();
+            }
         }
+
+        static bool CanSkillPopup()
+        {
+            var agent = Controllers.AgentController.Agent;
+            return agent.GroupCollection.Count > 0;
+        }
+        #endregion
+
+        #region 技能组 签入/出
+        static readonly IRelayCommand skillSignCommand = new AsyncRelayCommand<object>(DoSkillSignAsync, CanSkillSign);
+        public IRelayCommand SkillSignCommand => skillSignCommand;
+        static bool doingSkillSign = false;
+
+        static async Task DoSkillSignAsync(object parameter)
+        {
+            var agent = Controllers.AgentController.Agent;
+            var model = Instance.AgentBasicInfo;
+            doingSkillSign = true;
+            try
+            {
+                skillSignCommand.NotifyCanExecuteChanged();
+                var skillId = parameter as string;
+                var sg = model.SkillGroups.First((m) => m.Id == skillId);
+                if (sg.Signed)
+                {
+                    logger.DebugFormat("签出技能 [{0}]({1})", sg.Id, sg.Name);
+                    await agent.SignOut(skillId);
+                }
+                else
+                {
+                    logger.DebugFormat("签入技能 [{0}]({1})", sg.Id, sg.Name);
+                    await agent.SignIn(skillId);
+                }
+            }
+            finally
+            {
+                doingSkillSign = false;
+                skillSignCommand.NotifyCanExecuteChanged();
+            }
+        }
+
+        static bool CanSkillSign(object _)
+        {
+            if (doingSkillSign) return false;
+            var agent = Controllers.AgentController.Agent;
+            if (agent == null) return false;
+            if (agent.IsRequesting) return false;
+            return true;
+        }
+
         #endregion
 
         #region Command 打开状态弹出窗
@@ -122,48 +179,18 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         static bool CanOpenStatePopup()
         {
-            if (doingSetState) return false;
             var agent = Controllers.AgentController.Agent;
-            if (agent == null) return false;
+            client.AgentState[] allowedAgentStates = { client.AgentState.Idle, client.AgentState.Pause, client.AgentState.Leave };
+            if (!allowedAgentStates.Any(x => x == agent.AgentState)) return false;
             return true;
         }
-        #endregion
-
-        #region Command 签入/出
-        static readonly IRelayCommand skillSignCommand = new RelayCommand<object>(DoSkillSign, CanSkillSign);
-        public IRelayCommand SkillSignCommand => skillSignCommand;
-
-        static async void DoSkillSign(object parameter)
-        {
-            var skillId = parameter as string;
-            var agent = Controllers.AgentController.Agent;
-            var sg = agent.GroupCollection.First((m) => m.Id == skillId);
-            if (sg.Signed)
-            {
-                logger.DebugFormat("签出技能 [{0}]({1})", sg.Id, sg.Name);
-                await agent.SignOut(skillId);
-            }
-            else
-            {
-                logger.DebugFormat("签入技能 [{0}]({1})", sg.Id, sg.Name);
-                await agent.SignIn(skillId);
-            }
-        }
-
-        static bool CanSkillSign(object _)
-        {
-            var agent = Controllers.AgentController.Agent;
-            if (agent == null) return false;
-            return true;
-        }
-
         #endregion
 
         #region Command 修改状态
-        static readonly IRelayCommand setStateCommand = new RelayCommand<object>(DoSetState, CanSetState);
+        static readonly IRelayCommand setStateCommand = new AsyncRelayCommand<object>(DoSetStateAsync, CanSetState);
         public IRelayCommand SetStateCommand => setStateCommand;
         static bool doingSetState = false;
-        static async void DoSetState(object parameter)
+        static async Task DoSetStateAsync(object parameter)
         {
             doingSetState = true;
             try
@@ -185,13 +212,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     await agent.SetBusy();
                 }
             }
-            catch (client.BaseRequestError err)
-            {
-                MessageBox.Show($"{err}", "坐席客户端远程调用失败");
-            }
             finally
             {
                 doingSetState = false;
+                Instance.IsStatePopupOpened = false;
                 setStateCommand.NotifyCanExecuteChanged();
             }
         }
@@ -201,6 +225,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (doingSetState) return false;
             var agent = Controllers.AgentController.Agent;
             if (agent == null) return false;
+            if (agent.IsRequesting) return false;
             client.AgentState[] vals = { client.AgentState.Idle, client.AgentState.Pause, client.AgentState.Leave };
             if (!vals.Any(x => x == agent.AgentState)) return false;
             if (parameter != null)
@@ -212,81 +237,85 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
-        #region Command Offhook
-        static readonly IRelayCommand offHookCommand = new RelayCommand(DoOffHook, CanOffHook);
-        public IRelayCommand OffHookCommand => offHookCommand;
-        static bool doingOffHook = false;
+        #region Answer
+        static readonly IRelayCommand answerCommand = new AsyncRelayCommand(DoAnswerAsync, CanAnswer);
+        public IRelayCommand AnswerCommand => answerCommand;
+        static bool doingAnswer = false;
 
-        static async void DoOffHook()
+        static async Task DoAnswerAsync()
         {
-            doingOffHook = true;
+            doingAnswer = true;
             try
             {
-                offHookCommand.NotifyCanExecuteChanged();
+                answerCommand.NotifyCanExecuteChanged();
                 logger.Debug("摘机");
                 var agent = Controllers.AgentController.Agent;
-                await agent.OffHook();
+                await agent.Answer();
             }
             finally
             {
-                doingOffHook = false;
-                offHookCommand.NotifyCanExecuteChanged();
+                doingAnswer = false;
+                answerCommand.NotifyCanExecuteChanged();
             }
         }
 
-        static bool CanOffHook()
+        static bool CanAnswer()
         {
-            if (doingOffHook) return false;
+            if (doingAnswer) return false;
             var agent = Controllers.AgentController.Agent;
             if (agent == null) return false;
-            if (agent.AgentState != client.AgentState.Idle
-                && agent.AgentState != client.AgentState.Ring) return false;
-            if (agent.TeleState == client.TeleState.OffHook) return false;
+
+            var callCnt = (
+                from c in agent.SipAccountCollection.SelectMany(x => x.Calls)
+                where c.State == org.pjsip.pjsua2.pjsip_inv_state.PJSIP_INV_STATE_INCOMING
+                select c
+            ).Count();
+            if (callCnt < 1) return false;
+
             return true;
         }
         #endregion
 
         #region Command Hangup
-        static readonly IRelayCommand onHookCommand = new RelayCommand(DoOnHook, CanOnHook);
-        public IRelayCommand OnHookCommand => onHookCommand;
-        static bool doingOnHook = false;
-        static async void DoOnHook()
+        static readonly IRelayCommand hangupCommand = new AsyncRelayCommand(DoHangupAsync, CanHangup);
+        public IRelayCommand HangupCommand => hangupCommand;
+        static bool doingHangup = false;
+        static async Task DoHangupAsync()
         {
-            doingOnHook = true;
+            doingHangup = true;
             try
             {
-                onHookCommand.NotifyCanExecuteChanged();
+                hangupCommand.NotifyCanExecuteChanged();
                 logger.Debug("挂机");
                 var agent = Controllers.AgentController.Agent;
-                await agent.OnHook();
+                await agent.Hangup();
             }
             finally
             {
-                doingOnHook = false;
-                onHookCommand.NotifyCanExecuteChanged();
+                doingHangup = false;
+                hangupCommand.NotifyCanExecuteChanged();
             }
         }
 
-        static bool CanOnHook()
+        static bool CanHangup()
         {
-            if (doingOnHook) return false;
-            var agent = Controllers.AgentController.Agent;
-            if (agent == null) return false;
-            if (agent.IsOffHookRequesting) return false;
-            if (agent.TeleState == client.TeleState.OffHook) return true;
-            if (agent.AgentState != client.AgentState.Work
-                && agent.AgentState != client.AgentState.WorkPause
-                && agent.AgentState != client.AgentState.Ring) return false;
-            if (agent.TeleState == client.TeleState.OnHook
-                && agent.AgentState != client.AgentState.Ring) return false;
+            if (doingHangup) return false;
+
+            var sipAccountList = Instance.AgentBasicInfo.SipAccountList;
+            var callCnt = (
+                from c in sipAccountList.SelectMany(x => x.Calls)
+                select c
+            ).Count();
+            if (callCnt < 1) return false;
+
             return true;
         }
         #endregion
 
         #region 座席咨询
-        static readonly IRelayCommand xferConsultCommand = new RelayCommand(DoXferConsult);
+        static readonly IRelayCommand xferConsultCommand = new AsyncRelayCommand(DoXferConsultAsync);
         public IRelayCommand XferConsultCommand => xferConsultCommand;
-        static async void DoXferConsult()
+        static async Task DoXferConsultAsync()
         {
             var agent = Controllers.AgentController.Agent;
 
@@ -314,9 +343,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 座席转移
-        static readonly IRelayCommand xferCommand = new RelayCommand(DoXfer);
+        static readonly IRelayCommand xferCommand = new AsyncRelayCommand(DoXferAsync);
         public IRelayCommand XferCommand => xferCommand;
-        static async void DoXfer()
+        static async Task DoXferAsync()
         {
             var agent = Controllers.AgentController.Agent;
 
@@ -344,31 +373,59 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 保持
-        static readonly IRelayCommand holdCommand = new RelayCommand(DoHold);
+        static readonly IRelayCommand holdCommand = new AsyncRelayCommand(DoHoldAsync, CanHold);
         public IRelayCommand HoldCommand => holdCommand;
-        static async void DoHold()
+        static async Task DoHoldAsync()
         {
             var agent = Controllers.AgentController.Agent;
             await agent.Hold();
+            Instance.RefreshAgentExecutables();
+        }
+        static bool CanHold()
+        {
+            var agent = Controllers.AgentController.Agent;
+            if (agent.IsRequesting) return false;
+            if (agent.AgentState != client.AgentState.Work) return false;
+
+            var calls = Instance.AgentBasicInfo.CallList;
+
+            if (calls.Count == 0) return false;
+            if (calls.All(x => x.IsHeld)) return false;
+            return true;
         }
         #endregion
 
         #region 取消保持
-        static readonly IRelayCommand unHoldCommand = new RelayCommand<object>(DoUnHold);
+        static readonly IRelayCommand unHoldCommand = new AsyncRelayCommand<object>(DoUnHoldAsync, CanUnHold);
         public IRelayCommand UnHoldCommand => unHoldCommand;
-        static async void DoUnHold(object parameter)
+        static async Task DoUnHoldAsync(object parameter)
         {
-            client.CallInfo callInfo = null;
             var agent = Controllers.AgentController.Agent;
             if (parameter == null)
             {
-                callInfo = agent.CallCollection.First(x => x.IsHeld);
+                await agent.UnHold();
             }
             else
             {
-                callInfo = parameter as client.CallInfo;
+                await agent.UnHold(parameter as client.CallInfo);
             }
-            await agent.UnHold(callInfo);
+            Instance.RefreshAgentExecutables();
+        }
+        static bool CanUnHold(object parameter)
+        {
+            var agent = Controllers.AgentController.Agent;
+            if (agent.IsRequesting) return false;
+            if (agent.AgentState != client.AgentState.Work) return false;
+            if (parameter == null)
+            {
+                if (agent.HeldCallCollection.Count == 0) return false;
+            }
+            else
+            {
+                var callInfo = parameter as client.CallInfo;
+                if (!callInfo.IsHeld) return false;
+            }
+            return true;
         }
         #endregion
 
@@ -401,9 +458,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
             Instance.IsQueuePopupOpened = !isQueuePopupOpened;
         }
 
-        static readonly IRelayCommand dequeueCommand = new RelayCommand<object>(DoDequeue);
+        static readonly IRelayCommand dequeueCommand = new AsyncRelayCommand<object>(DoDequeueAsync);
         public IRelayCommand DequeueCommand => dequeueCommand;
-        static async void DoDequeue(object paramter)
+        static async Task DoDequeueAsync(object paramter)
         {
             var queueInfo = paramter as client.QueueInfo;
             var agent = Controllers.AgentController.Agent;
@@ -412,12 +469,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 外乎
-        static readonly IRelayCommand dialCommand = new RelayCommand(DoDial);
+        static readonly IRelayCommand dialCommand = new AsyncRelayCommand(DoDialAsync);
         public IRelayCommand DialCommand => dialCommand;
-        static async void DoDial()
+        static async Task DoDialAsync()
         {
             var agent = Controllers.AgentController.Agent;
-
             var dialog = new Dialogs.PromptDialog()
             {
                 DataContext = new Dictionary<string, object> {
@@ -432,9 +488,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 外转
-        static readonly IRelayCommand xferExtCommand = new RelayCommand(DoXferExt);
+        static readonly IRelayCommand xferExtCommand = new AsyncRelayCommand(DoXferExtAsync);
         public IRelayCommand XferExtCommand => xferExtCommand;
-        static async void DoXferExt()
+        static async Task DoXferExtAsync()
         {
             var agent = Controllers.AgentController.Agent;
             var dialog = new Dialogs.PromptDialog()
@@ -451,9 +507,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 外咨
-        static readonly IRelayCommand xferExtConsultCommand = new RelayCommand(DoXferExtConsult);
+        static readonly IRelayCommand xferExtConsultCommand = new AsyncRelayCommand(DoXferExtConsultAsync);
         public IRelayCommand XferExtConsultCommand => xferExtConsultCommand;
-        static async void DoXferExtConsult()
+        static async Task DoXferExtConsultAsync()
         {
             var agent = Controllers.AgentController.Agent;
             var dialog = new Dialogs.PromptDialog()
@@ -466,6 +522,163 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (dialog.ShowDialog() != true) return;
             var inputText = dialog.InputText;
             await agent.XferExtConsult(inputText);
+        }
+        #endregion
+
+        #region 转 IVR
+        static readonly IRelayCommand callIvrCommand = new AsyncRelayCommand(DoCallIvrAsync);
+        public IRelayCommand CallIvrCommand => callIvrCommand;
+        static async Task DoCallIvrAsync()
+        {
+            var agent = Controllers.AgentController.Agent;
+
+            string ivrId;
+            client.IvrInvokeType ivrType;
+            string ivrString;
+
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "转 IVR" },
+                        { "Label", "输入 IVR 的 ID" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                ivrId = dialog.InputText;
+            }
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "转 IVR" },
+                        { "Label", "输入 IVR 的 类型。 0 or Keep: (Default)不释放; 1 or Over: 释放" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                if (string.IsNullOrWhiteSpace(dialog.InputText))
+                    ivrType = client.IvrInvokeType.Keep;
+                else
+                    ivrType = (client.IvrInvokeType)Enum.Parse(typeof(client.IvrInvokeType), dialog.InputText);
+            }
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "转 IVR" },
+                        { "Label", "输入 IVR 的 文本参数" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                ivrString = dialog.InputText;
+            }
+            await agent.CallIvr(ivrId, ivrType, ivrString);
+        }
+        #endregion
+
+        #region btnAdv
+        static readonly IRelayCommand advCommand = new AsyncRelayCommand(DoAdvCommandAsync);
+        public IRelayCommand AdvCommand => advCommand;
+        static async Task DoAdvCommandAsync()
+        {
+            var agent = Controllers.AgentController.Agent;
+
+            int connIndex;
+            client.MessageType msgTyp;
+            int n;
+            string s;
+
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "发送 CTI 命令" },
+                        { "Label", "输入 CTI 服务器节点序号" },
+                        { "InputText", "0" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                connIndex = int.Parse(dialog.InputText);
+            }
+
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "发送 CTI 命令" },
+                        { "Label", "输入 CTI 命令名称" },
+                        { "InputText", "REMOTE_MSG_LISTEN" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                msgTyp = (client.MessageType)Enum.Parse(typeof(client.MessageType), dialog.InputText);
+            }
+
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "发送 CTI 命令" },
+                        { "Label", "输入 CTI 命令参数的整数部分" },
+                        { "InputText", "-1" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                n = int.Parse(dialog.InputText);
+            }
+
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
+                        { "Title", "发送 CTI 命令" },
+                        { "Label", "输入 CTI 命令参数的字符串部分" },
+                        { "InputText", "" },
+                    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                s = dialog.InputText;
+            }
+
+            switch (msgTyp)
+            {
+                case client.MessageType.REMOTE_MSG_LISTEN:
+                    await agent.Monitor(connIndex, s);
+                    break;
+                case client.MessageType.REMOTE_MSG_STOPLISTEN:
+                    await agent.UnMonitor(connIndex, s);
+                    break;
+                case client.MessageType.REMOTE_MSG_FORCEIDLE:
+                    await agent.SetIdle(s);
+                    break;
+                case client.MessageType.REMOTE_MSG_FORCEPAUSE:
+                    {
+                        var parts = s.Split(new char[] { '|' });
+                        await agent.SetBusy(
+                            parts[0],
+                            (client.WorkType)Enum.Parse(typeof(client.WorkType), parts[1])
+                        );
+                    }
+                    break;
+                case client.MessageType.REMOTE_MSG_INTERCEPT:
+                    await agent.Intercept(connIndex, s);
+                    break;
+                case client.MessageType.REMOTE_MSG_FORCEINSERT:
+                    await agent.Interrupt(connIndex, s);
+                    break;
+                case client.MessageType.REMOTE_MSG_FORCEHANGUP:
+                    await agent.Hangup(connIndex, s);
+                    break;
+                case client.MessageType.REMOTE_MSG_FORCESIGNOFF:
+                    await agent.SignOut(s);
+                    break;
+                case client.MessageType.REMOTE_MSG_KICKOUT:
+                    await agent.KickOut(s);
+                    break;
+                default:
+                    MessageBox.Show($"还没有实现 {msgTyp}");
+                    break;
+            }
         }
         #endregion
     }

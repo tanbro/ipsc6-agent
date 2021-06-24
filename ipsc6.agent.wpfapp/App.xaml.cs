@@ -6,7 +6,6 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 
-
 namespace ipsc6.agent.wpfapp
 {
     /// <summary>
@@ -19,6 +18,7 @@ namespace ipsc6.agent.wpfapp
 
         public static TaskScheduler TaskScheduler { get; private set; }
         public static TaskFactory TaskFactory { get; private set; }
+
         void Application_Startup(object sender, StartupEventArgs e)
         {
             try

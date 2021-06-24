@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ipsc6.agent.wpfapp.Dialogs"
         mc:Ignorable="d"
         Height="150" Width="300" WindowStyle="ToolWindow" ResizeMode="NoResize"
-        Title="{Binding Path=[Title], Mode=OneWay, FallbackValue='Prompt'}"
+        Title="{Binding [Title], Mode=OneWay, FallbackValue='Prompt'}"
         FocusManager.FocusedElement="{Binding ElementName=txtInput}"
         >
     <Grid>
@@ -17,9 +17,9 @@
 
         <StackPanel Grid.Row="0" Margin="2">
             <Label Grid.Row="0" Margin="2" Target="{Binding ElementName=txtInput}"
-                   Content="{Binding Path=[Label], Mode=OneWay, FallbackValue='Input:'}" 
+                   Content="{Binding [Label], Mode=OneWay, FallbackValue='Input:'}" 
                    />
-            <TextBox x:Name="txtInput" Margin="2" />
+            <TextBox x:Name="txtInput" Margin="2" Text="{Binding [InputText]}"/>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="2" HorizontalAlignment="Right" >

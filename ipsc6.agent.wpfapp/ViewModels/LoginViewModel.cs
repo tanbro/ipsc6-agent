@@ -39,7 +39,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
 
         #region Login Command
-        readonly static IRelayCommand loginCommand = new RelayCommand<object>(DoLogin, CanLogin);
+        readonly static IRelayCommand loginCommand = new AsyncRelayCommand<object>(DoLoginAsync, CanLogin);
         public IRelayCommand LoginCommand => loginCommand;
 
         static bool CanLogin(object _)
@@ -52,7 +52,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         static bool _isLogging = false;
 
-        public static async void DoLogin(object parameter)
+        public static async Task DoLoginAsync(object parameter)
         {
             _isLogging = true;
             try
@@ -67,7 +67,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 var agent = Controllers.AgentController.CreateAgent();
                 try
                 {
-                    await Controllers.AgentController.StartupAgent(workerNum, password);
+                    await Controllers.AgentController.StartupAgentAsync(workerNum, password);
                     logger.InfoFormat("登录成功");
                     isOk = true;
                 }
