@@ -34,7 +34,7 @@
 
 这个文档工程：
 
-- 使用 [PlantUML][] 绘图(通过 [plantuml-markdown][] 文档中转 Markdown Code Block 为图形)
+- 使用 [PlantUML][] 绘图(通过 [plantuml-markdown][] 将 Markdown Code Block 中的 [PlantUML][] 代码转为图形)
 - 使用 [WeasyPrint][] (通过 [mkdocs-with-pdf][]) 将生成的 `HTML` 站点转为 `PDF` 文档
 
 但这些工具链比较复杂，包括 [PlantUML][], [GraphViz][], [WeasyPrint][] 等，它们在 Windows 环境下可能并不容易使用。
