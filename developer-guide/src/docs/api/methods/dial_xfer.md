@@ -91,6 +91,6 @@
 
 -   **Result**: `null`
 
-[ivrinvoketype]: ../enums.md#IVR-调用类型 "IVR 调用类型"
+[ivrinvoketype]: ../types/enums.md#IVR-调用类型 "IVR 调用类型"
 
 --8<-- "includes/glossary.md"

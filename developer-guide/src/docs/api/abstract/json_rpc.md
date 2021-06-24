@@ -189,9 +189,7 @@ function logIn(workerNum, password) {
 
 !!! note
 
-    事件通知类型的请求 JSONRPC 数据 没有 `id` 属性，不需要回复。
-
-WebSocket 客户端不应回复这个通知消息。
+    事件通知类型的 JSONRPC 请求数据没有 `id` 属性， WebSocket 客户端**不应回复**通知消息。
 
 登录时，一旦 `logIn` 调用成功， `onStatusChanged` 事件就会被触发。
 这个过程可以用下面的时序图表示：

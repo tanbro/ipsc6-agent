@@ -15,18 +15,18 @@ note top: SIP 注册账户
 class SipCall
 note bottom: 程序内部的 SIP 呼叫
 
-class SkillGroup
-note top: 技能组
+class Group
+note top: 座席组
 
 class Call
-note top: CTI服务器上的座席呼叫
+note top: CTI服务器上的相关座席呼叫信息
 
-class Queue
-note top: 排队
+class QueueInfo
+note top: 排队信息
 
 
 Agent "1" o-- "1..*" CtiServer: 连接一个或多个CTI服务 >
-Agent "1" o-- "1..*" SkillGroup: 属于 >
+Agent "1" o-- "1..*" Group: 属于 >
 Agent "1" *-- "1..*" SipAccount: 注册一个或多个SIP账户 >
 
 CtiData "0..*" *.. "1" CtiServer: 属于 >
@@ -34,11 +34,11 @@ CtiData "0..*" *.. "1" CtiServer: 属于 >
 Call ..|> CtiData
 Agent "1" *-- "0..*" Call
 
-Queue ..|> CtiData
-Agent "1" -- "0..*" Queue
+QueueInfo ..|> CtiData
+Agent "1" -- "0..*" QueueInfo: 相关 >
 
-Call "1" -- "0..1" SkillGroup: 呼叫对应的技能 >
-Queue "1" -- "0..*" SkillGroup: 排队的技能 >
+Call "1" -- "0..1" Group: 呼叫对应的技能 >
+QueueInfo "1" -- "0..*" Group: 排队的技能 >
 
 CtiServer "1" o-- "0..*" SipAccount: 属于 <
 SipAccount "1" *-- "0..*" SipCall: 属于 <

@@ -32,6 +32,17 @@
 -   **Params**: 无
 -   **Result**: `null`
 
+## 获取完整的座席信息
+
+-   **Method**: `getAgentFull`
+
+-   **Params**: 无
+
+-   **Result**: `Object`
+
+    返回完整的 [Agent][] 对象
+
+[agent]: ../types/agent.md
 [agentstate]: ../types/enums.md#座席状态
 [worktype]: ../types/enums.md#座席工作类型
 
