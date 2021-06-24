@@ -235,3 +235,5 @@
     | key                    | type      | required | default |
     | ---------------------- | --------- | -------- | ------- |
     | `Misc:IsSaveWorkerNum` | `Boolean` |          | `false` |
+
+--8<-- "includes/glossary.md"

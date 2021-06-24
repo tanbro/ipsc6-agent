@@ -1,7 +1,7 @@
 # JSONRPC
 
-座席程序的对外可编程接口采用 _JSONRPC over Websocket_ 的形式。
-它的 RPC 传送协议大体上遵照 _[JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)_ 的定义[^1]。
+座席程序的对外可编程接口采用 _[JSON-RPC][] over [WebSocket][]_ 的形式。
+它的 RPC 传送协议大体上遵照 _[JSONRPC 2.0 Specification](https://www.jsonrpc.org/specification)_ 的定义[^1]。
 
 在本文的后续部分，我们将使用类似面向过程语言的函数定义形式，说明 API 接口。
 
@@ -54,10 +54,10 @@ function logIn(workerNum, password) {
 
     -   **Params**:
 
-        | Argument    | Data Type | Default | Description |
-        | ----------- | --------- | ------- | ----------- |
-        | `workerNum` | `String`  | -       | 登录工号    |
-        | `password`  | `String`  | -       | 登录密码    |
+        | Argument    | Type     | Default | Description |
+        | ----------- | -------- | ------- | ----------- |
+        | `workerNum` | `String` | -       | 登录工号    |
+        | `password`  | `String` | -       | 登录密码    |
 
         请求部分的 JSON 的写法可以是以下例中的任一:
 
@@ -187,6 +187,10 @@ function logIn(workerNum, password) {
 }
 ```
 
+!!! note
+
+    事件通知类型的请求 JSONRPC 数据 没有 `id` 属性，不需要回复。
+
 WebSocket 客户端不应回复这个通知消息。
 
 登录时，一旦 `logIn` 调用成功， `onAgentStatusChanged` 事件就会被触发。
@@ -211,9 +215,9 @@ deactivate 用户程序
 @enduml
 ```
 
-!!! note
-`logIn` 的回复和 `onAgentStatusChanged` 事件通知**没有**时序性。
-也就是说，它们之中，哪个消息先被收到是不确定的。
+!!! info
+
+    `logIn` 的回复和 `onAgentStatusChanged` 事件通知**没有**时序性。也就是说，它们之中，哪个消息先被收到是不确定的。
 
 现在，我们可以补充上一个小节的 HTML 代码片段，把这个事件的处理加上:
 

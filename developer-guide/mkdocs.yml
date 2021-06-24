@@ -3,7 +3,6 @@ site_author: 刘雪彦
 copyright: 广州市和声信息技术有限公司 © 2021
 
 docs_dir: src
-use_directory_urls: false
 
 nav:
   - index.md
@@ -17,7 +16,26 @@ nav:
           - docs/api/jsonrpc_websocket/jsonrpc.md
           - docs/api/jsonrpc_websocket/mixed_content.md
 
-      - 类型:
+      - 方法:
+          - docs/api/methods/cti_server.md
+          - docs/api/methods/group.md
+          - docs/api/methods/status.md
+          - docs/api/methods/sip.md
+          - docs/api/methods/dial_xfer.md
+          - docs/api/methods/call_info.md
+          - docs/api/methods/queue.md
+          - docs/api/methods/manage.md
+          - docs/api/methods/gui.md
+
+      - 事件: []
+    #       - docs/api/events/client_connection_state_changed.md
+    #       - docs/api/events/agent_status_changed.md
+    #       - docs/api/events/sip_register_state_changed.md
+    #       - docs/api/events/ring_received.md
+    #       - docs/api/events/skill_groups_changed.md
+    #       - docs/api/events/hold_list_changed.md
+
+      - 数据类型:
           - docs/api/types/class_overview.md
           - docs/api/types/agent.md
           - docs/api/types/cti_server.md
@@ -26,25 +44,8 @@ nav:
           - docs/api/types/queue_info.md
           - docs/api/types/sip_account.md
           - docs/api/types/sip_call.md
+          - docs/api/types/snd_device.md
           - docs/api/types/enums.md
-
-      - 方法:
-          - docs/api/methods/cti_server.md
-          - docs/api/methods/group.md
-          - docs/api/methods/status.md
-          - docs/api/methods/sip.md
-          - docs/api/methods/dial.md
-          - docs/api/methods/call.md
-          - docs/api/methods/queue.md
-          - docs/api/methods/manage.md
-          - docs/api/methods/gui.md
-      - 事件: []
-    #       - docs/api/events/client_connection_state_changed.md
-    #       - docs/api/events/agent_status_changed.md
-    #       - docs/api/events/sip_register_state_changed.md
-    #       - docs/api/events/ring_received.md
-    #       - docs/api/events/skill_groups_changed.md
-    #       - docs/api/events/hold_list_changed.md
 
 plugins:
   - search

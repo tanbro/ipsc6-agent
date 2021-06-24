@@ -6,9 +6,9 @@
 
 -   **Params**:
 
-    | Argument    | Data Type | Default | Description  |
-    | ----------- | --------- | ------- | ------------ |
-    | `workerNum` | `String`  | -       | 目标座席工号 |
+    | Argument    | Type     | Default | Description  |
+    | ----------- | -------- | ------- | ------------ |
+    | `workerNum` | `String` | -       | 目标座席工号 |
 
 -   **Result**: `null`
 
@@ -18,9 +18,9 @@
 
 -   **Params**:
 
-    | Argument    | Data Type | Default | Description  |
-    | ----------- | --------- | ------- | ------------ |
-    | `workerNum` | `String`  | -       | 目标座席工号 |
+    | Argument    | Type     | Default | Description  |
+    | ----------- | -------- | ------- | ------------ |
+    | `workerNum` | `String` | -       | 目标座席工号 |
 
 -   **Result**: `null`
 
@@ -30,9 +30,9 @@
 
 -   **Params**:
 
-    | Argument    | Data Type | Default | Description  |
-    | ----------- | --------- | ------- | ------------ |
-    | `workerNum` | `String`  | -       | 目标座席工号 |
+    | Argument    | Type     | Default | Description  |
+    | ----------- | -------- | ------- | ------------ |
+    | `workerNum` | `String` | -       | 目标座席工号 |
 
 -   **Result**: `null`
 
@@ -42,9 +42,9 @@
 
 -   **Params**:
 
-    | Argument    | Data Type | Default | Description  |
-    | ----------- | --------- | ------- | ------------ |
-    | `workerNum` | `String`  | -       | 目标座席工号 |
+    | Argument    | Type     | Default | Description  |
+    | ----------- | -------- | ------- | ------------ |
+    | `workerNum` | `String` | -       | 目标座席工号 |
 
 -   **Result**: `null`
 
@@ -54,9 +54,9 @@
 
 -   **Params**:
 
-    | Argument    | Data Type | Default | Description  |
-    | ----------- | --------- | ------- | ------------ |
-    | `workerNum` | `String`  | -       | 目标座席工号 |
+    | Argument    | Type     | Default | Description  |
+    | ----------- | -------- | ------- | ------------ |
+    | `workerNum` | `String` | -       | 目标座席工号 |
 
 -   **Result**: `null`
 
@@ -66,22 +66,22 @@
 
 -   **Params**:
 
-    | Argument    | Data Type | Default | Description                     |
+    | Argument    | Type      | Default | Description                     |
     | ----------- | --------- | ------- | ------------------------------- |
     | `workerNum` | `String`  | -       | 目标座席工号                    |
     | `workType`  | `Integer` | `10`    | 忙碌的种类: [WorkType][] 枚举值 |
 
 -   **Result**: `null`
 
-## 强行示空
+## 强行示闲
 
 -   **Method**: `setIdle`
 
 -   **Params**:
 
-    | Argument    | Data Type | Default | Description  |
-    | ----------- | --------- | ------- | ------------ |
-    | `workerNum` | `String`  | -       | 目标座席工号 |
+    | Argument    | Type     | Default | Description  |
+    | ----------- | -------- | ------- | ------------ |
+    | `workerNum` | `String` | -       | 目标座席工号 |
 
 -   **Result**: `null`
 
@@ -93,9 +93,9 @@
 
 -   **Params**:
 
-    | Argument    | Data Type | Default | Description  |
-    | ----------- | --------- | ------- | ------------ |
-    | `workerNum` | `String`  | -       | 目标座席工号 |
+    | Argument    | Type     | Default | Description  |
+    | ----------- | -------- | ------- | ------------ |
+    | `workerNum` | `String` | -       | 目标座席工号 |
 
 -   **Result**: `null`
 
@@ -107,9 +107,9 @@
 
 -   **Params**:
 
-    | Argument    | Data Type | Default | Description  |
-    | ----------- | --------- | ------- | ------------ |
-    | `workerNum` | `String`  | -       | 目标座席工号 |
+    | Argument    | Type     | Default | Description  |
+    | ----------- | -------- | ------- | ------------ |
+    | `workerNum` | `String` | -       | 目标座席工号 |
 
 -   **Result**: `null`
 
@@ -119,9 +119,9 @@
 
 -   **Params**:
 
-    | Argument    | Data Type | Default | Description  |
-    | ----------- | --------- | ------- | ------------ |
-    | `workerNum` | `String`  | -       | 目标座席工号 |
+    | Argument    | Type     | Default | Description  |
+    | ----------- | -------- | ------- | ------------ |
+    | `workerNum` | `String` | -       | 目标座席工号 |
 
 -   **Result**: `null`
 
@@ -131,9 +131,9 @@
 
 -   **Params**:
 
-    | Argument    | Data Type | Default | Description  |
-    | ----------- | --------- | ------- | ------------ |
-    | `workerNum` | `String`  | -       | 目标座席工号 |
+    | Argument    | Type     | Default | Description  |
+    | ----------- | -------- | ------- | ------------ |
+    | `workerNum` | `String` | -       | 目标座席工号 |
 
 -   **Result**: `null`
 

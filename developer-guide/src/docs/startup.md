@@ -47,3 +47,5 @@ Windows Registry Editor Version 5.00
 ```html
 <a href="ipsc6-agent-launch:--WebServer:ListenPort 8080">启动座席程序</a>
 ```
+
+--8<-- "includes/glossary.md"

@@ -14,13 +14,13 @@
 
 ## 排队抢接
 
-将正在队列中、尚未排到座席的来话直接分配到发起调用的座席。
+将正在队列中、尚未接通的来话直接分配到发起调用的座席。
 
 -   **Method**: `dequeue`
 
 -   **Params**:
 
-    | Argument   | Data Type | Default | Description                       |
+    | Argument   | Type      | Default | Description                       |
     | ---------- | --------- | ------- | --------------------------------- |
     | `ctiIndex` | `Integer` | -       | 目标来话所属于的 CTI 服务器索引值 |
     | `channel`  | `Integer` | -       | 目标来话的通道号                  |
@@ -28,3 +28,5 @@
 -   **Result**: `null`
 
 [queueinfo]: ../types/queue_info.md "排队信息"
+
+--8<-- "includes/glossary.md"

@@ -1,4 +1,4 @@
-# 呼叫相关方法
+# 呼叫信息相关方法
 
 ## 获取呼叫列表
 
@@ -55,7 +55,7 @@ const result = getCalls().filter((call) => call.isHeld);
 
 -   **Params**:
 
-    | Argument   | Data Type | Default | Description                   |
+    | Argument   | Type      | Default | Description                   |
     | ---------- | --------- | ------- | ----------------------------- |
     | `ctiIndex` | `Integer` | `null`  | 呼叫所属于的 CTI 服务器索引值 |
     | `channel`  | `Integer` | `null`  | 呼叫的通道号                  |
