@@ -1,4 +1,4 @@
-site_name: IPSC 座席客户端开发人员指南
+site_name: IPSC6 座席客户端开发人员指南
 site_author: 刘雪彦
 copyright: 广州市和声信息技术有限公司 © 2021
 
@@ -13,32 +13,32 @@ nav:
   - docs/startup.md
 
   - API 参考:
-    - JSONRPC over WebSocket:
-      - docs/api/jsonrpc_websocket/jsonrpc.md
-      - docs/api/jsonrpc_websocket/mixed_content.md
+      - JSONRPC over WebSocket:
+          - docs/api/jsonrpc_websocket/jsonrpc.md
+          - docs/api/jsonrpc_websocket/mixed_content.md
 
-    - 类型:
-        - docs/api/types/class_overview.md
-        - docs/api/types/agent.md
-        - docs/api/types/cti_server.md
-        - docs/api/types/group.md
-        - docs/api/types/call.md
-        - docs/api/types/queue_info.md
-        - docs/api/types/sip_account.md
-        - docs/api/types/sip_call.md
-        - docs/api/types/enums.md
+      - 类型:
+          - docs/api/types/class_overview.md
+          - docs/api/types/agent.md
+          - docs/api/types/cti_server.md
+          - docs/api/types/group.md
+          - docs/api/types/call.md
+          - docs/api/types/queue_info.md
+          - docs/api/types/sip_account.md
+          - docs/api/types/sip_call.md
+          - docs/api/types/enums.md
 
-    - 方法:
-        - docs/api/methods/cti_server.md
-        - docs/api/methods/group.md
-        - docs/api/methods/status.md
-        - docs/api/methods/sip.md
-        - docs/api/methods/dial.md
-        - docs/api/methods/call.md
-        - docs/api/methods/queue.md
-        - docs/api/methods/manage.md
-        - docs/api/methods/gui.md
-    - 事件: []
+      - 方法:
+          - docs/api/methods/cti_server.md
+          - docs/api/methods/group.md
+          - docs/api/methods/status.md
+          - docs/api/methods/sip.md
+          - docs/api/methods/dial.md
+          - docs/api/methods/call.md
+          - docs/api/methods/queue.md
+          - docs/api/methods/manage.md
+          - docs/api/methods/gui.md
+      - 事件: []
     #       - docs/api/events/client_connection_state_changed.md
     #       - docs/api/events/agent_status_changed.md
     #       - docs/api/events/sip_register_state_changed.md
@@ -52,7 +52,7 @@ plugins:
       enabled_if_env: ENABLE_PDF_EXPORT
       toc_title: 目录
       toc_level: 3
-      cover_title: "IPSC 座席客户端"
+      cover_title: "IPSC6 座席客户端"
       cover_subtitle: "开发人员指南"
 
 theme:
