@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace ipsc6.agent.client
 {
-    public struct SipAccountInfo
+    public struct SipAccount
     {
-        public SipAccountInfo(Sip.Account account)
+        public SipAccount(Sip.Account account)
         {
             if (account is null)
             {
@@ -15,7 +15,7 @@ namespace ipsc6.agent.client
             }
             IsRegisterActive = false;
             LastRegisterError = 0;
-            calls = new HashSet<SipCallInfo>();
+            calls = new HashSet<SipCall>();
             Id = account.getId();
             IsValid = account.isValid();
             if (IsValid)
@@ -28,7 +28,7 @@ namespace ipsc6.agent.client
                 }
                 calls.UnionWith(
                     from call in account.Calls
-                    select new SipCallInfo(call)
+                    select new SipCall(call)
                 );
             }
 
@@ -38,7 +38,7 @@ namespace ipsc6.agent.client
         public bool IsValid { get; }
         public bool IsRegisterActive { get; }
         public int LastRegisterError { get; }
-        private readonly HashSet<SipCallInfo> calls;
-        public IReadOnlyCollection<SipCallInfo> Calls => calls;
+        private readonly HashSet<SipCall> calls;
+        public IReadOnlyCollection<SipCall> Calls => calls;
     }
 }

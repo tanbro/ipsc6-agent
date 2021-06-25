@@ -339,7 +339,7 @@ namespace ipsc6.agent.client
             ConnectionState[] allowStates = { ConnectionState.Init, ConnectionState.Closed, ConnectionState.Failed, ConnectionState.Lost };
             lock (connectLock)
             {
-                if (allowStates.Any(p => p == State))
+                if (allowStates.Contains(State))
                 {
                     SetState(ConnectionState.Opening);
                 }
@@ -419,12 +419,12 @@ namespace ipsc6.agent.client
             ConnectionState[] allowedStates = { ConnectionState.Opening, ConnectionState.Ok };
             lock (connectLock)
             {
-                if (closedStates.Any(m => m == State))
+                if (closedStates.Contains(State))
                 {
                     logger.WarnFormat("{0} Close(graceful) ... Already closed.", this);
                     return;
                 }
-                if (!allowedStates.Any(m => m == State))
+                if (!allowedStates.Contains(State))
                 {
                     throw new InvalidOperationException($"Invalid state: {State}");
                 }

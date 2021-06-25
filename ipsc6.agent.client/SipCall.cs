@@ -5,9 +5,9 @@ using org.pjsip.pjsua2;
 
 namespace ipsc6.agent.client
 {
-    public struct SipCallInfo
+    public struct SipCall
     {
-        public SipCallInfo(Sip.Call call)
+        public SipCall(Sip.Call call)
         {
             if (call is null)
             {

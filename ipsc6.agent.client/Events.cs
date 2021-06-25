@@ -72,11 +72,11 @@ namespace ipsc6.agent.client
 
     public class BaseCtiEventArgs<T> : EventArgs
     {
-        public CtiServer ConnectionInfo { get; }
+        public CtiServer CtiServer { get; }
         public T Value { get; }
-        public BaseCtiEventArgs(CtiServer connectionInfo, T value)
+        public BaseCtiEventArgs(CtiServer ctiServer, T value)
         {
-            ConnectionInfo = connectionInfo;
+            CtiServer = ctiServer;
             Value = value;
         }
     }

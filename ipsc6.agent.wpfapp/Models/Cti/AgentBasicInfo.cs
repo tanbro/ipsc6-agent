@@ -72,8 +72,8 @@ namespace ipsc6.agent.wpfapp.Models.Cti
             set => SetProperty(ref queueList, value);
         }
 
-        IList<client.SipAccountInfo> sipAccountList = new List<client.SipAccountInfo>();
-        public IList<client.SipAccountInfo> SipAccountList
+        IList<client.SipAccount> sipAccountList = new List<client.SipAccount>();
+        public IList<client.SipAccount> SipAccountList
         {
             get => sipAccountList;
             set

@@ -7,15 +7,6 @@ namespace agent {
 namespace network {
 
 public
-delegate void ConnectAttemptFailedEventHandler(Object ^ sender, EventArgs ^ e);
-
-public
-delegate void DisconnectedEventHandler(Object ^ sender, EventArgs ^ e);
-
-public
-delegate void ConnectionLostEventHandler(Object ^ sender, EventArgs ^ e);
-
-public
 ref class ConnectedEventArgs : EventArgs {
    public:
     ConnectedEventArgs() : EventArgs(){};

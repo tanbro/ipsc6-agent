@@ -63,12 +63,12 @@ namespace ipsc6.agent.client
                 }
                 // 释放未托管的资源(未托管的对象)并重写终结器
                 // 将大型字段设置为 null
-                foreach (var sipAcc in sipAccounts)
+                foreach (var sipAcc in sipAccountCollection)
                 {
                     logger.DebugFormat("Dispose {0}", sipAcc);
                     sipAcc.Dispose();
                 }
-                sipAccounts.Clear();
+                sipAccountCollection.Clear();
                 //
                 foreach (var conn in connections)
                 {
@@ -136,53 +136,43 @@ namespace ipsc6.agent.client
         public string WorkerNumber => workerNumber;
         string password;
 
+        readonly List<Connection> connections = new();
         readonly List<CtiServer> ctiServers = new();
         public IReadOnlyList<CtiServer> CtiServers => ctiServers;
         public int GetConnetionIndex(CtiServer connectionInfo) => ctiServers.IndexOf(connectionInfo);
         private Connection GetConnection(int index) => connections[index];
         private Connection GetConnection(CtiServer connectionInfo) => connections[GetConnetionIndex(connectionInfo)];
         public ConnectionState GetConnectionState(int index) => GetConnection(index).State;
-        public ConnectionState GetConnectionState(CtiServer connectionInfo)
+        public ConnectionState GetConnectionState(CtiServer ctiServer)
         {
-            var index = ctiServers.IndexOf(connectionInfo);
+            var index = ctiServers.IndexOf(ctiServer);
             return connections[index].State;
         }
 
-        readonly List<Connection> connections = new();
-
         int mainConnectionIndex = -1;
+        Connection MainConnection => connections[mainConnectionIndex];
         public int MainConnectionIndex => mainConnectionIndex;
-
-        public event EventHandler OnMainConnectionChanged;
-
         public CtiServer MainConnectionInfo => (mainConnectionIndex < 0) ? null : ctiServers[mainConnectionIndex];
 
-        Connection MainConnection => connections[mainConnectionIndex];
+        public event EventHandler OnMainConnectionChanged;
         public int AgentId => MainConnection.AgentId;
 
-        string displayName;
-        public string DisplayName => displayName;
-
-        int agentChannel = -1;
-        public int AgentChannel => agentChannel;
-
-        AgentState agentState = AgentState.NotExist;
-        WorkType workType = WorkType.Unknown;
-        public AgentState AgentState => agentState;
-        public WorkType WorkType => workType;
+        public string DisplayName { get; private set; }
+        public int AgentChannel { get; private set; } = -1;
+        public AgentState AgentState { get; private set; } = AgentState.NotExist;
+        public WorkType WorkType { get; private set; } = WorkType.Unknown;
         public AgentStateWorkType AgentStateWorkType
         {
-            get => new(agentState, workType);
+            get => new(AgentState, WorkType);
             private set
             {
-                agentState = value.AgentState;
-                workType = value.WorkType;
+                AgentState = value.AgentState;
+                WorkType = value.WorkType;
             }
         }
         public event AgentStateChangedEventHandler OnAgentStateChanged;
 
-        TeleState teleState = TeleState.OnHook;
-        public TeleState TeleState => teleState;
+        public TeleState TeleState { get; private set; } = TeleState.OnHook;
         public event TeleStateChangedEventHandler OnTeleStateChanged;
 
         readonly HashSet<QueueInfo> queueInfos = new();
@@ -216,28 +206,28 @@ namespace ipsc6.agent.client
                 var conn = sender as Connection;
                 var msg = e.Message;
                 var index = connections.IndexOf(conn);
-                var connInfo = ctiServers[index];
+                var ctiServer = ctiServers[index];
                 switch (msg.Type)
                 {
                     case MessageType.REMOTE_MSG_SETSTATE:
                         /// 状态改变
-                        ProcessStateChangedMessage(connInfo, msg);
+                        ProcessStateChangedMessage(ctiServer, msg);
                         break;
                     case MessageType.REMOTE_MSG_SETTELESTATE:
                         /// 电话状态改变
-                        ProcessTeleStateChangedMessage(connInfo, msg);
+                        ProcessTeleStateChangedMessage(ctiServer, msg);
                         break;
                     case MessageType.REMOTE_MSG_QUEUEINFO:
                         /// 排队信息
-                        ProcessQueueInfoMessage(connInfo, msg);
+                        ProcessQueueInfoMessage(ctiServer, msg);
                         break;
                     case MessageType.REMOTE_MSG_HOLDINFO:
                         /// 保持信息
-                        ProcessHoldInfoMessage(connInfo, msg);
+                        ProcessHoldInfoMessage(ctiServer, msg);
                         break;
                     case MessageType.REMOTE_MSG_SENDDATA:
                         /// 其他各种数据
-                        ProcessDataMessage(connInfo, msg);
+                        ProcessDataMessage(ctiServer, msg);
                         break;
                     default:
                         break;
@@ -252,9 +242,8 @@ namespace ipsc6.agent.client
 
         private AgentStateWorkType cachedStateWorkType;
 
-        void ProcessStateChangedMessage(CtiServer connInfo, ServerSentMessage msg)
+        void ProcessStateChangedMessage(CtiServer ctiServer, ServerSentMessage msg)
         {
-            AgentState[] workingState = { AgentState.Ring, AgentState.Work };
             AgentStateWorkType newState;
             var newWorkType = (WorkType)msg.N2;
             if (newWorkType == WorkType.OffHooked)
@@ -267,7 +256,7 @@ namespace ipsc6.agent.client
                 newState = new AgentStateWorkType((AgentState)msg.N1, (WorkType)msg.N2);
             }
             logger.DebugFormat("StateChanged - {0}", newState);
-            var currIndex = ctiServers.FindIndex(ci => ci == connInfo);
+            var currIndex = ctiServers.FindIndex(ci => ci == ctiServer);
             AgentStateWorkType oldState = null;
             Connection oldMainConnObj = null;
             lock (this)
@@ -279,25 +268,16 @@ namespace ipsc6.agent.client
                     // 缓存状态
                     if (!isEverLostAllConnections)
                     {
-                        AgentState[] agentStates = { AgentState.Idle, AgentState.Pause };
-                        WorkType[] workTypes = {
-                            WorkType.PauseBusy,
-                            WorkType.PauseLeave,
-                            WorkType.PauseTyping,
-                            //WorkType.PauseForce,
-                            //WorkType.PauseDisconnect,
-                            WorkType.PauseSnooze,
-                            WorkType.PauseDinner,
-                            WorkType.PauseTrain,
-                        };
-                        if (agentStates.Any(x => x == newState.AgentState) && workTypes.Any(x => x == newState.WorkType))
+                        if (AgentState is AgentState.Idle or AgentState.Pause
+                            && availableSetBusyWorkTypes.Contains(WorkType))
                         {
                             cachedStateWorkType = newState;
                         }
                     }
                 }
                 // 如果是工作状态且主连接不是当前的，需要切换！
-                if (workingState.Any(x => x == newState.AgentState) && currIndex != mainConnectionIndex)
+                if (newState.AgentState is AgentState.Ring or AgentState.Work
+                    && currIndex != mainConnectionIndex)
                 {
                     oldMainConnObj = MainConnection;
                     // 先修改 index
@@ -328,14 +308,14 @@ namespace ipsc6.agent.client
         {
             TeleState oldState;
             TeleState newState = (TeleState)msg.N1;
-            logger.DebugFormat("TeleStateChanged - {0} --> {1}", teleState, newState);
+            logger.DebugFormat("TeleStateChanged - {0} --> {1}", TeleState, newState);
             TeleStateChangedEventArgs ev = null;
             lock (this)
             {
-                oldState = teleState;
+                oldState = TeleState;
                 if (oldState != newState)
                 {
-                    teleState = newState;
+                    TeleState = newState;
                     ev = new TeleStateChangedEventArgs(oldState, newState);
                 }
                 // 如果挂机了， Call List 必须清空
@@ -367,80 +347,80 @@ namespace ipsc6.agent.client
 
         readonly static QueueEventType[] aliveQueueEventTypes = { QueueEventType.Join, QueueEventType.Wait };
 
-        void ProcessQueueInfoMessage(CtiServer connInfo, ServerSentMessage msg)
+        void ProcessQueueInfoMessage(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var queueInfo = new QueueInfo(connInfo, msg, groups);
-            bool isAlive = aliveQueueEventTypes.Any(x => x == queueInfo.EventType);
+            var queueInfo = new QueueInfo(ctiServer, msg, groups);
+            bool isAlive = aliveQueueEventTypes.Contains(queueInfo.EventType);
             logger.DebugFormat("QueueInfoMessage - {0}", queueInfo);
             // 记录 QueueInfo
             lock (this)
             {
                 // 修改之前,一律先删除
-                queueInfos.RemoveWhere(x => x == queueInfo);
+                queueInfos.Remove(queueInfo);
                 if (isAlive)
                     queueInfos.Add(queueInfo);
             }
-            OnQueueInfoReceived?.Invoke(this, new QueueInfoEventArgs(connInfo, queueInfo));
+            OnQueueInfoReceived?.Invoke(this, new QueueInfoEventArgs(ctiServer, queueInfo));
         }
 
-        void ProcessHoldInfoMessage(CtiServer connInfo, ServerSentMessage msg)
+        void ProcessHoldInfoMessage(CtiServer ctiServer, ServerSentMessage msg)
         {
             var channel = msg.N1;
             var holdEventType = (HoldEventType)msg.N2;
-            var callInfo = new Call(connInfo, channel, msg.S)
+            var callInfo = new Call(ctiServer, channel, msg.S)
             {
                 IsHeld = holdEventType != HoldEventType.Cancel,
                 HoldType = holdEventType,
             };
             logger.DebugFormat("HoldInfoMessage - {0}: {1}", callInfo.IsHeld ? "UnHold" : "Hold", callInfo);
-            // 改写 Call Collection
+            // 改写 Call Collection(remove then add)
             lock (this)
             {
-                calls.RemoveWhere(x => x == callInfo);
+                calls.Remove(callInfo);
                 calls.Add(callInfo);
             }
-            OnHoldInfoReceived?.Invoke(this, new HoldInfoEventArgs(connInfo, callInfo));
+            OnHoldInfoReceived?.Invoke(this, new HoldInfoEventArgs(ctiServer, callInfo));
         }
 
-        void ProcessDataMessage(CtiServer connInfo, ServerSentMessage msg)
+        void ProcessDataMessage(CtiServer ctiServer, ServerSentMessage msg)
         {
             switch ((ServerSentMessageSubType)msg.N1)
             {
                 case ServerSentMessageSubType.AgentId:
-                    DoOnAgentId(connInfo, msg);
+                    DoOnAgentId(ctiServer, msg);
                     break;
                 case ServerSentMessageSubType.Channel:
-                    DoOnChannel(connInfo, msg);
+                    DoOnChannel(ctiServer, msg);
                     break;
                 case ServerSentMessageSubType.SipRegistrarList:
-                    DoOnSipRegistrarList(connInfo, msg);
+                    DoOnSipRegistrarList(ctiServer, msg);
                     break;
                 case ServerSentMessageSubType.GroupIdList:
-                    DoOnGroupIdList(connInfo, msg);
+                    DoOnGroupIdList(ctiServer, msg);
                     break;
                 case ServerSentMessageSubType.GroupNameList:
-                    DoOnGroupNameList(connInfo, msg);
+                    DoOnGroupNameList(ctiServer, msg);
                     break;
                 case ServerSentMessageSubType.PrivilegeList:
-                    DoOnPrivilegeList(connInfo, msg);
+                    DoOnPrivilegeList(ctiServer, msg);
                     break;
                 case ServerSentMessageSubType.PrivilegeExternList:
-                    DoOnPrivilegeExternList(connInfo, msg);
+                    DoOnPrivilegeExternList(ctiServer, msg);
                     break;
                 case ServerSentMessageSubType.SignedGroupIdList:
-                    DoOnSignedGroupIdList(connInfo, msg);
+                    DoOnSignedGroupIdList(ctiServer, msg);
                     break;
                 case ServerSentMessageSubType.WorkingChannel:
-                    DoOnWorkingChannel(connInfo, msg);
+                    DoOnWorkingChannel(ctiServer, msg);
                     break;
                 case ServerSentMessageSubType.Ring:
-                    DoOnRing(connInfo, msg);
+                    DoOnRing(ctiServer, msg);
                     break;
                 case ServerSentMessageSubType.IvrData:
-                    DoOnIvrData(connInfo, msg);
+                    DoOnIvrData(ctiServer, msg);
                     break;
                 case ServerSentMessageSubType.CustomString:
-                    DoOnCustomString(connInfo, msg);
+                    DoOnCustomString(ctiServer, msg);
                     break;
                 default:
                     break;
@@ -489,13 +469,13 @@ namespace ipsc6.agent.client
                     {
                         logger.DebugFormat("处理 SipAccount 地址 {0} ...", addr);
                         var uri = $"sip:{workerNumber}@{addr}";
-                        Sip.Account sipAcc;
-                        sipAcc = sipAccounts.FirstOrDefault(x => x.getInfo().uri == uri);
-                        if (sipAcc != null)
+                        Sip.Account acc;
+                        acc = sipAccountCollection.FirstOrDefault(x => x.getInfo().uri == uri);
+                        if (acc != null)
                         {
                             logger.DebugFormat("SipAccount 释放已存在帐户 {0} ...", uri);
-                            sipAccounts.Remove(sipAcc);
-                            sipAcc.Dispose();
+                            sipAccountCollection.Remove(acc);
+                            acc.Dispose();
                         }
                         logger.DebugFormat("SipAccount 新建帐户 {0} ...", uri);
                         using var sipAuthCred = new AuthCredInfo("digest", "*", workerNumber, 0, "hesong");
@@ -506,13 +486,13 @@ namespace ipsc6.agent.client
                         cfg.regConfig.firstRetryIntervalSec = 15;
                         cfg.regConfig.registrarUri = $"sip:{addr}";
                         cfg.sipConfig.authCreds.Add(sipAuthCred);
-                        var acc = new Sip.Account(connectionIndex);
+                        acc = new Sip.Account(connectionIndex);
                         acc.OnRegisterStateChanged += Acc_OnRegisterStateChanged;
                         acc.OnIncomingCall += Acc_OnIncomingCall;
                         acc.OnCallDisconnected += Acc_OnCallDisconnected;
                         acc.OnCallStateChanged += Acc_OnCallStateChanged;
                         acc.create(cfg);
-                        sipAccounts.Add(acc);
+                        sipAccountCollection.Add(acc);
                     }
                     ReloadSipAccountCollection();
                 }
@@ -523,10 +503,10 @@ namespace ipsc6.agent.client
 
         private void ReloadSipAccountCollection()
         {
-            sipAccountInfos.Clear();
-            sipAccountInfos.UnionWith(
-                from m in sipAccounts
-                select new SipAccountInfo(m)
+            sipAccounts.Clear();
+            sipAccounts.UnionWith(
+                from m in sipAccountCollection
+                select new SipAccount(m)
             );
         }
 
@@ -585,51 +565,51 @@ namespace ipsc6.agent.client
         }
 
         public event CustomStringReceivedEventArgsReceivedEventHandler OnCustomStringReceived;
-        private void DoOnCustomString(CtiServer connInfo, ServerSentMessage msg)
+        private void DoOnCustomString(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var val = new ServerSentCustomString(connInfo, msg.N2, msg.S);
-            var evt = new CustomStringReceivedEventArgs(connInfo, val);
+            var val = new ServerSentCustomString(ctiServer, msg.N2, msg.S);
+            var evt = new CustomStringReceivedEventArgs(ctiServer, val);
             OnCustomStringReceived?.Invoke(this, evt);
         }
 
         public event IvrDataReceivedEventHandler OnIvrDataReceived;
-        private void DoOnIvrData(CtiServer connInfo, ServerSentMessage msg)
+        private void DoOnIvrData(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var val = new IvrData(connInfo, msg.N2, msg.S);
-            var evt = new IvrDataReceivedEventArgs(connInfo, val);
+            var val = new IvrData(ctiServer, msg.N2, msg.S);
+            var evt = new IvrDataReceivedEventArgs(ctiServer, val);
             OnIvrDataReceived?.Invoke(this, evt);
         }
 
         public event RingInfoReceivedEventHandler OnRingInfoReceived;
-        private void DoOnRing(CtiServer connInfo, ServerSentMessage msg)
+        private void DoOnRing(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var workChInfo = new WorkingChannelInfo(msg.N2);
-            var callInfo = new Call(connInfo, workChInfo.Channel, msg.S);
+            var workingChannelInfo = new WorkingChannelInfo(msg.N2);
+            var callInfo = new Call(ctiServer, workingChannelInfo.Channel, msg.S);
             logger.DebugFormat("OnRing - {0}", callInfo);
             lock (this)
             {
-                workingChannelInfo = workChInfo;
+                WorkingChannelInfo = workingChannelInfo;
+                calls.Remove(callInfo);
                 calls.Add(callInfo);
             }
             OnWorkingChannelInfoReceived?.Invoke(this,
-                new WorkingChannelInfoReceivedEventArgs(connInfo, workChInfo));
+                new WorkingChannelInfoReceivedEventArgs(ctiServer, workingChannelInfo));
             OnRingInfoReceived?.Invoke(this,
-                new RingInfoReceivedEventArgs(connInfo, callInfo));
+                new RingInfoReceivedEventArgs(ctiServer, callInfo));
         }
 
-        WorkingChannelInfo workingChannelInfo;
-        public WorkingChannelInfo WorkingChannel => workingChannelInfo;
+        public WorkingChannelInfo WorkingChannelInfo { get; private set; }
         public event WorkingChannelInfoReceivedEventHandler OnWorkingChannelInfoReceived;
-        private void DoOnWorkingChannel(CtiServer connInfo, ServerSentMessage msg)
+        private void DoOnWorkingChannel(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var info = new WorkingChannelInfo(msg.N2, msg.S);
-            logger.DebugFormat("OnWorkingChannel - {0}: {1}", connInfo, info.Channel);
+            var workingChannelInfo = new WorkingChannelInfo(msg.N2, msg.S);
+            logger.DebugFormat("OnWorkingChannel - {0}: {1}", ctiServer, workingChannelInfo.Channel);
             lock (this)
             {
-                workingChannelInfo = info;
+                WorkingChannelInfo = workingChannelInfo;
             }
             OnWorkingChannelInfoReceived?.Invoke(this,
-                new WorkingChannelInfoReceivedEventArgs(connInfo, info));
+                new WorkingChannelInfoReceivedEventArgs(ctiServer, workingChannelInfo));
         }
 
         private readonly HashSet<Privilege> privilegeCollection = new();
@@ -671,12 +651,12 @@ namespace ipsc6.agent.client
         void DoOnGroupIdList(CtiServer _, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var groupIter = from s in msg.S.Split(Constants.VerticalBarDelimiter)
-                            select new Group(s);
+            var itGroups = from s in msg.S.Split(Constants.VerticalBarDelimiter)
+                           select new Group(s);
             lock (this)
             {
                 groups.Clear();
-                groups.AddRange(groupIter);
+                groups.AddRange(itGroups);
             }
         }
 
@@ -741,39 +721,40 @@ namespace ipsc6.agent.client
         }
 
         public event ChannelAssignedEventHandler OnChannelAssigned;
-        void DoOnChannel(CtiServer connInfo, ServerSentMessage msg)
+        void DoOnChannel(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var evt = new ChannelAssignedEventArgs(connInfo, msg.N2);
+            var evt = new ChannelAssignedEventArgs(ctiServer, msg.N2);
             lock (this)
             {
-                agentChannel = evt.Value;
+                AgentChannel = evt.Value;
             }
             OnChannelAssigned?.Invoke(this, evt);
         }
 
         public event AgentDisplayNameReceivedEventHandler OnAgentDisplayNameReceived;
-        void DoOnAgentId(CtiServer connInfo, ServerSentMessage msg)
+        void DoOnAgentId(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var evt = new AgentDisplayNameReceivedEventArgs(connInfo, msg.S);
+            var evt = new AgentDisplayNameReceivedEventArgs(ctiServer, msg.S);
             lock (this)
             {
-                displayName = evt.Value;
+                DisplayName = evt.Value;
             }
             OnAgentDisplayNameReceived?.Invoke(this, evt);
         }
 
         public event ConnectionInfoStateChangedEventHandler OnConnectionStateChanged;
 
+        static readonly ConnectionState[] disconntedStates = { ConnectionState.Lost, ConnectionState.Failed, ConnectionState.Closed };
+        static readonly AgentState[] workingStates = { AgentState.Ring, AgentState.Work };
+
         private bool isEverLostAllConnections = false;
         void Conn_OnConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
         {
-            ConnectionState[] disconntedStates = { ConnectionState.Lost, ConnectionState.Failed, ConnectionState.Closed };
-            AgentState[] workingState = { AgentState.Ring, AgentState.Work, AgentState.WorkPause };
             var conn = sender as Connection;
             var connIdx = connections.IndexOf(conn);
-            var connInfo = ctiServers[connIdx];
+            var ctiServer = ctiServers[connIdx];
             var rand = new Random();
-            var evtStateChanged = new ConnectionInfoStateChangedEventArgs(connInfo, e.OldState, e.NewState);
+            var evtStateChanged = new ConnectionInfoStateChangedEventArgs(ctiServer, e.OldState, e.NewState);
             EventArgs evtMainConnChanged = null;
             Action action = null;
             logger.DebugFormat("{0}: {1} --> {2}", conn, e.OldState, e.NewState);
@@ -792,7 +773,7 @@ namespace ipsc6.agent.client
                 }
                 //////////
                 // 断线处理
-                if (disconntedStates.Any(x => x == e.NewState))
+                if (disconntedStates.Contains(e.NewState))
                 {
                     var isMain = connIdx == mainConnectionIndex;
                     if (isMain)
@@ -815,16 +796,16 @@ namespace ipsc6.agent.client
                             if (indices.Count > 0)
                             {
                                 // 有的选,但是如果在工作状态,不能变!
-                                if (workingState.Any(x => x == AgentState))
+                                if (workingStates.Contains(AgentState))
                                 {
-                                    logger.WarnFormat("主服务节点 [{0}]({1}) 连接断开. 由于处于工作状态, 将继续使用该主节点并发起重连", connIdx, connInfo);
+                                    logger.WarnFormat("主服务节点 [{0}]({1}) 连接断开. 由于处于工作状态, 将继续使用该主节点并发起重连", connIdx, ctiServer);
                                 }
                                 else
                                 {
                                     mainConnectionIndex = indices[rand.Next(indices.Count)];
                                     logger.WarnFormat(
                                         "主服务节点 [{0}]({1}) 连接断开. 切换主节点到 [{2}]({3})",
-                                        connIdx, connInfo, mainConnectionIndex, MainConnectionInfo
+                                        connIdx, ctiServer, mainConnectionIndex, MainConnectionInfo
                                     );
                                 }
                             }
@@ -847,14 +828,14 @@ namespace ipsc6.agent.client
                                                 mainConnectionIndex = indices2[rand.Next(indices2.Count)];
                                                 logger.WarnFormat(
                                                     "主服务节点 [{0}]({1}) 连接被主动关闭. 虽然找不到其它可用的连接, 仍切换主节点到 [{2}]({3})",
-                                                    connIdx, connInfo, mainConnectionIndex, MainConnectionInfo
+                                                    connIdx, ctiServer, mainConnectionIndex, MainConnectionInfo
                                                 );
                                             }
                                             else
                                             {
                                                 logger.WarnFormat(
                                                     "主服务节点 [{0}]({1}) 连接被主动关闭. 且找不到其它未被主动关闭的连接, 将继续使用该主节点并发起重连",
-                                                    connIdx, connInfo
+                                                    connIdx, ctiServer
                                                 );
                                             }
                                         }
@@ -862,7 +843,7 @@ namespace ipsc6.agent.client
                                     default:
                                         logger.WarnFormat(
                                             "主服务节点 [{0}]({1}) 连接断开. 但是由于找不到其它可用服务节点连接, 将继续使用该主节点并发起重连",
-                                            connIdx, connInfo
+                                            connIdx, ctiServer
                                         );
                                         break;
                                 }
@@ -872,15 +853,15 @@ namespace ipsc6.agent.client
                             {
                                 action = new Action(async () =>
                                 {
-                                    logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, connInfo);
+                                    logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
                                     try
                                     {
-                                        await conn.OpenAsync(connInfo.Host, connInfo.Port, workerNumber, password, flag: 0);
-                                        logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, connInfo);
+                                        await conn.OpenAsync(ctiServer.Host, ctiServer.Port, workerNumber, password, flag: 0);
+                                        logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
                                     }
                                     catch (ConnectionException ex)
                                     {
-                                        logger.ErrorFormat("从服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, connInfo, $"{ex.GetType()} {ex.Message}");
+                                        logger.ErrorFormat("从服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
                                     };
                                 });
                                 // 需要抛出切换新的主服务节事件
@@ -890,15 +871,15 @@ namespace ipsc6.agent.client
                             {
                                 action = new Action(async () =>
                                 {
-                                    logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接 ... ", connIdx, connInfo);
+                                    logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
                                     try
                                     {
-                                        await conn.OpenAsync(connInfo.Host, connInfo.Port, workerNumber, password, flag: 1);
-                                        logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接成功", connIdx, connInfo);
+                                        await conn.OpenAsync(ctiServer.Host, ctiServer.Port, workerNumber, password, flag: 1);
+                                        logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
                                     }
                                     catch (ConnectionException ex)
                                     {
-                                        logger.ErrorFormat("主服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, connInfo, $"{ex.GetType()} {ex.Message}");
+                                        logger.ErrorFormat("主服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
                                     };
                                 });
                             }
@@ -910,23 +891,23 @@ namespace ipsc6.agent.client
                         {
                             logger.WarnFormat(
                                 "从服务节点 [{0}]({1}) 连接断开 ({2} {3}). 放弃重连.",
-                                connIdx, connInfo, e.NewState, runningState
+                                connIdx, ctiServer, e.NewState, runningState
                             );
                         }
                         else
                         {
-                            logger.WarnFormat("从服务节点 [{0}]({1}) 连接丢失. 将发起重连", connIdx, connInfo);
+                            logger.WarnFormat("从服务节点 [{0}]({1}) 连接丢失. 将发起重连", connIdx, ctiServer);
                             action = new Action(async () =>
                             {
-                                logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, connInfo);
+                                logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
                                 try
                                 {
-                                    await conn.OpenAsync(connInfo.Host, connInfo.Port, workerNumber, password, flag: 0);
-                                    logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, connInfo);
+                                    await conn.OpenAsync(ctiServer.Host, ctiServer.Port, workerNumber, password, flag: 0);
+                                    logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
                                 }
                                 catch (ConnectionException ex)
                                 {
-                                    logger.ErrorFormat("从服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, connInfo, $"{ex.GetType()} {ex.Message}");
+                                    logger.ErrorFormat("从服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
                                 }
                             });
                         }
@@ -1088,12 +1069,12 @@ namespace ipsc6.agent.client
                 // release Sip Accounts
                 lock (this)
                 {
-                    foreach (var sipAcc in sipAccounts)
+                    foreach (var sipAcc in sipAccountCollection)
                     {
                         logger.DebugFormat("Dispose {0}", sipAcc);
                         sipAcc.Dispose();
                     }
-                    sipAccounts.Clear();
+                    sipAccountCollection.Clear();
                 }
             }
         }
@@ -1166,14 +1147,23 @@ namespace ipsc6.agent.client
             }
         }
 
+        static readonly WorkType[] availableSetBusyWorkTypes = {
+            WorkType.PauseBusy,
+            WorkType.PauseLeave,
+            WorkType.PauseTyping,
+            WorkType.PauseForce,
+            WorkType.PauseDisconnect,
+            WorkType.PauseSnooze,
+            WorkType.PauseDinner,
+            WorkType.PauseTrain,
+        };
+
         public async Task SetBusyAsync(WorkType workType = WorkType.PauseBusy)
         {
+            if (!availableSetBusyWorkTypes.Contains(workType))
+                throw new ArgumentOutOfRangeException(nameof(workType), $"Invalid work type {workType}");
             using (requestGuard.TryEnter())
             {
-                if (workType < WorkType.PauseBusy)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(workType), $"Invalid work type {workType}");
-                }
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_PAUSE, (int)workType);
                 await MainConnection.RequestAsync(req);
             }
@@ -1210,7 +1200,7 @@ namespace ipsc6.agent.client
 
         public async Task Xfer(Call callInfo, string groupId, string workerNum = "", string customString = "")
         {
-            await XferAsync(callInfo.ConnectionInfo, callInfo.Channel, groupId, workerNum, customString);
+            await XferAsync(callInfo.CtiServer, callInfo.Channel, groupId, workerNum, customString);
         }
 
         public async Task XferAsync(string groupId, string workerNum = "", string customString = "")
@@ -1224,7 +1214,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 Call callInfo = HeldCalls.FirstOrDefault();
-                var conn = (callInfo == null) ? MainConnection : GetConnection(callInfo.ConnectionInfo);
+                var conn = (callInfo == null) ? MainConnection : GetConnection(callInfo.CtiServer);
                 var s = $"{workerNum}|{groupId}|{customString}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT, -1, s);
                 await conn.RequestAsync(req);
@@ -1250,7 +1240,7 @@ namespace ipsc6.agent.client
 
         public async Task XferExtAsync(Call callInfo, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
-            var connectionInfo = callInfo.ConnectionInfo;
+            var connectionInfo = callInfo.CtiServer;
             var channel = callInfo.Channel;
             await XferExtAsync(connectionInfo, channel, calledTelnum, callingTelnum, channelGroup, option);
         }
@@ -1266,7 +1256,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 Call callInfo = HeldCalls.First();
-                var conn = GetConnection(callInfo.ConnectionInfo);
+                var conn = GetConnection(callInfo.CtiServer);
                 var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT_EX, -1, s);
                 await conn.RequestAsync(req);
@@ -1292,7 +1282,7 @@ namespace ipsc6.agent.client
 
         public async Task CallIvrAsync(Call callInfo, string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
         {
-            var connectionInfo = callInfo.ConnectionInfo;
+            var connectionInfo = callInfo.CtiServer;
             var channel = callInfo.Channel;
             await CallIvrAsync(connectionInfo, channel, ivrId, invokeType, customString);
         }
@@ -1310,7 +1300,7 @@ namespace ipsc6.agent.client
             }
             if (callInfo == null)
             {
-                await CallIvrAsync(MainConnectionInfo, agentChannel, ivrId, invokeType, customString);
+                await CallIvrAsync(MainConnectionInfo, AgentChannel, ivrId, invokeType, customString);
             }
             else
             {
@@ -1331,7 +1321,7 @@ namespace ipsc6.agent.client
                         select item
                     ).First();
                 }
-                var conn = GetConnection(callInfo.ConnectionInfo);
+                var conn = GetConnection(callInfo.CtiServer);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HOLD);
                 await conn.RequestAsync(req);
             }
@@ -1355,7 +1345,7 @@ namespace ipsc6.agent.client
 
         public async Task UnHold(Call callInfo)
         {
-            await UnHoldAsync(callInfo.ConnectionInfo, callInfo.Channel);
+            await UnHoldAsync(callInfo.CtiServer, callInfo.Channel);
         }
 
         public async Task UnHoldAsync()
@@ -1370,7 +1360,7 @@ namespace ipsc6.agent.client
             {
                 if (channel < 0)
                 {
-                    channel = workingChannelInfo.Channel;
+                    channel = WorkingChannelInfo.Channel;
                 }
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_BREAK_SESS, channel, customString);
                 await MainConnection.RequestAsync(req);
@@ -1390,7 +1380,7 @@ namespace ipsc6.agent.client
                     lock (this)
                     {
                         var call = (
-                            from c in sipAccounts.SelectMany(x => x.Calls)
+                            from c in sipAccountCollection.SelectMany(x => x.Calls)
                             let ci = c.getInfo()
                             where ci.state == pjsip_inv_state.PJSIP_INV_STATE_INCOMING
                             select c
@@ -1493,7 +1483,7 @@ namespace ipsc6.agent.client
         {
             using (requestGuard.TryEnter())
             {
-                var conn = GetConnection(queueInfo.ConnectionInfo);
+                var conn = GetConnection(queueInfo.CtiServer);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, queueInfo.Channel);
                 await conn.RequestAsync(req);
             }
@@ -1651,9 +1641,9 @@ namespace ipsc6.agent.client
             }
         }
 
-        readonly HashSet<Sip.Account> sipAccounts = new();
-        readonly HashSet<SipAccountInfo> sipAccountInfos = new();
-        public IReadOnlyCollection<SipAccountInfo> SipAccounts => sipAccountInfos;
+        readonly HashSet<Sip.Account> sipAccountCollection = new();
+        readonly HashSet<SipAccount> sipAccounts = new();
+        public IReadOnlyCollection<SipAccount> SipAccounts => sipAccounts;
 
     }
 }

@@ -32,7 +32,7 @@ namespace ipsc6.agent.client
         public bool IsHeld { get; internal set; }
         public HoldEventType HoldType { get; internal set; }
 
-        public Call(CtiServer connectionInfo, int channel, string dataString) : base(connectionInfo)
+        public Call(CtiServer ctiServer, int channel, string dataString) : base(ctiServer)
         {
             Channel = channel;
             IsHeld = false;
@@ -91,17 +91,17 @@ namespace ipsc6.agent.client
         public override int GetHashCode()
         {
             int hashCode = 1152885954;
-            hashCode = hashCode * -1521134295 + EqualityComparer<CtiServer>.Default.GetHashCode(ConnectionInfo);
+            hashCode = hashCode * -1521134295 + EqualityComparer<CtiServer>.Default.GetHashCode(CtiServer);
             hashCode = hashCode * -1521134295 + Channel.GetHashCode();
             return hashCode;
         }
         public override bool Equals(object obj) => Equals(obj as Call);
         public bool Equals(Call other) => other != null
-            && EqualityComparer<CtiServer>.Default.Equals(ConnectionInfo, other.ConnectionInfo)
+            && EqualityComparer<CtiServer>.Default.Equals(CtiServer, other.CtiServer)
             && Channel == other.Channel;
         public static bool operator ==(Call left, Call right) => EqualityComparer<Call>.Default.Equals(left, right);
         public static bool operator !=(Call left, Call right) => !(left == right);
         public override string ToString() =>
-            $"<{GetType().Name} Connection={ConnectionInfo}, Channel={Channel}, IsHeld={IsHeld}, HoldType={HoldType}, CallDirection={CallDirection}, RemoteTelnum={RemoteTelNum}>";
+            $"<{GetType().Name} Connection={CtiServer}, Channel={Channel}, IsHeld={IsHeld}, HoldType={HoldType}, CallDirection={CallDirection}, RemoteTelnum={RemoteTelNum}>";
     }
 }
