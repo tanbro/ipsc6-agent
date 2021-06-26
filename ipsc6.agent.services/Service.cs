@@ -15,7 +15,6 @@ namespace ipsc6.agent.services
         public string Echo(string s) => s;
         public void Throw() => throw new Exception();
 
-
         public async Task<string> DelayEcho(string s, int milliseconds)
         {
             await Task.Delay(milliseconds);
@@ -23,7 +22,7 @@ namespace ipsc6.agent.services
         }
         #endregion
 
-        #region GUI 无关的 Agent 操作
+        #region 内部方法
 
         internal static client.Agent agent;
 
@@ -41,13 +40,33 @@ namespace ipsc6.agent.services
         {
             if (agent != null) throw new InvalidOperationException();
             agent = new client.Agent(addresses, localPort, localAddress);
-            agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
+            agent.OnGroupReceived += Agent_OnGroupReceived;
+            agent.OnSignedGroupsChanged += Agent_OnSignedGroupsChanged;
         }
 
-        private static void Agent_OnAgentDisplayNameReceived(object sender, client.AgentDisplayNameReceivedEventArgs e)
+        private static void Agent_OnSignedGroupsChanged(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            ReloadGroups();
+            OnSignedGroupsChanged(new EventArgs());
         }
+
+        private static void ReloadGroups()
+        {
+            Model.Groups = (
+                from x in agent.Groups
+                select new Models.Group() { Id = x.Id, Name = x.Name, IsSigned = x.IsSigned }
+            ).ToList();
+        }
+
+        private static void Agent_OnGroupReceived(object sender, EventArgs e)
+        {
+            ReloadGroups();
+            OnSignedGroupsChanged(new EventArgs());
+        }
+
+        public event EventHandler<EventArgs> SignedGroupsChanged;
+        internal void OnSignedGroupsChanged(EventArgs args) => SignedGroupsChanged?.Invoke(this, args);
+
 
         internal static void DestroyAgent()
         {
@@ -56,14 +75,51 @@ namespace ipsc6.agent.services
             agent = null;
         }
 
-        internal static async Task LogInAsync(string workerNumber, string password)
+        internal static Models.Model Model = new();
+
+        internal async Task LogInAsync(string workerNumber, string password)
         {
             await agent.StartUpAsync(workerNumber, password);
         }
 
-        public static async Task SignIn(string skillId)
+        #endregion
+
+        #region AgentGroup
+
+        public async Task SignGroups(bool isSignIn = true)
         {
-            await agent.SignInAsync(skillId);
+            if (isSignIn)
+            {
+                await agent.SignInAsync();
+            }
+            else
+            {
+                await agent.SignOutAsync();
+            }
+        }
+
+        public async Task SignGroups(string id, bool isSignIn = true)
+        {
+            if (isSignIn)
+            {
+                await agent.SignInAsync(id);
+            }
+            else
+            {
+                await agent.SignOutAsync(id);
+            }
+        }
+
+        public async Task SignGroups(IEnumerable<string> ids, bool isSignIn = true)
+        {
+            if (isSignIn)
+            {
+                await agent.SignInAsync(ids);
+            }
+            else
+            {
+                await agent.SignOutAsync(ids);
+            }
         }
 
         #endregion

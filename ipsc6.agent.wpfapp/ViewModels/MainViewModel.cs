@@ -8,11 +8,12 @@ using System.Windows;
 
 using Microsoft.Toolkit.Mvvm.Input;
 
+
 namespace ipsc6.agent.wpfapp.ViewModels
 {
     using AgentStateWorkType = Tuple<client.AgentState, client.WorkType>;
 
-    public class MainViewModel : Utils.SingletonObservableObject<MainViewModel>
+    public class MainViewModel: Utils.SingletonObservableObject<MainViewModel>
     {
         static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainViewModel));
 
@@ -73,26 +74,23 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
-        public Models.Cti.AgentBasicInfo AgentBasicInfo => Models.Cti.AgentBasicInfo.Instance;
-        public Models.Cti.RingInfo RingInfo => Models.Cti.RingInfo.Instance;
-
-        internal void RefreshAgentExecutables()
-        {
-            IRelayCommand[] commands =
-            {
-                answerCommand, hangupCommand,
-                statePopupCommand, setStateCommand,
-                skillSignCommand,
-                holdCommand, unHoldCommand,
-            };
-            var _ = App.TaskFactory.StartNew(() =>
-            {
-                foreach (var command in commands)
-                {
-                    command.NotifyCanExecuteChanged();
-                }
-            });
-        }
+        //internal void RefreshAgentExecutables()
+        //{
+        //    IRelayCommand[] commands =
+        //    {
+        //        answerCommand, hangupCommand,
+        //        statePopupCommand, setStateCommand,
+        //        skillSignCommand,
+        //        holdCommand, unHoldCommand,
+        //    };
+        //    var _ = App.TaskFactory.StartNew(() =>
+        //    {
+        //        foreach (var command in commands)
+        //        {
+        //            command.NotifyCanExecuteChanged();
+        //        }
+        //    });
+        //}
 
         #region 技能组 Popup
         static bool isSkillPopupOpened;
@@ -106,44 +104,38 @@ namespace ipsc6.agent.wpfapp.ViewModels
         static void DoSkillPopup()
         {
             Instance.IsSkillPopupOpened = !isSkillPopupOpened;
-            if (Instance.IsSkillPopupOpened)
-            {
-                Instance.RefreshAgentExecutables();
-            }
         }
 
         static bool CanSkillPopup()
         {
-            var agent = Controllers.AgentController.Agent;
-            return agent.Groups.Count > 0;
+            return true;
         }
         #endregion
 
-        #region 技能组 签入/出
+        #region 座席组
+
+        static IReadOnlyCollection<services.Models.Group> groups;
+        public IReadOnlyCollection<services.Models.Group> Groups
+        {
+            get => groups;
+            set => SetProperty(ref groups, value);
+        }
+
         static readonly IRelayCommand skillSignCommand = new AsyncRelayCommand<object>(DoSkillSignAsync, CanSkillSign);
         public IRelayCommand SkillSignCommand => skillSignCommand;
         static bool doingSkillSign = false;
 
         static async Task DoSkillSignAsync(object parameter)
         {
-            var agent = Controllers.AgentController.Agent;
-            var model = Instance.AgentBasicInfo;
+            
             doingSkillSign = true;
             try
             {
                 skillSignCommand.NotifyCanExecuteChanged();
-                var skillId = parameter as string;
-                var sg = model.SkillGroups.First((m) => m.Id == skillId);
-                if (sg.IsSigned)
-                {
-                    logger.DebugFormat("签出技能 [{0}]({1})", sg.Id, sg.Name);
-                    await agent.SignOutAsync(skillId);
-                }
-                else
-                {
-                    logger.DebugFormat("签入技能 [{0}]({1})", sg.Id, sg.Name);
-                    await agent.SignInAsync(skillId);
-                }
+                
+                var groupId = parameter as string;
+                logger.DebugFormat("签出技能 {0}", groupId);
+                await services.Service.SignGroups(groupId, true);
             }
             finally
             {
@@ -154,15 +146,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         static bool CanSkillSign(object _)
         {
-            if (doingSkillSign) return false;
-            var agent = Controllers.AgentController.Agent;
-            if (agent == null) return false;
-            if (agent.IsRequesting) return false;
             return true;
         }
 
         #endregion
-
+/*
         #region Command 打开状态弹出窗
         static bool isStatePopupOpened;
         public bool IsStatePopupOpened
@@ -681,5 +669,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
         }
         #endregion
+*/
     }
 }

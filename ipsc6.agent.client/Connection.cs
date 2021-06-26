@@ -106,10 +106,8 @@ namespace ipsc6.agent.client
         private MessageType pendingReqType = MessageType.NONE;
         private TaskCompletionSource<ServerSentMessage> reqTcs;
 
-        string remoteHost;
-        public string RemoteHost => remoteHost;
-        ushort remotePort;
-        public ushort RemotePort => remotePort;
+        public string RemoteHost { get; private set; }
+        public ushort RemotePort { get; private set; }
 
         public bool Connected => connector.Connected;
 
@@ -119,19 +117,15 @@ namespace ipsc6.agent.client
         public event ConnectionStateChangedEventHandler OnConnectionStateChanged;
 
         private static int _ref = 0;
-        static CancellationTokenSource eventThreadCancelSource;
-        static readonly ConcurrentQueue<EventQueueItem> eventQueue = new();
-        static Thread eventThread = new(EventThreadStarter);
+        private static CancellationTokenSource eventThreadCancelSource;
+        private static readonly ConcurrentQueue<EventQueueItem> eventQueue = new();
+        private static Thread eventThread = new(EventThreadStarter);
 
         static void EventThreadStarter(object obj)
         {
             var token = (CancellationToken)obj;
             SpinWait.SpinUntil(() =>
             {
-                if (token.IsCancellationRequested)
-                {
-                    return true;
-                }
                 while (eventQueue.TryDequeue(out EventQueueItem item))
                 {
                     try
@@ -140,10 +134,10 @@ namespace ipsc6.agent.client
                     }
                     catch (Exception exce)
                     {
-                        logger.ErrorFormat("EventThreadStarter - {0}", exce);
+                        logger.ErrorFormat("EventThread - {0}", exce);
                     }
                 }
-                return false;
+                return token.IsCancellationRequested;
             }, Timeout.Infinite);
         }
 
@@ -359,10 +353,10 @@ namespace ipsc6.agent.client
                 connector.Connect(remoteHost);
             }
             logger.DebugFormat("{0} connect request was sent", this);
-            this.remoteHost = remoteHost;
-            this.remotePort = remotePort;
+            RemoteHost = remoteHost;
+            RemotePort = remotePort;
             logger.DebugFormat("{0} await connect >>>", this);
-            await connectTcs.Task;
+            _ = await connectTcs.Task;
             logger.DebugFormat("{0} await connect <<<", this);
             ///
             /// 登录

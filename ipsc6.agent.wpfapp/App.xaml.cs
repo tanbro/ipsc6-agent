@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
+
 namespace ipsc6.agent.wpfapp
 {
     /// <summary>
@@ -67,7 +68,8 @@ namespace ipsc6.agent.wpfapp
                 services.Service.Initial();
                 try
                 {
-                    var jsonRpcWs = new server.Server(() => new services.Service());
+                    //var jsonRpcWs = new server.Server(() => new services.Service());
+                    var jsonRpcWs = new server.Server(() => new object[] { new services.Service(), new GuiService() });
                     var jsonRpcWsTask = Task.Run(() => jsonRpcWs.RunAsync(jsonRpcWsCanceller.Token));
                     try
                     {
@@ -108,6 +110,45 @@ namespace ipsc6.agent.wpfapp
                 Current.MainWindow.Title,
                 MessageBoxButton.OK, MessageBoxImage.Error
             );
+        }
+
+        public static void Invoke(Action action)
+        {
+            if (Thread.CurrentThread == Current.Dispatcher.Thread)
+            {
+                action();
+            }
+            else
+            {
+                Current.Dispatcher.Invoke(action);
+            }
+        }
+
+        public static async Task InvokeAsync(Task task)
+        {
+            var awaitable = task.ConfigureAwait(false);
+            if (Thread.CurrentThread == Current.Dispatcher.Thread)
+            {
+                await awaitable;
+            }
+            else
+            {
+                var task2 = await Current.Dispatcher.InvokeAsync(async () => await awaitable);
+                await task2;
+            }
+        }
+
+        public static async Task InvokeAsync(Func<Task> action)
+        {
+            if (Thread.CurrentThread == Current.Dispatcher.Thread)
+            {
+                await action().ConfigureAwait(false);
+            }
+            else
+            {
+                var task2 = await Current.Dispatcher.InvokeAsync(action);
+                await task2;
+            }
         }
     }
 }

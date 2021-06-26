@@ -94,15 +94,13 @@
     <Compile Include="Converters\AgentTeleStateConverters.cs" />
     <Compile Include="Converters\BooleanToPinIconConverter.cs" />
     <Compile Include="DesignData\MainDesignViewModel.cs" />
-    <Compile Include="Controllers\AgentController.cs" />
     <Compile Include="Dialogs\PromptDialog.xaml.cs">
       <DependentUpon>PromptDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GuiService.cs" />
     <Compile Include="Views\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\Cti\AgentBasicInfo.cs" />
-    <Compile Include="Models\Cti\AgentStateOperations.cs" />
     <Compile Include="UserControls\AdvPanel.xaml.cs">
       <DependentUpon>AdvPanel.xaml</DependentUpon>
     </Compile>
@@ -119,7 +117,6 @@
     <Compile Include="UserControls\WorkerStatusPanel.xaml.cs">
       <DependentUpon>WorkerStatusPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\Cti\RingInfo.cs" />
     <Compile Include="UserControls\DialPanel.xaml.cs">
       <DependentUpon>DialPanel.xaml</DependentUpon>
     </Compile>

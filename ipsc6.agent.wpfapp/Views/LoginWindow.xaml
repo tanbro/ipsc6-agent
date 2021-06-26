@@ -9,7 +9,7 @@
         Title="登录"
         Height="325" Width="350"
         ResizeMode="NoResize" WindowStyle="None" WindowStartupLocation="CenterScreen"
-        BorderBrush="#FF5E91E4" BorderThickness="1" Topmost="True"
+        BorderBrush="#FF5E91E4" BorderThickness="1"
     >
 
     <Window.DataContext>

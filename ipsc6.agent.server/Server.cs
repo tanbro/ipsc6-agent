@@ -23,9 +23,9 @@ namespace ipsc6.agent.server
 
         private WebServer CreateWebServer()
         {
-            var url = $"http://localhost:{Port}/";
+            var urls = new string[] { $"http://127.0.0.1:{Port}/", $"http://localhost:{Port}/" };
             return new WebServer(options => options
-                .WithUrlPrefix(url)
+                .WithUrlPrefixes(urls)
                 .WithMode(HttpListenerMode.EmbedIO)
             )
             // First, we will configure our web server by adding Modules.

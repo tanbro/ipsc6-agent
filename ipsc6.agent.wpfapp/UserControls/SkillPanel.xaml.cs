@@ -24,7 +24,7 @@ namespace ipsc6.agent.wpfapp.UserControls
         public SkillPanel()
         {
             InitializeComponent();
-            DataContext = ViewModels.MainViewModel.Instance;
+            //DataContext = ViewModels.MainViewModel.Instance;
         }
 
         private void ShowOrHideSkillPopup(object sender, RoutedEventArgs e)

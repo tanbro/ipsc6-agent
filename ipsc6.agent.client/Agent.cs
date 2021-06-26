@@ -235,7 +235,7 @@ namespace ipsc6.agent.client
             }
             catch (Exception exce)
             {
-                logger.ErrorFormat("OnServerSend - {0}: {1}", sender, exce);
+                logger.ErrorFormat("OnServerSend - {0}: {1}\r\n{2}", sender, e.Message, exce);
                 throw;
             }
         }

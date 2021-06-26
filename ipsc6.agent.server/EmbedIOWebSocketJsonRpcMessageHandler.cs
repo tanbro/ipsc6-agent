@@ -33,14 +33,13 @@ namespace ipsc6.agent.server
 
     public delegate void EmbedIOWebSocketJsonRpcMessageHandlerSendEventHandler(object sender, EmbedIOWebSocketJsonRpcMessageHandlerSendEventArgs e);
 
-    public class EmbedIOWebSocketJsonRpcMessageHandler : MessageHandlerBase, IJsonRpcMessageHandler
+    public class EmbedIOWebSocketJsonRpcMessageHandler : MessageHandlerBase
     {
-        static readonly ConcurrentDictionary<IWebSocketContext, EmbedIOWebSocketJsonRpcMessageHandler> handlerDict = new();
+        private static readonly ConcurrentDictionary<IWebSocketContext, EmbedIOWebSocketJsonRpcMessageHandler> handlers = new();
 
         internal static void PushReceivedMessage(IWebSocketContext context, byte[] message)
         {
-            var inst = handlerDict[context];
-            inst.receiveQueue.Enqueue(message);
+            handlers[context].receiveQueue.Enqueue(message);
         }
 
         private readonly AsyncQueue<byte[]> receiveQueue = new();
@@ -51,7 +50,7 @@ namespace ipsc6.agent.server
         public EmbedIOWebSocketJsonRpcMessageHandler(IWebSocketContext context, IJsonRpcMessageFormatter formatter) : base(formatter)
         {
             Context = context;
-            handlerDict[context] = this;
+            handlers[context] = this;
         }
 
         /// <inheritdoc />
@@ -65,7 +64,7 @@ namespace ipsc6.agent.server
 
         protected override async ValueTask<JsonRpcMessage> ReadCoreAsync(CancellationToken cancellationToken)
         {
-            var data = await receiveQueue.DequeueAsync(cancellationToken);
+            byte[] data = await receiveQueue.DequeueAsync(cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
             return Formatter.Deserialize(new ReadOnlySequence<byte>(data));
         }
@@ -74,17 +73,17 @@ namespace ipsc6.agent.server
         protected override async ValueTask WriteCoreAsync(JsonRpcMessage content, CancellationToken cancellationToken)
         {
             byte[] data;
-            using (var contentSequenceBuilder = new Sequence<byte>())
+            using (Sequence<byte> bufferWriter = new())
             {
-                Formatter.Serialize(contentSequenceBuilder, content);
-                data = contentSequenceBuilder.AsReadOnlySequence.ToArray();
+                Formatter.Serialize(bufferWriter, content);
+                data = bufferWriter.AsReadOnlySequence.ToArray();
             }
-            var e = new EmbedIOWebSocketJsonRpcMessageHandlerSendEventArgs(Context, data);
+            EmbedIOWebSocketJsonRpcMessageHandlerSendEventArgs e = new(Context, data);
             OnSend?.Invoke(this, e);
             cancellationToken.ThrowIfCancellationRequested();
             if (e.SendTask != null)
             {
-                await e.SendTask.WithCancellation(cancellationToken);
+                await e.SendTask.WithCancellation(cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -94,7 +93,7 @@ namespace ipsc6.agent.server
             if (disposing)
             {
                 EmbedIOWebSocketJsonRpcMessageHandler _;
-                handlerDict.TryRemove(Context, out _);
+                handlers.TryRemove(Context, out _);
             }
             base.Dispose(disposing);
         }

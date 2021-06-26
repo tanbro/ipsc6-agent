@@ -31,43 +31,43 @@ namespace ipsc6.agent.wpfapp.Views
 
         private void InfoPanel_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
-                DragMove();
+            //if (e.ChangedButton == MouseButton.Left)
+            //    DragMove();
         }
 
-        CancellationTokenSource snapCts = null;
+        //CancellationTokenSource snapCts = null;
 
         private void Window_LocationChanged(object sender, EventArgs e)
         {
-            var vm = DataContext as ViewModels.MainViewModel;
-            if (Top <= 0)
-            {
-                // 准备吸附
-                snapCts = new CancellationTokenSource();
-                App.TaskFactory.StartNew(async () =>
-                {
-                    logger.Debug("开始吸附判断delay");
-                    await Task.Delay(2500);
-                    if (Top <= 0)
-                    {
-                        /// 吸附！！！
-                        logger.Debug("吸附！！！");
-                        vm.Snapped = true;
-                    }
-                    snapCts.Cancel();
-                    snapCts = null;
-                }, snapCts.Token);
-            }
-            else
-            {
-                if (snapCts != null)
-                {
-                    snapCts.Cancel();
-                    snapCts = null;
-                }
-                logger.Debug("取消吸附！！！");
-                vm.Snapped = false;
-            }
+            //var vm = DataContext as ViewModels.MainViewModel;
+            //if (Top <= 0)
+            //{
+            //    // 准备吸附
+            //    snapCts = new CancellationTokenSource();
+            //    App.TaskFactory.StartNew(async () =>
+            //    {
+            //        logger.Debug("开始吸附判断delay");
+            //        await Task.Delay(2500);
+            //        if (Top <= 0)
+            //        {
+            //            /// 吸附！！！
+            //            logger.Debug("吸附！！！");
+            //            vm.Snapped = true;
+            //        }
+            //        snapCts.Cancel();
+            //        snapCts = null;
+            //    }, snapCts.Token);
+            //}
+            //else
+            //{
+            //    if (snapCts != null)
+            //    {
+            //        snapCts.Cancel();
+            //        snapCts = null;
+            //    }
+            //    logger.Debug("取消吸附！！！");
+            //    vm.Snapped = false;
+            //}
         }
     }
 }
