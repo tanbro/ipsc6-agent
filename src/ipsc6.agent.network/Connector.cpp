@@ -188,42 +188,42 @@ int Connector::Receive() {
     switch (msgId) {
         case ID_DISCONNECTION_NOTIFICATION: {
             _remoteAddrIndex = -1;
-            OnDisconnected(this, gcnew EventArgs());
+            OnDisconnected(this, EventArgs::Empty);
         } break;
 
         case ID_CONNECTION_ATTEMPT_FAILED: {
             _remoteAddrIndex = -1;
-            OnConnectAttemptFailed(this, gcnew EventArgs());
+            OnConnectAttemptFailed(this, EventArgs::Empty);
         } break;
 
         case ID_INVALID_PASSWORD: {
             _remoteAddrIndex = -1;
-            OnConnectAttemptFailed(this, gcnew EventArgs());
+            OnConnectAttemptFailed(this, EventArgs::Empty);
         } break;
 
         case ID_NO_FREE_INCOMING_CONNECTIONS: {
             _remoteAddrIndex = -1;
-            OnConnectAttemptFailed(this, gcnew EventArgs());
+            OnConnectAttemptFailed(this, EventArgs::Empty);
         } break;
 
         case ID_CONNECTION_BANNED: {
             _remoteAddrIndex = -1;
-            OnConnectAttemptFailed(this, gcnew EventArgs());
+            OnConnectAttemptFailed(this, EventArgs::Empty);
         } break;
 
         case ID_INCOMPATIBLE_PROTOCOL_VERSION: {
             _remoteAddrIndex = -1;
-            OnConnectAttemptFailed(this, gcnew EventArgs());
+            OnConnectAttemptFailed(this, EventArgs::Empty);
         } break;
 
         case ID_IP_RECENTLY_CONNECTED: {
             _remoteAddrIndex = -1;
-            OnConnectAttemptFailed(this, gcnew EventArgs());
+            OnConnectAttemptFailed(this, EventArgs::Empty);
         } break;
 
         case ID_CONNECTION_LOST: {
             _remoteAddrIndex = -1;
-            OnConnectionLost(this, gcnew EventArgs());
+            OnConnectionLost(this, EventArgs::Empty);
         } break;
 
         case ID_CONNECTION_REQUEST_ACCEPTED: {

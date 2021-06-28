@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 using System.Windows;
 
 
+using LocalRpcTargetFunc = System.Func<EmbedIO.WebSockets.WebSocketModule, EmbedIO.WebSockets.IWebSocketContext, object>;
+
+
 namespace ipsc6.agent.wpfapp
 {
     /// <summary>
@@ -17,9 +20,6 @@ namespace ipsc6.agent.wpfapp
     {
 
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(App));
-
-        public static TaskScheduler TaskScheduler { get; private set; }
-        public static TaskFactory TaskFactory { get; private set; }
 
         void Application_Startup(object sender, StartupEventArgs e)
         {
@@ -41,58 +41,50 @@ namespace ipsc6.agent.wpfapp
 
             logger.Warn("\r\n!!!!!!!!!!!!!!!!!!!! Startup !!!!!!!!!!!!!!!!!!!!\r\n");
 
-            TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
-            TaskFactory = new TaskFactory(TaskScheduler);
-
             try
             {
                 Config.Manager.Initialize();
             }
             catch (Exception err)
             {
-                Shutdown(2);
                 logger.ErrorFormat("配置文件加载失败: {0}\r\n^^^^^^^^^^^^^^^^^^^^ Shutdown ^^^^^^^^^^^^^^^^^^^^\r\n", err);
                 MessageBox.Show(
                     $"应用程序配置文件加载失败，程序无法运行，即将退出。\r\n\r\n{err}",
                     "错误",
                     MessageBoxButton.OK, MessageBoxImage.Error
                 );
+                Shutdown(2);
                 return;
             }
-
-            var jsonRpcWsCanceller = new CancellationTokenSource();
 
             try
             {
                 logger.Debug("Initial()");
-                services.Service.Initial();
+
+                var localRpcCreators = new LocalRpcTargetFunc[] {
+                    (_, _) => mainService,
+                    (_, _) => guiService,
+                };
+                var rpcServer = new server.Server(localRpcCreators);
+                var rpcServerCanceller = new CancellationTokenSource();
+
+                var rpcServerTask = Task.Run(() => rpcServer.RunAsync(rpcServerCanceller.Token));
                 try
                 {
-                    //var jsonRpcWs = new server.Server(() => new services.Service());
-                    var jsonRpcWs = new server.Server(() => new object[] { new services.Service(), new GuiService() });
-                    var jsonRpcWsTask = Task.Run(() => jsonRpcWs.RunAsync(jsonRpcWsCanceller.Token));
-                    try
+                    _ = ViewModels.MainViewModel.Instance; // ensure lazy create
+                    if (new Views.LoginWindow().ShowDialog() == true)
                     {
-                        if (new Views.LoginWindow().ShowDialog() == true)
-                        {
-                            new Views.MainWindow().ShowDialog();
-                        }
-                    }
-                    finally
-                    {
-                        jsonRpcWsCanceller.Cancel();
-#pragma warning disable VSTHRD002
-                        jsonRpcWsTask.Wait();
-#pragma warning restore VSTHRD002
-                        services.Service.DestroyAgent();
+                        new Views.MainWindow().ShowDialog();
                     }
                 }
                 finally
                 {
-                    logger.Debug("Release()");
-                    services.Service.Release();
+                    rpcServerCanceller.Cancel();
+#pragma warning disable VSTHRD002
+                    rpcServerTask.Wait();
+#pragma warning restore VSTHRD002
+                    mainService.Destroy();
                 }
-
             }
             finally
             {
@@ -133,22 +125,25 @@ namespace ipsc6.agent.wpfapp
             }
             else
             {
-                var task2 = await Current.Dispatcher.InvokeAsync(async () => await awaitable);
-                await task2;
+                var subTask = await Current.Dispatcher.InvokeAsync(async () => await awaitable);
+                await subTask;
             }
         }
 
-        public static async Task InvokeAsync(Func<Task> action)
+        public static async Task InvokeAsync(Func<Task> callback)
         {
             if (Thread.CurrentThread == Current.Dispatcher.Thread)
             {
-                await action().ConfigureAwait(false);
+                await callback().ConfigureAwait(false);
             }
             else
             {
-                var task2 = await Current.Dispatcher.InvokeAsync(action);
-                await task2;
+                var task = await Current.Dispatcher.InvokeAsync(callback);
+                await task;
             }
         }
+
+        internal static services.Service mainService = new();
+        internal static GuiService guiService = new();
     }
 }

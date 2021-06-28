@@ -75,8 +75,9 @@ ref class Connector {
     event EventHandler ^ OnConnectAttemptFailed;
     event EventHandler ^ OnDisconnected;
     event EventHandler ^ OnConnectionLost;
-    event ConnectedEventHandler ^ OnConnected;
-    event AgentMessageReceivedEventHandler ^ OnAgentMessageReceived;
+    event EventHandler<ConnectedEventArgs ^> ^ OnConnected;
+    event EventHandler<AgentMessageReceivedEventArgs ^> ^
+        OnAgentMessageReceived;
 
     /* clang-format off */
     property String ^ BoundAddress { String ^ get() { return _boundAddress; } }

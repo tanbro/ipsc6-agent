@@ -13,9 +13,6 @@ ref class ConnectedEventArgs : EventArgs {
 };
 
 public
-delegate void ConnectedEventHandler(Object ^ sender, ConnectedEventArgs ^ e);
-
-public
 ref class AgentMessageReceivedEventArgs : EventArgs {
    public:
     property int CommandType;
@@ -32,11 +29,6 @@ ref class AgentMessageReceivedEventArgs : EventArgs {
     };
     virtual String ^ ToString() override;
 };
-
-public
-delegate void AgentMessageReceivedEventHandler(Object ^ sender,
-                                               AgentMessageReceivedEventArgs ^
-                                                   e);
 
 }  // namespace network
 }  // namespace agent

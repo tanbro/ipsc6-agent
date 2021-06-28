@@ -6,13 +6,13 @@ using System.Windows.Data;
 
 namespace ipsc6.agent.wpfapp.Converters
 {
-    [ValueConversion(typeof(IReadOnlyCollection<client.Group>), typeof(string))]
+    [ValueConversion(typeof(IReadOnlyCollection<services.Models.Group>), typeof(string))]
     public class AgentGroupsToNumberTitleConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null) return "0/0";
-            var v = value as IReadOnlyCollection<client.Group>;
+            var v = value as IReadOnlyCollection<services.Models.Group>;
             return $"{v.Count(x => x.IsSigned)}/{v.Count}";
         }
 

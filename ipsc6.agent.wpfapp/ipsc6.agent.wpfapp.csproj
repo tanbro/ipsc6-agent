@@ -107,8 +107,8 @@
     <Compile Include="UserControls\PreferencePanel.xaml.cs">
       <DependentUpon>PreferencePanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\SkillPanel.xaml.cs">
-      <DependentUpon>SkillPanel.xaml</DependentUpon>
+    <Compile Include="UserControls\GroupPanel.xaml.cs">
+      <DependentUpon>GroupPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\SysStatusPanel.xaml.cs">
       <DependentUpon>SysStatusPanel.xaml</DependentUpon>
@@ -188,7 +188,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\SkillPanel.xaml">
+    <Page Include="UserControls\GroupPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

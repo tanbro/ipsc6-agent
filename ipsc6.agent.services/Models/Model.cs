@@ -12,6 +12,8 @@ namespace ipsc6.agent.services.Models
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class Model
     {
+        public string WorkerNumber { get; internal set; }
+        public string DisplayName { get; internal set; }
         public IReadOnlyCollection<Group> Groups { get; internal set; }
     }
 }

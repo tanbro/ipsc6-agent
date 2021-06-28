@@ -35,22 +35,22 @@ namespace ipsc6.agent.server
 
     public class EmbedIOWebSocketJsonRpcMessageHandler : MessageHandlerBase
     {
-        private static readonly ConcurrentDictionary<IWebSocketContext, EmbedIOWebSocketJsonRpcMessageHandler> handlers = new();
+        private static readonly ConcurrentDictionary<IWebSocketContext, EmbedIOWebSocketJsonRpcMessageHandler> instanceMap = new();
 
         internal static void PushReceivedMessage(IWebSocketContext context, byte[] message)
         {
-            handlers[context].receiveQueue.Enqueue(message);
+            instanceMap[context].receiveQueue.Enqueue(message);
         }
 
         private readonly AsyncQueue<byte[]> receiveQueue = new();
 
-        public event EmbedIOWebSocketJsonRpcMessageHandlerSendEventHandler OnSend;
+        internal event EmbedIOWebSocketJsonRpcMessageHandlerSendEventHandler OnSend;
 
         public IWebSocketContext Context { get; }
         public EmbedIOWebSocketJsonRpcMessageHandler(IWebSocketContext context, IJsonRpcMessageFormatter formatter) : base(formatter)
         {
             Context = context;
-            handlers[context] = this;
+            instanceMap[context] = this;
         }
 
         /// <inheritdoc />
@@ -92,8 +92,16 @@ namespace ipsc6.agent.server
         {
             if (disposing)
             {
-                EmbedIOWebSocketJsonRpcMessageHandler _;
-                handlers.TryRemove(Context, out _);
+                {
+                    instanceMap.TryRemove(Context, out _);
+                }
+                {
+                    receiveQueue.Complete();
+                    while (!receiveQueue.IsEmpty)
+                    {
+                        receiveQueue.TryDequeue(out _);
+                    }
+                }
             }
             base.Dispose(disposing);
         }

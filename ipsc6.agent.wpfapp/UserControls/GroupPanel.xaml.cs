@@ -19,12 +19,12 @@ namespace ipsc6.agent.wpfapp.UserControls
     /// <summary>
     /// SkillPanel.xaml 的交互逻辑
     /// </summary>
-    public partial class SkillPanel : UserControl
+    public partial class GroupPanel : UserControl
     {
-        public SkillPanel()
+        public GroupPanel()
         {
             InitializeComponent();
-            //DataContext = ViewModels.MainViewModel.Instance;
+            DataContext = ViewModels.MainViewModel.Instance;
         }
 
         private void ShowOrHideSkillPopup(object sender, RoutedEventArgs e)

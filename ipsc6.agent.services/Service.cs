@@ -11,80 +11,120 @@ namespace ipsc6.agent.services
 #pragma warning disable VSTHRD200
     public class Service
     {
-        #region Common
-        public string Echo(string s) => s;
+
+        #region Demo methods
+        public string Echo(string s)
+        {
+            OnEchoTriggered?.Invoke(this, new EchoTriggeredEventArgs() { S = s });
+            return s;
+        }
         public void Throw() => throw new Exception();
 
         public async Task<string> DelayEcho(string s, int milliseconds)
         {
+            OnEchoTriggered?.Invoke(this, new EchoTriggeredEventArgs() { S = s });
             await Task.Delay(milliseconds);
             return s;
         }
+
+        public event EventHandler OnEchoTriggered;
         #endregion
 
         #region 内部方法
 
-        internal static client.Agent agent;
+        internal client.Agent agent;
 
-        internal static void Initial()
-        {
-            client.Agent.Initial();
-        }
+        internal Models.Model Model = new();
 
-        internal static void Release()
-        {
-            client.Agent.Release();
-        }
-
-        internal static void CreateAgent(IEnumerable<string> addresses, ushort localPort, string localAddress)
-        {
-            if (agent != null) throw new InvalidOperationException();
-            agent = new client.Agent(addresses, localPort, localAddress);
-            agent.OnGroupReceived += Agent_OnGroupReceived;
-            agent.OnSignedGroupsChanged += Agent_OnSignedGroupsChanged;
-        }
-
-        private static void Agent_OnSignedGroupsChanged(object sender, EventArgs e)
-        {
-            ReloadGroups();
-            OnSignedGroupsChanged(new EventArgs());
-        }
-
-        private static void ReloadGroups()
-        {
-            Model.Groups = (
-                from x in agent.Groups
-                select new Models.Group() { Id = x.Id, Name = x.Name, IsSigned = x.IsSigned }
-            ).ToList();
-        }
-
-        private static void Agent_OnGroupReceived(object sender, EventArgs e)
-        {
-            ReloadGroups();
-            OnSignedGroupsChanged(new EventArgs());
-        }
-
-        public event EventHandler<EventArgs> SignedGroupsChanged;
-        internal void OnSignedGroupsChanged(EventArgs args) => SignedGroupsChanged?.Invoke(this, args);
-
-
-        internal static void DestroyAgent()
+        internal void Destroy()
         {
             if (agent == null) return;
             agent.Dispose();
             agent = null;
+            client.Agent.Release();
         }
 
-        internal static Models.Model Model = new();
+        internal void Create(IEnumerable<string> addresses, ushort localPort, string localAddress)
+        {
+            if (agent != null) throw new InvalidOperationException();
+            client.Agent.Initial();
+            agent = new client.Agent(addresses, localPort, localAddress);
+            agent.OnAgentStateChanged += Agent_OnAgentStateChanged;
+            agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
+            agent.OnGroupReceived += Agent_OnGroupReceived;
+            agent.OnSignedGroupsChanged += Agent_OnSignedGroupsChanged;
+        }
+        #endregion
+
+        #region status
+
+        public event EventHandler OnLoginCompleted;
+
+        private void Agent_OnAgentDisplayNameReceived(object sender, client.AgentDisplayNameReceivedEventArgs e)
+        {
+            Model.DisplayName = agent.DisplayName;
+            Model.WorkerNumber = agent.WorkerNumber;
+            OnLoginCompleted?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler<StatusChangedEventArgs> OnStatusChanged;
+
+        private void Agent_OnAgentStateChanged(object sender, client.AgentStateChangedEventArgs e)
+        {
+            var evt = new StatusChangedEventArgs()
+            {
+                OldState = e.OldState.AgentState,
+                OldWorkType = e.OldState.WorkType,
+                NewState = e.NewState.AgentState,
+                NewWorkType = e.NewState.WorkType,
+            };
+            OnStatusChanged?.Invoke(this, evt);
+        }
 
         internal async Task LogInAsync(string workerNumber, string password)
         {
             await agent.StartUpAsync(workerNumber, password);
         }
 
+        public async Task SetBusy(client.WorkType workType = client.WorkType.PauseBusy)
+        {
+            await agent.SetBusyAsync(workType);
+        }
+
+        public async Task SetIdle()
+        {
+            await agent.SetIdleAsync();
+        }
+
+        public Models.Model GetAgentFull()
+        {
+            return Model;
+        }
+
         #endregion
 
         #region AgentGroup
+
+        public event EventHandler OnSignedGroupsChanged;
+
+        private void Agent_OnSignedGroupsChanged(object sender, EventArgs e)
+        {
+            ReloadGroups();
+        }
+
+        private void ReloadGroups()
+        {
+            Model.Groups = (
+                from x in agent.Groups
+                select new Models.Group() { Id = x.Id, Name = x.Name, IsSigned = x.IsSigned }
+            ).ToList();
+            OnSignedGroupsChanged?.Invoke(this, new EventArgs());
+        }
+
+        private void Agent_OnGroupReceived(object sender, EventArgs e)
+        {
+            ReloadGroups();
+        }
 
         public async Task SignGroups(bool isSignIn = true)
         {
@@ -98,7 +138,7 @@ namespace ipsc6.agent.services
             }
         }
 
-        public async Task SignGroups(string id, bool isSignIn = true)
+        public async Task SignGroup(string id, bool isSignIn = true)
         {
             if (isSignIn)
             {
@@ -120,6 +160,11 @@ namespace ipsc6.agent.services
             {
                 await agent.SignOutAsync(ids);
             }
+        }
+
+        public IEnumerable<Models.Group> GetGroups()
+        {
+            return Model.Groups.ToList();
         }
 
         #endregion

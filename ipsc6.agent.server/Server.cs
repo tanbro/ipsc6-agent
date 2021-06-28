@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using EmbedIO;
 
+using LocalRpcTargetFunc = System.Func<EmbedIO.WebSockets.WebSocketModule, EmbedIO.WebSockets.IWebSocketContext, object>;
 
 namespace ipsc6.agent.server
 {
@@ -10,14 +12,23 @@ namespace ipsc6.agent.server
     {
         public ushort Port { get; }
         public string Path { get; }
-        public Server(Func<object> localRpcTargetCreator, ushort port = 9696, string path = "/jsonrpc")
+
+        public Server(LocalRpcTargetFunc localRpcTargetCreator, ushort port = 9696, string path = "/jsonrpc")
         {
+            localRpcTargetCreator = localRpcTargetCreator ?? throw new ArgumentNullException(nameof(localRpcTargetCreator));
+            localRpcTargetCreators = new LocalRpcTargetFunc[] { localRpcTargetCreator };
             Port = port;
             Path = "/" + path.TrimStart('/');
-            this.localRpcTargetCreator = localRpcTargetCreator;
         }
 
-        private readonly Func<object> localRpcTargetCreator;
+        public Server(IEnumerable<LocalRpcTargetFunc> localRpcTargetCreators, ushort port = 9696, string path = "/jsonrpc")
+        {
+            this.localRpcTargetCreators = localRpcTargetCreators ?? throw new ArgumentNullException(nameof(localRpcTargetCreators));
+            Port = port;
+            Path = "/" + path.TrimStart('/');
+        }
+
+        private readonly IEnumerable<LocalRpcTargetFunc> localRpcTargetCreators;
 
         // Create and configure our web server.
 
@@ -30,7 +41,7 @@ namespace ipsc6.agent.server
             )
             // First, we will configure our web server by adding Modules.
             .WithLocalSessionManager()
-            .WithModule(new EmbedIOWebSocketJsonRpcModule(Path, localRpcTargetCreator));
+            .WithModule(new EmbedIOWebSocketJsonRpcModule(Path, localRpcTargetCreators));
         }
 
         public async Task RunAsync(CancellationToken cancellation)

@@ -170,16 +170,16 @@ namespace ipsc6.agent.client
                 WorkType = value.WorkType;
             }
         }
-        public event AgentStateChangedEventHandler OnAgentStateChanged;
+        public event EventHandler<AgentStateChangedEventArgs> OnAgentStateChanged;
 
         public TeleState TeleState { get; private set; } = TeleState.OnHook;
-        public event TeleStateChangedEventHandler OnTeleStateChanged;
+        public event EventHandler<TeleStateChangedEventArgs> OnTeleStateChanged;
 
         readonly HashSet<QueueInfo> queueInfos = new();
         public IReadOnlyCollection<QueueInfo> QueueInfos => queueInfos;
-        public event QueueInfoReceivedEventHandler OnQueueInfoReceived;
+        public event EventHandler<QueueInfoEventArgs> OnQueueInfoReceived;
 
-        public event HoldInfoReceivedEventHandler OnHoldInfoReceived;
+        public event EventHandler<HoldInfoEventArgs> OnHoldInfoReceived;
 
         readonly HashSet<Call> calls = new();
         public IReadOnlyCollection<Call> Calls => calls;
@@ -295,7 +295,7 @@ namespace ipsc6.agent.client
                     await oldMainConnObj.RequestAsync(req);
                 });
                 // fire the event
-                OnMainConnectionChanged?.Invoke(this, new EventArgs());
+                OnMainConnectionChanged?.Invoke(this, EventArgs.Empty);
             }
             if (oldState != null)
             {
@@ -448,11 +448,11 @@ namespace ipsc6.agent.client
                     }
                 }
             }
-            OnSignedGroupsChanged?.Invoke(this, new EventArgs());
+            OnSignedGroupsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public event SipRegistrarListReceivedEventHandler OnSipRegistrarListReceived;
-        public event SipRegisterStateChangedEventHandler OnSipRegisterStateChanged;
+        public event EventHandler<SipRegistrarListReceivedEventArgs> OnSipRegistrarListReceived;
+        public event EventHandler OnSipRegisterStateChanged;
         public event EventHandler OnSipCallStateChanged;
         private void DoOnSipRegistrarList(CtiServer connectionInfo, ServerSentMessage msg)
         {
@@ -516,7 +516,7 @@ namespace ipsc6.agent.client
             {
                 ReloadSipAccountCollection();
             }
-            OnSipRegisterStateChanged?.Invoke(this, new EventArgs());
+            OnSipRegisterStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void Acc_OnIncomingCall(object sender, Sip.CallEventArgs e)
@@ -543,7 +543,7 @@ namespace ipsc6.agent.client
                 }
                 ReloadSipAccountCollection();
             }
-            OnSipCallStateChanged?.Invoke(this, new EventArgs());
+            OnSipCallStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void Acc_OnCallStateChanged(object sender, Sip.CallEventArgs e)
@@ -552,7 +552,7 @@ namespace ipsc6.agent.client
             {
                 ReloadSipAccountCollection();
             }
-            OnSipCallStateChanged?.Invoke(this, new EventArgs());
+            OnSipCallStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void Acc_OnCallDisconnected(object sender, EventArgs e)
@@ -561,10 +561,10 @@ namespace ipsc6.agent.client
             {
                 ReloadSipAccountCollection();
             }
-            OnSipCallStateChanged?.Invoke(this, new EventArgs());
+            OnSipCallStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public event CustomStringReceivedEventArgsReceivedEventHandler OnCustomStringReceived;
+        public event EventHandler<CustomStringReceivedEventArgs> OnCustomStringReceived;
         private void DoOnCustomString(CtiServer ctiServer, ServerSentMessage msg)
         {
             var val = new ServerSentCustomString(ctiServer, msg.N2, msg.S);
@@ -572,7 +572,7 @@ namespace ipsc6.agent.client
             OnCustomStringReceived?.Invoke(this, evt);
         }
 
-        public event IvrDataReceivedEventHandler OnIvrDataReceived;
+        public event EventHandler<IvrDataReceivedEventArgs> OnIvrDataReceived;
         private void DoOnIvrData(CtiServer ctiServer, ServerSentMessage msg)
         {
             var val = new IvrData(ctiServer, msg.N2, msg.S);
@@ -580,7 +580,7 @@ namespace ipsc6.agent.client
             OnIvrDataReceived?.Invoke(this, evt);
         }
 
-        public event RingInfoReceivedEventHandler OnRingInfoReceived;
+        public event EventHandler<RingInfoReceivedEventArgs> OnRingInfoReceived;
         private void DoOnRing(CtiServer ctiServer, ServerSentMessage msg)
         {
             var workingChannelInfo = new WorkingChannelInfo(msg.N2);
@@ -599,7 +599,7 @@ namespace ipsc6.agent.client
         }
 
         public WorkingChannelInfo WorkingChannelInfo { get; private set; }
-        public event WorkingChannelInfoReceivedEventHandler OnWorkingChannelInfoReceived;
+        public event EventHandler<WorkingChannelInfoReceivedEventArgs> OnWorkingChannelInfoReceived;
         private void DoOnWorkingChannel(CtiServer ctiServer, ServerSentMessage msg)
         {
             var workingChannelInfo = new WorkingChannelInfo(msg.N2, msg.S);
@@ -624,7 +624,7 @@ namespace ipsc6.agent.client
             {
                 privilegeCollection.UnionWith(values);
             }
-            OnPrivilegeCollectionReceived?.Invoke(this, new EventArgs());
+            OnPrivilegeCollectionReceived?.Invoke(this, EventArgs.Empty);
         }
 
         private readonly HashSet<int> privilegeExternCollection = new();
@@ -639,7 +639,7 @@ namespace ipsc6.agent.client
             {
                 privilegeExternCollection.UnionWith(values);
             }
-            OnPrivilegeExternCollectionReceived?.Invoke(this, new EventArgs());
+            OnPrivilegeExternCollectionReceived?.Invoke(this, EventArgs.Empty);
         }
 
         readonly List<Group> groups = new();
@@ -677,7 +677,7 @@ namespace ipsc6.agent.client
                     isEverLostAllConnections = false;
                 }
             }
-            OnGroupReceived?.Invoke(this, new EventArgs());
+            OnGroupReceived?.Invoke(this, EventArgs.Empty);
             if (isRestore)
             {
                 var groupIdList = (
@@ -720,7 +720,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        public event ChannelAssignedEventHandler OnChannelAssigned;
+        public event EventHandler<ChannelAssignedEventArgs> OnChannelAssigned;
         void DoOnChannel(CtiServer ctiServer, ServerSentMessage msg)
         {
             var evt = new ChannelAssignedEventArgs(ctiServer, msg.N2);
@@ -731,7 +731,7 @@ namespace ipsc6.agent.client
             OnChannelAssigned?.Invoke(this, evt);
         }
 
-        public event AgentDisplayNameReceivedEventHandler OnAgentDisplayNameReceived;
+        public event EventHandler<AgentDisplayNameReceivedEventArgs> OnAgentDisplayNameReceived;
         void DoOnAgentId(CtiServer ctiServer, ServerSentMessage msg)
         {
             var evt = new AgentDisplayNameReceivedEventArgs(ctiServer, msg.S);
@@ -742,7 +742,7 @@ namespace ipsc6.agent.client
             OnAgentDisplayNameReceived?.Invoke(this, evt);
         }
 
-        public event ConnectionInfoStateChangedEventHandler OnConnectionStateChanged;
+        public event EventHandler<ConnectionInfoStateChangedEventArgs> OnConnectionStateChanged;
 
         static readonly ConnectionState[] disconntedStates = { ConnectionState.Lost, ConnectionState.Failed, ConnectionState.Closed };
         static readonly AgentState[] workingStates = { AgentState.Ring, AgentState.Work };
@@ -865,7 +865,7 @@ namespace ipsc6.agent.client
                                     };
                                 });
                                 // 需要抛出切换新的主服务节事件
-                                evtMainConnChanged = new EventArgs();
+                                evtMainConnChanged = EventArgs.Empty;
                             }
                             else
                             {
@@ -1634,7 +1634,7 @@ namespace ipsc6.agent.client
                     mainConnectionIndex = index;
                     logger.InfoFormat("切换主服务节点到 {0}", MainConnection);
                 }
-                OnMainConnectionChanged?.Invoke(this, new EventArgs());
+                OnMainConnectionChanged?.Invoke(this, EventArgs.Empty);
                 // 再通知原来的主，无论能否通知成功
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKENAWAY);
                 await connObj.RequestAsync(req);

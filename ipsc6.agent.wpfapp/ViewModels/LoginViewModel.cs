@@ -87,16 +87,16 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         options.LocalPort,
                         options.LocalAddress
                     );
-                    services.Service.CreateAgent(options.ServerList, options.LocalPort, options.LocalAddress);
+                    App.mainService.Create(options.ServerList, options.LocalPort, options.LocalAddress);
                     try
                     {
-                        await services.Service.LogInAsync(workerNum, password);
+                        await App.mainService.LogInAsync(workerNum, password);
                         logger.InfoFormat("登录成功");
                         isOk = true;
                     }
                     catch (Exception err)
                     {
-                        services.Service.DestroyAgent();
+                        App.mainService.Destroy();
                         if (err is ConnectionException)
                         {
                             MessageBox.Show(

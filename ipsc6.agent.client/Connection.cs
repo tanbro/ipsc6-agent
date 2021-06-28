@@ -111,10 +111,10 @@ namespace ipsc6.agent.client
 
         public bool Connected => connector.Connected;
 
-        public event ServerSentEventHandler OnServerSentEvent;
-        public event ClosedEventHandler OnClosed;
-        public event LostEventHandler OnLost;
-        public event ConnectionStateChangedEventHandler OnConnectionStateChanged;
+        public event EventHandler<ServerSentEventArgs> OnServerSentEvent;
+        public event EventHandler OnClosed;
+        public event EventHandler OnLost;
+        public event EventHandler<ConnectionStateChangedEventArgs> OnConnectionStateChanged;
 
         private static int _ref = 0;
         private static CancellationTokenSource eventThreadCancelSource;
@@ -173,11 +173,11 @@ namespace ipsc6.agent.client
                 }
                 if (msg is ConnectorDisconnectedEventArgs)
                 {
-                    OnClosed?.Invoke(this, new EventArgs());
+                    OnClosed?.Invoke(this, EventArgs.Empty);
                 }
                 else
                 {
-                    OnLost?.Invoke(this, new EventArgs());
+                    OnLost?.Invoke(this, EventArgs.Empty);
                 }
                 if (prevState == ConnectionState.Closing)
                 {

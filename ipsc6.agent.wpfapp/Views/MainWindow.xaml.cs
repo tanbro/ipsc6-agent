@@ -31,8 +31,8 @@ namespace ipsc6.agent.wpfapp.Views
 
         private void InfoPanel_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            //if (e.ChangedButton == MouseButton.Left)
-            //    DragMove();
+            if (e.ChangedButton == MouseButton.Left)
+                DragMove();
         }
 
         //CancellationTokenSource snapCts = null;

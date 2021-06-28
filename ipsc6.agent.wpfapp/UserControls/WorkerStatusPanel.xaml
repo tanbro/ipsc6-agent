@@ -81,14 +81,14 @@
                     <TextBlock Grid.Column="0"
                                Style="{StaticResource MyScoreBoardTitleTextStyle}"
                                Margin="4 0 4 0" HorizontalAlignment="Left"
-                               Text="{Binding AgentBasicInfo.DisplayName, Mode=OneWay}"
+                               Text="{Binding DisplayName, Mode=OneWay}"
                     >
                         <!--小美-->
                     </TextBlock>
 
                     <TextBlock Grid.Column="1" Style="{StaticResource MyScoreBoardTitleTextStyle}"
                                Margin="4 0 4 0" HorizontalAlignment="Right"
-                               Text="{Binding AgentBasicInfo.WorkerNumber, Mode=OneWay}"
+                               Text="{Binding WorkerNumber, Mode=OneWay}"
                     >
                     <!--1001-->
                     </TextBlock>
@@ -116,16 +116,16 @@
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" HorizontalAlignment="Center"
-                                    Text="{Binding AgentBasicInfo.AgentStateWorkType, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
+                                    Text="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
                                 />
                                 <Border Grid.Column="1" HorizontalAlignment="Center"
                                     Style="{StaticResource MyStateLightStyle}"
-                                    Background="{Binding AgentBasicInfo.AgentStateWorkType, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
+                                    Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
                                  />
                             </Grid>
                             <Popup x:Name="StatePopup" StaysOpen="False"
                                    IsOpen="{Binding IsStatePopupOpened}">
-                                <ListBox ItemsSource="{Binding AgentBasicInfo.StateOperationItems}">
+                                <ListBox ItemsSource="{Binding StateOperationItems, Mode=OneWay}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Button Margin="4"

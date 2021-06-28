@@ -8,22 +8,30 @@ using System.Collections.Concurrent;
 using EmbedIO.WebSockets;
 using StreamJsonRpc;
 
+using LocalRpcTargetFunc = System.Func<EmbedIO.WebSockets.WebSocketModule, EmbedIO.WebSockets.IWebSocketContext, object>;
+
 namespace ipsc6.agent.server
 {
-
     // <summary>
     /// Defines a very simple JsonRpc server.
     /// </summary>
     public class EmbedIOWebSocketJsonRpcModule : WebSocketModule
     {
-        public EmbedIOWebSocketJsonRpcModule(string urlPath, Func<object> localRpcTargetCreator, JsonRpcTargetOptions jsonRpcTargetOptions = null) : base(urlPath, true)
+        public EmbedIOWebSocketJsonRpcModule(string urlPath, IEnumerable<LocalRpcTargetFunc> localRpcTargetCreators, JsonRpcTargetOptions jsonRpcTargetOptions = null) : base(urlPath, true)
         {
-            localRpcTargetCreator = localRpcTargetCreator ?? throw new ArgumentNullException(nameof(localRpcTargetCreator));
-            this.localRpcTargetCreator = localRpcTargetCreator;
+            this.localRpcTargetCreators = localRpcTargetCreators ?? throw new ArgumentNullException(nameof(localRpcTargetCreators));
             this.jsonRpcTargetOptions = jsonRpcTargetOptions ?? DefaultJsonRpcTargetOptions;
         }
 
-        private readonly Func<object> localRpcTargetCreator;
+        ~EmbedIOWebSocketJsonRpcModule()
+        {
+            foreach (var kv in jsonRpcMap)
+            {
+                kv.Value.Dispose();
+            }
+            jsonRpcMap.Clear();
+        }
+
         private readonly JsonRpcTargetOptions jsonRpcTargetOptions;
 
         public static readonly JsonRpcTargetOptions DefaultJsonRpcTargetOptions = new()
@@ -32,7 +40,9 @@ namespace ipsc6.agent.server
             EventNameTransform = CommonMethodNameTransforms.CamelCase,
         };
 
-        private static readonly ConcurrentDictionary<IWebSocketContext, JsonRpc> mapWsRpc = new();
+        private readonly IEnumerable<LocalRpcTargetFunc> localRpcTargetCreators;
+
+        private readonly ConcurrentDictionary<IWebSocketContext, JsonRpc> jsonRpcMap = new();
 
         /// <inheritdoc />
         protected override Task OnClientConnectedAsync(IWebSocketContext context)
@@ -42,22 +52,17 @@ namespace ipsc6.agent.server
             {
                 e.SendTask = SendAsync(e.Context, Encoding.UTF8.GetString(e.Message));
             };
-            JsonRpc rpc = new(handler);
-            mapWsRpc[context] = rpc;
-            var target = localRpcTargetCreator();
-            if (target is IEnumerable<object>)
+            JsonRpc jsonRpc = new(handler);
+            var targets = (
+                from func in localRpcTargetCreators
+                select func(this, context)
+            ).ToList();
+            foreach (var target in targets)
             {
-                foreach (var obj in target as IEnumerable<object>)
-                {
-                    rpc.AddLocalRpcTarget(obj, jsonRpcTargetOptions);
-                }
+                jsonRpc.AddLocalRpcTarget(target, jsonRpcTargetOptions);
             }
-            else
-            {
-                rpc.AddLocalRpcTarget(target, jsonRpcTargetOptions);
-            }
-            rpc.StartListening();
-
+            jsonRpcMap[context] = jsonRpc;
+            jsonRpc.StartListening();
             return Task.CompletedTask;
         }
 
@@ -71,9 +76,9 @@ namespace ipsc6.agent.server
         /// <inheritdoc />
         protected override Task OnClientDisconnectedAsync(IWebSocketContext context)
         {
-            if (mapWsRpc.TryRemove(context, out JsonRpc rpc))
+            if (jsonRpcMap.TryRemove(context, out JsonRpc value))
             {
-                rpc.Dispose();
+                value.Dispose();
             }
             return Task.CompletedTask;
         }

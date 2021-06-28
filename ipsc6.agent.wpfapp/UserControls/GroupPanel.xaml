@@ -1,4 +1,4 @@
-<UserControl x:Class="ipsc6.agent.wpfapp.UserControls.SkillPanel"
+<UserControl x:Class="ipsc6.agent.wpfapp.UserControls.GroupPanel"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -10,7 +10,7 @@
              xmlns:iconpacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance dd:MainDesignViewModel, IsDesignTimeCreatable=True}"
-             x:Name="SkillPanelUserControl"
+             x:Name="GroupPanelUserControl"
              Width="60" Height="64">
     <UserControl.DataContext>
         <vm:MainViewModel/>
@@ -18,8 +18,6 @@
 
     <UserControl.Resources>
         <conv:AgentGroupsToNumberTitleConverter x:Key="AgentGroupsToNumberTitleConverter"/>
-        <conv:ToggledBooleanToMaterialIconConverter x:Key="ToggledBooleanToMaterialIconConverter"/>
-        <conv:ToggledBooleanToBrushConverter x:Key="ToggledBooleanToBrushConverter"/>
     </UserControl.Resources>
 
     <Border Width="60" Height="64"
@@ -45,13 +43,13 @@
                 CornerRadius="0 0 5 5"
             >
                 <Button Style="{StaticResource ScoreButtonStyle}"
-                        Command="{Binding SkillPopupCommand}">
+                        Command="{Binding GroupPopupCommand}">
                     <StackPanel>
-                        <TextBlock Text="{Binding AgentBasicInfo.SkillGroups, Mode=OneWay, Converter={StaticResource AgentGroupsToNumberTitleConverter}}"/>
+                        <TextBlock Text="{Binding Groups, Mode=OneWay, Converter={StaticResource AgentGroupsToNumberTitleConverter}}"/>
                         <Popup x:Name="SkillPopup" StaysOpen="False"
-                               IsOpen="{Binding IsSkillPopupOpened}">
+                               IsOpen="{Binding IsGroupPopupOpened}">
                             <ContentControl>
-                                <ListBox ItemsSource="{Binding AgentBasicInfo.SkillGroups, Mode=OneWay}">
+                                <ListBox ItemsSource="{Binding Groups, Mode=OneWay}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Background="{StaticResource MyBackgroud}">
@@ -61,8 +59,8 @@
                                                 </Grid.ColumnDefinitions>
                                                 <ToggleButton Grid.Column="0" Margin="2"
                                                               Style="{StaticResource MyToggleButton}"
-                                                              IsChecked="{Binding Signed, Mode=OneWay}"
-                                                              Command="{Binding ElementName=SkillPanelUserControl, Path=DataContext.SkillSignCommand}"
+                                                              IsChecked="{Binding IsSigned, Mode=OneWay}"
+                                                              Command="{Binding ElementName=GroupPanelUserControl, Path=DataContext.SignGroupCommand}"
                                                               CommandParameter="{Binding Id}"/>
                                                 <TextBlock Grid.Column="1" Text="{Binding Name, Mode=OneWay}" Margin="2"/>
                                             </Grid>

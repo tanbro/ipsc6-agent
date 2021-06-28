@@ -2,26 +2,6 @@ using System;
 
 namespace ipsc6.agent.client
 {
-    public delegate void ServerSentEventHandler(object sender, ServerSentEventArgs e);
-    public delegate void ClosedEventHandler(object sender, EventArgs e);
-    public delegate void LostEventHandler(object sender, EventArgs e);
-    public delegate void ConnectionStateChangedEventHandler(object sender, ConnectionStateChangedEventArgs e);
-    public delegate void ConnectionInfoStateChangedEventHandler(object sender, ConnectionInfoStateChangedEventArgs e);
-
-    public delegate void AgentStateChangedEventHandler(object sender, AgentStateChangedEventArgs e);
-    public delegate void TeleStateChangedEventHandler(object sender, TeleStateChangedEventArgs e);
-    public delegate void QueueInfoReceivedEventHandler(object sender, QueueInfoEventArgs e);
-    public delegate void HoldInfoReceivedEventHandler(object sender, HoldInfoEventArgs e);
-
-    public delegate void AgentIdAssignedEventHandler(object sender, AgentIdAssignedEventArgs e);
-    public delegate void AgentDisplayNameReceivedEventHandler(object sender, AgentDisplayNameReceivedEventArgs e);
-    public delegate void ChannelAssignedEventHandler(object sender, ChannelAssignedEventArgs e);
-    public delegate void WorkingChannelInfoReceivedEventHandler(object sender, WorkingChannelInfoReceivedEventArgs e);
-    public delegate void RingInfoReceivedEventHandler(object sender, RingInfoReceivedEventArgs e);
-    public delegate void IvrDataReceivedEventHandler(object sender, IvrDataReceivedEventArgs e);
-    public delegate void CustomStringReceivedEventArgsReceivedEventHandler(object sender, CustomStringReceivedEventArgs e);
-    public delegate void SipRegistrarListReceivedEventHandler(object sender, SipRegistrarListReceivedEventArgs e);
-    public delegate void SipRegisterStateChangedEventHandler(object sender, EventArgs e);
 
     public class ServerSentEventArgs : EventArgs
     {

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFrameworks>net461;net48;net5.0</TargetFrameworks>
         <LangVersion>latest</LangVersion>
@@ -28,6 +28,7 @@
 
     <!-- Local Project References -->
     <ItemGroup>
+        <ProjectReference Include="..\ipsc6.agent.server\ipsc6.agent.server.csproj" />
         <ProjectReference Include="..\ipsc6.agent.client\ipsc6.agent.client.csproj" />
     </ItemGroup>
 
