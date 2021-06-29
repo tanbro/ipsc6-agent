@@ -9,10 +9,7 @@ namespace ipsc6.agent.client
     {
         public SipCall(Sip.Call call)
         {
-            if (call is null)
-            {
-                throw new ArgumentNullException(nameof(call));
-            }
+            call = call is not null ? call : throw new ArgumentNullException(nameof(call));
             var info = call.getInfo();
             Id = info.id;
             LocalUri = info.localUri;

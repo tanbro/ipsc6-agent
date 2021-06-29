@@ -11,10 +11,10 @@ namespace ipsc6.agent.wpfapp
     public class GuiService
     {
 #pragma warning disable VSTHRD200
-        public async Task LogIn(string workerNum, string password)
+        public async Task LogIn(string workerNumber, string password)
         {
-            ViewModels.LoginViewModel.Instance.WorkerNum = workerNum;
-            await ViewModels.LoginViewModel.DoLoginAsync(password);
+            ViewModels.LoginViewModel.Instance.WorkerNumber = workerNumber;
+            await ViewModels.LoginViewModel.DoLoginAsync(password).ConfigureAwait(false);
         }
 #pragma warning restore VSTHRD200
     }

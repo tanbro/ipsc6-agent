@@ -6,14 +6,14 @@
 
 ## 属性
 
-### workerNum
+### workerNumber
 
-`workerNum`
+`workerNumber`
 : 工号
 
-    |  Attribute  |   Type   |
-    | ----------- | -------- |
-    | `workerNum` | `String` |
+    |   Attribute    |   Type   |
+    | -------------- | -------- |
+    | `workerNumber` | `String` |
 
     系统中，每个座席的工号都是唯一的。
 

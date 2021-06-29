@@ -62,7 +62,7 @@
         </Grid>
 
         <Border Grid.Row="1" BorderThickness="1 0 1 1"
-                Background="{Binding AgentBasicInfo.AgentStateWorkType, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
+                Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
                 BorderBrush="DarkGray"
                 />
 

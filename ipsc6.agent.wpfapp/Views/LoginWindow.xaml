@@ -77,7 +77,7 @@
                     </Label>
 
                     <TextBox x:Name="textboxName" Grid.Column="1" Margin="16 8 16 8" FontSize="14"
-                         Text="{Binding WorkerNum}">
+                         Text="{Binding WorkerNumber}">
                         <TextBox.Style>
                             <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
                                 <Style.Resources>
@@ -151,8 +151,8 @@
                         IsDefault="True"
                         FontSize="20" FontWeight="Bold" Margin="16 8 16 8"
                         Content="登&#160;&#160;&#160;&#160;录"
-                        Command="{Binding LoginCommand}"
-                        CommandParameter="{Binding ElementName=textboxPassword}"/>
+                        Command="{Binding LoginCommand}"/>
+                <!--CommandParameter="{Binding ElementName=textboxPassword}-->
                 <!--Background="#FF5E91E4" Foreground="White"-->
             </Grid>
 

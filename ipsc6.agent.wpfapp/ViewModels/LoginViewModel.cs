@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,95 +11,87 @@ using Microsoft.Extensions.Configuration;
 
 using Microsoft.Toolkit.Mvvm.Input;
 
-using ipsc6.agent.client;
-using System.Threading;
-using System.Windows.Threading;
+
 
 namespace ipsc6.agent.wpfapp.ViewModels
 {
     public class LoginViewModel : Utils.SingletonObservableObject<LoginViewModel>
     {
-        static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(LoginViewModel));
+        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(LoginViewModel));
 
-        static Views.LoginWindow window;
+        private static Views.LoginWindow window;
         public Views.LoginWindow Window { set => window = value; }
 
-        static string workerNum;
-        public string WorkerNum
+        private static string workerNumber;
+        public string WorkerNumber
         {
-            get => workerNum;
-            set => SetProperty(ref workerNum, value);
-        }
-
-        static int passwordLength;
-        public int PasswordLength
-        {
-            get => passwordLength;
+            get => workerNumber;
             set
             {
-                passwordLength = value;
-                LoginCommand.NotifyCanExecuteChanged();
+                if (SetProperty(ref workerNumber, value))
+                {
+                    LoginCommand.NotifyCanExecuteChanged();
+                }
+            }
+        }
+
+        private static string password;
+        public string Password
+        {
+            get => password;
+            set
+            {
+                if (SetProperty(ref password, value))
+                {
+                    LoginCommand.NotifyCanExecuteChanged();
+                }
             }
         }
 
         #region Login Command
-        readonly static IRelayCommand loginCommand = new AsyncRelayCommand<object>(DoLoginAsync, CanLogin);
-        public IRelayCommand LoginCommand => loginCommand;
+        private static readonly IAsyncRelayCommand loginCommand = new AsyncRelayCommand<object>(DoLoginAsync, CanLogin);
+        public IAsyncRelayCommand LoginCommand => loginCommand;
 
-        static bool CanLogin(object _)
+        private static bool CanLogin(object _)
         {
-            if (loginSem.CurrentCount < 1) return false;
-            if (string.IsNullOrEmpty(workerNum)) return false;
-            if (passwordLength <= 0) return false;
-            return true;
+            return loginSem.CurrentCount > 0 && !string.IsNullOrEmpty(workerNumber) && !string.IsNullOrEmpty(password);
         }
 
-        static readonly SemaphoreSlim loginSem = new(1);
+        private static readonly SemaphoreSlim loginSem = new(1);
 
         public static async Task DoLoginAsync(object parameter)
         {
-            string password;
-            if (parameter is PasswordBox)
-            {
-                password = (parameter as PasswordBox).Password;
-            }
-            else if (parameter is string)
-            {
-                password = parameter as string;
-            }
-            else
-            {
-                throw new InvalidCastException();
-            }
+            string _password = parameter is string ? parameter as string : password;
+            await loginSem.WaitAsync();
 
-            await App.InvokeAsync(async () =>
+            await Application.Current.Dispatcher.InvokeAsync(async () =>
             {
-                bool isOk = false;
-                await loginSem.WaitAsync();
                 try
                 {
                     loginCommand.NotifyCanExecuteChanged();
-                    var cfg = Config.Manager.ConfigurationRoot;
-                    var options = new Config.Ipsc();
-                    cfg.GetSection(nameof(Config.Ipsc)).Bind(options);
+                    IConfigurationRoot cfgRoot = Config.Manager.ConfigurationRoot;
+                    Config.Ipsc cfgIpsc = new();
+                    cfgRoot.GetSection(nameof(Config.Ipsc)).Bind(cfgIpsc);
                     logger.InfoFormat(
                         "CreateAgent - ServerList: {0}, LocalPort: {1}, LocalAddress: \"{2}\"",
-                        (options.ServerList == null) ? "<null>" : $"\"{string.Join(",", options.ServerList)}\"",
-                        options.LocalPort,
-                        options.LocalAddress
+                        (cfgIpsc.ServerList == null) ? "<null>" : $"\"{string.Join(",", cfgIpsc.ServerList)}\"",
+                        cfgIpsc.LocalPort, cfgIpsc.LocalAddress
                     );
-                    App.mainService.Create(options.ServerList, options.LocalPort, options.LocalAddress);
+                    App.mainService.CreateAgent(cfgIpsc.ServerList, cfgIpsc.LocalPort, cfgIpsc.LocalAddress);
                     try
                     {
-                        await App.mainService.LogInAsync(workerNum, password);
-                        logger.InfoFormat("登录成功");
-                        isOk = true;
+                        logger.Debug("开始登录 ...");
+                        await App.mainService.LogInAsync(workerNumber, _password);
+                        logger.Info("登录成功");
+                        window.DialogResult = true;
+                        window.Close();
                     }
                     catch (Exception err)
                     {
-                        App.mainService.Destroy();
-                        if (err is ConnectionException)
+                        App.mainService.DestroyAgent();
+                        if (err is client.ConnectionException)
                         {
+                            logger.ErrorFormat("登录失败: {0}", err);
                             MessageBox.Show(
                                 $"登录失败\r\n\r\n{err}",
                                 Application.Current.MainWindow.Title,
@@ -107,13 +100,14 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         }
                         else
                         {
+                            logger.FatalFormat("登录期间发成了意料之外的错误: {0}", err);
+                            MessageBox.Show(
+                                $"无法处理的错误\r\n\r\n{err}",
+                                Application.Current.MainWindow.Title,
+                                MessageBoxButton.OK, MessageBoxImage.Error
+                            );
                             throw;
                         }
-                    }
-                    if (isOk)
-                    {
-                        window.DialogResult = true;
-                        window.Close();
                     }
                 }
                 finally

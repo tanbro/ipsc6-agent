@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 
-namespace ipsc6.agent.services
+namespace ipsc6.agent.services.Events
 {
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class EchoTriggeredEventArgs : EventArgs

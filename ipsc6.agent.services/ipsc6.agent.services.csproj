@@ -28,8 +28,8 @@
 
     <!-- Local Project References -->
     <ItemGroup>
-        <ProjectReference Include="..\ipsc6.agent.server\ipsc6.agent.server.csproj" />
         <ProjectReference Include="..\ipsc6.agent.client\ipsc6.agent.client.csproj" />
+        <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
     </ItemGroup>
 
     <!-- NuGet -->

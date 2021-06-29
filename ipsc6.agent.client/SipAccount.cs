@@ -9,10 +9,9 @@ namespace ipsc6.agent.client
     {
         public SipAccount(Sip.Account account)
         {
-            if (account is null)
-            {
-                throw new ArgumentNullException(nameof(account));
-            }
+            account = account is not null ? account : throw new ArgumentNullException(nameof(account));
+            ConnectionIndex = account.ConnectionIndex;
+            Uri = "";
             IsRegisterActive = false;
             LastRegisterError = 0;
             calls = new HashSet<SipCall>();
@@ -23,6 +22,7 @@ namespace ipsc6.agent.client
                 var info = account.getInfo();
                 if (info.regIsConfigured)
                 {
+                    Uri = info.uri;
                     IsRegisterActive = info.regIsActive;
                     LastRegisterError = info.regLastErr;
                 }
@@ -31,10 +31,12 @@ namespace ipsc6.agent.client
                     select new SipCall(call)
                 );
             }
-
         }
 
+        public int ConnectionIndex { get; }
+
         public int Id { get; }
+        public string Uri { get; }
         public bool IsValid { get; }
         public bool IsRegisterActive { get; }
         public int LastRegisterError { get; }

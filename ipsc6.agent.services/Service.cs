@@ -15,14 +15,14 @@ namespace ipsc6.agent.services
         #region Demo methods
         public string Echo(string s)
         {
-            OnEchoTriggered?.Invoke(this, new EchoTriggeredEventArgs() { S = s });
+            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs() { S = s });
             return s;
         }
         public void Throw() => throw new Exception();
 
         public async Task<string> DelayEcho(string s, int milliseconds)
         {
-            OnEchoTriggered?.Invoke(this, new EchoTriggeredEventArgs() { S = s });
+            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs() { S = s });
             await Task.Delay(milliseconds);
             return s;
         }
@@ -36,19 +36,26 @@ namespace ipsc6.agent.services
 
         internal Models.Model Model = new();
 
-        internal void Destroy()
+        internal static void Initial()
+        {
+            client.Agent.Initial();
+        }
+
+        internal static void Release()
+        {
+            client.Agent.Release();
+        }
+
+        internal void DestroyAgent()
         {
             if (agent == null) return;
             agent.Dispose();
             agent = null;
-            client.Agent.Release();
         }
 
-        internal void Create(IEnumerable<string> addresses, ushort localPort, string localAddress)
+        internal void CreateAgent(IEnumerable<string> addresses, ushort localPort, string localAddress)
         {
             if (agent != null) throw new InvalidOperationException();
-            client.Agent.Initial();
-
             agent = new client.Agent(addresses, localPort, localAddress);
 
             agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
@@ -62,10 +69,12 @@ namespace ipsc6.agent.services
             agent.OnGroupReceived += Agent_OnGroupReceived;
             agent.OnSignedGroupsChanged += Agent_OnSignedGroupsChanged;
 
+            agent.OnSipRegistrarListReceived += Agent_OnSipRegistrarListReceived;
+            agent.OnSipRegisterStateChanged += Agent_OnSipRegisterStateChanged;
+            agent.OnSipCallStateChanged += Agent_OnSipCallStateChanged;
+
             ReloadCtiServers();
         }
-
-
         #endregion
 
         #region status
@@ -79,13 +88,13 @@ namespace ipsc6.agent.services
             OnLoginCompleted?.Invoke(this, EventArgs.Empty);
         }
 
-        public event EventHandler<StatusChangedEventArgs> OnStatusChanged;
+        public event EventHandler<Events.StatusChangedEventArgs> OnStatusChanged;
 
         private void Agent_OnAgentStateChanged(object sender, client.AgentStateChangedEventArgs e)
         {
             Model.State = e.NewState.AgentState;
             Model.WorkType = e.NewState.WorkType;
-            OnStatusChanged?.Invoke(this, new StatusChangedEventArgs()
+            OnStatusChanged?.Invoke(this, new Events.StatusChangedEventArgs()
             {
                 OldState = e.OldState.AgentState,
                 OldWorkType = e.OldState.WorkType,
@@ -95,12 +104,12 @@ namespace ipsc6.agent.services
         }
 
 
-        public event EventHandler<TeleStateChangedEventArgs> OnTeleStateChanged;
+        public event EventHandler<Events.TeleStateChangedEventArgs> OnTeleStateChanged;
 
         private void Agent_OnTeleStateChanged(object sender, client.TeleStateChangedEventArgs e)
         {
             Model.TeleState = e.NewState;
-            OnTeleStateChanged?.Invoke(this, new TeleStateChangedEventArgs()
+            OnTeleStateChanged?.Invoke(this, new Events.TeleStateChangedEventArgs()
             {
                 OldState = e.OldState,
                 NewState = e.NewState,
@@ -122,20 +131,17 @@ namespace ipsc6.agent.services
             await agent.SetIdleAsync();
         }
 
-        public Models.Model GetAgentFull()
+        public Models.Model GetModel()
         {
             return Model;
         }
-
         #endregion
 
         #region Connection
-
-
         private void Agent_OnConnectionStateChanged(object sender, client.ConnectionInfoStateChangedEventArgs e)
         {
             ReloadCtiServers();
-            OnCtiConnectionStateChanged?.Invoke(this, new CtiConnectionStateChangedEventArgs()
+            OnCtiConnectionStateChanged?.Invoke(this, new Events.CtiConnectionStateChangedEventArgs()
             {
                 CtiIndex = agent.GetConnetionIndex(e.ConnectionInfo),
                 OldState = e.OldState,
@@ -150,20 +156,23 @@ namespace ipsc6.agent.services
         }
 
         public event EventHandler OnMainCtiConnectionChanged;
-        public event EventHandler<CtiConnectionStateChangedEventArgs> OnCtiConnectionStateChanged;
+        public event EventHandler<Events.CtiConnectionStateChangedEventArgs> OnCtiConnectionStateChanged;
 
         private void ReloadCtiServers()
         {
-            Model.CtiServers = new List<Models.CtiServer>(
-                from nt in agent.CtiServers.Select((conn, i) => (conn, i))
-                select new Models.CtiServer()
-                {
-                    Host = nt.conn.Host,
-                    Port = nt.conn.Port,
-                    IsMain = nt.i == agent.MainConnectionIndex,
-                    State = agent.GetConnectionState(nt.i),
-                }
-            );
+            lock (Model)
+            {
+                Model.CtiServers = (
+                    from t in agent.CtiServers.Select((value, index) => (index, value))
+                    select new Models.CtiServer()
+                    {
+                        Host = t.value.Host,
+                        Port = t.value.Port,
+                        IsMain = t.index == agent.MainConnectionIndex,
+                        State = agent.GetConnectionState(t.index),
+                    }
+                ).ToList();
+            }
         }
 
         public IReadOnlyCollection<Models.CtiServer> GetCtiServers()
@@ -184,10 +193,13 @@ namespace ipsc6.agent.services
 
         private void ReloadGroups()
         {
-            Model.Groups = (
-                from x in agent.Groups
-                select new Models.Group() { Id = x.Id, Name = x.Name, IsSigned = x.IsSigned }
-            ).ToList();
+            lock (Model)
+            {
+                Model.Groups = (
+                    from x in agent.Groups
+                    select new Models.Group() { Id = x.Id, Name = x.Name, IsSigned = x.IsSigned }
+                ).ToList();
+            }
             OnSignedGroupsChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -238,6 +250,61 @@ namespace ipsc6.agent.services
         }
 
         #endregion
+
+        #region SIP
+
+        private void Agent_OnSipRegistrarListReceived(object sender, client.SipRegistrarListReceivedEventArgs e)
+        {
+            ReloadSipAccounts();
+        }
+        private void Agent_OnSipCallStateChanged(object sender, EventArgs e)
+        {
+            ReloadSipAccounts();
+        }
+
+        private void Agent_OnSipRegisterStateChanged(object sender, EventArgs e)
+        {
+            ReloadSipAccounts();
+        }
+
+        private void ReloadSipAccounts()
+        {
+            lock (Model)
+            {
+                if (agent != null && agent.SipAccounts != null)
+                {
+                    Model.SipAccounts = (
+                        from a in agent.SipAccounts
+                        select new Models.SipAccount()
+                        {
+                            CtiIndex = a.ConnectionIndex,
+                            IsValid = a.IsValid,
+                            Uri = a.Uri,
+                            IsRegisterActive = a.IsRegisterActive,
+                            LastRegisterError = a.LastRegisterError,
+                            Calls = (
+                                from c in a.Calls
+                                select new Models.SipCall()
+                                {
+                                    Id = c.Id,
+                                    LocalUri = c.LocalUri,
+                                    RemoteUri = c.RemoteUri,
+                                    State = c.State,
+                                }
+                            ).ToList(),
+                        }
+                    ).ToList();
+                }
+            }
+        }
+
+        public IReadOnlyCollection<Models.SipAccount> GetSipAccounts()
+        {
+            return Model.SipAccounts;
+        }
+
+        #endregion
+
     }
 #pragma warning restore VSTHRD200
 }

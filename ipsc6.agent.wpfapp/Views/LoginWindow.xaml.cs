@@ -29,8 +29,8 @@ namespace ipsc6.agent.wpfapp.Views
 
         private void PasswordChanged(object sender, RoutedEventArgs e)
         {
-            var dc = DataContext as ViewModels.LoginViewModel;
-            dc.PasswordLength = (sender as PasswordBox).Password.Length;
+            var vm = DataContext as ViewModels.LoginViewModel;
+            vm.Password = (sender as PasswordBox).Password;
         }
     }
 }

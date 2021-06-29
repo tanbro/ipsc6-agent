@@ -32,15 +32,15 @@
 -   **Params**: 无
 -   **Result**: `null`
 
-## 获取完整的座席信息
+## 获取完整的座席信息数据模型
 
--   **Method**: `getAgentFull`
+-   **Method**: `getModel`
 
 -   **Params**: 无
 
 -   **Result**: `Object`
 
-    返回完整的 [Agent][] 对象
+    返回完整的 [Agent][] 数据模型
 
 [agent]: ../types/agent.md
 [agentstate]: ../types/enums.md#座席状态

@@ -106,7 +106,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             Instance.DisplayName = m.DisplayName;
         }
 
-        private static void MainService_OnStatusChanged(object sender, services.StatusChangedEventArgs e)
+        private static void MainService_OnStatusChanged(object sender, services.Events.StatusChangedEventArgs e)
         {
             Instance.Status = new AgentStateWorkType(e.NewState, e.NewWorkType);
         }
@@ -187,7 +187,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 logger.DebugFormat("签入 {0}", groupId);
             else
                 logger.DebugFormat("签出 {0}", groupId);
-            await App.mainService.SignGroup(groupId, isSignIn).ConfigureAwait(false);
+            await App.mainService.SignGroup(groupId, isSignIn);
         }
 
         private static bool CanSignGroup(object _)
@@ -244,19 +244,19 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var svr = App.mainService;
             if (st.Item1 == client.AgentState.Idle)
             {
-                await svr.SetIdle().ConfigureAwait(false);
+                await svr.SetIdle();
             }
             else if (st.Item1 == client.AgentState.Pause)
             {
-                await svr.SetBusy(st.Item2).ConfigureAwait(false);
+                await svr.SetBusy(st.Item2);
             }
             else if (st.Item1 == client.AgentState.Leave)
             {
-                await svr.SetBusy().ConfigureAwait(false);
+                await svr.SetBusy();
             }
         }
 
-        static bool CanSetState(object parameter)
+        private static bool CanSetState(object parameter)
         {
             //if (doingSetState) return false;
             //var agent = Controllers.AgentController.Agent;
@@ -271,6 +271,16 @@ namespace ipsc6.agent.wpfapp.ViewModels
             //}
             return true;
         }
+        #endregion
+
+        #region SIP/Tele
+        private static client.TeleState teleState;
+        public client.TeleState TeleState
+        {
+            get => teleState;
+            set => SetProperty(ref teleState, value);
+        }
+
         #endregion
         /*
                 #region Answer
