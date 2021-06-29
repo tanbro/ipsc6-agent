@@ -15,24 +15,24 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
     public class MainViewModel : Utils.SingletonObservableObject<MainViewModel>
     {
-        static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainViewModel));
+        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainViewModel));
 
         #region 主窗口
-        static bool pinned = true;
+        private static bool pinned = true;
         public bool Pinned
         {
             get => pinned;
             set => SetProperty(ref pinned, value);
         }
 
-        static readonly IRelayCommand pinCommand = new RelayCommand(DoPin);
+        private static readonly IRelayCommand pinCommand = new RelayCommand(DoPin);
         public IRelayCommand PinCommand => pinCommand;
-        static void DoPin()
+        private static void DoPin()
         {
             Instance.Pinned = !pinned;
         }
 
-        static bool snapped = false;
+        private static bool snapped = false;
         public bool Snapped
         {
             get => snapped;
@@ -135,6 +135,13 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             get => status;
             set => SetProperty(ref status, value);
+        }
+
+        private static client.AgentState teleStats;
+        public client.AgentState TeleStats
+        {
+            get => teleStats;
+            set => SetProperty(ref teleStats, value);
         }
 
         #endregion

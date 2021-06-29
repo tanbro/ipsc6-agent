@@ -24,4 +24,20 @@ namespace ipsc6.agent.services
         public client.WorkType OldWorkType { get; set; }
         public client.WorkType NewWorkType { get; set; }
     }
+
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
+    public class CtiConnectionStateChangedEventArgs : EventArgs
+    {
+        public int CtiIndex { get; set; }
+        public client.ConnectionState OldState { get; set; }
+        public client.ConnectionState NewState { get; set; }
+    }
+
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
+    public class TeleStateChangedEventArgs : EventArgs
+    {
+        public client.TeleState OldState { get; set; }
+        public client.TeleState NewState { get; set; }
+    }
+
 }

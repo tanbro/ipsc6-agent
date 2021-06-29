@@ -12,6 +12,12 @@
     | `oldState` | `Integer` | -       | 原连接状态：[CtiServerConnectionState][] 枚举值 |
     | `newState` | `Integer` | -       | 现连接状态：[CtiServerConnectionState][] 枚举值 |
 
+## CTI 服务器主连接变化事件
+
+-   **Method**: `onMainCtiConnectionChanged`
+
+-   **Params**: 无
+
 [ctiserverconnectionstate]: ../types/enums.md#CTI-服务器连接状态 "CTI 服务器连接状态"
 
 --8<-- "includes/glossary.md"

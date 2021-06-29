@@ -48,12 +48,24 @@ namespace ipsc6.agent.services
         {
             if (agent != null) throw new InvalidOperationException();
             client.Agent.Initial();
+
             agent = new client.Agent(addresses, localPort, localAddress);
-            agent.OnAgentStateChanged += Agent_OnAgentStateChanged;
+
             agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
+
+            agent.OnConnectionStateChanged += Agent_OnConnectionStateChanged;
+            agent.OnMainConnectionChanged += Agent_OnMainConnectionChanged;
+
+            agent.OnAgentStateChanged += Agent_OnAgentStateChanged;
+            agent.OnTeleStateChanged += Agent_OnTeleStateChanged;
+
             agent.OnGroupReceived += Agent_OnGroupReceived;
             agent.OnSignedGroupsChanged += Agent_OnSignedGroupsChanged;
+
+            ReloadCtiServers();
         }
+
+
         #endregion
 
         #region status
@@ -71,14 +83,28 @@ namespace ipsc6.agent.services
 
         private void Agent_OnAgentStateChanged(object sender, client.AgentStateChangedEventArgs e)
         {
-            var evt = new StatusChangedEventArgs()
+            Model.State = e.NewState.AgentState;
+            Model.WorkType = e.NewState.WorkType;
+            OnStatusChanged?.Invoke(this, new StatusChangedEventArgs()
             {
                 OldState = e.OldState.AgentState,
                 OldWorkType = e.OldState.WorkType,
                 NewState = e.NewState.AgentState,
                 NewWorkType = e.NewState.WorkType,
-            };
-            OnStatusChanged?.Invoke(this, evt);
+            });
+        }
+
+
+        public event EventHandler<TeleStateChangedEventArgs> OnTeleStateChanged;
+
+        private void Agent_OnTeleStateChanged(object sender, client.TeleStateChangedEventArgs e)
+        {
+            Model.TeleState = e.NewState;
+            OnTeleStateChanged?.Invoke(this, new TeleStateChangedEventArgs()
+            {
+                OldState = e.OldState,
+                NewState = e.NewState,
+            });
         }
 
         internal async Task LogInAsync(string workerNumber, string password)
@@ -103,6 +129,50 @@ namespace ipsc6.agent.services
 
         #endregion
 
+        #region Connection
+
+
+        private void Agent_OnConnectionStateChanged(object sender, client.ConnectionInfoStateChangedEventArgs e)
+        {
+            ReloadCtiServers();
+            OnCtiConnectionStateChanged?.Invoke(this, new CtiConnectionStateChangedEventArgs()
+            {
+                CtiIndex = agent.GetConnetionIndex(e.ConnectionInfo),
+                OldState = e.OldState,
+                NewState = e.NewState,
+            });
+        }
+
+        private void Agent_OnMainConnectionChanged(object sender, EventArgs e)
+        {
+            ReloadCtiServers();
+            OnMainCtiConnectionChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler OnMainCtiConnectionChanged;
+        public event EventHandler<CtiConnectionStateChangedEventArgs> OnCtiConnectionStateChanged;
+
+        private void ReloadCtiServers()
+        {
+            Model.CtiServers = new List<Models.CtiServer>(
+                from nt in agent.CtiServers.Select((conn, i) => (conn, i))
+                select new Models.CtiServer()
+                {
+                    Host = nt.conn.Host,
+                    Port = nt.conn.Port,
+                    IsMain = nt.i == agent.MainConnectionIndex,
+                    State = agent.GetConnectionState(nt.i),
+                }
+            );
+        }
+
+        public IReadOnlyCollection<Models.CtiServer> GetCtiServers()
+        {
+            return Model.CtiServers;
+        }
+
+        #endregion
+
         #region AgentGroup
 
         public event EventHandler OnSignedGroupsChanged;
@@ -118,7 +188,7 @@ namespace ipsc6.agent.services
                 from x in agent.Groups
                 select new Models.Group() { Id = x.Id, Name = x.Name, IsSigned = x.IsSigned }
             ).ToList();
-            OnSignedGroupsChanged?.Invoke(this, new EventArgs());
+            OnSignedGroupsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void Agent_OnGroupReceived(object sender, EventArgs e)

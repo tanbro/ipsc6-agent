@@ -47,6 +47,8 @@ nav:
           - docs/api/types/snd_device.md
           - docs/api/types/enums.md
 
+  - docs/third_party.md
+
 plugins:
   - search
   - with-pdf:

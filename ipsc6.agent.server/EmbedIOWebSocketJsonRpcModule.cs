@@ -17,10 +17,9 @@ namespace ipsc6.agent.server
     /// </summary>
     public class EmbedIOWebSocketJsonRpcModule : WebSocketModule
     {
-        public EmbedIOWebSocketJsonRpcModule(string urlPath, IEnumerable<LocalRpcTargetFunc> localRpcTargetCreators, JsonRpcTargetOptions jsonRpcTargetOptions = null) : base(urlPath, true)
+        public EmbedIOWebSocketJsonRpcModule(string urlPath, IEnumerable<LocalRpcTargetFunc> localRpcTargetCreators) : base(urlPath, true)
         {
             this.localRpcTargetCreators = localRpcTargetCreators ?? throw new ArgumentNullException(nameof(localRpcTargetCreators));
-            this.jsonRpcTargetOptions = jsonRpcTargetOptions ?? DefaultJsonRpcTargetOptions;
         }
 
         ~EmbedIOWebSocketJsonRpcModule()
@@ -31,8 +30,6 @@ namespace ipsc6.agent.server
             }
             jsonRpcMap.Clear();
         }
-
-        private readonly JsonRpcTargetOptions jsonRpcTargetOptions;
 
         public static readonly JsonRpcTargetOptions DefaultJsonRpcTargetOptions = new()
         {
@@ -53,13 +50,10 @@ namespace ipsc6.agent.server
                 e.SendTask = SendAsync(e.Context, Encoding.UTF8.GetString(e.Message));
             };
             JsonRpc jsonRpc = new(handler);
-            var targets = (
-                from func in localRpcTargetCreators
-                select func(this, context)
-            ).ToList();
-            foreach (var target in targets)
+            foreach (var func in localRpcTargetCreators)
             {
-                jsonRpc.AddLocalRpcTarget(target, jsonRpcTargetOptions);
+                var target = func(this, context);
+                jsonRpc.AddLocalRpcTarget(target, DefaultJsonRpcTargetOptions);
             }
             jsonRpcMap[context] = jsonRpc;
             jsonRpc.StartListening();

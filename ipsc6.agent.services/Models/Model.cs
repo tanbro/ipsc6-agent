@@ -15,5 +15,9 @@ namespace ipsc6.agent.services.Models
         public string WorkerNumber { get; internal set; }
         public string DisplayName { get; internal set; }
         public IReadOnlyCollection<Group> Groups { get; internal set; }
+        public IReadOnlyCollection<CtiServer> CtiServers { get; internal set; }
+        public client.AgentState State { get; internal set; }
+        public client.WorkType WorkType { get; internal set; }
+        public client.TeleState TeleState { get; internal set; }
     }
 }

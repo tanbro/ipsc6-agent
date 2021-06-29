@@ -160,7 +160,34 @@ function logIn(workerNum, password) {
 
 我们以座席状态变化事件举例：当登录成功后，座席状态会发生变化，座席程序会把状态变化事件以 JSONRPC 的形式通知给与它相连的 WebSocket 客户端。
 
-座席客户端发出的事件通知相当于反向的 RPC，且消息的 JSON 对象没有 `id` 属性，不需要回复。
+!!! important
+
+    座席客户端发出的事件通知相当于反向的 RPC，且消息的 JSON 对象没有 `id` 属性，不需要回复。
+
+!!! attention
+
+    受限于我们所采用的 JSONRPC 框架 [StreamJsonRpc][]，座席发送给 WebSocket 客户端的 JSONRPC 事件通知数据，其参数部分的格式具有特殊规则：`params` 属性的数据类型固定为 `Array`
+
+    - 对于参数为空的事件，数组中没有任何元素。
+    - 对于参数不为空的事件，数组**有且只有一个元素**，该元素是 `Object` 类型，其属性对应事件的参数。
+
+    例如，某事件 `onEvent1` 没有任何参数，则该 JSONRPC 事件通知行如:
+
+    !!!example
+
+        ```json
+        {"method": "onEvent1", "params": []}
+        ```
+
+    又如，某事件 `onEvent2` 具有一个整数参数和一个文本参数，分别名为 `intArg` 和 `strArg`，则该 JSONRPC 事件通知形如:
+
+    !!!example
+
+        ```json
+        {"method": "onEvent2", "params": [{"intArg": 123, "strArg": "abc"}]}
+        ```
+
+    **注意例中的事件参数 `intArg` 和 `strArg` 构成一个对象，方才置于 `params` 数组中。**
 
 我们用类似方法调用文档的形式描述它:
 
@@ -172,10 +199,16 @@ function logIn(workerNum, password) {
 
 -   **Params**:
 
-    | Argument   | Type      | Default | Description           |
-    | ---------- | --------- | ------- | --------------------- |
-    | `state`    | `Integer` | -       | [AgentState][] 枚举值 |
-    | `workType` | `Integer` | -       | [WorkType][] 枚举值   |
+    | Argument      | Type      | Default | Description                    |
+    | ------------- | --------- | ------- | ------------------------------ |
+    | `oldState`    | `Integer` | -       | 旧状态 [AgentState][] 枚举值   |
+    | `newState`    | `Integer` | -       | 新状态 [AgentState][] 枚举值   |
+    | `oldWorkType` | `Integer` | -       | 旧工作类型 [WorkType][] 枚举值 |
+    | `newWorkType` | `Integer` | -       | 新工作类型 [WorkType][] 枚举值 |
+
+    !!! attention
+
+        `params` 的类型是 `Array` 而不是 `Object`。它有且只有一个对象类型的数组元素。文档中记录的事件参数实际上是数组中这个唯一对象的属性。
 
 这个事件的 JSON 数据形如：
 
@@ -183,11 +216,13 @@ function logIn(workerNum, password) {
 {
     "jsonrpc": "2.0",
     "method": "onStatusChanged",
-    "params": [0, 0]
+    "params": [
+        { "oldState": 0, "newState": 4, "oldWorkType": 0, "newWorkType": 0 }
+    ]
 }
 ```
 
-!!! note
+!!! important
 
     事件通知类型的 JSONRPC 请求数据没有 `id` 属性， WebSocket 客户端**不应回复**通知消息。
 
