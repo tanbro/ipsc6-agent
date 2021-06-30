@@ -1,10 +1,9 @@
+using org.pjsip.pjsua2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-using org.pjsip.pjsua2;
 
 namespace ipsc6.agent.client
 {

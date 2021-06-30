@@ -99,11 +99,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         else
                         {
                             logger.FatalFormat("登录期间发成了意料之外的错误: {0}", err);
-                            MessageBox.Show(
-                                $"无法处理的错误\r\n\r\n{err}",
-                                Application.Current.MainWindow.Title,
-                                MessageBoxButton.OK, MessageBoxImage.Error
-                            );
                             throw;
                         }
                     }
