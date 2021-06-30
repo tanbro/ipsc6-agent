@@ -33,13 +33,13 @@ Connector::~Connector() {
 }
 
 void Connector::Initial() {
-    connectors = gcnew HashSet<Connector ^>();
+    connectors = gcnew List<Connector ^>();
     receiveThreadStarted =
         gcnew EventWaitHandle(false, EventResetMode::AutoReset);
-    receiveThread = gcnew Thread(gcnew ThreadStart(ReceiveThreadProc));
+    receiveCancelTokenSource = gcnew CancellationTokenSource();
+    receiveThread = gcnew Thread(gcnew ThreadStart(ReceiveThreadStarter));
     do {
         lock l(connectors);
-        receiveThreadStopping = false;
         receiveThread->Start();
         receiveThreadStarted->WaitOne();
     } while (0);
@@ -55,20 +55,20 @@ void Connector::Release() {
         for each (auto connector in connectors) {
             connector->Shutdown();
         }
-        receiveThreadStopping = true;
+        connectors->Clear();
     } while (0);
+    receiveCancelTokenSource->Cancel();
     if (receiveThread->IsAlive) {
         receiveThread->Join();
     }
-    connectors->Clear();
 }
 
 Connector ^
     Connector::CreateInstance(unsigned short localPort, String ^ address) {
     auto connector = gcnew Connector(localPort, address);
-    connector->StartUp();
     do {
         lock l(connectors);
+        connector->StartUp();
         connectors->Add(connector);
     } while (0);
     return connector;
@@ -102,8 +102,8 @@ void Connector::Connect(String ^ host,
     try {
         const char* host_cstr = context->marshal_as<const char*>(host);
         RakNet::ConnectionAttemptResult result = _peer->Connect(
-            host_cstr, remotePort, CONNECT_PASSWORD, strlen(CONNECT_PASSWORD),
-            0, 0, 12U, 500U, timeoutMs);
+            host_cstr, remotePort, CONNECT_PASSWORD,
+            (int)strlen(CONNECT_PASSWORD), 0, 0, 12U, 500U, timeoutMs);
         if (RakNet::CONNECTION_ATTEMPT_STARTED != result) {
             throw gcnew InvalidOperationException(
                 String::Format("RakPeer Connect failed ({0})", (int)result));
@@ -114,11 +114,13 @@ void Connector::Connect(String ^ host,
 }
 
 void Connector::Connect(String ^ host, unsigned short remotePort) {
+    if (remotePort == 0)
+        remotePort = DEFAULT_REMOTE_PORT;
     Connect(host, remotePort, 0);
 }
 
 void Connector::Connect(String ^ host) {
-    Connect(host, DEFAULT_REMOTE_PORT);
+    Connect(host, 0);
 }
 
 void Connector::Disconnect() {
@@ -131,29 +133,20 @@ void Connector::Disconnect(bool force) {
     _remoteAddrIndex = -1;
 }
 
-void Connector::ReceiveThreadProc() {
-    bool stopping = false;
+void Connector::ReceiveThreadStarter() {
     receiveThreadStarted->Set();
-    while (true) {
-        int receiveCount = 0;
-        do {
-            lock l(connectors);
-            // 检查是否可以退出了?
-            stopping = receiveThreadStopping;
-            if (stopping) {
-                break;
-            }
-            //
-            for each (auto connector in connectors) {
-                receiveCount += connector->Receive();
-            }
-        } while (0);
-        if (stopping) {
-            break;
+    SpinWait::SpinUntil(gcnew Func<bool>(ReceiveSpinFunc), Timeout::Infinite);
+}
+
+bool Connector::ReceiveSpinFunc() {
+    do {
+        lock l(connectors);
+        for each (auto connector in connectors) {
+            connector->Receive();
         }
-        // 睡眠，死循环
-        Thread::Sleep(receiveCount > 0 ? 0 : 1000);
-    }
+    } while (0);
+    // 检查是否可以退出了?
+    return receiveCancelTokenSource->IsCancellationRequested;
 }
 
 void Connector::StartUp() {
@@ -195,66 +188,42 @@ int Connector::Receive() {
     switch (msgId) {
         case ID_DISCONNECTION_NOTIFICATION: {
             _remoteAddrIndex = -1;
-            try {
-                OnDisconnected(this, gcnew EventArgs());
-            } catch (NullReferenceException ^) {
-            }
+            OnDisconnected(this, EventArgs::Empty);
         } break;
 
         case ID_CONNECTION_ATTEMPT_FAILED: {
             _remoteAddrIndex = -1;
-            try {
-                OnConnectAttemptFailed(this, gcnew EventArgs());
-            } catch (NullReferenceException ^) {
-            }
+            OnConnectAttemptFailed(this, EventArgs::Empty);
         } break;
 
         case ID_INVALID_PASSWORD: {
             _remoteAddrIndex = -1;
-            try {
-                OnConnectAttemptFailed(this, gcnew EventArgs());
-            } catch (NullReferenceException ^) {
-            }
+            OnConnectAttemptFailed(this, EventArgs::Empty);
         } break;
 
         case ID_NO_FREE_INCOMING_CONNECTIONS: {
             _remoteAddrIndex = -1;
-            try {
-                OnConnectAttemptFailed(this, gcnew EventArgs());
-            } catch (NullReferenceException ^) {
-            }
+            OnConnectAttemptFailed(this, EventArgs::Empty);
         } break;
 
         case ID_CONNECTION_BANNED: {
             _remoteAddrIndex = -1;
-            try {
-                OnConnectAttemptFailed(this, gcnew EventArgs());
-            } catch (NullReferenceException ^) {
-            }
+            OnConnectAttemptFailed(this, EventArgs::Empty);
         } break;
 
         case ID_INCOMPATIBLE_PROTOCOL_VERSION: {
             _remoteAddrIndex = -1;
-            try {
-                OnConnectAttemptFailed(this, gcnew EventArgs());
-            } catch (NullReferenceException ^) {
-            }
+            OnConnectAttemptFailed(this, EventArgs::Empty);
         } break;
 
         case ID_IP_RECENTLY_CONNECTED: {
             _remoteAddrIndex = -1;
-            try {
-                OnConnectAttemptFailed(this, gcnew EventArgs());
-            } catch (NullReferenceException ^) {
-            }
+            OnConnectAttemptFailed(this, EventArgs::Empty);
         } break;
 
         case ID_CONNECTION_LOST: {
             _remoteAddrIndex = -1;
-            try {
-                OnConnectionLost(this, gcnew EventArgs());
-            } catch (NullReferenceException ^) {
-            }
+            OnConnectionLost(this, EventArgs::Empty);
         } break;
 
         case ID_CONNECTION_REQUEST_ACCEPTED: {
@@ -285,7 +254,7 @@ void Connector::SendRawData(const BYTE* data, size_t length) {
         _sendStream->Write(RakNet::GetTime());
         _sendStream->Write((RakNet::MessageID)ID_USER_PACKET_ENUM);
         _sendStream->Write((char)0);  //压缩标志——不压缩
-        _sendStream->Write((const char*)data, length);  // user data
+        _sendStream->Write((const char*)data, (unsigned)length);  // user data
         if (0 == _peer->Send(_sendStream, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0,
                              _peer->GetSystemAddressFromIndex(_remoteAddrIndex),
                              false)) {
@@ -300,7 +269,7 @@ void Connector::SendRawData(array<Byte> ^ data) {
     // https://docs.microsoft.com/en-us/cpp/dotnet/how-to-marshal-arrays-using-cpp-interop
     // 2)
     // https://docs.microsoft.com/en-us/cpp/dotnet/how-to-obtain-a-pointer-to-byte-array
-    pin_ptr<System::Byte> p = &data[0];
+    pin_ptr<Byte> p = &data[0];
     BYTE* pby = p;
     BYTE* result = reinterpret_cast<BYTE*>(pby);
     SendRawData(result, data->Length);
@@ -343,16 +312,10 @@ void Connector::SendAgentMessage(int commandType, int n, String ^ s) {
     }
 }
 
-static size_t SZ_ASK_DYNAMIC_SIP_AGENT_ID =
-    sizeof(MsgType) + sizeof(BYTE) + sizeof(int32_t);
-
 void Connector::DoOnConnectionRequestAccepted(RakNet::Packet* packet) {
     /// 连接成功事件
     auto e = gcnew ConnectedEventArgs();
-    try {
-        OnConnected(this, e);
-    } catch (NullReferenceException ^) {
-    }
+    OnConnected(this, e);
 }
 
 static size_t SZ_USER_PACKET_HEADER =
@@ -403,10 +366,7 @@ void Connector::DoOnUserPacketReceived(RakNet::Packet* packet) {
             /// 抛出事件：坐席收到来自服务器端的数据
             auto e =
                 gcnew AgentMessageReceivedEventArgs(command_type, n1, n2, s);
-            try {
-                OnAgentMessageReceived(this, e);
-            } catch (NullReferenceException ^) {
-            }
+            OnAgentMessageReceived(this, e);
         } break;
 
         default: {

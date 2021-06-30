@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ipsc6.agent.client.Sip
 {
     public class Account : org.pjsip.pjsua2.Account
     {
-        static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Account));
+        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Account));
         public int ConnectionIndex { get; }
 
         public Account(int connectionIndex) : base()
@@ -25,8 +24,9 @@ namespace ipsc6.agent.client.Sip
         public event CallDisconnectedEventHandler OnCallDisconnected;
         public event CallStateChangedEventHandler OnCallStateChanged;
 
-        string _string;
-        string MakeString()
+        private string _string;
+
+        private string MakeString()
         {
             if (isValid())
             {
@@ -53,7 +53,7 @@ namespace ipsc6.agent.client.Sip
             OnRegisterStateChanged?.Invoke(this, new EventArgs());
         }
 
-        private HashSet<Call> calls = new HashSet<Call>();
+        private readonly HashSet<Call> calls = new();
         public IReadOnlyCollection<Call> Calls => calls;
 
         public override void onIncomingCall(org.pjsip.pjsua2.OnIncomingCallParam param)

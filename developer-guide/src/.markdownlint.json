@@ -1,0 +1,9 @@
+{
+    "ul-indent": {
+        "indent": 4
+    },
+    "line-length": false,
+    "code-block-style": false,
+    "no-hard-tabs": false,
+    "list-marker-space": false
+}

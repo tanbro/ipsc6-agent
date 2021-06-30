@@ -7,22 +7,10 @@ namespace agent {
 namespace network {
 
 public
-delegate void ConnectAttemptFailedEventHandler(Object ^ sender, EventArgs ^ e);
-
-public
-delegate void DisconnectedEventHandler(Object ^ sender, EventArgs ^ e);
-
-public
-delegate void ConnectionLostEventHandler(Object ^ sender, EventArgs ^ e);
-
-public
 ref class ConnectedEventArgs : EventArgs {
    public:
     ConnectedEventArgs() : EventArgs(){};
 };
-
-public
-delegate void ConnectedEventHandler(Object ^ sender, ConnectedEventArgs ^ e);
 
 public
 ref class AgentMessageReceivedEventArgs : EventArgs {
@@ -41,11 +29,6 @@ ref class AgentMessageReceivedEventArgs : EventArgs {
     };
     virtual String ^ ToString() override;
 };
-
-public
-delegate void AgentMessageReceivedEventHandler(Object ^ sender,
-                                               AgentMessageReceivedEventArgs ^
-                                                   e);
 
 }  // namespace network
 }  // namespace agent

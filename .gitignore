@@ -1,4 +1,6 @@
 /out
+/Debug
+/Release
 
 ##################################
 # gitignore/Global/Linux.gitignore

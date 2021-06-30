@@ -2,26 +2,6 @@ using System;
 
 namespace ipsc6.agent.client
 {
-    public delegate void ServerSentEventHandler(object sender, ServerSentEventArgs e);
-    public delegate void ClosedEventHandler(object sender, EventArgs e);
-    public delegate void LostEventHandler(object sender, EventArgs e);
-    public delegate void ConnectionStateChangedEventHandler(object sender, ConnectionStateChangedEventArgs e);
-    public delegate void ConnectionInfoStateChangedEventHandler(object sender, ConnectionInfoStateChangedEventArgs e);
-
-    public delegate void AgentStateChangedEventHandler(object sender, AgentStateChangedEventArgs e);
-    public delegate void TeleStateChangedEventHandler(object sender, TeleStateChangedEventArgs e);
-    public delegate void QueueInfoEventHandler(object sender, QueueInfoEventArgs e);
-    public delegate void HoldInfoEventHandler(object sender, HoldInfoEventArgs e);
-
-    public delegate void AgentIdAssignedEventHandler(object sender, AgentIdAssignedEventArgs e);
-    public delegate void AgentDisplayNameReceivedEventHandler(object sender, AgentDisplayNameReceivedEventArgs e);
-    public delegate void ChannelAssignedEventHandler(object sender, ChannelAssignedEventArgs e);
-    public delegate void WorkingChannelInfoReceivedEventHandler(object sender, WorkingChannelInfoReceivedEventArgs e);
-    public delegate void RingInfoReceivedEventHandler(object sender, RingInfoReceivedEventArgs e);
-    public delegate void IvrDataReceivedEventHandler(object sender, IvrDataReceivedEventArgs e);
-    public delegate void CustomStringReceivedEventArgsReceivedEventHandler(object sender, CustomStringReceivedEventArgs e);
-    public delegate void SipRegistrarListReceivedEventHandler(object sender, SipRegistrarListReceivedEventArgs e);
-    public delegate void SipRegisterStateChangedEventHandler(object sender, EventArgs e);
 
     public class ServerSentEventArgs : EventArgs
     {
@@ -50,9 +30,9 @@ namespace ipsc6.agent.client
 
     public class ConnectionInfoStateChangedEventArgs : StateChangedEventArgs<ConnectionState>
     {
-        public ConnectionInfo ConnectionInfo { get; }
+        public CtiServer ConnectionInfo { get; }
         public ConnectionInfoStateChangedEventArgs(
-            ConnectionInfo connectionInfo,
+            CtiServer connectionInfo,
             ConnectionState oldState, ConnectionState newState
         ) : base(oldState, newState)
         {
@@ -72,11 +52,11 @@ namespace ipsc6.agent.client
 
     public class BaseCtiEventArgs<T> : EventArgs
     {
-        public ConnectionInfo ConnectionInfo { get; }
+        public CtiServer CtiServer { get; }
         public T Value { get; }
-        public BaseCtiEventArgs(ConnectionInfo connectionInfo, T value)
+        public BaseCtiEventArgs(CtiServer ctiServer, T value)
         {
-            ConnectionInfo = connectionInfo;
+            CtiServer = ctiServer;
             Value = value;
         }
     }
@@ -94,12 +74,12 @@ namespace ipsc6.agent.client
 
     public class QueueInfoEventArgs : BaseCtiEventArgs<QueueInfo>
     {
-        public QueueInfoEventArgs(ConnectionInfo connectionInfo, QueueInfo value) : base(connectionInfo, value) { }
+        public QueueInfoEventArgs(CtiServer connectionInfo, QueueInfo value) : base(connectionInfo, value) { }
     }
 
     public class HoldInfoEventArgs : BaseCtiEventArgs<CallInfo>
     {
-        public HoldInfoEventArgs(ConnectionInfo connectionInfo, CallInfo value) : base(connectionInfo, value) { }
+        public HoldInfoEventArgs(CtiServer connectionInfo, CallInfo value) : base(connectionInfo, value) { }
     }
 
     public struct AgentIdName
@@ -110,37 +90,37 @@ namespace ipsc6.agent.client
 
     public class AgentIdAssignedEventArgs : BaseCtiEventArgs<AgentIdName>
     {
-        public AgentIdAssignedEventArgs(ConnectionInfo connectionInfo, AgentIdName value) : base(connectionInfo, value) { }
+        public AgentIdAssignedEventArgs(CtiServer connectionInfo, AgentIdName value) : base(connectionInfo, value) { }
     }
 
     public class AgentDisplayNameReceivedEventArgs : BaseCtiEventArgs<string>
     {
-        public AgentDisplayNameReceivedEventArgs(ConnectionInfo connectionInfo, string value) : base(connectionInfo, value) { }
+        public AgentDisplayNameReceivedEventArgs(CtiServer connectionInfo, string value) : base(connectionInfo, value) { }
     }
 
     public class ChannelAssignedEventArgs : BaseCtiEventArgs<int>
     {
-        public ChannelAssignedEventArgs(ConnectionInfo connectionInfo, int value) : base(connectionInfo, value) { }
+        public ChannelAssignedEventArgs(CtiServer connectionInfo, int value) : base(connectionInfo, value) { }
     }
 
     public class WorkingChannelInfoReceivedEventArgs : BaseCtiEventArgs<WorkingChannelInfo>
     {
-        public WorkingChannelInfoReceivedEventArgs(ConnectionInfo connectionInfo, WorkingChannelInfo value) : base(connectionInfo, value) { }
+        public WorkingChannelInfoReceivedEventArgs(CtiServer connectionInfo, WorkingChannelInfo value) : base(connectionInfo, value) { }
     }
 
     public class RingInfoReceivedEventArgs : BaseCtiEventArgs<CallInfo>
     {
-        public RingInfoReceivedEventArgs(ConnectionInfo connectionInfo, CallInfo value) : base(connectionInfo, value) { }
+        public RingInfoReceivedEventArgs(CtiServer connectionInfo, CallInfo value) : base(connectionInfo, value) { }
     }
 
     public class IvrDataReceivedEventArgs : BaseCtiEventArgs<IvrData>
     {
-        public IvrDataReceivedEventArgs(ConnectionInfo connectionInfo, IvrData value) : base(connectionInfo, value) { }
+        public IvrDataReceivedEventArgs(CtiServer connectionInfo, IvrData value) : base(connectionInfo, value) { }
     }
 
     public class CustomStringReceivedEventArgs : BaseCtiEventArgs<ServerSentCustomString>
     {
-        public CustomStringReceivedEventArgs(ConnectionInfo connectionInfo, ServerSentCustomString value) : base(connectionInfo, value) { }
+        public CustomStringReceivedEventArgs(CtiServer connectionInfo, ServerSentCustomString value) : base(connectionInfo, value) { }
     }
 
     public class SipRegistrarListReceivedEventArgs : EventArgs

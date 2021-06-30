@@ -12,29 +12,27 @@ using MahApps.Metro.IconPacks;
 namespace ipsc6.agent.wpfapp.Converters
 {
     [ValueConversion(typeof(client.TeleState), typeof(SolidColorBrush))]
-    class AgentTeleStateToBrushConverters : IValueConverter
+    internal class AgentTeleStateToBrushConverters : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             Color color = (Color)ColorConverter.ConvertFromString("#808080");
-            if (value != null)
+            var model = App.mainService.Model;
+            var sipAccounts = model.SipAccounts;
+            if (value != null && sipAccounts != null)
             {
                 var teleState = (client.TeleState)value;
-                var agent = Controllers.AgentController.Agent;
-                if (agent != null)
+                if (model.SipAccounts.Any(x => x.IsRegisterActive && x.LastRegisterError == 0))  // 有注册了的
                 {
-                    if (agent.SipAccountCollection.Any(x => x.IsRegisterActive))  // 有注册了的
+                    switch (teleState)
                     {
-                        switch (teleState)
-                        {
-                            case client.TeleState.OffHook:
-                                color = (Color)ColorConverter.ConvertFromString("#3ea4d8");
-                                break;
-                            case client.TeleState.OnHook:
-                                color = (Color)ColorConverter.ConvertFromString("#ba0300");
-                                break;
-                            default: break;
-                        }
+                        case client.TeleState.OffHook:
+                            color = (Color)ColorConverter.ConvertFromString("#3ea4d8");
+                            break;
+                        case client.TeleState.OnHook:
+                            color = (Color)ColorConverter.ConvertFromString("#ba0300");
+                            break;
+                        default: break;
                     }
                 }
             }
@@ -49,21 +47,22 @@ namespace ipsc6.agent.wpfapp.Converters
     }
 
     [ValueConversion(typeof(client.TeleState), typeof(PackIconMaterialKind))]
-    class AgentTeleStateToMaterialIconConverter : IValueConverter
+    internal class AgentTeleStateToMaterialIconConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var result = PackIconMaterialKind.PhoneOff;
-            if (value != null)
+            var model = App.mainService.Model;
+            var sipAccounts = model.SipAccounts;
+            if (value != null && sipAccounts != null)
             {
                 var teleState = (client.TeleState)value;
-                var model = Models.Cti.AgentBasicInfo.Instance;
                 switch (teleState)
                 {
                     case client.TeleState.OffHook:
                         return PackIconMaterialKind.Phone;
                     case client.TeleState.OnHook:
-                        if (model.SipAccountList.Any(x => x.IsRegisterActive))  // 有任何一个注册了的
+                        if (model.SipAccounts.Any(x => x.IsRegisterActive && x.LastRegisterError == 0))  // 有任何一个注册了的
                             return PackIconMaterialKind.PhoneHangup;
                         else
                             return PackIconMaterialKind.PhoneOff;

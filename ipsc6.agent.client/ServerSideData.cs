@@ -2,11 +2,11 @@ namespace ipsc6.agent.client
 {
     public class ServerSideData
     {
-        public ConnectionInfo ConnectionInfo { get; }
+        public CtiServer CtiServer { get; }
 
-        public ServerSideData(ConnectionInfo connectionInfo)
+        public ServerSideData(CtiServer ctiServer)
         {
-            ConnectionInfo = connectionInfo;
+            CtiServer = ctiServer;
         }
 
     }

@@ -20,9 +20,9 @@ namespace ipsc6.agent.client
         public long ProcessId { get; }
         public long AgentSessionId { get; }
         public CallDirection CallDirection { get; }
-        public string RemoteTelnum { get; }
+        public string RemoteTelNum { get; }
         public string RemoteLocation { get; }
-        public string LocalTelnum { get; }
+        public string LocalTelNum { get; }
         public string WorkerNum { get; }
         public QueueInfoType QueueType { get; }
         public string SkillGroupId { get; }
@@ -32,7 +32,7 @@ namespace ipsc6.agent.client
         public bool IsHeld { get; internal set; }
         public HoldEventType HoldType { get; internal set; }
 
-        public CallInfo(ConnectionInfo connectionInfo, int channel, string dataString) : base(connectionInfo)
+        public CallInfo(CtiServer ctiServer, int channel, string dataString) : base(ctiServer)
         {
             Channel = channel;
             IsHeld = false;
@@ -45,22 +45,26 @@ namespace ipsc6.agent.client
                 switch (i)
                 {
                     case 0:
+#pragma warning disable CA1305
                         ProcessId = long.Parse(s);
+#pragma warning restore CA1305
                         break;
                     case 1:
+#pragma warning disable CA1305
                         AgentSessionId = long.Parse(s);
+#pragma warning restore CA1305
                         break;
                     case 2:
                         CallDirection = (CallDirection)Enum.Parse(typeof(CallDirection), s);
                         break;
                     case 3:
-                        RemoteTelnum = s;
+                        RemoteTelNum = s;
                         break;
                     case 4:
                         RemoteLocation = s;
                         break;
                     case 5:
-                        LocalTelnum = s;
+                        LocalTelNum = s;
                         break;
                     case 6:
                         WorkerNum = s;
@@ -87,17 +91,17 @@ namespace ipsc6.agent.client
         public override int GetHashCode()
         {
             int hashCode = 1152885954;
-            hashCode = hashCode * -1521134295 + EqualityComparer<ConnectionInfo>.Default.GetHashCode(ConnectionInfo);
+            hashCode = hashCode * -1521134295 + EqualityComparer<CtiServer>.Default.GetHashCode(CtiServer);
             hashCode = hashCode * -1521134295 + Channel.GetHashCode();
             return hashCode;
         }
         public override bool Equals(object obj) => Equals(obj as CallInfo);
         public bool Equals(CallInfo other) => other != null
-            && EqualityComparer<ConnectionInfo>.Default.Equals(ConnectionInfo, other.ConnectionInfo)
+            && EqualityComparer<CtiServer>.Default.Equals(CtiServer, other.CtiServer)
             && Channel == other.Channel;
         public static bool operator ==(CallInfo left, CallInfo right) => EqualityComparer<CallInfo>.Default.Equals(left, right);
         public static bool operator !=(CallInfo left, CallInfo right) => !(left == right);
         public override string ToString() =>
-            $"<{GetType().Name} Connection={ConnectionInfo}, Channel={Channel}, IsHeld={IsHeld}, HoldType={HoldType}, CallDirection={CallDirection}, RemoteTelnum={RemoteTelnum}>";
+            $"<{GetType().Name} Connection={CtiServer}, Channel={Channel}, IsHeld={IsHeld}, HoldType={HoldType}, CallDirection={CallDirection}, RemoteTelnum={RemoteTelNum}>";
     }
 }

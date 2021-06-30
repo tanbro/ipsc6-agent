@@ -48,10 +48,10 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <ContentControl Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Foreground="{Binding AgentBasicInfo.TeleState, Mode=OneWay, Converter={StaticResource AgentTeleStateToBrushConverters}}"
+                                Foreground="{Binding TeleState, Mode=OneWay, Converter={StaticResource AgentTeleStateToBrushConverters}}"
                                 >
                     <iconPacks:PackIconMaterial Height="24" Width="24"
-                        Kind="{Binding AgentBasicInfo.TeleState, Mode=OneWay, Converter={StaticResource AgentTeleStateToMaterialIconConverter}}"
+                        Kind="{Binding TeleState, Mode=OneWay, Converter={StaticResource AgentTeleStateToMaterialIconConverter}}"
                     />
                 </ContentControl>
                 <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">

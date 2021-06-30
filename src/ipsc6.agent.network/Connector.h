@@ -26,12 +26,13 @@ ref class Connector {
     ~Connector();
 
    private:
-    static HashSet<Connector ^> ^ connectors;
+    static ICollection<Connector ^> ^ connectors;
 
     static EventWaitHandle ^ receiveThreadStarted;
     static Thread ^ receiveThread;
-    static Boolean receiveThreadStopping;
-    static void ReceiveThreadProc();
+    static void ReceiveThreadStarter();
+    static bool ReceiveSpinFunc();
+    static CancellationTokenSource ^ receiveCancelTokenSource;
 
     String ^ _address;
     unsigned short _localPort;
@@ -71,20 +72,19 @@ ref class Connector {
     void SendRawData(array<Byte> ^ data);
     void SendAgentMessage(int commandType, int n, String ^ s);
 
-    event ConnectAttemptFailedEventHandler ^ OnConnectAttemptFailed;
-    event DisconnectedEventHandler ^ OnDisconnected;
-    event ConnectionLostEventHandler ^ OnConnectionLost;
-    event ConnectedEventHandler ^ OnConnected;
-    event AgentMessageReceivedEventHandler ^ OnAgentMessageReceived;
+    event EventHandler ^ OnConnectAttemptFailed;
+    event EventHandler ^ OnDisconnected;
+    event EventHandler ^ OnConnectionLost;
+    event EventHandler<ConnectedEventArgs ^> ^ OnConnected;
+    event EventHandler<AgentMessageReceivedEventArgs ^> ^
+        OnAgentMessageReceived;
 
     /* clang-format off */
     property String ^ BoundAddress { String ^ get() { return _boundAddress; } }
         /* clang-format on */
 
         /* clang-format off */
-    property bool Connected {
-        bool get() { return _remoteAddrIndex >= 0; }
-    }
+    property bool Connected { bool get() { return _remoteAddrIndex >= 0; } }
     /* clang-format on */
 
 };  // ref class Connector

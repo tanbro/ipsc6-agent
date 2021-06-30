@@ -16,10 +16,10 @@ namespace ipsc6.agent.client
         public string CallingNo { get; }
         public string WorkerNum { get; }
         public string CustomeString { get; }
-        private readonly HashSet<AgentGroup> groups = new HashSet<AgentGroup>();
-        public IReadOnlyCollection<AgentGroup> Groups => groups;
+        private readonly HashSet<Group> groups = new();
+        public IReadOnlyCollection<Group> Groups => groups;
 
-        public QueueInfo(ConnectionInfo connectionInfo, ServerSentMessage msg, IReadOnlyCollection<AgentGroup> refGroups) : base(connectionInfo)
+        public QueueInfo(CtiServer ctiServer, ServerSentMessage msg, IReadOnlyCollection<Group> refGroups) : base(ctiServer)
         {
             Channel = msg.N1;
             EventType = (QueueEventType)msg.N2;
@@ -42,7 +42,9 @@ namespace ipsc6.agent.client
                         Type = (QueueInfoType)Enum.Parse(typeof(QueueInfoType), s);
                         break;
                     case 2:
+#pragma warning disable CA1305
                         ProcessId = long.Parse(s);
+#pragma warning restore CA1305
                         break;
                     case 3:
                         Id = s;
@@ -70,14 +72,14 @@ namespace ipsc6.agent.client
         public bool Equals(QueueInfo other)
         {
             return other != null &&
-                   EqualityComparer<ConnectionInfo>.Default.Equals(ConnectionInfo, other.ConnectionInfo) &&
+                   EqualityComparer<CtiServer>.Default.Equals(CtiServer, other.CtiServer) &&
                    Channel == other.Channel;
         }
 
         public override int GetHashCode()
         {
             int hashCode = 379874733;
-            hashCode = hashCode * -1521134295 + EqualityComparer<ConnectionInfo>.Default.GetHashCode(ConnectionInfo);
+            hashCode = hashCode * -1521134295 + EqualityComparer<CtiServer>.Default.GetHashCode(CtiServer);
             hashCode = hashCode * -1521134295 + Channel.GetHashCode();
             return hashCode;
         }
@@ -92,6 +94,6 @@ namespace ipsc6.agent.client
             return !(left == right);
         }
         public override string ToString() =>
-            $"<{GetType().Name} Connection={ConnectionInfo}, Channel={Channel}, EventType={EventType}, Type={Type}, ProcessId={ProcessId}, CallingNo={CallingNo}>";
+            $"<{GetType().Name} Connection={CtiServer}, Channel={Channel}, EventType={EventType}, Type={Type}, ProcessId={ProcessId}, CallingNo={CallingNo}>";
     }
 }

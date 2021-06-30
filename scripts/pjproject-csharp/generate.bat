@@ -11,7 +11,8 @@ swig -v ^
     -I%PJPROJECT_ROOT%\pjsip\include ^
     -c++ -w312 ^
     -csharp -namespace org.pjsip.pjsua2 ^
-    -outdir pjsua2_csharp ^
+    -outdir org.pjsip.pjsua2\Source ^
     %PJPROJECT_ROOT%\pjsip-apps\src\swig\pjsua2.i
 
 move %PJPROJECT_ROOT%\pjsip-apps\src\swig\pjsua2_wrap.* pjsua2_wrap\src
+

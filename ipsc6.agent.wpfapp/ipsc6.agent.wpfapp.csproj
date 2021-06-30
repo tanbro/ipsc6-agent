@@ -9,31 +9,12 @@
     <RootNamespace>ipsc6.agent.wpfapp</RootNamespace>
     <AssemblyName>ipsc6.agent.wpfapp</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <LanguageVersion>latest</LanguageVersion>
+    <LangVersion>latest</LangVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Icons\App.ico</ApplicationIcon>
@@ -44,7 +25,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
@@ -54,7 +34,6 @@
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
@@ -64,7 +43,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
@@ -74,7 +52,6 @@
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
@@ -117,23 +94,21 @@
     <Compile Include="Converters\AgentTeleStateConverters.cs" />
     <Compile Include="Converters\BooleanToPinIconConverter.cs" />
     <Compile Include="DesignData\MainDesignViewModel.cs" />
-    <Compile Include="Controllers\AgentController.cs" />
     <Compile Include="Dialogs\PromptDialog.xaml.cs">
       <DependentUpon>PromptDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="LoginWindow.xaml.cs">
+    <Compile Include="GuiService.cs" />
+    <Compile Include="Views\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\Cti\AgentBasicInfo.cs" />
-    <Compile Include="Models\Cti\AgentStateOperations.cs" />
     <Compile Include="UserControls\AdvPanel.xaml.cs">
       <DependentUpon>AdvPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\PreferencePanel.xaml.cs">
       <DependentUpon>PreferencePanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\SkillPanel.xaml.cs">
-      <DependentUpon>SkillPanel.xaml</DependentUpon>
+    <Compile Include="UserControls\GroupPanel.xaml.cs">
+      <DependentUpon>GroupPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\SysStatusPanel.xaml.cs">
       <DependentUpon>SysStatusPanel.xaml</DependentUpon>
@@ -142,7 +117,6 @@
     <Compile Include="UserControls\WorkerStatusPanel.xaml.cs">
       <DependentUpon>WorkerStatusPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\Cti\RingInfo.cs" />
     <Compile Include="UserControls\DialPanel.xaml.cs">
       <DependentUpon>DialPanel.xaml</DependentUpon>
     </Compile>
@@ -166,11 +140,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="LoginWindow.xaml">
+    <Page Include="Views\LoginWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -178,7 +152,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
@@ -214,7 +188,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\SkillPanel.xaml">
+    <Page Include="UserControls\GroupPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -267,17 +241,12 @@
     <Folder Include="DataTemplates\" />
     <Folder Include="Images\" />
     <Folder Include="SampleData\" />
-    <Folder Include="Views\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ipsc6.agent.client\ipsc6.agent.client.csproj">
-      <Project>{c0c4df43-fda0-4da8-92c5-71cd62f7c47b}</Project>
-      <Name>ipsc6.agent.client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj">
-      <Project>{8c33211b-00b7-414f-af11-1262899195fb}</Project>
-      <Name>org.pjsip.pjsua2</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\ipsc6.agent.client\ipsc6.agent.client.csproj" />
+    <ProjectReference Include="..\ipsc6.agent.server\ipsc6.agent.server.csproj" />
+    <ProjectReference Include="..\ipsc6.agent.services\ipsc6.agent.services.csproj" />
+    <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\64\people-plus.png" />
@@ -323,4 +292,8 @@
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*" . /D /Y
+xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*" . /D /Y</PostBuildEvent>
+  </PropertyGroup>
 </Project>

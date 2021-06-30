@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net461;net48;net5.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <Platforms>x86;x64</Platforms>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+        <PlatformTarget>x64</PlatformTarget>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+        <PlatformTarget>x86</PlatformTarget>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+        <PlatformTarget>x64</PlatformTarget>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+        <PlatformTarget>x86</PlatformTarget>
+    </PropertyGroup>
+
+    <!-- NuGet Packages References -->
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    </ItemGroup>
+
+    <!-- Local Project References -->
+    <ItemGroup>
+        <ProjectReference Include="..\ipsc6.agent.client\ipsc6.agent.client.csproj" />
+        <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
+    </ItemGroup>
+
+    <!-- NuGet -->
+    <ItemGroup>
+        <PackageReference Include="log4net" Version="2.0.12" />
+    </ItemGroup>
+
+</Project>
