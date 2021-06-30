@@ -28,14 +28,12 @@ IPSC 一向以来使用这个库进行服务器-坐席客户端的网络通信
 
 ```sh
 RakNet
-      └── build
-               └── Win32
-               └── x64
+    └── build
+        └── Win32
+            └── x64
 ```
 
-
-
-对于 `x86`，我们打开 `x86 Native Tools Command Prompt for VS`，在 `Win32`目录执行然:
+对于 `x86`，我们打开 `x86 Native Tools Command Prompt for VS`，在 `Win32`目录执行:
 
 ```sh
 cmake -A Win32 ../..
