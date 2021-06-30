@@ -10,7 +10,7 @@ using Newtonsoft.Json.Serialization;
 namespace ipsc6.agent.services.Models
 {
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
-    public class CtiServer
+    public struct CtiServer
     {
         public string Host { get; set; }
         public ushort Port { get; set; }

@@ -288,34 +288,34 @@ namespace ipsc6.agent.client
         {
             var data = new ServerSentMessage(e, Encoding);
             logger.DebugFormat("{0} AgentMessageReceived: {1}", this, data);
-            eventQueue.Enqueue(new EventQueueItem(this, data));
+            eventQueue.Enqueue(new EventQueueItem() { Connection = this, Data = data });
         }
 
         private void Connector_OnConnectionLost(object sender, EventArgs e)
         {
             logger.ErrorFormat("{0} OnConnectionLost", this);
-            eventQueue.Enqueue(new EventQueueItem(this, new ConnectorConnectionLostEventArgs()));
+            eventQueue.Enqueue(new EventQueueItem() { Connection = this, Data = new ConnectorConnectionLostEventArgs() });
         }
 
         private void Connector_OnDisconnected(object sender, EventArgs e)
         {
             logger.WarnFormat("{0} OnDisconnected", this);
-            eventQueue.Enqueue(new EventQueueItem(this, new ConnectorDisconnectedEventArgs()));
+            eventQueue.Enqueue(new EventQueueItem() { Connection = this, Data = new ConnectorDisconnectedEventArgs() });
         }
 
         private void Connector_OnConnected(object sender, network.ConnectedEventArgs e)
         {
             logger.InfoFormat("{0} OnConnected", this);
-            eventQueue.Enqueue(new EventQueueItem(this, new ConnectorConnectedEventArgs()));
+            eventQueue.Enqueue(new EventQueueItem() { Connection = this, Data = new ConnectorConnectedEventArgs() });
         }
 
         private void Connector_OnConnectAttemptFailed(object sender, EventArgs e)
         {
             logger.ErrorFormat("{0} OnConnectAttemptFailed", this);
-            eventQueue.Enqueue(new EventQueueItem(this, new ConnectorConnectAttemptFailedEventArgs()));
+            eventQueue.Enqueue(new EventQueueItem() { Connection = this, Data = new ConnectorConnectAttemptFailedEventArgs() });
         }
 
-        public Encoding Encoding { get; }
+        public Encoding Encoding { get; private set; }
 
         private readonly object connectLock = new();
 
@@ -516,13 +516,8 @@ namespace ipsc6.agent.client
 
     internal struct EventQueueItem
     {
-        public Connection Connection { get; }
-        public object Data { get; }
-        public EventQueueItem(Connection connection, object data)
-        {
-            Connection = connection;
-            Data = data;
-        }
+        public Connection Connection { get; internal set; }
+        public object Data { get; internal set; }
     }
 
 }

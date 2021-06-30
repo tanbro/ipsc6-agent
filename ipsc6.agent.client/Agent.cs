@@ -1399,12 +1399,15 @@ namespace ipsc6.agent.client
             await sipSemaphore.WaitAsync();
             try
             {
-                await SyncFactory.StartNew(SipEndpoint.hangupAllCalls);
-                // 主动挂机了， Call List 也来一个清空动作
-                lock (this)
+                await SyncFactory.StartNew(() =>
                 {
-                    calls.Clear();
-                }
+                    lock (this)
+                    {
+                        SipEndpoint.hangupAllCalls();
+                        // 主动挂机了， Call List 也来一个清空动作
+                        calls.Clear();
+                    }
+                });
             }
             finally
             {

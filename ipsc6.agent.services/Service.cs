@@ -304,6 +304,16 @@ namespace ipsc6.agent.services
             return Model.SipAccounts;
         }
 
+        public async Task Answer()
+        {
+            await agent.AnswerAsync();
+        }
+
+        public async Task Hangup()
+        {
+            await agent.HangupAsync();
+        }
+
         #endregion
 
     }
