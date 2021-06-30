@@ -71,12 +71,9 @@ namespace ipsc6.agent.wpfapp
                     try
                     {
                         _ = ViewModels.MainViewModel.Instance; // ensure lazy create
-                        var loginWindow = new Views.LoginWindow();
-                        var loginResult = loginWindow.ShowDialog();
-                        if (loginResult == true)
+                        if (new Views.LoginWindow().ShowDialog() == true)
                         {
-                            var mainWindow = new Views.MainWindow();
-                            mainWindow.ShowDialog();
+                            new Views.MainWindow().ShowDialog();
                         }
                     }
                     finally

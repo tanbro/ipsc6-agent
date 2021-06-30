@@ -13,21 +13,22 @@ namespace ipsc6.agent.services
     {
 
         #region Demo methods
-        public string Echo(string s)
+        public string Echo(string message)
         {
-            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs() { S = s });
-            return s;
+            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs() { Message = message });
+            return message;
         }
-        public void Throw() => throw new Exception();
 
-        public async Task<string> DelayEcho(string s, int milliseconds)
+        public async Task<string> EchoWithDelay(string message, int milliseconds)
         {
-            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs() { S = s });
+            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs() { Message = message });
             await Task.Delay(milliseconds);
-            return s;
+            return message;
         }
 
         public event EventHandler OnEchoTriggered;
+
+        public static void ThrowAnException(string message) => throw new Exception(message);
         #endregion
 
         #region 内部方法

@@ -13,7 +13,7 @@ namespace ipsc6.agent.services.Events
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class EchoTriggeredEventArgs : EventArgs
     {
-        public string S { get; set; }
+        public string Message { get; set; }
     }
 
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
