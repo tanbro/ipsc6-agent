@@ -16,7 +16,7 @@
 | `remoteTelNum` | `String`  | 远端的号码               |
 | `remoteLoc`    | `String`  | 远端的地理位置           |
 | `workerNum`    | `String`  | 座席工号                 |
-| `skillGroupId` | `String`  | 技能组 ID                |
+| `groupId`      | `String`  | 座席组 ID                |
 | `ivrPath`      | `String`  | IVR 路径                 |
 | `customString` | `String`  | 随路数据                 |
 

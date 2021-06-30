@@ -8,9 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 
 using Microsoft.Extensions.Configuration;
-
 using Microsoft.Toolkit.Mvvm.Input;
-
 
 
 namespace ipsc6.agent.wpfapp.ViewModels
@@ -61,22 +59,22 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         public static async Task DoLoginAsync(object parameter)
         {
-            string _password = parameter is string ? parameter as string : password;
             await loginSem.WaitAsync();
-
-            await Application.Current.Dispatcher.InvokeAsync(async () =>
+            try
             {
-                try
+                string _password = parameter is string ? parameter as string : password;
+                IConfigurationRoot cfgRoot = Config.Manager.ConfigurationRoot;
+                Config.Ipsc cfgIpsc = new();
+                cfgRoot.GetSection(nameof(Config.Ipsc)).Bind(cfgIpsc);
+                logger.InfoFormat(
+                    "CreateAgent - ServerList: {0}, LocalPort: {1}, LocalAddress: \"{2}\"",
+                    (cfgIpsc.ServerList == null) ? "<null>" : $"\"{string.Join(",", cfgIpsc.ServerList)}\"",
+                    cfgIpsc.LocalPort, cfgIpsc.LocalAddress
+                );
+
+                await Application.Current.Dispatcher.InvokeAsync(async () =>
                 {
                     loginCommand.NotifyCanExecuteChanged();
-                    IConfigurationRoot cfgRoot = Config.Manager.ConfigurationRoot;
-                    Config.Ipsc cfgIpsc = new();
-                    cfgRoot.GetSection(nameof(Config.Ipsc)).Bind(cfgIpsc);
-                    logger.InfoFormat(
-                        "CreateAgent - ServerList: {0}, LocalPort: {1}, LocalAddress: \"{2}\"",
-                        (cfgIpsc.ServerList == null) ? "<null>" : $"\"{string.Join(",", cfgIpsc.ServerList)}\"",
-                        cfgIpsc.LocalPort, cfgIpsc.LocalAddress
-                    );
                     App.mainService.CreateAgent(cfgIpsc.ServerList, cfgIpsc.LocalPort, cfgIpsc.LocalAddress);
                     try
                     {
@@ -101,21 +99,19 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         else
                         {
                             logger.FatalFormat("登录期间发成了意料之外的错误: {0}", err);
-                            MessageBox.Show(
-                                $"无法处理的错误\r\n\r\n{err}",
-                                Application.Current.MainWindow.Title,
-                                MessageBoxButton.OK, MessageBoxImage.Error
-                            );
                             throw;
                         }
                     }
-                }
-                finally
-                {
-                    loginSem.Release();
-                }
-                loginCommand.NotifyCanExecuteChanged();
-            });
+                    finally
+                    {
+                        loginCommand.NotifyCanExecuteChanged();
+                    }
+                });
+            }
+            finally
+            {
+                loginSem.Release();
+            }
         }
         #endregion
     }

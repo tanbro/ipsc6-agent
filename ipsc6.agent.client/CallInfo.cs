@@ -14,7 +14,7 @@ namespace ipsc6.agent.client
     //     完整格式：ProcessId;AgentSessionId;呼叫方向;用户电话号码;号码归属地;系统本地电话号码;坐席工号;排队类型;排队技能组ID;IVR路径|InValueStr(原来格式的排队数据)
     //     样例：10000156512848000;10000156512848003;0;18600001111;广州;10050;1001;1;Group1;;|ABCD|123
     */
-    public class Call : ServerSideData, IEquatable<Call>
+    public class CallInfo : ServerSideData, IEquatable<CallInfo>
     {
         public int Channel { get; }
         public long ProcessId { get; }
@@ -32,7 +32,7 @@ namespace ipsc6.agent.client
         public bool IsHeld { get; internal set; }
         public HoldEventType HoldType { get; internal set; }
 
-        public Call(CtiServer ctiServer, int channel, string dataString) : base(ctiServer)
+        public CallInfo(CtiServer ctiServer, int channel, string dataString) : base(ctiServer)
         {
             Channel = channel;
             IsHeld = false;
@@ -95,12 +95,12 @@ namespace ipsc6.agent.client
             hashCode = hashCode * -1521134295 + Channel.GetHashCode();
             return hashCode;
         }
-        public override bool Equals(object obj) => Equals(obj as Call);
-        public bool Equals(Call other) => other != null
+        public override bool Equals(object obj) => Equals(obj as CallInfo);
+        public bool Equals(CallInfo other) => other != null
             && EqualityComparer<CtiServer>.Default.Equals(CtiServer, other.CtiServer)
             && Channel == other.Channel;
-        public static bool operator ==(Call left, Call right) => EqualityComparer<Call>.Default.Equals(left, right);
-        public static bool operator !=(Call left, Call right) => !(left == right);
+        public static bool operator ==(CallInfo left, CallInfo right) => EqualityComparer<CallInfo>.Default.Equals(left, right);
+        public static bool operator !=(CallInfo left, CallInfo right) => !(left == right);
         public override string ToString() =>
             $"<{GetType().Name} Connection={CtiServer}, Channel={Channel}, IsHeld={IsHeld}, HoldType={HoldType}, CallDirection={CallDirection}, RemoteTelnum={RemoteTelNum}>";
     }

@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "venv/bin/python",
+    "python.pythonPath": "venv\\Scripts\\python.exe",
     "plantuml.server": "https://www.plantuml.com/plantuml",
     "yaml.customTags": [
         "tag:yaml.org,2002:python/name:pymdownx.slugs.uslugify"

@@ -77,9 +77,9 @@ namespace ipsc6.agent.client
         public QueueInfoEventArgs(CtiServer connectionInfo, QueueInfo value) : base(connectionInfo, value) { }
     }
 
-    public class HoldInfoEventArgs : BaseCtiEventArgs<Call>
+    public class HoldInfoEventArgs : BaseCtiEventArgs<CallInfo>
     {
-        public HoldInfoEventArgs(CtiServer connectionInfo, Call value) : base(connectionInfo, value) { }
+        public HoldInfoEventArgs(CtiServer connectionInfo, CallInfo value) : base(connectionInfo, value) { }
     }
 
     public struct AgentIdName
@@ -108,9 +108,9 @@ namespace ipsc6.agent.client
         public WorkingChannelInfoReceivedEventArgs(CtiServer connectionInfo, WorkingChannelInfo value) : base(connectionInfo, value) { }
     }
 
-    public class RingInfoReceivedEventArgs : BaseCtiEventArgs<Call>
+    public class RingInfoReceivedEventArgs : BaseCtiEventArgs<CallInfo>
     {
-        public RingInfoReceivedEventArgs(CtiServer connectionInfo, Call value) : base(connectionInfo, value) { }
+        public RingInfoReceivedEventArgs(CtiServer connectionInfo, CallInfo value) : base(connectionInfo, value) { }
     }
 
     public class IvrDataReceivedEventArgs : BaseCtiEventArgs<IvrData>

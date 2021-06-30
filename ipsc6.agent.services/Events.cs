@@ -13,7 +13,7 @@ namespace ipsc6.agent.services.Events
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class EchoTriggeredEventArgs : EventArgs
     {
-        public string S { get; set; }
+        public string Message { get; set; }
     }
 
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
@@ -40,4 +40,9 @@ namespace ipsc6.agent.services.Events
         public client.TeleState NewState { get; set; }
     }
 
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
+    public class CallInfoEventArgs : EventArgs
+    {
+        public Models.CallInfo Call { get; set; }
+    }
 }

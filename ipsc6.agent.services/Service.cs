@@ -13,21 +13,22 @@ namespace ipsc6.agent.services
     {
 
         #region Demo methods
-        public string Echo(string s)
+        public string Echo(string message)
         {
-            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs() { S = s });
-            return s;
+            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs() { Message = message });
+            return message;
         }
-        public void Throw() => throw new Exception();
 
-        public async Task<string> DelayEcho(string s, int milliseconds)
+        public async Task<string> EchoWithDelay(string message, int milliseconds)
         {
-            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs() { S = s });
+            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs() { Message = message });
             await Task.Delay(milliseconds);
-            return s;
+            return message;
         }
 
         public event EventHandler OnEchoTriggered;
+
+        public static void ThrowAnException(string message) => throw new Exception(message);
         #endregion
 
         #region 内部方法
@@ -73,8 +74,12 @@ namespace ipsc6.agent.services
             agent.OnSipRegisterStateChanged += Agent_OnSipRegisterStateChanged;
             agent.OnSipCallStateChanged += Agent_OnSipCallStateChanged;
 
+            agent.OnHoldInfoReceived += Agent_OnHoldInfoReceived;
+            agent.OnRingInfoReceived += Agent_OnRingInfoReceived;
+
             ReloadCtiServers();
         }
+
         #endregion
 
         #region status
@@ -84,7 +89,7 @@ namespace ipsc6.agent.services
         private void Agent_OnAgentDisplayNameReceived(object sender, client.AgentDisplayNameReceivedEventArgs e)
         {
             Model.DisplayName = agent.DisplayName;
-            Model.WorkerNumber = agent.WorkerNumber;
+            Model.WorkerNum = agent.WorkerNum;
             OnLoginCompleted?.Invoke(this, EventArgs.Empty);
         }
 
@@ -116,9 +121,9 @@ namespace ipsc6.agent.services
             });
         }
 
-        internal async Task LogInAsync(string workerNumber, string password)
+        internal async Task LogInAsync(string workerNum, string password)
         {
-            await agent.StartUpAsync(workerNumber, password);
+            await agent.StartUpAsync(workerNum, password);
         }
 
         public async Task SetBusy(client.WorkType workType = client.WorkType.PauseBusy)
@@ -303,8 +308,67 @@ namespace ipsc6.agent.services
             return Model.SipAccounts;
         }
 
+        public async Task Answer()
+        {
+            await agent.AnswerAsync();
+        }
+
+        public async Task Hangup()
+        {
+            await agent.HangupAsync();
+        }
+
         #endregion
 
+        #region Calls
+
+        private void Agent_OnRingInfoReceived(object sender, client.RingInfoReceivedEventArgs e)
+        {
+            var callInfo = CreateCallInfo(e.Value);
+            ReloadCalls();
+            OnRingCallReceived?.Invoke(this, new Events.CallInfoEventArgs() { Call = callInfo });
+        }
+
+        private void Agent_OnHoldInfoReceived(object sender, client.HoldInfoEventArgs e)
+        {
+            var callInfo = CreateCallInfo(e.Value);
+            ReloadCalls();
+            OnHeldCallReceived?.Invoke(this, new Events.CallInfoEventArgs() { Call = callInfo });
+        }
+
+        private Models.CallInfo CreateCallInfo(client.CallInfo value)
+        {
+            return new Models.CallInfo()
+            {
+                CtiIndex = agent.GetConnetionIndex(value.CtiServer),
+                Channel = value.Channel,
+                Direction = value.CallDirection,
+                IsHeld = value.IsHeld,
+                HoldType = value.HoldType,
+                RemoteTeleNum = value.RemoteTelNum,
+                RemoteLoc = value.RemoteLocation,
+                WorkerNum = value.WorkerNum,
+                GroupId = value.SkillGroupId,
+                IvrPath = value.IvrPath,
+                CustomString = value.CustomString,
+            };
+        }
+
+        private void ReloadCalls()
+        {
+            lock (Model)
+            {
+                Model.Calls = (
+                    from primeCallInfo in agent.Calls
+                    select CreateCallInfo(primeCallInfo)
+                ).ToList();
+            }
+        }
+
+        public event EventHandler<Events.CallInfoEventArgs> OnRingCallReceived;
+        public event EventHandler<Events.CallInfoEventArgs> OnHeldCallReceived;
+
+        #endregion
     }
 #pragma warning restore VSTHRD200
 }

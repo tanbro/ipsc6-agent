@@ -18,7 +18,6 @@ namespace ipsc6.agent.wpfapp
     /// </summary>
     public partial class App : Application
     {
-
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(App));
 
         private void Application_Startup(object sender, StartupEventArgs e)
@@ -72,12 +71,9 @@ namespace ipsc6.agent.wpfapp
                     try
                     {
                         _ = ViewModels.MainViewModel.Instance; // ensure lazy create
-                        var loginWindow = new Views.LoginWindow();
-                        var loginResult = loginWindow.ShowDialog();
-                        if (loginResult == true)
+                        if (new Views.LoginWindow().ShowDialog() == true)
                         {
-                            var mainWindow = new Views.MainWindow();
-                            mainWindow.ShowDialog();
+                            new Views.MainWindow().ShowDialog();
                         }
                     }
                     finally

@@ -293,7 +293,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*" "$(OutDir)" /D /Y
-xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*" "$(OutDir)" /D /Y</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*" . /D /Y
+xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*" . /D /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>

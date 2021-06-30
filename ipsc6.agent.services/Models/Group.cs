@@ -10,7 +10,7 @@ using Newtonsoft.Json.Serialization;
 namespace ipsc6.agent.services.Models
 {
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
-    public class Group
+    public struct Group
     {
         public string Id { get; internal set; }
         public string Name { get; internal set; }
