@@ -130,7 +130,7 @@ namespace ipsc6.agent.client
 
         public AgentRunningState RunningState { get; private set; } = AgentRunningState.Stopped;
 
-        public string WorkerNumber { get; private set; }
+        public string WorkerNum { get; private set; }
 
         private string password;
 
@@ -178,10 +178,10 @@ namespace ipsc6.agent.client
 
         public event EventHandler<HoldInfoEventArgs> OnHoldInfoReceived;
 
-        readonly HashSet<Call> calls = new();
-        public IReadOnlyCollection<Call> Calls => calls;
+        readonly HashSet<CallInfo> calls = new();
+        public IReadOnlyCollection<CallInfo> Calls => calls;
 
-        public IReadOnlyCollection<Call> HeldCalls
+        public IReadOnlyCollection<CallInfo> HeldCalls
         {
             get
             {
@@ -364,7 +364,7 @@ namespace ipsc6.agent.client
         {
             var channel = msg.N1;
             var holdEventType = (HoldEventType)msg.N2;
-            var callInfo = new Call(ctiServer, channel, msg.S)
+            var callInfo = new CallInfo(ctiServer, channel, msg.S)
             {
                 IsHeld = holdEventType != HoldEventType.Cancel,
                 HoldType = holdEventType,
@@ -465,7 +465,7 @@ namespace ipsc6.agent.client
                     foreach (var addr in evt.Value)
                     {
                         logger.DebugFormat("处理 SipAccount 地址 {0} ...", addr);
-                        var uri = $"sip:{WorkerNumber}@{addr}";
+                        var uri = $"sip:{WorkerNum}@{addr}";
                         Sip.Account acc;
                         acc = sipAccountCollection.FirstOrDefault(x => x.getInfo().uri == uri);
                         if (acc != null)
@@ -475,7 +475,7 @@ namespace ipsc6.agent.client
                             acc.Dispose();
                         }
                         logger.DebugFormat("SipAccount 新建帐户 {0} ...", uri);
-                        using var sipAuthCred = new AuthCredInfo("digest", "*", WorkerNumber, 0, "hesong");
+                        using var sipAuthCred = new AuthCredInfo("digest", "*", WorkerNum, 0, "hesong");
                         using var cfg = new AccountConfig { idUri = uri };
                         cfg.regConfig.timeoutSec = 60;
                         cfg.regConfig.retryIntervalSec = 30;
@@ -581,7 +581,7 @@ namespace ipsc6.agent.client
         private void DoOnRing(CtiServer ctiServer, ServerSentMessage msg)
         {
             var workingChannelInfo = new WorkingChannelInfo(msg.N2);
-            var callInfo = new Call(ctiServer, workingChannelInfo.Channel, msg.S);
+            var callInfo = new CallInfo(ctiServer, workingChannelInfo.Channel, msg.S);
             logger.DebugFormat("OnRing - {0}", callInfo);
             lock (this)
             {
@@ -853,7 +853,7 @@ namespace ipsc6.agent.client
                                     logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
                                     try
                                     {
-                                        await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNumber, password, flag: 0);
+                                        await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 0);
                                         logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
                                     }
                                     catch (ConnectionException ex)
@@ -871,7 +871,7 @@ namespace ipsc6.agent.client
                                     logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
                                     try
                                     {
-                                        await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNumber, password, flag: 1);
+                                        await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 1);
                                         logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
                                     }
                                     catch (ConnectionException ex)
@@ -899,7 +899,7 @@ namespace ipsc6.agent.client
                                 logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
                                 try
                                 {
-                                    await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNumber, password, flag: 0);
+                                    await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 0);
                                     logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
                                 }
                                 catch (ConnectionException ex)
@@ -925,7 +925,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        public async Task StartUpAsync(string workerNumber, string password)
+        public async Task StartUpAsync(string workerNum, string password)
         {
             using (requestGuard.TryEnter())
             {
@@ -948,12 +948,12 @@ namespace ipsc6.agent.client
                     minorIndices = from i in Enumerable.Range(0, ctiServers.Count)
                                    where i != MainConnectionIndex
                                    select i;
-                    WorkerNumber = workerNumber;
+                    WorkerNum = workerNum;
                     this.password = password;
                     logger.InfoFormat("主服务节点 [{0}]({1}|{2}) 首次连接 ... ", MainConnectionIndex, MainConnectionInfo.Host, MainConnectionInfo.Port);
                     await mainConnection.OpenAsync(
                         MainConnectionInfo.Host, MainConnectionInfo.Port,
-                        workerNumber, password,
+                        workerNum, password,
                         flag: 1
                     );
                     lock (this)
@@ -973,7 +973,7 @@ namespace ipsc6.agent.client
                 var tasks = from i in minorIndices
                             select connections[i].OpenAsync(
                                 ctiServers[i].Host, ctiServers[i].Port,
-                                workerNumber, password,
+                                workerNum, password,
                                 flag: 0
                             );
                 await Task.WhenAll(tasks);
@@ -1195,14 +1195,14 @@ namespace ipsc6.agent.client
             await XferAsync(connectionInfo, channel, groupId, workerNum, customString);
         }
 
-        public async Task Xfer(Call callInfo, string groupId, string workerNum = "", string customString = "")
+        public async Task Xfer(CallInfo callInfo, string groupId, string workerNum = "", string customString = "")
         {
             await XferAsync(callInfo.CtiServer, callInfo.Channel, groupId, workerNum, customString);
         }
 
         public async Task XferAsync(string groupId, string workerNum = "", string customString = "")
         {
-            Call callInfo = HeldCalls.First();
+            CallInfo callInfo = HeldCalls.First();
             await Xfer(callInfo, groupId, workerNum, customString);
         }
 
@@ -1210,7 +1210,7 @@ namespace ipsc6.agent.client
         {
             using (requestGuard.TryEnter())
             {
-                Call callInfo = HeldCalls.FirstOrDefault();
+                CallInfo callInfo = HeldCalls.FirstOrDefault();
                 var conn = (callInfo == null) ? mainConnection : GetConnection(callInfo.CtiServer);
                 var s = $"{workerNum}|{groupId}|{customString}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT, -1, s);
@@ -1235,7 +1235,7 @@ namespace ipsc6.agent.client
             await XferExtAsync(connectionInfo, channel, calledTelnum, callingTelnum, channelGroup, option);
         }
 
-        public async Task XferExtAsync(Call callInfo, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        public async Task XferExtAsync(CallInfo callInfo, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
             var connectionInfo = callInfo.CtiServer;
             var channel = callInfo.Channel;
@@ -1244,7 +1244,7 @@ namespace ipsc6.agent.client
 
         public async Task XferExtAsync(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
         {
-            Call callInfo = HeldCalls.First();
+            CallInfo callInfo = HeldCalls.First();
             await XferExtAsync(callInfo, calledTelnum, callingTelnum, channelGroup, option);
         }
 
@@ -1252,7 +1252,7 @@ namespace ipsc6.agent.client
         {
             using (requestGuard.TryEnter())
             {
-                Call callInfo = HeldCalls.First();
+                CallInfo callInfo = HeldCalls.First();
                 var conn = GetConnection(callInfo.CtiServer);
                 var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT_EX, -1, s);
@@ -1277,7 +1277,7 @@ namespace ipsc6.agent.client
             await CallIvrAsync(connectionInfo, channel, ivrId, invokeType, customString);
         }
 
-        public async Task CallIvrAsync(Call callInfo, string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
+        public async Task CallIvrAsync(CallInfo callInfo, string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
         {
             var connectionInfo = callInfo.CtiServer;
             var channel = callInfo.Channel;
@@ -1286,7 +1286,7 @@ namespace ipsc6.agent.client
 
         public async Task CallIvrAsync(string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
         {
-            Call callInfo;
+            CallInfo callInfo;
             lock (this)
             {
                 callInfo = (
@@ -1309,7 +1309,7 @@ namespace ipsc6.agent.client
         {
             using (requestGuard.TryEnter())
             {
-                Call callInfo;
+                CallInfo callInfo;
                 lock (this)
                 {
                     callInfo = (
@@ -1340,7 +1340,7 @@ namespace ipsc6.agent.client
             await UnHoldAsync(connectionInfo, channel);
         }
 
-        public async Task UnHold(Call callInfo)
+        public async Task UnHold(CallInfo callInfo)
         {
             await UnHoldAsync(callInfo.CtiServer, callInfo.Channel);
         }

@@ -11,7 +11,9 @@ using Microsoft.Toolkit.Mvvm.Input;
 
 namespace ipsc6.agent.wpfapp.ViewModels
 {
+#pragma warning disable IDE0065
     using AgentStateWorkType = Tuple<client.AgentState, client.WorkType>;
+#pragma warning restore IDE0065
 
     public class MainViewModel : Utils.SingletonObservableObject<MainViewModel>
     {
@@ -38,35 +40,37 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => snapped;
             set
             {
-                var win = Application.Current.MainWindow;
+                var window = Application.Current.MainWindow;
                 if (value)
                 {
-                    win.Height = 8;
-                    win.Top = 0;
+                    window.Height = 8;
+                    window.Top = 0;
                     MainPanelVisibility = Visibility.Collapsed;
                 }
                 else
                 {
-                    win.Height = 80;
+                    window.Height = 80;
                     MainPanelVisibility = Visibility.Visible;
                 }
                 SetProperty(ref snapped, value);
             }
         }
 
-        static double mainWindowHeight;
+        private static double mainWindowHeight;
         public double MainWindowHeight
         {
             get => mainWindowHeight;
             set => SetProperty(ref mainWindowHeight, value);
         }
-        static double mainWindowTop;
+
+        private static double mainWindowTop;
         public double MainWindowTop
         {
             get => mainWindowTop;
             set => SetProperty(ref mainWindowTop, value);
         }
-        static Visibility mainPanelVisibility = Visibility.Visible;
+
+        private static Visibility mainPanelVisibility = Visibility.Visible;
         public Visibility MainPanelVisibility
         {
             get => mainPanelVisibility;
@@ -102,7 +106,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static void MainService_OnLoginCompleted(object sender, EventArgs e)
         {
             var m = App.mainService.Model;
-            Instance.WorkerNumber = m.WorkerNumber;
+            Instance.WorkerNumber = m.WorkerNum;
             Instance.DisplayName = m.DisplayName;
         }
 

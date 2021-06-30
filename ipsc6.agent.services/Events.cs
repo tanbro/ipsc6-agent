@@ -40,4 +40,9 @@ namespace ipsc6.agent.services.Events
         public client.TeleState NewState { get; set; }
     }
 
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
+    public class CallInfoEventArgs : EventArgs
+    {
+        public Models.CallInfo Call { get; set; }
+    }
 }

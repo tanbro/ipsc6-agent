@@ -8,13 +8,13 @@ using System.Windows.Data;
 
 namespace ipsc6.agent.wpfapp.Converters
 {
-    [ValueConversion(typeof(IReadOnlyCollection<client.Call>), typeof(string))]
+    [ValueConversion(typeof(IReadOnlyCollection<client.CallInfo>), typeof(string))]
     class AgentCallsToHoldPanelTitleConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null) return "0";
-            var v = value as IReadOnlyCollection<client.Call>;
+            var v = value as IReadOnlyCollection<client.CallInfo>;
             return v.Count.ToString();
         }
 
