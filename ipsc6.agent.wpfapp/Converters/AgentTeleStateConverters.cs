@@ -17,25 +17,25 @@ namespace ipsc6.agent.wpfapp.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             Color color = (Color)ColorConverter.ConvertFromString("#808080");
-            //var model = App.mainService.Model;
-            //var sipAccounts = model.SipAccounts;
-            //if (value != null && sipAccounts != null)
-            //{
-            //    var teleState = (client.TeleState)value;
-            //    if (model.SipAccounts.Any(x => x.IsRegisterActive && x.LastRegisterError == 0))  // 有注册了的
-            //    {
-            //        switch (teleState)
-            //        {
-            //            case client.TeleState.OffHook:
-            //                color = (Color)ColorConverter.ConvertFromString("#3ea4d8");
-            //                break;
-            //            case client.TeleState.OnHook:
-            //                color = (Color)ColorConverter.ConvertFromString("#ba0300");
-            //                break;
-            //            default: break;
-            //        }
-            //    }
-            //}
+            var vm = ViewModels.MainViewModel.Instance;
+            var sipAccounts = vm.SipAccounts;
+            if (value != null && sipAccounts != null)
+            {
+                var teleState = (client.TeleState)value;
+                if (sipAccounts.Any(x => x.IsRegisterActive && x.LastRegisterError == 0))  // 有注册了的
+                {
+                    switch (teleState)
+                    {
+                        case client.TeleState.OffHook:
+                            color = (Color)ColorConverter.ConvertFromString("#3ea4d8");
+                            break;
+                        case client.TeleState.OnHook:
+                            color = (Color)ColorConverter.ConvertFromString("#ba0300");
+                            break;
+                        default: break;
+                    }
+                }
+            }
             return new SolidColorBrush(color);
 
         }
@@ -52,23 +52,23 @@ namespace ipsc6.agent.wpfapp.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var result = PackIconMaterialKind.PhoneOff;
-            //var model = App.mainService.Model;
-            //var sipAccounts = model.SipAccounts;
-            //if (value != null && sipAccounts != null)
-            //{
-            //    var teleState = (client.TeleState)value;
-            //    switch (teleState)
-            //    {
-            //        case client.TeleState.OffHook:
-            //            return PackIconMaterialKind.Phone;
-            //        case client.TeleState.OnHook:
-            //            if (model.SipAccounts.Any(x => x.IsRegisterActive && x.LastRegisterError == 0))  // 有任何一个注册了的
-            //                return PackIconMaterialKind.PhoneHangup;
-            //            else
-            //                return PackIconMaterialKind.PhoneOff;
-            //        default: break;
-            //    }
-            //}
+            var vm = ViewModels.MainViewModel.Instance;
+            var sipAccounts = vm.SipAccounts;
+            if (value != null && sipAccounts != null)
+            {
+                var teleState = (client.TeleState)value;
+                switch (teleState)
+                {
+                    case client.TeleState.OffHook:
+                        return PackIconMaterialKind.Phone;
+                    case client.TeleState.OnHook:
+                        if (sipAccounts.Any(x => x.IsRegisterActive && x.LastRegisterError == 0))  // 有任何一个注册了的
+                            return PackIconMaterialKind.PhoneHangup;
+                        else
+                            return PackIconMaterialKind.PhoneOff;
+                    default: break;
+                }
+            }
             return result;
         }
 

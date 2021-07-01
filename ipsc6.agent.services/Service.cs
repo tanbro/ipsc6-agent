@@ -103,6 +103,7 @@ namespace ipsc6.agent.services
             {
                 Model.State = e.NewState.AgentState;
                 Model.WorkType = e.NewState.WorkType;
+                ReloadCalls();
             }
             OnStatusChanged?.Invoke(this, new Events.StatusChangedEventArgs()
             {
@@ -119,6 +120,7 @@ namespace ipsc6.agent.services
         private void Agent_OnTeleStateChanged(object sender, client.TeleStateChangedEventArgs e)
         {
             Model.TeleState = e.NewState;
+            ReloadCalls();
             OnTeleStateChanged?.Invoke(this, new Events.TeleStateChangedEventArgs()
             {
                 OldState = e.OldState,

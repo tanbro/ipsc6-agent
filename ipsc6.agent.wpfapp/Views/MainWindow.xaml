@@ -50,9 +50,7 @@
             <uc:QueuePanel Grid.Column="2" Margin="1 0 0 1"/>
             -->
             <uc:MainToolBar Grid.Column="3" Margin="1 0 0 1"/>
-            <!--
             <uc:HoldPanel Grid.Column="4" Margin="1 0 0 1"/>
--->
             <uc:WorkerStatusPanel Grid.Column="5" Margin="1 0 0 1"/>
             <uc:GroupPanel Grid.Column="6" Margin="1 0 0 1"/>
             <uc:SysStatusPanel Grid.Column="7" Margin="1 0 0 1"/>

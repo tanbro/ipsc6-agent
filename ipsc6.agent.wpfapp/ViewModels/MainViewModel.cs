@@ -79,6 +79,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
+        #region ctor
         private static void RefreshExecutables()
         {
             IRelayCommand[] commands =
@@ -86,8 +87,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 answerCommand, hangupCommand,
                 groupPopupCommand,
                 statePopupCommand, setStateCommand,
-                //skillSignCommand,
-                //holdCommand, unHoldCommand,
+                signGroupCommand,
+                holdCommand, unHoldCommand,
             };
             foreach (var command in commands)
             {
@@ -102,7 +103,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
             App.mainService.OnSignedGroupsChanged += MainService_OnSignedGroupsChanged;
             App.mainService.OnRingCallReceived += MainService_OnRingCallReceived;
             App.mainService.OnHeldCallReceived += MainService_OnHeldCallReceived;
+            App.mainService.OnTeleStateChanged += MainService_OnTeleStateChanged;
+            App.mainService.OnSipRegisterStateChanged += MainService_OnSipRegisterStateChanged;
         }
+
+        #endregion
 
         #region Agent Status
         private static void MainService_OnLoginCompleted(object sender, EventArgs e)
@@ -139,14 +144,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => status;
             set => SetProperty(ref status, value);
         }
-
-        private static client.AgentState teleStats;
-        public client.AgentState TeleStats
-        {
-            get => teleStats;
-            set => SetProperty(ref teleStats, value);
-        }
-
         #endregion
 
         #region Group
@@ -184,10 +181,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
             set => SetProperty(ref groups, value);
         }
 
-        private static readonly IAsyncRelayCommand signGroupCommand = new AsyncRelayCommand<object>(DoSignGroupAsync, CanSignGroup);
-        public IAsyncRelayCommand SignGroupCommand => signGroupCommand;
+        private static readonly IRelayCommand signGroupCommand = new RelayCommand<object>(DoSignGroup, CanSignGroup);
+        public IRelayCommand SignGroupCommand => signGroupCommand;
 
-        private static async Task DoSignGroupAsync(object parameter)
+        private static async void DoSignGroup(object parameter)
         {
             string groupId = parameter as string;
             var svc = App.mainService;
@@ -208,6 +205,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static bool CanSignGroup(object _)
         {
             //if (Utils.CommandGuard.IsGuarding) return false;
+            client.AgentState[] allowedAgentStates = { client.AgentState.OnLine, client.AgentState.Idle, client.AgentState.Pause, client.AgentState.Leave };
+            if (!allowedAgentStates.Any(x => x == status.Item1)) return false;
             return true;
         }
 
@@ -292,6 +291,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region Tele State
+        private static void MainService_OnTeleStateChanged(object sender, services.Events.TeleStateChangedEventArgs e)
+        {
+            Instance.TeleState = e.NewState;
+        }
+
         private static client.TeleState teleState;
         public client.TeleState TeleState
         {
@@ -302,6 +306,20 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region SIP UAC
+        private static void MainService_OnSipRegisterStateChanged(object sender, EventArgs e)
+        {
+            var svc = App.mainService;
+            Instance.SipAccounts = svc.GetSipAccounts();
+            // UI 上的电话状态Icon/Label的转换结果由“TeleState”和注册状态共同计算得出，但是 bingding 只有 TeleState(不规范)，所以这里强行传播给绑定
+            Instance.OnPropertyChanged("TeleState");
+        }
+
+        private static IReadOnlyCollection<services.Models.SipAccount> sipAccounts;
+        public IReadOnlyCollection<services.Models.SipAccount> SipAccounts
+        {
+            get => sipAccounts;
+            set => SetProperty(ref sipAccounts, value);
+        }
         private static readonly IRelayCommand answerCommand = new RelayCommand(DoAnswer, CanAnswer);
         public IRelayCommand AnswerCommand => answerCommand;
 
@@ -318,6 +336,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static bool CanAnswer()
         {
             //if (Utils.CommandGuard.IsGuarding) return false;
+            var callsIter = sipAccounts.SelectMany(m => m.Calls);
+            if (!callsIter.Any(x => x.State == org.pjsip.pjsua2.pjsip_inv_state.PJSIP_INV_STATE_CONNECTING)) return false;
             return true;
         }
 
@@ -338,6 +358,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             //if (Utils.CommandGuard.IsGuarding) return false;
             return true;
         }
+
         #endregion
 
         #region 座席咨询
@@ -400,30 +421,44 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
-        #region Call/Hold List
+        #region Call/Hold 保持 取消保持
 
         private static void MainService_OnHeldCallReceived(object sender, services.Events.CallInfoEventArgs e)
         {
-            throw new NotImplementedException();
+            ReloadCalls();
         }
 
         private static void MainService_OnRingCallReceived(object sender, services.Events.CallInfoEventArgs e)
         {
-            throw new NotImplementedException();
+            ReloadCalls();
         }
 
-        private static IReadOnlyList<services.Models.CallInfo> calls = new services.Models.CallInfo[] { };
-        public IReadOnlyList<services.Models.CallInfo> Calls
+        private static void ReloadCalls()
+        {
+            var svc = App.mainService;
+            Instance.Calls = svc.GetCalls();
+            Instance.HeldCalls = Instance.Calls.Where(x => x.IsHeld).ToList();
+            RefreshExecutables();
+        }
+
+        private static IReadOnlyCollection<services.Models.CallInfo> calls = new services.Models.CallInfo[] { };
+        public IReadOnlyCollection<services.Models.CallInfo> Calls
         {
             get => calls;
             set => SetProperty(ref calls, value);
         }
-        #endregion
 
-        #region 保持
-        static readonly IRelayCommand holdCommand = new RelayCommand(DoHold, CanHold);
+        private static IReadOnlyCollection<services.Models.CallInfo> heldCalls = new services.Models.CallInfo[] { };
+        public IReadOnlyCollection<services.Models.CallInfo> HeldCalls
+        {
+            get => heldCalls;
+            set => SetProperty(ref heldCalls, value);
+        }
+
+        private static readonly IRelayCommand holdCommand = new RelayCommand(DoHold, CanHold);
         public IRelayCommand HoldCommand => holdCommand;
-        static async void DoHold()
+
+        private static async void DoHold()
         {
             var svc = App.mainService;
             using (await Utils.CommandGuard.CreateAsync(holdCommand))
@@ -438,15 +473,13 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (!calls.Any(x => !x.IsHeld)) return false;
             return true;
         }
-        #endregion
 
-        #region 取消保持
-        static readonly IRelayCommand unHoldCommand = new RelayCommand<object>(DoUnHold, CanUnHold);
+        private static readonly IRelayCommand unHoldCommand = new RelayCommand<object>(DoUnHold, CanUnHold);
         public IRelayCommand UnHoldCommand => unHoldCommand;
-        static async void DoUnHold(object parameter)
+        private static async void DoUnHold(object parameter)
         {
             var svc = App.mainService;
-            using (await Utils.CommandGuard.CreateAsync(unHoldCommand))
+            using (await Utils.CommandGuard.CreateAsync(unHoldCommand).ConfigureAwait(true))
             {
                 if (parameter == null)
                 {
@@ -461,8 +494,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         static bool CanUnHold(object parameter)
         {
-            //if (Utils.CommandGuard.IsGuarding) return false;
-
             var svc = App.mainService;
             if (status.Item1 != client.AgentState.Work) return false;
             if (parameter == null)
@@ -473,7 +504,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
             {
                 var callInfo = (services.Models.CallInfo)parameter;
                 if (!callInfo.IsHeld) return false;
-
             }
             return true;
         }

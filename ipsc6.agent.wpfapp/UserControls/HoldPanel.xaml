@@ -46,10 +46,10 @@
                 CornerRadius="0 0 5 5">
                 <Button Style="{StaticResource ScoreButtonStyle}" Command="{Binding HoldPopupCommand}">
                     <StackPanel>
-                        <TextBlock Text="{Binding AgentBasicInfo.HoldList.Count, Mode=OneWay}"/>
+                        <TextBlock Text="{Binding HeldCalls.Count, Mode=OneWay}"/>
                         <Popup StaysOpen="False" IsOpen="{Binding IsHoldPopupOpened}">
                             <ContentControl>
-                                <ListBox ItemsSource="{Binding AgentBasicInfo.HoldList, Mode=OneWay}">
+                                <ListBox ItemsSource="{Binding HeldCalls, Mode=OneWay}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Background="{StaticResource MyBackgroud}">
@@ -65,12 +65,12 @@
                                                     <ContentControl Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                         <iconPacks:PackIconMaterial
                                                             Foreground="DarkBlue"
-                                                            ToolTip="{Binding CallDirection, Mode=OneWay, Converter={StaticResource AgentCallDirectionToStringConverter}}"
-                                                            Kind="{Binding CallDirection, Mode=OneWay, Converter={StaticResource AgentCallDirectionToMaterialIconConverter}}"/>
+                                                            ToolTip="{Binding Direction, Mode=OneWay, Converter={StaticResource AgentCallDirectionToStringConverter}}"
+                                                            Kind="{Binding Direction, Mode=OneWay, Converter={StaticResource AgentCallDirectionToMaterialIconConverter}}"/>
                                                     </ContentControl>
                                                     <TextBlock Grid.Column="1" VerticalAlignment="Center"
                                                                Foreground="DarkBlue"
-                                                               Text="{Binding RemoteTelnum}"/>
+                                                               Text="{Binding RemoteTeleNum}"/>
                                                 </Grid>
                                                 <Button Grid.Column="1" Style="{StaticResource MyCommonButton}"
                                                         Margin="4" Height="48" Width="48"
