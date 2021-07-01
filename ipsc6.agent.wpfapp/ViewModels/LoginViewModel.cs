@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Toolkit.Mvvm.Input;
 
+#pragma warning disable VSTHRD100
 
 namespace ipsc6.agent.wpfapp.ViewModels
 {
@@ -28,7 +29,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             {
                 if (SetProperty(ref workerNumber, value))
                 {
-                    LoginCommand.NotifyCanExecuteChanged();
+                    Application.Current.Dispatcher.Invoke(LoginCommand.NotifyCanExecuteChanged);
                 }
             }
         }
@@ -41,55 +42,56 @@ namespace ipsc6.agent.wpfapp.ViewModels
             {
                 if (SetProperty(ref password, value))
                 {
-                    LoginCommand.NotifyCanExecuteChanged();
+                    Application.Current.Dispatcher.Invoke(LoginCommand.NotifyCanExecuteChanged);
                 }
             }
         }
 
-        #region Login Command
         private static readonly IAsyncRelayCommand loginCommand = new AsyncRelayCommand<object>(DoLoginAsync, CanLogin);
         public IAsyncRelayCommand LoginCommand => loginCommand;
 
         private static bool CanLogin(object _)
         {
-            return loginSem.CurrentCount > 0 && !string.IsNullOrEmpty(workerNumber) && !string.IsNullOrEmpty(password);
+            if (string.IsNullOrEmpty(workerNumber) || string.IsNullOrEmpty(password))
+                return false;
+            if (Utils.CommandGuard.IsGuarding)
+                return false;
+            return true;
         }
-
-        private static readonly SemaphoreSlim loginSem = new(1);
 
         public static async Task DoLoginAsync(object parameter)
         {
-            await loginSem.WaitAsync();
-            try
-            {
-                string _password = parameter is string ? parameter as string : password;
-                IConfigurationRoot cfgRoot = Config.Manager.ConfigurationRoot;
-                Config.Ipsc cfgIpsc = new();
-                cfgRoot.GetSection(nameof(Config.Ipsc)).Bind(cfgIpsc);
-                logger.InfoFormat(
-                    "CreateAgent - ServerList: {0}, LocalPort: {1}, LocalAddress: \"{2}\"",
-                    (cfgIpsc.ServerList == null) ? "<null>" : $"\"{string.Join(",", cfgIpsc.ServerList)}\"",
-                    cfgIpsc.LocalPort, cfgIpsc.LocalAddress
-                );
+            string _password = parameter is string ? parameter as string : password;
+            var dispatcher = Application.Current.Dispatcher;
+            var svc = App.mainService;
 
-                await Application.Current.Dispatcher.InvokeAsync(async () =>
+            using (await Utils.CommandGuard.CreateAsync(loginCommand))
+            {
+                await dispatcher.InvokeAsync(async () =>
                 {
-                    loginCommand.NotifyCanExecuteChanged();
-                    App.mainService.CreateAgent(cfgIpsc.ServerList, cfgIpsc.LocalPort, cfgIpsc.LocalAddress);
+                    IConfigurationRoot cfgRoot = Config.Manager.ConfigurationRoot;
+                    Config.Ipsc cfgIpsc = new();
+                    cfgRoot.GetSection(nameof(Config.Ipsc)).Bind(cfgIpsc);
+                    logger.InfoFormat(
+                        "DoLoginAsync - CreateAgent - ServerList: {0}, LocalPort: {1}, LocalAddress: \"{2}\"",
+                        (cfgIpsc.ServerList == null) ? "<null>" : $"\"{string.Join(",", cfgIpsc.ServerList)}\"",
+                        cfgIpsc.LocalPort, cfgIpsc.LocalAddress
+                    );
+                    svc.CreateAgent(cfgIpsc.ServerList, cfgIpsc.LocalPort, cfgIpsc.LocalAddress);
                     try
                     {
-                        logger.Debug("开始登录 ...");
-                        await App.mainService.LogInAsync(workerNumber, _password);
-                        logger.Info("登录成功");
+                        logger.Debug("DoLoginAsync - 开始登录 ...");
+                        await svc.LogInAsync(workerNumber, _password);
+                        logger.Info("DoLoginAsync - 登录成功");
                         window.DialogResult = true;
                         window.Close();
                     }
                     catch (Exception err)
                     {
-                        App.mainService.DestroyAgent();
+                        svc.DestroyAgent();
                         if (err is client.ConnectionException)
                         {
-                            logger.ErrorFormat("登录失败: {0}", err);
+                            logger.ErrorFormat("DoLoginAsync - 登录失败: {0}", err);
                             MessageBox.Show(
                                 $"登录失败\r\n\r\n{err}",
                                 Application.Current.MainWindow.Title,
@@ -98,22 +100,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         }
                         else
                         {
-                            logger.FatalFormat("登录期间发成了意料之外的错误: {0}", err);
+                            logger.FatalFormat("DoLoginAsync - {0}", err);
                             throw;
                         }
                     }
-                    finally
-                    {
-                        loginCommand.NotifyCanExecuteChanged();
-                    }
                 });
             }
-            finally
-            {
-                loginSem.Release();
-            }
         }
-        #endregion
     }
 
 }
+
+#pragma warning restore VSTHRD100

@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
+
+using Newtonsoft.Json;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 [assembly: InternalsVisibleTo("ipsc6.agent.wpfapp")]
 namespace ipsc6.agent.services
@@ -11,7 +14,6 @@ namespace ipsc6.agent.services
 #pragma warning disable VSTHRD200
     public class Service
     {
-
         #region Demo methods
         public string Echo(string message)
         {
@@ -35,7 +37,7 @@ namespace ipsc6.agent.services
 
         internal client.Agent agent;
 
-        internal Models.Model Model = new();
+        private readonly Models.Model Model = new();
 
         internal static void Initial()
         {
@@ -97,8 +99,11 @@ namespace ipsc6.agent.services
 
         private void Agent_OnAgentStateChanged(object sender, client.AgentStateChangedEventArgs e)
         {
-            Model.State = e.NewState.AgentState;
-            Model.WorkType = e.NewState.WorkType;
+            lock (Model)
+            {
+                Model.State = e.NewState.AgentState;
+                Model.WorkType = e.NewState.WorkType;
+            }
             OnStatusChanged?.Invoke(this, new Events.StatusChangedEventArgs()
             {
                 OldState = e.OldState.AgentState,
@@ -126,6 +131,16 @@ namespace ipsc6.agent.services
             await agent.StartUpAsync(workerNum, password);
         }
 
+        public IReadOnlyList<string> GetWorkerNum()
+        {
+            return new List<string> { Model.WorkerNum, Model.DisplayName };
+        }
+
+        public IReadOnlyList<int> GetStatus()
+        {
+            return new List<int> { (int)Model.State, (int)Model.WorkType };
+        }
+
         public async Task SetBusy(client.WorkType workType = client.WorkType.PauseBusy)
         {
             await agent.SetBusyAsync(workType);
@@ -138,7 +153,16 @@ namespace ipsc6.agent.services
 
         public Models.Model GetModel()
         {
-            return Model;
+#pragma warning disable SYSLIB0011
+            using MemoryStream ms = new();
+            BinaryFormatter formatter = new();
+            lock (Model)
+            {
+                formatter.Serialize(ms, Model);
+            }
+            ms.Position = 0;
+            return (Models.Model)formatter.Deserialize(ms);
+#pragma warning restore SYSLIB0011
         }
         #endregion
 
@@ -182,7 +206,7 @@ namespace ipsc6.agent.services
 
         public IReadOnlyCollection<Models.CtiServer> GetCtiServers()
         {
-            return Model.CtiServers;
+            return GetModel().CtiServers;
         }
 
         #endregion
@@ -249,9 +273,9 @@ namespace ipsc6.agent.services
             }
         }
 
-        public IEnumerable<Models.Group> GetGroups()
+        public IReadOnlyCollection<Models.Group> GetGroups()
         {
-            return Model.Groups.ToList();
+            return GetModel().Groups;
         }
 
         #endregion
@@ -271,6 +295,8 @@ namespace ipsc6.agent.services
         {
             ReloadSipAccounts();
         }
+
+        public event EventHandler OnSipRegisterStateChanged;
 
         private void ReloadSipAccounts()
         {
@@ -301,11 +327,12 @@ namespace ipsc6.agent.services
                     ).ToList();
                 }
             }
+            OnSipRegisterStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public IReadOnlyCollection<Models.SipAccount> GetSipAccounts()
         {
-            return Model.SipAccounts;
+            return GetModel().SipAccounts;
         }
 
         public async Task Answer()
@@ -367,6 +394,35 @@ namespace ipsc6.agent.services
 
         public event EventHandler<Events.CallInfoEventArgs> OnRingCallReceived;
         public event EventHandler<Events.CallInfoEventArgs> OnHeldCallReceived;
+
+        public IReadOnlyCollection<Models.CallInfo> GetCalls()
+        {
+            return GetModel().Calls;
+        }
+
+        public IReadOnlyCollection<Models.CallInfo> GetHeldCalls()
+        {
+            return (
+                from callInfo in GetModel().Calls
+                where callInfo.IsHeld
+                select callInfo
+            ).ToList();
+        }
+
+        public async Task Hold()
+        {
+            await agent.HoldAsync();
+        }
+
+        public async Task UnHold()
+        {
+            await agent.UnHoldAsync();
+        }
+
+        public async Task UnHold(int ctiIndex, int channel)
+        {
+            await agent.UnHoldAsync(ctiIndex, channel);
+        }
 
         #endregion
     }

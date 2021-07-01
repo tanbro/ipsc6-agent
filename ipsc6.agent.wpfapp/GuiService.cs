@@ -14,7 +14,9 @@ namespace ipsc6.agent.wpfapp
         public async Task LogIn(string workerNumber, string password)
         {
             ViewModels.LoginViewModel.Instance.WorkerNumber = workerNumber;
-            await ViewModels.LoginViewModel.DoLoginAsync(password).ConfigureAwait(false);
+#pragma warning disable VSTHRD111
+            await ViewModels.LoginViewModel.DoLoginAsync(password);
+#pragma warning restore VSTHRD111
         }
 #pragma warning restore VSTHRD200
     }

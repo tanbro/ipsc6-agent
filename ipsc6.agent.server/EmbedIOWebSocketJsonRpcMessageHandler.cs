@@ -59,7 +59,7 @@ namespace ipsc6.agent.server
 
         protected override async ValueTask<JsonRpcMessage> ReadCoreAsync(CancellationToken cancellationToken)
         {
-            byte[] data = await receiveQueue.DequeueAsync(cancellationToken).ConfigureAwait(false);
+            byte[] data = await receiveQueue.DequeueAsync(cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             return Formatter.Deserialize(new ReadOnlySequence<byte>(data));
         }
@@ -78,7 +78,7 @@ namespace ipsc6.agent.server
             cancellationToken.ThrowIfCancellationRequested();
             if (e.SendTask != null)
             {
-                await e.SendTask.WithCancellation(cancellationToken).ConfigureAwait(false);
+                await e.SendTask.WithCancellation(cancellationToken);
             }
         }
 

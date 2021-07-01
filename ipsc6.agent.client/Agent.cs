@@ -1340,7 +1340,7 @@ namespace ipsc6.agent.client
             await UnHoldAsync(connectionInfo, channel);
         }
 
-        public async Task UnHold(CallInfo callInfo)
+        public async Task UnHoldAsync(CallInfo callInfo)
         {
             await UnHoldAsync(callInfo.CtiServer, callInfo.Channel);
         }
@@ -1348,7 +1348,7 @@ namespace ipsc6.agent.client
         public async Task UnHoldAsync()
         {
             var callInfo = HeldCalls.First();
-            await UnHold(callInfo);
+            await UnHoldAsync(callInfo);
         }
 
         public async Task BreakAsync(int channel = -1, string customString = "")

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using Newtonsoft.Json;
@@ -5,6 +6,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace ipsc6.agent.services.Models
 {
+    [Serializable]
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class Model
     {
