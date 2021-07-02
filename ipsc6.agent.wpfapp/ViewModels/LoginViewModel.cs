@@ -47,12 +47,16 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
         }
 
-        private static readonly IAsyncRelayCommand loginCommand = new AsyncRelayCommand<object>(DoLoginAsync, CanLogin);
-        public IAsyncRelayCommand LoginCommand => loginCommand;
+        private static readonly IRelayCommand loginCommand = new RelayCommand(DoLogin, CanLogin);
+        public IRelayCommand LoginCommand => loginCommand;
 
-        public static async Task DoLoginAsync(object parameter)
+        public static async void DoLogin()
         {
-            string _password = parameter is string ? parameter as string : password;
+            await ExecuteLoginAsync(workerNumber, password);
+        }
+
+        public static async Task ExecuteLoginAsync(string workerNum, string password)
+        {
             var dispatcher = Application.Current.Dispatcher;
             var svc = App.mainService;
 
@@ -72,7 +76,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     try
                     {
                         logger.Debug("DoLoginAsync - 开始登录 ...");
-                        await svc.LogInAsync(workerNumber, _password);
+                        await svc.LogInAsync(workerNum, password);
                         logger.Info("DoLoginAsync - 登录成功");
                         window.DialogResult = true;
                         window.Close();
@@ -91,7 +95,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         }
                         else
                         {
-                            logger.FatalFormat("DoLoginAsync - {0}", err);
                             throw;
                         }
                     }
@@ -100,7 +103,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
         }
 
-        private static bool CanLogin(object _)
+        private static bool CanLogin()
         {
             if (string.IsNullOrEmpty(workerNumber) || string.IsNullOrEmpty(password))
                 return false;

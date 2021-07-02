@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using Microsoft.Toolkit.Mvvm.Input;
 
 #pragma warning disable IDE0058, VSTHRD003, VSTHRD111
@@ -23,10 +24,20 @@ namespace ipsc6.agent.wpfapp.Utils
                 {
                     // 释放托管状态(托管对象)
                     semaphore.Release();
-                    foreach (var command in commands)
+                    Application.Current.Dispatcher.Invoke(() =>
                     {
-                        Application.Current.Dispatcher.Invoke(command.NotifyCanExecuteChanged);
-                    }
+                        try
+                        {
+                            foreach (var command in commands)
+                            {
+                                command.NotifyCanExecuteChanged();
+                            }
+                        }
+                        finally
+                        {
+                            Application.Current.MainWindow.Cursor = savedCursor;
+                        }
+                    });
                 }
 
                 // 释放未托管的资源(未托管的对象)并重写终结器
@@ -61,14 +72,21 @@ namespace ipsc6.agent.wpfapp.Utils
 
         private static readonly SemaphoreSlim semaphore = new(1);
         private readonly IReadOnlyCollection<IRelayCommand> commands;
+        private readonly Cursor savedCursor;
         private CommandGuard(IEnumerable<IRelayCommand> commands)
         {
+            savedCursor = Application.Current.MainWindow.Cursor;
             this.commands = new HashSet<IRelayCommand>(commands);
-            foreach (var command in commands)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                Application.Current.Dispatcher.Invoke(command.NotifyCanExecuteChanged);
-            }
+                Application.Current.MainWindow.Cursor = Cursors.Wait;
+                foreach (var command in commands)
+                {
+                    command.NotifyCanExecuteChanged();
+                }
+            });
         }
+
         public static CommandGuard Create(IRelayCommand command)
         {
             return Create(new IRelayCommand[] { command });
@@ -95,8 +113,6 @@ namespace ipsc6.agent.wpfapp.Utils
         //        private async Task DisposeAsyncCore()
         //#pragma warning restore VSTHRD200
         //        {
-        //            _onDispose?.Invoke();
-        //            await Task.CompletedTask;
         //        }
 
         public static bool IsGuarding => semaphore.CurrentCount == 0;
