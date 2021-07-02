@@ -315,7 +315,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             Instance.OnPropertyChanged("TeleState");
         }
 
-        private static IReadOnlyCollection<services.Models.SipAccount> sipAccounts;
+        private static IReadOnlyCollection<services.Models.SipAccount> sipAccounts = new services.Models.SipAccount[] { };
         public IReadOnlyCollection<services.Models.SipAccount> SipAccounts
         {
             get => sipAccounts;
