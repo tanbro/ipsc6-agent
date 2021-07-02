@@ -7,6 +7,7 @@ using System.Windows;
 
 using Microsoft.Toolkit.Mvvm.Input;
 
+using org.pjsip.pjsua2;
 
 #pragma warning disable VSTHRD100
 
@@ -337,13 +338,14 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             //if (Utils.CommandGuard.IsGuarding) return false;
             var callsIter = sipAccounts.SelectMany(m => m.Calls);
-            if (!callsIter.Any(x => x.State == org.pjsip.pjsua2.pjsip_inv_state.PJSIP_INV_STATE_CONNECTING)) return false;
+            if (!callsIter.Any(x => x.State == pjsip_inv_state.PJSIP_INV_STATE_CONNECTING)) return false;
             return true;
         }
 
         private static readonly IRelayCommand hangupCommand = new RelayCommand(DoHangup, CanHangup);
         public IRelayCommand HangupCommand => hangupCommand;
-        static async void DoHangup()
+
+        private static async void DoHangup()
         {
             var svc = App.mainService;
             using (await Utils.CommandGuard.CreateAsync(hangupCommand))
@@ -356,72 +358,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static bool CanHangup()
         {
             //if (Utils.CommandGuard.IsGuarding) return false;
+            var callsIter = sipAccounts.SelectMany(m => m.Calls);
+            var states = new pjsip_inv_state[] { pjsip_inv_state.PJSIP_INV_STATE_NULL, pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED };
+            if (!callsIter.Any(x => states.Contains(x.State))) return false;
             return true;
         }
 
         #endregion
 
-        #region 座席咨询
-        static readonly IRelayCommand xferConsultCommand = new RelayCommand(DoXferConsult);
-        public IRelayCommand XferConsultCommand => xferConsultCommand;
-        static async void DoXferConsult()
-        {
-            var svc = App.mainService;
-
-            var dialog = new Dialogs.PromptDialog()
-            {
-                DataContext = new Dictionary<string, object> {
-                            { "Title", "转接" },
-                            { "Label", "输入要转接的目标。格式： 技能组ID:座席工号" }
-                        }
-            };
-            if (dialog.ShowDialog() != true) return;
-            var inputText = dialog.InputText;
-
-            string groupId, workerNum = "";
-            var parts = inputText.Split(new char[] { ':' }, 2);
-            if (parts.Length > 0)
-                groupId = parts[0];
-            else
-                return;
-            if (parts.Length > 1)
-                workerNum = parts[1];
-
-            await svc.agent.XferConsultAsync(groupId.Trim(), workerNum.Trim());
-        }
-        #endregion
-
-        #region 座席转移
-        static readonly IRelayCommand xferCommand = new RelayCommand(DoXfer);
-        public IRelayCommand XferCommand => xferCommand;
-        static async void DoXfer()
-        {
-            var svc = App.mainService;
-
-            var dialog = new Dialogs.PromptDialog()
-            {
-                DataContext = new Dictionary<string, object> {
-                    { "Title", "转接" },
-                    { "Label", "输入要转接的目标。格式： 技能组ID:座席工号" }
-                }
-            };
-            if (dialog.ShowDialog() != true) return;
-            var inputText = dialog.InputText;
-
-            string groupId, workerNum = "";
-            var parts = inputText.Split(new char[] { ':' }, 2);
-            if (parts.Length > 0)
-                groupId = parts[0];
-            else
-                return;
-            if (parts.Length > 1)
-                workerNum = parts[1];
-
-            await svc.agent.XferAsync(groupId.Trim(), workerNum.Trim());
-        }
-        #endregion
-
-        #region Call/Hold 保持 取消保持
+        #region Call 保持, 取消保持, 保持列表
 
         private static void MainService_OnHeldCallReceived(object sender, services.Events.CallInfoEventArgs e)
         {
@@ -507,22 +452,23 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
             return true;
         }
-        #endregion
 
-        #region 保持列表
-        static bool isHoldPopupOpened;
+        private static bool isHoldPopupOpened;
         public bool IsHoldPopupOpened
         {
             get => isHoldPopupOpened;
             set => SetProperty(ref isHoldPopupOpened, value);
         }
-        static readonly IRelayCommand holdPopupCommand = new RelayCommand(DoHoldPopup);
+
+        private static readonly IRelayCommand holdPopupCommand = new RelayCommand(DoHoldPopup);
         public IRelayCommand HoldPopupCommand => holdPopupCommand;
-        static void DoHoldPopup()
+
+        private static void DoHoldPopup()
         {
             Instance.IsHoldPopupOpened = !isHoldPopupOpened;
         }
         #endregion
+
         /*
         #region 排队列表
         static bool isQueuePopupOpened;
@@ -547,7 +493,69 @@ namespace ipsc6.agent.wpfapp.ViewModels
             await agent.DequeueAsync(queueInfo);
         }
         #endregion
+*/
 
+        #region 座席咨询
+        static readonly IRelayCommand xferConsultCommand = new RelayCommand(DoXferConsult);
+        public IRelayCommand XferConsultCommand => xferConsultCommand;
+        static async void DoXferConsult()
+        {
+            var svc = App.mainService;
+
+            var dialog = new Dialogs.PromptDialog()
+            {
+                DataContext = new Dictionary<string, object> {
+                            { "Title", "转接" },
+                            { "Label", "输入要转接的目标。格式： 技能组ID:座席工号" }
+                        }
+            };
+            if (dialog.ShowDialog() != true) return;
+            var inputText = dialog.InputText;
+
+            string groupId, workerNum = "";
+            var parts = inputText.Split(new char[] { ':' }, 2);
+            if (parts.Length > 0)
+                groupId = parts[0];
+            else
+                return;
+            if (parts.Length > 1)
+                workerNum = parts[1];
+
+            await svc.agent.XferConsultAsync(groupId.Trim(), workerNum.Trim());
+        }
+        #endregion
+
+        #region 座席转移
+        private static readonly IRelayCommand xferCommand = new RelayCommand(DoXfer);
+        public IRelayCommand XferCommand => xferCommand;
+        static async void DoXfer()
+        {
+            var svc = App.mainService;
+
+            var dialog = new Dialogs.PromptDialog()
+            {
+                DataContext = new Dictionary<string, object> {
+                    { "Title", "转接" },
+                    { "Label", "输入要转接的目标。格式： 技能组ID:座席工号" }
+                }
+            };
+            if (dialog.ShowDialog() != true) return;
+            var inputText = dialog.InputText;
+
+            string groupId, workerNum = "";
+            var parts = inputText.Split(new char[] { ':' }, 2);
+            if (parts.Length > 0)
+                groupId = parts[0];
+            else
+                return;
+            if (parts.Length > 1)
+                workerNum = parts[1];
+
+            await svc.agent.XferAsync(groupId.Trim(), workerNum.Trim());
+        }
+        #endregion
+
+        /*
         #region 外乎
         static readonly IRelayCommand dialCommand = new AsyncRelayCommand(DoDialAsync);
         public IRelayCommand DialCommand => dialCommand;
