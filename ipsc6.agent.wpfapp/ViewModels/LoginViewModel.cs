@@ -50,15 +50,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static readonly IAsyncRelayCommand loginCommand = new AsyncRelayCommand<object>(DoLoginAsync, CanLogin);
         public IAsyncRelayCommand LoginCommand => loginCommand;
 
-        private static bool CanLogin(object _)
-        {
-            if (string.IsNullOrEmpty(workerNumber) || string.IsNullOrEmpty(password))
-                return false;
-            if (Utils.CommandGuard.IsGuarding)
-                return false;
-            return true;
-        }
-
         public static async Task DoLoginAsync(object parameter)
         {
             string _password = parameter is string ? parameter as string : password;
@@ -67,7 +58,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
             using (await Utils.CommandGuard.CreateAsync(loginCommand))
             {
-                await dispatcher.InvokeAsync(async () =>
+                await dispatcher.Invoke(async () =>
                 {
                     IConfigurationRoot cfgRoot = Config.Manager.ConfigurationRoot;
                     Config.Ipsc cfgIpsc = new();
@@ -75,8 +66,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     logger.InfoFormat(
                         "DoLoginAsync - CreateAgent - ServerList: {0}, LocalPort: {1}, LocalAddress: \"{2}\"",
                         (cfgIpsc.ServerList == null) ? "<null>" : $"\"{string.Join(",", cfgIpsc.ServerList)}\"",
-                        cfgIpsc.LocalPort, cfgIpsc.LocalAddress
-                    );
+                        cfgIpsc.LocalPort,
+                        cfgIpsc.LocalAddress);
                     svc.CreateAgent(cfgIpsc.ServerList, cfgIpsc.LocalPort, cfgIpsc.LocalAddress);
                     try
                     {
@@ -105,7 +96,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         }
                     }
                 });
+
             }
+        }
+
+        private static bool CanLogin(object _)
+        {
+            if (string.IsNullOrEmpty(workerNumber) || string.IsNullOrEmpty(password))
+                return false;
+            if (Utils.CommandGuard.IsGuarding)
+                return false;
+            return true;
         }
     }
 

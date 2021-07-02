@@ -8,6 +8,7 @@
         xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
         xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         FontSize="16"
         Title="IPSC6 座席工具条"
         SizeToContent="WidthAndHeight"
@@ -15,9 +16,6 @@
         LocationChanged="Window_LocationChanged"
         >
     <!--Height="{Binding Snapped, Mode=OneWay, Converter={StaticResource SnappedBooleanToMainWindowHeightConverter}}"-->
-    <Window.DataContext>
-        <vm:MainViewModel/>
-    </Window.DataContext>
 
     <Window.Resources>
         <converters:AgentStateToTextConverter x:Key="AgentStateToTextConverter"/>

@@ -6,12 +6,9 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              Height="64">
-
-    <UserControl.DataContext>
-        <vm:MainViewModel/>
-    </UserControl.DataContext>
 
     <UserControl.Resources>
         <Style x:Key="OffHookButtonStyle" TargetType="Button">

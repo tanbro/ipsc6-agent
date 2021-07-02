@@ -132,4 +132,14 @@ namespace ipsc6.agent.client
         }
     }
 
+    public class SipCallEventArgs : EventArgs
+    {
+        public SipCall SipCall { get; }
+
+        public SipCallEventArgs(SipCall sipCall) : base()
+        {
+            SipCall = sipCall;
+        }
+    }
+
 }

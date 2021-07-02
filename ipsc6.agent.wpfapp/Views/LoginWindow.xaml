@@ -10,11 +10,8 @@
         Height="325" Width="350"
         ResizeMode="NoResize" WindowStyle="None" WindowStartupLocation="CenterScreen"
         BorderBrush="#FF5E91E4" BorderThickness="1"
+        d:DataContext="{d:DesignData Type=vm:LoginViewModel}"
     >
-
-    <Window.DataContext>
-        <vm:LoginViewModel/>
-    </Window.DataContext>
 
     <Window.Resources>
         <Storyboard x:Key="OnMouseLeftButtonUp1">

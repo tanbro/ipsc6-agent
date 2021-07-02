@@ -8,11 +8,10 @@
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
              Width="60" Height="64"
+             d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              x:Name="QueuePanelUserControl"
              >
-    <UserControl.DataContext>
-        <vm:MainViewModel/>
-    </UserControl.DataContext>
+
     <UserControl.Resources>
         <converters:QueueListToTitleConverter x:Key="QueueListToTitleConverter"/>
         <converters:QueueToStringConverter x:Key="QueueToStringConverter"/>

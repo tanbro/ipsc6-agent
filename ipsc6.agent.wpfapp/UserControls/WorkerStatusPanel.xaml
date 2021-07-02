@@ -1,21 +1,15 @@
 <UserControl x:Class="ipsc6.agent.wpfapp.UserControls.WorkerStatusPanel"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008/" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008/"
              mc:Ignorable="d"
-             x:Name="WorkerStatusPannelUserControl"
              xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
-             xmlns:dd="clr-namespace:ipsc6.agent.wpfapp.DesignData"
-             d:DataContext="{d:DesignInstance dd:MainDesignViewModel, IsDesignTimeCreatable=True}"
-             d:DesignHeight="300" d:DesignWidth="300"
+             d:DataContext="{d:DesignInstance vm:MainViewModel}"
+             x:Name="WorkerStatusPannelUserControl"
              Width="128" Height="64">
-
-    <UserControl.DataContext>
-        <vm:MainViewModel/>
-    </UserControl.DataContext>
 
     <UserControl.Resources>
         <Style x:Key="WorkerStatusButtonStyle" TargetType="Button">

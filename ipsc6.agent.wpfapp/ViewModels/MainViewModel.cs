@@ -85,7 +85,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             IRelayCommand[] commands =
             {
-                answerCommand, hangupCommand,
                 groupPopupCommand,
                 statePopupCommand, setStateCommand,
                 signGroupCommand,
@@ -106,8 +105,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             App.mainService.OnHeldCallReceived += MainService_OnHeldCallReceived;
             App.mainService.OnTeleStateChanged += MainService_OnTeleStateChanged;
             App.mainService.OnSipRegisterStateChanged += MainService_OnSipRegisterStateChanged;
+            App.mainService.OnSipCallStateChanged += MainService_OnSipCallStateChanged;
         }
-
         #endregion
 
         #region Agent Status
@@ -309,10 +308,29 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #region SIP UAC
         private static void MainService_OnSipRegisterStateChanged(object sender, EventArgs e)
         {
+            ReloadSipAccounts();
+        }
+
+        private static void MainService_OnSipCallStateChanged(object sender, EventArgs e)
+        {
+            ReloadSipAccounts();
+        }
+
+        private static void ReloadSipAccounts()
+        {
             var svc = App.mainService;
             Instance.SipAccounts = svc.GetSipAccounts();
             // UI 上的电话状态Icon/Label的转换结果由“TeleState”和注册状态共同计算得出，但是 bingding 只有 TeleState(不规范)，所以这里强行传播给绑定
             Instance.OnPropertyChanged("TeleState");
+
+            IRelayCommand[] commands =
+            {
+                answerCommand, hangupCommand
+            };
+            foreach (var command in commands)
+            {
+                Application.Current.Dispatcher.Invoke(command.NotifyCanExecuteChanged);
+            }
         }
 
         private static IReadOnlyCollection<services.Models.SipAccount> sipAccounts = new services.Models.SipAccount[] { };

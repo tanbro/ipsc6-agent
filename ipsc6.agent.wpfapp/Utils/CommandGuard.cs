@@ -11,6 +11,8 @@ namespace ipsc6.agent.wpfapp.Utils
 {
     public class CommandGuard : IAsyncDisposable, IDisposable
     {
+        //private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(CommandGuard));
+
         private bool disposedValue;
 
         protected virtual void Dispose(bool disposing)
@@ -20,9 +22,7 @@ namespace ipsc6.agent.wpfapp.Utils
                 if (disposing)
                 {
                     // 释放托管状态(托管对象)
-#pragma warning disable IDE0058
                     semaphore.Release();
-#pragma warning restore IDE0058
                     foreach (var command in commands)
                     {
                         Application.Current.Dispatcher.Invoke(command.NotifyCanExecuteChanged);
@@ -69,6 +69,16 @@ namespace ipsc6.agent.wpfapp.Utils
                 Application.Current.Dispatcher.Invoke(command.NotifyCanExecuteChanged);
             }
         }
+        public static CommandGuard Create(IRelayCommand command)
+        {
+            return Create(new IRelayCommand[] { command });
+        }
+
+        public static CommandGuard Create(IEnumerable<IRelayCommand> commands)
+        {
+            semaphore.Wait();
+            return new CommandGuard(commands);
+        }
 
         public static async Task<CommandGuard> CreateAsync(IRelayCommand command)
         {
@@ -90,6 +100,7 @@ namespace ipsc6.agent.wpfapp.Utils
         //        }
 
         public static bool IsGuarding => semaphore.CurrentCount == 0;
+        public static int CurrentCount => semaphore.CurrentCount;
     }
 }
 #pragma warning restore IDE0058, VSTHRD003, VSTHRD111

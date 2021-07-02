@@ -450,7 +450,7 @@ namespace ipsc6.agent.client
 
         public event EventHandler<SipRegistrarListReceivedEventArgs> OnSipRegistrarListReceived;
         public event EventHandler OnSipRegisterStateChanged;
-        public event EventHandler OnSipCallStateChanged;
+        public event EventHandler<SipCallEventArgs> OnSipCallStateChanged;
         private void DoOnSipRegistrarList(CtiServer connectionInfo, ServerSentMessage msg)
         {
             var connectionIndex = GetConnetionIndex(connectionInfo);
@@ -518,6 +518,7 @@ namespace ipsc6.agent.client
 
         private void Acc_OnIncomingCall(object sender, Sip.CallEventArgs e)
         {
+            SipCall callObj = new(e.Call);
             lock (this)
             {
                 if (IsOffHooking)
@@ -540,25 +541,27 @@ namespace ipsc6.agent.client
                 }
                 ReloadSipAccountCollection();
             }
-            OnSipCallStateChanged?.Invoke(this, EventArgs.Empty);
+            OnSipCallStateChanged?.Invoke(this, new SipCallEventArgs(callObj));
         }
 
         private void Acc_OnCallStateChanged(object sender, Sip.CallEventArgs e)
         {
+            SipCall callObj = new(e.Call);
             lock (this)
             {
                 ReloadSipAccountCollection();
             }
-            OnSipCallStateChanged?.Invoke(this, EventArgs.Empty);
+            OnSipCallStateChanged?.Invoke(this, new SipCallEventArgs(callObj));
         }
 
-        private void Acc_OnCallDisconnected(object sender, EventArgs e)
+        private void Acc_OnCallDisconnected(object sender, Sip.CallEventArgs e)
         {
+            SipCall callObj = new(e.Call);
             lock (this)
             {
                 ReloadSipAccountCollection();
             }
-            OnSipCallStateChanged?.Invoke(this, EventArgs.Empty);
+            OnSipCallStateChanged?.Invoke(this, new SipCallEventArgs(callObj));
         }
 
         public event EventHandler<CustomStringReceivedEventArgs> OnCustomStringReceived;

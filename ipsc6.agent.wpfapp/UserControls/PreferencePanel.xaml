@@ -8,11 +8,8 @@
              mc:Ignorable="d" 
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
+             d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              Height="64" Width="48">
-
-    <UserControl.DataContext>
-        <vm:MainViewModel/>
-    </UserControl.DataContext>
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>

@@ -6,10 +6,8 @@
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              >
-    <UserControl.DataContext>
-        <vm:MainViewModel/>
-    </UserControl.DataContext>
 
     <Grid Width="236" Height="72" Background="{StaticResource MyInfoPannelBackgroud}">
         <Grid.RowDefinitions>

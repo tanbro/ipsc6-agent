@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2010" 
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
              mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              Width="96" Height="64"
              >
 

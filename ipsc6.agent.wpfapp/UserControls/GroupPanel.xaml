@@ -6,15 +6,11 @@
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              xmlns:conv="clr-namespace:ipsc6.agent.wpfapp.Converters"
-             xmlns:dd="clr-namespace:ipsc6.agent.wpfapp.DesignData"
              xmlns:iconpacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance dd:MainDesignViewModel, IsDesignTimeCreatable=True}"
+             d:DataContext="{d:DesignInstance vm:MainViewModel}"
              x:Name="GroupPanelUserControl"
              Width="60" Height="64">
-    <UserControl.DataContext>
-        <vm:MainViewModel/>
-    </UserControl.DataContext>
 
     <UserControl.Resources>
         <conv:AgentGroupsToNumberTitleConverter x:Key="AgentGroupsToNumberTitleConverter"/>

@@ -287,18 +287,22 @@ namespace ipsc6.agent.services
         private void Agent_OnSipRegistrarListReceived(object sender, client.SipRegistrarListReceivedEventArgs e)
         {
             ReloadSipAccounts();
+            OnSipRegisterStateChanged?.Invoke(this, EventArgs.Empty);
         }
         private void Agent_OnSipCallStateChanged(object sender, EventArgs e)
         {
             ReloadSipAccounts();
+            OnSipCallStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void Agent_OnSipRegisterStateChanged(object sender, EventArgs e)
         {
             ReloadSipAccounts();
+            OnSipRegisterStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler OnSipRegisterStateChanged;
+        public event EventHandler OnSipCallStateChanged;
 
         private void ReloadSipAccounts()
         {
@@ -329,7 +333,6 @@ namespace ipsc6.agent.services
                     ).ToList();
                 }
             }
-            OnSipRegisterStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public IReadOnlyCollection<Models.SipAccount> GetSipAccounts()

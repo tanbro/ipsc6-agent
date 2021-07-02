@@ -8,12 +8,11 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
+             d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              Width="42" Height="64"
              x:Name="HoldPanelUserControl"
              >
-    <UserControl.DataContext>
-        <vm:MainViewModel/>
-    </UserControl.DataContext>
+
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:AgentCallsToNumberTitleConverter x:Key="AgentCallsToNumberTitleConverter"/>
