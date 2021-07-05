@@ -45,4 +45,10 @@ namespace ipsc6.agent.services.Events
     {
         public Models.CallInfo Call { get; set; }
     }
+
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
+    public class QueueInfoEventArgs : EventArgs
+    {
+        public Models.QueueInfo QueueInfo { get; set; }
+    }
 }

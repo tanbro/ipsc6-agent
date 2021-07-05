@@ -19,5 +19,6 @@ namespace ipsc6.agent.services.Models
         public client.TeleState TeleState { get; internal set; }
         public IReadOnlyCollection<SipAccount> SipAccounts { get; internal set; } = new List<SipAccount>();
         public IReadOnlyCollection<CallInfo> Calls { get; internal set; } = new List<CallInfo>();
+        public IReadOnlyCollection<QueueInfo> QueueInfos { get; internal set; } = new List<QueueInfo>();
     }
 }

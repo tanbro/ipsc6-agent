@@ -79,6 +79,8 @@ namespace ipsc6.agent.services
             agent.OnHoldInfoReceived += Agent_OnHoldInfoReceived;
             agent.OnRingInfoReceived += Agent_OnRingInfoReceived;
 
+            agent.OnQueueInfoReceived += Agent_OnQueueInfoReceived;
+
             ReloadCtiServers();
         }
 
@@ -428,6 +430,43 @@ namespace ipsc6.agent.services
         {
             await agent.UnHoldAsync(ctiIndex, channel);
         }
+
+        #endregion
+
+        #region QueueInfo
+
+        private void Agent_OnQueueInfoReceived(object sender, client.QueueInfoEventArgs e)
+        {
+            lock (Model)
+            {
+                Model.QueueInfos = (
+                    from obj in agent.QueueInfos
+                    select CreateQueueInfo(obj)
+                ).ToList();
+            }
+            OnQueueInfoEvent?.Invoke(this, new Events.QueueInfoEventArgs() { QueueInfo = CreateQueueInfo(e.Value) });
+        }
+
+        private Models.QueueInfo CreateQueueInfo(client.QueueInfo obj)
+        {
+            return new Models.QueueInfo()
+            {
+                CtiIndex = agent.GetConnetionIndex(obj.CtiServer),
+                Channel = obj.Channel,
+                Id = obj.Id,
+                Type = obj.Type,
+                ProcessId = obj.ProcessId,
+                CallingNo = obj.CallingNo,
+                WorkerNum = obj.WorkerNum,
+                CustomeString = obj.CustomeString,
+                Groups = (
+                    from x in obj.Groups
+                    select new Models.Group() { Id = x.Id, Name = x.Name, IsSigned = x.IsSigned }
+                ).ToList(),
+            };
+        }
+
+        public event EventHandler<Events.QueueInfoEventArgs> OnQueueInfoEvent;
 
         #endregion
     }
