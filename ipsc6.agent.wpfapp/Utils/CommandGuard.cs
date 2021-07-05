@@ -35,7 +35,7 @@ namespace ipsc6.agent.wpfapp.Utils
                         }
                         finally
                         {
-                            Application.Current.MainWindow.Cursor = savedCursor;
+                            Mouse.OverrideCursor = null;
                         }
                     });
                 }
@@ -72,14 +72,22 @@ namespace ipsc6.agent.wpfapp.Utils
 
         private static readonly SemaphoreSlim semaphore = new(1);
         private readonly IReadOnlyCollection<IRelayCommand> commands;
-        private readonly Cursor savedCursor;
+
+        private CommandGuard()
+        {
+            commands = new IRelayCommand[] { };
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Mouse.OverrideCursor = Cursors.Wait;
+            });
+        }
+
         private CommandGuard(IEnumerable<IRelayCommand> commands)
         {
-            savedCursor = Application.Current.MainWindow.Cursor;
             this.commands = new HashSet<IRelayCommand>(commands);
             Application.Current.Dispatcher.Invoke(() =>
             {
-                Application.Current.MainWindow.Cursor = Cursors.Wait;
+                Mouse.OverrideCursor = Cursors.Wait;
                 foreach (var command in commands)
                 {
                     command.NotifyCanExecuteChanged();
@@ -87,9 +95,16 @@ namespace ipsc6.agent.wpfapp.Utils
             });
         }
 
+        public static CommandGuard Create()
+        {
+            IRelayCommand[] commands = new IRelayCommand[] { };
+            return Create(commands);
+        }
+
         public static CommandGuard Create(IRelayCommand command)
         {
-            return Create(new IRelayCommand[] { command });
+            IRelayCommand[] commands = new IRelayCommand[] { command };
+            return Create(commands);
         }
 
         public static CommandGuard Create(IEnumerable<IRelayCommand> commands)
@@ -98,9 +113,16 @@ namespace ipsc6.agent.wpfapp.Utils
             return new CommandGuard(commands);
         }
 
+        public static async Task<CommandGuard> CreateAsync()
+        {
+            IRelayCommand[] commands = new IRelayCommand[] { };
+            return await CreateAsync(commands);
+        }
+
         public static async Task<CommandGuard> CreateAsync(IRelayCommand command)
         {
-            return await CreateAsync(new IRelayCommand[] { command });
+            IRelayCommand[] commands = new IRelayCommand[] { command };
+            return await CreateAsync(commands);
         }
 
         public static async Task<CommandGuard> CreateAsync(IEnumerable<IRelayCommand> commands)
