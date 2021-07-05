@@ -70,8 +70,8 @@
 
     | Argument        | Type     | Default | Description |
     | --------------- | -------- | ------- | ----------- |
-    | `calledTelnum`  | `String` | -       | 被叫号码    |
-    | `callingTelnum` | `String` | `""`    | 主叫号码    |
+    | `calledTelNum`  | `String` | -       | 被叫号码    |
+    | `callingTelNum` | `String` | `""`    | 主叫号码    |
     | `channelGroup`  | `String` | `""`    | 通道组      |
     | `option`        | `String` | `""`    | 其它参数    |
 
