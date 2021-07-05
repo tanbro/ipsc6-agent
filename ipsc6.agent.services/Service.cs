@@ -457,7 +457,7 @@ namespace ipsc6.agent.services
                 State = obj.EventType,
                 Type = obj.Type,
                 ProcessId = obj.ProcessId,
-                CallingNo = obj.CallingNo,
+                CallingTelNum = obj.CallingTelNum,
                 WorkerNum = obj.WorkerNum,
                 CustomeString = obj.CustomeString,
                 Groups = (
@@ -474,6 +474,15 @@ namespace ipsc6.agent.services
             return GetModel().QueueInfos;
         }
 
+        public async Task Dequeue(int ctiIndex, int channel)
+        {
+            await agent.DequeueAsync(ctiIndex, channel);
+        }
+
+        #endregion
+
+        #region 拨号、转接、咨询
+        
         #endregion
     }
 #pragma warning restore VSTHRD200

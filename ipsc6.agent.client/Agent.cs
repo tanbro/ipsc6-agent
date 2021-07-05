@@ -1484,10 +1484,16 @@ namespace ipsc6.agent.client
 
         public async Task DequeueAsync(QueueInfo queueInfo)
         {
+            var connectionIndex = GetConnetionIndex(queueInfo.CtiServer);
+            await DequeueAsync(connectionIndex, queueInfo.Channel);
+        }
+
+        public async Task DequeueAsync(int connectionIndex, int channel)
+        {
             using (requestGuard.TryEnter())
             {
-                var conn = GetConnection(queueInfo.CtiServer);
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, queueInfo.Channel);
+                var conn = GetConnection(connectionIndex);
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, channel);
                 await conn.RequestAsync(req);
             }
         }

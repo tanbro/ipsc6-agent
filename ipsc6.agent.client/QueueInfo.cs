@@ -13,7 +13,7 @@ namespace ipsc6.agent.client
         public QueueEventType EventType { get; }
         public QueueInfoType Type { get; }
         public long ProcessId { get; }
-        public string CallingNo { get; }
+        public string CallingTelNum { get; }
         public string WorkerNum { get; }
         public string CustomeString { get; }
         private readonly HashSet<Group> groups = new();
@@ -53,7 +53,7 @@ namespace ipsc6.agent.client
                         WorkerNum = s;
                         break;
                     case 5:
-                        CallingNo = s;
+                        CallingTelNum = s;
                         break;
                     case 6:
                         CustomeString = s;
@@ -94,6 +94,6 @@ namespace ipsc6.agent.client
             return !(left == right);
         }
         public override string ToString() =>
-            $"<{GetType().Name} Connection={CtiServer}, Channel={Channel}, EventType={EventType}, Type={Type}, ProcessId={ProcessId}, CallingNo={CallingNo}>";
+            $"<{GetType().Name} Connection={CtiServer}, Channel={Channel}, EventType={EventType}, Type={Type}, ProcessId={ProcessId}, CallingNo={CallingTelNum}>";
     }
 }

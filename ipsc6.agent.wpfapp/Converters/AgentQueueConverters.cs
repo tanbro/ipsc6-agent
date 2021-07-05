@@ -34,7 +34,7 @@ namespace ipsc6.agent.wpfapp.Converters
         {
             if (value == null) return "";
             var v = (services.Models.QueueInfo)value;
-            return $"{v.CallingNo}";
+            return $"{v.CallingTelNum}";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

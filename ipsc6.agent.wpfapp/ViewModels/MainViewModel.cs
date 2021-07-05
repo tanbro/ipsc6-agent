@@ -594,7 +594,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         /*
-        #region 外乎
+        #region 呼叫(外)
         static readonly IRelayCommand dialCommand = new AsyncRelayCommand(DoDialAsync);
         public IRelayCommand DialCommand => dialCommand;
         static async Task DoDialAsync()
