@@ -33,7 +33,7 @@
             >
                 <Button Style="{StaticResource ScoreButtonStyle}"
                         Command="{Binding AdvCommand}">
-                    btnAdv
+                    ADV
                 </Button>
             </Border>
 

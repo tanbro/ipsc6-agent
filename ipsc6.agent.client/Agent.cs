@@ -1147,7 +1147,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        static readonly WorkType[] availableSetBusyWorkTypes = {
+        private static readonly WorkType[] availableSetBusyWorkTypes = {
             WorkType.PauseBusy,
             WorkType.PauseLeave,
             WorkType.PauseTyping,

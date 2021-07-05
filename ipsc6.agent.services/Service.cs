@@ -521,6 +521,52 @@ namespace ipsc6.agent.services
         {
             await agent.CallIvrAsync(ivrId, invokeType, customString);
         }
+
+        public async Task Monitor(int ctiIndex, string workerNum)
+        {
+            await agent.MonitorAsync(ctiIndex, workerNum);
+        }
+
+        public async Task UnMonitor(int ctiIndex, string workerNum)
+        {
+            await agent.UnMonitorAsync(ctiIndex, workerNum);
+        }
+
+        public async Task Intercept(int ctiIndex, string workerNum)
+        {
+            await agent.InterceptAsync(ctiIndex, workerNum);
+        }
+
+        public async Task Interrupt(int ctiIndex, string workerNum)
+        {
+            await agent.InterruptAsync(ctiIndex, workerNum);
+        }
+
+        public async Task Hangup(int ctiIndex, string workerNum)
+        {
+            await agent.HangupAsync(ctiIndex, workerNum);
+        }
+
+        public async Task SetBusy(string workerNum, client.WorkType workType = client.WorkType.PauseBusy)
+        {
+            await agent.SetBusyAsync(workerNum, workType);
+        }
+
+        public async Task SetIdle(string workerNum)
+        {
+            await agent.SetIdleAsync(workerNum);
+        }
+
+        public async Task SignOut(string workerNum, string groupId)
+        {
+            await agent.SignOutAsync(workerNum, groupId);
+        }
+
+        public async Task KickOut(string workerNum)
+        {
+            await agent.KickOutAsync(workerNum);
+        }
+
         #endregion
     }
 #pragma warning restore VSTHRD200

@@ -706,114 +706,123 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
             await svc.CallIvr(ivrId, ivrType, ivrString);
         }
+
         #endregion
-        /*
-#region btnAdv
-static readonly IRelayCommand advCommand = new AsyncRelayCommand(DoAdvCommandAsync);
-public IRelayCommand AdvCommand => advCommand;
-static async Task DoAdvCommandAsync()
-{
-    var agent = Controllers.AgentController.Agent;
 
-    int connIndex;
-    client.MessageType msgTyp;
-    int n;
-    string s;
+        #region btnAdv
+        private static readonly IRelayCommand advCommand = new RelayCommand(DoAdvCommand);
+        public IRelayCommand AdvCommand => advCommand;
 
-    {
-        var dialog = new Dialogs.PromptDialog()
+        private static async void DoAdvCommand()
         {
-            DataContext = new Dictionary<string, object> {
+            var svc = App.mainService;
+
+            int connIndex;
+            client.MessageType msgTyp;
+            int n;
+            string s;
+
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
                 { "Title", "发送 CTI 命令" },
                 { "Label", "输入 CTI 服务器节点序号" },
                 { "InputText", "0" },
             }
-        };
-        if (dialog.ShowDialog() != true) return;
-        connIndex = int.Parse(dialog.InputText);
-    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                connIndex = int.Parse(dialog.InputText);
+            }
 
-    {
-        var dialog = new Dialogs.PromptDialog()
-        {
-            DataContext = new Dictionary<string, object> {
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
                 { "Title", "发送 CTI 命令" },
                 { "Label", "输入 CTI 命令名称" },
                 { "InputText", "REMOTE_MSG_LISTEN" },
             }
-        };
-        if (dialog.ShowDialog() != true) return;
-        msgTyp = (client.MessageType)Enum.Parse(typeof(client.MessageType), dialog.InputText);
-    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                msgTyp = (client.MessageType)Enum.Parse(typeof(client.MessageType), dialog.InputText);
+            }
 
-    {
-        var dialog = new Dialogs.PromptDialog()
-        {
-            DataContext = new Dictionary<string, object> {
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
                 { "Title", "发送 CTI 命令" },
                 { "Label", "输入 CTI 命令参数的整数部分" },
                 { "InputText", "-1" },
             }
-        };
-        if (dialog.ShowDialog() != true) return;
-        n = int.Parse(dialog.InputText);
-    }
+                };
+                if (dialog.ShowDialog() != true) return;
+                n = int.Parse(dialog.InputText);
+            }
 
-    {
-        var dialog = new Dialogs.PromptDialog()
-        {
-            DataContext = new Dictionary<string, object> {
+            {
+                var dialog = new Dialogs.PromptDialog()
+                {
+                    DataContext = new Dictionary<string, object> {
                 { "Title", "发送 CTI 命令" },
                 { "Label", "输入 CTI 命令参数的字符串部分" },
                 { "InputText", "" },
             }
-        };
-        if (dialog.ShowDialog() != true) return;
-        s = dialog.InputText;
-    }
-
-    switch (msgTyp)
-    {
-        case client.MessageType.REMOTE_MSG_LISTEN:
-            await agent.MonitorAsync(connIndex, s);
-            break;
-        case client.MessageType.REMOTE_MSG_STOPLISTEN:
-            await agent.UnMonitorAsync(connIndex, s);
-            break;
-        case client.MessageType.REMOTE_MSG_FORCEIDLE:
-            await agent.SetIdleAsync(s);
-            break;
-        case client.MessageType.REMOTE_MSG_FORCEPAUSE:
-            {
-                var parts = s.Split(new char[] { '|' });
-                await agent.SetBusyAsync(
-                    parts[0],
-                    (client.WorkType)Enum.Parse(typeof(client.WorkType), parts[1])
-                );
+                };
+                if (dialog.ShowDialog() != true) return;
+                s = dialog.InputText;
             }
-            break;
-        case client.MessageType.REMOTE_MSG_INTERCEPT:
-            await agent.InterceptAsync(connIndex, s);
-            break;
-        case client.MessageType.REMOTE_MSG_FORCEINSERT:
-            await agent.InterruptAsync(connIndex, s);
-            break;
-        case client.MessageType.REMOTE_MSG_FORCEHANGUP:
-            await agent.HangupAsync(connIndex, s);
-            break;
-        case client.MessageType.REMOTE_MSG_FORCESIGNOFF:
-            await agent.SignOutAsync(s);
-            break;
-        case client.MessageType.REMOTE_MSG_KICKOUT:
-            await agent.KickOutAsync(s);
-            break;
-        default:
-            MessageBox.Show($"还没有实现 {msgTyp}");
-            break;
-    }
-}
-#endregion
-*/
+
+            switch (msgTyp)
+            {
+                case client.MessageType.REMOTE_MSG_LISTEN:
+                    await svc.Monitor(connIndex, s);
+                    break;
+                case client.MessageType.REMOTE_MSG_STOPLISTEN:
+                    await svc.UnMonitor(connIndex, s);
+                    break;
+                case client.MessageType.REMOTE_MSG_FORCEIDLE:
+                    await svc.SetIdle(s);
+                    break;
+                case client.MessageType.REMOTE_MSG_FORCEPAUSE:
+                    {
+                        var parts = s.Split(new char[] { '|' });
+                        await svc.SetBusy(
+                            parts[0],
+                            (client.WorkType)Enum.Parse(typeof(client.WorkType), parts[1])
+                        );
+                    }
+                    break;
+                case client.MessageType.REMOTE_MSG_INTERCEPT:
+                    await svc.Intercept(connIndex, s);
+                    break;
+                case client.MessageType.REMOTE_MSG_FORCEINSERT:
+                    await svc.Interrupt(connIndex, s);
+                    break;
+                case client.MessageType.REMOTE_MSG_FORCEHANGUP:
+                    await svc.Hangup(connIndex, s);
+                    break;
+                case client.MessageType.REMOTE_MSG_FORCESIGNOFF:
+                    {
+                        var parts = s.Split(new char[] { '|' });
+                        await svc.SetBusy(
+                            parts[0],
+                            (client.WorkType)Enum.Parse(typeof(client.WorkType), parts[1])
+                        );
+                        await svc.SignOut(parts[0], parts[1]);
+                    }
+                    break;
+                case client.MessageType.REMOTE_MSG_KICKOUT:
+                    await svc.KickOut(s);
+                    break;
+                default:
+                    MessageBox.Show($"还没有实现 {msgTyp}");
+                    break;
+            }
+        }
+        #endregion
+
     }
 }
 
