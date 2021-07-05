@@ -21,13 +21,13 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static Views.LoginWindow window;
         public Views.LoginWindow Window { set => window = value; }
 
-        private static string workerNumber;
-        public string WorkerNumber
+        private static string workerNum;
+        public string WorkerNum
         {
-            get => workerNumber;
+            get => workerNum;
             set
             {
-                if (SetProperty(ref workerNumber, value))
+                if (SetProperty(ref workerNum, value))
                 {
                     Application.Current.Dispatcher.Invoke(LoginCommand.NotifyCanExecuteChanged);
                 }
@@ -82,14 +82,14 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
         }
 
-        internal static async Task DoLoginAsync(string workerNumber, string password)
+        internal static async Task DoLoginAsync(string workerNum, string password)
         {
             var dispatcher = Application.Current.Dispatcher;
             var svc = App.mainService;
 
             using (await Utils.CommandGuard.CreateAsync(loginCommand))
             {
-                LoginViewModel.workerNumber = workerNumber;
+                LoginViewModel.workerNum = workerNum;
                 LoginViewModel.password = password;
 
                 await dispatcher.Invoke(async () =>
@@ -128,7 +128,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static bool CanLogin()
         {
-            if (string.IsNullOrEmpty(workerNumber) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(workerNum) || string.IsNullOrEmpty(password))
                 return false;
             if (Utils.CommandGuard.IsGuarding)
                 return false;
@@ -154,7 +154,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var svc = App.mainService;
             CreateAgentInstance();
             logger.Debug("ExecuteLoginAsync - 开始登录 ...");
-            await svc.LogInAsync(workerNumber, password);
+            await svc.LogInAsync(workerNum, password);
             logger.Info("ExecuteLoginAsync - 登录成功");
         }
 

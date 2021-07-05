@@ -490,31 +490,30 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
-        /*
         #region 排队列表
-        static bool isQueuePopupOpened;
+        private static bool isQueuePopupOpened;
         public bool IsQueuePopupOpened
         {
             get => isQueuePopupOpened;
             set => SetProperty(ref isQueuePopupOpened, value);
         }
-        static readonly IRelayCommand queuePopupCommand = new RelayCommand(DoQueuePopup);
+        private static readonly IRelayCommand queuePopupCommand = new RelayCommand(DoQueuePopup);
         public IRelayCommand QueuePopupCommand => queuePopupCommand;
-        static void DoQueuePopup()
+        private static void DoQueuePopup()
         {
             Instance.IsQueuePopupOpened = !isQueuePopupOpened;
         }
 
-        static readonly IRelayCommand dequeueCommand = new AsyncRelayCommand<object>(DoDequeueAsync);
-        public IRelayCommand DequeueCommand => dequeueCommand;
-        static async Task DoDequeueAsync(object paramter)
-        {
-            var queueInfo = paramter as client.QueueInfo;
-            var agent = Controllers.AgentController.Agent;
-            await agent.DequeueAsync(queueInfo);
-        }
+        //static readonly IRelayCommand dequeueCommand = new AsyncRelayCommand<object>(DoDequeueAsync);
+        //public IRelayCommand DequeueCommand => dequeueCommand;
+        //static async Task DoDequeueAsync(object paramter)
+        //{
+        //    var queueInfo = paramter as client.QueueInfo;
+        //    var agent = Controllers.AgentController.Agent;
+        //    await agent.DequeueAsync(queueInfo);
+        //}
         #endregion
-*/
+
 
         #region 座席咨询
         static readonly IRelayCommand xferConsultCommand = new RelayCommand(DoXferConsult);
