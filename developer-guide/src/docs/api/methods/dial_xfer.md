@@ -82,12 +82,11 @@
 -   **Method**: `callIvr`
 -   **Params**:
 
-    | Argument       | Type      | Default | Description                                   |
-    | -------------- | --------- | ------- | --------------------------------------------- |
-    | `ivrId`        | `String`  | -       | IVR 的 ID                                     |
-    | `ctiIndex`     | `Integer` | `-1`    | CTI 服务器索引值。这这个 CTI 服务器上运行 IVR |
-    | `invokeType`   | `Integer` | `0`     | IVR 调用方式 [IvrInvokeType][] 枚举           |
-    | `customString` | `String`  | `""`    | 随路数据                                      |
+    | Argument       | Type      | Default | Description                         |
+    | -------------- | --------- | ------- | ----------------------------------- |
+    | `ivrId`        | `String`  | -       | IVR 的 ID                           |
+    | `invokeType`   | `Integer` | `0`     | IVR 调用方式 [IvrInvokeType][] 枚举 |
+    | `customString` | `String`  | `""`    | 随路数据                            |
 
 -   **Result**: `null`
 
