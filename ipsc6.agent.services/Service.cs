@@ -454,6 +454,7 @@ namespace ipsc6.agent.services
                 CtiIndex = agent.GetConnetionIndex(obj.CtiServer),
                 Channel = obj.Channel,
                 Id = obj.Id,
+                State = obj.EventType,
                 Type = obj.Type,
                 ProcessId = obj.ProcessId,
                 CallingNo = obj.CallingNo,
@@ -467,6 +468,11 @@ namespace ipsc6.agent.services
         }
 
         public event EventHandler<Events.QueueInfoEventArgs> OnQueueInfoEvent;
+
+        public IReadOnlyCollection<Models.QueueInfo> GetQueueInfos()
+        {
+            return GetModel().QueueInfos;
+        }
 
         #endregion
     }

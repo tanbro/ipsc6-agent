@@ -191,6 +191,16 @@ const unHold = () => {
   _ws.send(JSON.stringify(req));
 };
 
+const getQueueInfos = () => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "getQueueInfos",
+    params: [],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
 document.getElementById("frmLogin").addEventListener("submit", ev=>{
   ev.preventDefault();
   const form = ev.submitter.form;

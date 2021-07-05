@@ -75,7 +75,7 @@
 
                     <TextBox x:Name="textboxName" Grid.Column="1" Margin="16 8 16 8" FontSize="14"
                              InputMethod.IsInputMethodEnabled="False"
-                             Text="{Binding WorkerNumber}">
+                             Text="{Binding WorkerNum}">
                         <TextBox.Style>
                             <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
                                 <Style.Resources>
