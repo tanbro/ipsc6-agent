@@ -6,9 +6,10 @@
 
 -   **Params**:
 
-    | Argument    | Type     | Default | Description  |
-    | ----------- | -------- | ------- | ------------ |
-    | `workerNum` | `String` | -       | 目标座席工号 |
+    | Argument    | Type      | Default | Description                     |
+    | ----------- | --------- | ------- | ------------------------------- |
+    | `ctiIndex`  | `Integer` | -       | 目标座席的话路在这个 CTI 节点上 |
+    | `workerNum` | `String`  | -       | 目标座席工号                    |
 
 -   **Result**: `null`
 
@@ -18,21 +19,27 @@
 
 -   **Params**:
 
-    | Argument    | Type     | Default | Description  |
-    | ----------- | -------- | ------- | ------------ |
-    | `workerNum` | `String` | -       | 目标座席工号 |
+    | Argument    | Type      | Default | Description                     |
+    | ----------- | --------- | ------- | ------------------------------- |
+    | `ctiIndex`  | `Integer` | -       | 目标座席的话路在这个 CTI 节点上 |
+    | `workerNum` | `String`  | -       | 目标座席工号                    |
 
 -   **Result**: `null`
 
 ## 振铃拦截
 
+!!! Warning "Deprecated"
+
+    应使用 [`dequeue`](../queue.md#排队抢接) 代替这个功能
+
 -   **Method**: `intercept`
 
 -   **Params**:
 
-    | Argument    | Type     | Default | Description  |
-    | ----------- | -------- | ------- | ------------ |
-    | `workerNum` | `String` | -       | 目标座席工号 |
+    | Argument    | Type      | Default | Description                     |
+    | ----------- | --------- | ------- | ------------------------------- |
+    | `ctiIndex`  | `Integer` | -       | 目标座席的话路在这个 CTI 节点上 |
+    | `workerNum` | `String`  | -       | 目标座席工号                    |
 
 -   **Result**: `null`
 
@@ -42,9 +49,10 @@
 
 -   **Params**:
 
-    | Argument    | Type     | Default | Description  |
-    | ----------- | -------- | ------- | ------------ |
-    | `workerNum` | `String` | -       | 目标座席工号 |
+    | Argument    | Type      | Default | Description                     |
+    | ----------- | --------- | ------- | ------------------------------- |
+    | `ctiIndex`  | `Integer` | -       | 目标座席的话路在这个 CTI 节点上 |
+    | `workerNum` | `String`  | -       | 目标座席工号                    |
 
 -   **Result**: `null`
 
@@ -54,9 +62,10 @@
 
 -   **Params**:
 
-    | Argument    | Type     | Default | Description  |
-    | ----------- | -------- | ------- | ------------ |
-    | `workerNum` | `String` | -       | 目标座席工号 |
+    | Argument    | Type      | Default | Description                     |
+    | ----------- | --------- | ------- | ------------------------------- |
+    | `ctiIndex`  | `Integer` | -       | 目标座席的话路在这个 CTI 节点上 |
+    | `workerNum` | `String`  | -       | 目标座席工号                    |
 
 -   **Result**: `null`
 
@@ -87,6 +96,10 @@
 
 ## 闭塞
 
+!!! warning
+
+    此功能已经取消
+
 被闭塞的座席不参与任何排队
 
 -   **Method**: `block`
@@ -100,6 +113,10 @@
 -   **Result**: `null`
 
 ## 取消闭塞
+
+!!! warning
+
+    此功能已经取消
 
 被闭塞的座席不参与任何排队
 
@@ -134,6 +151,7 @@
     | Argument    | Type     | Default | Description  |
     | ----------- | -------- | ------- | ------------ |
     | `workerNum` | `String` | -       | 目标座席工号 |
+    | `groupId`   | `String` | -       | 要签出的组   |
 
 -   **Result**: `null`
 
