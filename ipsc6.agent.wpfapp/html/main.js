@@ -50,7 +50,7 @@ const logIn = (workerNum, password) => {
   _ws.send(JSON.stringify(req));
 };
 
-const signGroup = (id, isSignIn) => {
+const signGroup = (id, isSignIn=true) => {
   const req = {
     jsonrpc: "2.0",
     id: randomId(),
@@ -150,3 +150,54 @@ const getCalls = () => {
   };
   _ws.send(JSON.stringify(req));
 };
+
+const answer = () => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "answer",
+    params: [],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+const hangup = () => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "hangup",
+    params: [],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+const hold = () => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "hold",
+    params: [],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+const unHold = () => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "unHold",
+    params: [],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+document.getElementById("frmLogin").addEventListener("submit", ev=>{
+  ev.preventDefault();
+  const form = ev.submitter.form;
+  const inputs = form.elements;
+  const workerNum = inputs[0].value;
+  const password = inputs[1].value;
+  logIn(workerNum, password);
+});
+
+startSock();

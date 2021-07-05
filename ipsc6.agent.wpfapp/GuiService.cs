@@ -16,7 +16,7 @@ namespace ipsc6.agent.wpfapp
             /// 改 UI 的输入框
             ViewModels.LoginViewModel.Instance.WorkerNumber = workerNumber;
 #pragma warning disable VSTHRD111
-            await ViewModels.LoginViewModel.ExecuteLoginAsync(workerNumber, password);
+            await ViewModels.LoginViewModel.DoLoginAsync(workerNumber, password);
 #pragma warning restore VSTHRD111
         }
 #pragma warning restore VSTHRD200

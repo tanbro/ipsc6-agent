@@ -52,55 +52,78 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         public static async void DoLogin()
         {
-            await ExecuteLoginAsync(workerNumber, password);
+            var svc = App.mainService;
+
+            using (await Utils.CommandGuard.CreateAsync(loginCommand))
+            {
+                try
+                {
+                    await ExecuteLoginAsync();
+                    window.DialogResult = true;
+                    window.Close();
+                }
+                catch (Exception err)
+                {
+                    svc.DestroyAgent();
+                    if (err is client.ConnectionException)
+                    {
+                        logger.ErrorFormat("DoLogin - 登录失败: {0}", err);
+                        MessageBox.Show(
+                            $"登录失败\r\n\r\n{err}",
+                            Application.Current.MainWindow.Title,
+                            MessageBoxButton.OK, MessageBoxImage.Error
+                        );
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
         }
 
-        public static async Task ExecuteLoginAsync(string workerNum, string password)
+        internal static async Task DoLoginAsync(string workerNumber, string password)
         {
             var dispatcher = Application.Current.Dispatcher;
             var svc = App.mainService;
 
             using (await Utils.CommandGuard.CreateAsync(loginCommand))
             {
+                LoginViewModel.workerNumber = workerNumber;
+                LoginViewModel.password = password;
+
                 await dispatcher.Invoke(async () =>
                 {
-                    IConfigurationRoot cfgRoot = Config.Manager.ConfigurationRoot;
-                    Config.Ipsc cfgIpsc = new();
-                    cfgRoot.GetSection(nameof(Config.Ipsc)).Bind(cfgIpsc);
-                    logger.InfoFormat(
-                        "DoLoginAsync - CreateAgent - ServerList: {0}, LocalPort: {1}, LocalAddress: \"{2}\"",
-                        (cfgIpsc.ServerList == null) ? "<null>" : $"\"{string.Join(",", cfgIpsc.ServerList)}\"",
-                        cfgIpsc.LocalPort,
-                        cfgIpsc.LocalAddress);
-                    svc.CreateAgent(cfgIpsc.ServerList, cfgIpsc.LocalPort, cfgIpsc.LocalAddress);
                     try
                     {
-                        logger.Debug("DoLoginAsync - 开始登录 ...");
-                        await svc.LogInAsync(workerNum, password);
-                        logger.Info("DoLoginAsync - 登录成功");
+                        await ExecuteLoginAsync();
                         window.DialogResult = true;
                         window.Close();
                     }
                     catch (Exception err)
                     {
                         svc.DestroyAgent();
+                        logger.ErrorFormat("DoLoginAsync - 登录失败: {0}", err);
                         if (err is client.ConnectionException)
                         {
-                            logger.ErrorFormat("DoLoginAsync - 登录失败: {0}", err);
-                            MessageBox.Show(
-                                $"登录失败\r\n\r\n{err}",
-                                Application.Current.MainWindow.Title,
-                                MessageBoxButton.OK, MessageBoxImage.Error
-                            );
+                            _ = Task.Run(() =>
+                             {
+                                 dispatcher.Invoke(() =>
+                                 {
+                                     MessageBox.Show(
+                                         $"登录失败\r\n\r\n{err}",
+                                         Application.Current.MainWindow.Title,
+                                         MessageBoxButton.OK, MessageBoxImage.Error
+                                     );
+                                 });
+
+                             });
                         }
-                        else
-                        {
-                            throw;
-                        }
+                        throw;
                     }
                 });
-
             }
+
         }
 
         private static bool CanLogin()
@@ -111,6 +134,30 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 return false;
             return true;
         }
+
+        private static void CreateAgentInstance()
+        {
+            var svc = App.mainService;
+            IConfigurationRoot cfgRoot = Config.Manager.ConfigurationRoot;
+            Config.Ipsc cfgIpsc = new();
+            cfgRoot.GetSection(nameof(Config.Ipsc)).Bind(cfgIpsc);
+            logger.InfoFormat(
+                "CreateAgentInstance - ServerList: {0}, LocalPort: {1}, LocalAddress: \"{2}\"",
+                (cfgIpsc.ServerList == null) ? "<null>" : $"\"{string.Join(",", cfgIpsc.ServerList)}\"",
+                cfgIpsc.LocalPort,
+                cfgIpsc.LocalAddress);
+            svc.CreateAgent(cfgIpsc.ServerList, cfgIpsc.LocalPort, cfgIpsc.LocalAddress);
+        }
+
+        private static async Task ExecuteLoginAsync()
+        {
+            var svc = App.mainService;
+            CreateAgentInstance();
+            logger.Debug("ExecuteLoginAsync - 开始登录 ...");
+            await svc.LogInAsync(workerNumber, password);
+            logger.Info("ExecuteLoginAsync - 登录成功");
+        }
+
     }
 
 }

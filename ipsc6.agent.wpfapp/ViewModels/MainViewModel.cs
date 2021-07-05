@@ -85,9 +85,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             IRelayCommand[] commands =
             {
-                groupPopupCommand,
                 statePopupCommand, setStateCommand,
-                signGroupCommand,
+                groupPopupCommand, signGroupCommand,
                 holdCommand, unHoldCommand,
             };
             foreach (var command in commands)
@@ -164,6 +163,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static bool CanGroupPopup()
         {
             if (groups?.Count == 0) return false;
+            if (status.Item1 is client.AgentState.NotExist or client.AgentState.OffLine) return false;
             return true;
         }
 
@@ -186,8 +186,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static async void DoSignGroup(object parameter)
         {
-            string groupId = parameter as string;
             var svc = App.mainService;
+
+            if (parameter == null)
+                throw new ArgumentNullException(nameof(parameter));
+            string groupId = parameter as string;
 
             using (await Utils.CommandGuard.CreateAsync(signGroupCommand))
             {
@@ -197,7 +200,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     logger.DebugFormat("签入 {0}", groupId);
                 else
                     logger.DebugFormat("签出 {0}", groupId);
-
                 await svc.SignGroup(groupId, isSignIn);
             }
         }
@@ -323,10 +325,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             // UI 上的电话状态Icon/Label的转换结果由“TeleState”和注册状态共同计算得出，但是 bingding 只有 TeleState(不规范)，所以这里强行传播给绑定
             Instance.OnPropertyChanged("TeleState");
 
-            IRelayCommand[] commands =
-            {
-                answerCommand, hangupCommand
-            };
+            IRelayCommand[] commands = { answerCommand, hangupCommand };
             foreach (var command in commands)
             {
                 Application.Current.Dispatcher.Invoke(command.NotifyCanExecuteChanged);
@@ -356,7 +355,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             //if (Utils.CommandGuard.IsGuarding) return false;
             var callsIter = sipAccounts.SelectMany(m => m.Calls);
-            if (!callsIter.Any(x => x.State == pjsip_inv_state.PJSIP_INV_STATE_CONNECTING)) return false;
+            if (!callsIter.Any(x => x.State == pjsip_inv_state.PJSIP_INV_STATE_INCOMING)) return false;
             return true;
         }
 
@@ -377,7 +376,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             //if (Utils.CommandGuard.IsGuarding) return false;
             var callsIter = sipAccounts.SelectMany(m => m.Calls);
-            var states = new pjsip_inv_state[] { pjsip_inv_state.PJSIP_INV_STATE_NULL, pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED };
+            var states = new pjsip_inv_state[] {
+                pjsip_inv_state.PJSIP_INV_STATE_CALLING,pjsip_inv_state.PJSIP_INV_STATE_INCOMING,
+                pjsip_inv_state.PJSIP_INV_STATE_EARLY,pjsip_inv_state.PJSIP_INV_STATE_CONNECTING,
+                pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED
+            };
             if (!callsIter.Any(x => states.Contains(x.State))) return false;
             return true;
         }
