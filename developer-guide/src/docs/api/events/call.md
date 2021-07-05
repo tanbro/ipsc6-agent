@@ -8,10 +8,9 @@
 
 -   **Params**:
 
-    | Argument   | Type      | Default | Description                               |
-    | ---------- | --------- | ------- | ----------------------------------------- |
-    | `ctiIndex` | `Integer` | -       | 选中该座席的排队对应的 CTI 服务器的索引值 |
-    | `call`     | `Object`  | -       | 选中该座席的排队对应的呼叫([Call][]) 对象 |
+    | Argument | Type     | Default | Description                               |
+    | -------- | -------- | ------- | ----------------------------------------- |
+    | `call`   | `Object` | -       | 选中该座席的排队对应的呼叫([Call][]) 对象 |
 
 ## 收到通话保持消息
 
@@ -21,10 +20,9 @@
 
 -   **Params**:
 
-    | Argument   | Type      | Default | Description                                     |
-    | ---------- | --------- | ------- | ----------------------------------------------- |
-    | `ctiIndex` | `Integer` | -       | 保持状态发生变化的呼叫对应的 CTI 服务器的索引值 |
-    | `call`     | `Object`  | -       | 保持状态发生变化的呼叫([Call][]) 对象           |
+    | Argument | Type     | Default | Description                           |
+    | -------- | -------- | ------- | ------------------------------------- |
+    | `call`   | `Object` | -       | 保持状态发生变化的呼叫([Call][]) 对象 |
 
 [call]: ../types/call.md
 

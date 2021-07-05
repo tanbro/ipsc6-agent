@@ -8,10 +8,9 @@
 
 -   **Params**:
 
-    | Argument    | Type      | Default | Description                                 |
-    | ----------- | --------- | ------- | ------------------------------------------- |
-    | `ctiIndex`  | `Integer` | -       | 状态发生变化的呼叫对应的 CTI 服务器的索引值 |
-    | `queueInfo` | `Object`  | -       | 状态发生变化的呼叫([QueueInfo][]) 对象      |
+    | Argument    | Type     | Default | Description                            |
+    | ----------- | -------- | ------- | -------------------------------------- |
+    | `queueInfo` | `Object` | -       | 状态发生变化的呼叫([QueueInfo][]) 对象 |
 
 [queueinfo]: ../types/queue_info.md
 
