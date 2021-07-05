@@ -16,7 +16,7 @@ namespace ipsc6.agent.services.Models
         public client.QueueEventType State { get; internal set; }
         public client.QueueInfoType Type { get; internal set; }
         public long ProcessId { get; internal set; }
-        public string CallingNo { get; internal set; }
+        public string CallingTelNum { get; internal set; }
         public string WorkerNum { get; internal set; }
         public string CustomeString { get; internal set; }
         public IReadOnlyCollection<Group> Groups { get; internal set; }

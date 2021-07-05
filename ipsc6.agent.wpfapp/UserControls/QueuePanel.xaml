@@ -40,11 +40,11 @@
                         Command="{Binding QueuePopupCommand}">
                     <StackPanel>
                         <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
-                           Text="{Binding AgentBasicInfo.QueueList, Mode=OneWay, Converter={StaticResource QueueListToTitleConverter}}"
+                           Text="{Binding QueueInfos, Mode=OneWay, Converter={StaticResource QueueListToTitleConverter}}"
                            />
                         <Popup x:Name="QueuePopup" StaysOpen="False" IsOpen="{Binding IsQueuePopupOpened}">
                             <ContentControl>
-                                <ListBox ItemsSource="{Binding AgentBasicInfo.QueueList, Mode=OneWay}">
+                                <ListBox ItemsSource="{Binding QueueInfos, Mode=OneWay}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal">

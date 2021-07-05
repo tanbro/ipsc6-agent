@@ -15,7 +15,6 @@ namespace ipsc6.agent.wpfapp.Converters
         {
             if (value == null) return "<null>";
             var v = value as client.CallInfo;
-            //return $"[{ci.Channel}] ({ci.RemoteTelnum})=>({ci.LocalTelnum})";
             return v.ToString();
 
         }

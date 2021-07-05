@@ -1169,12 +1169,12 @@ namespace ipsc6.agent.client
             }
         }
 
-        public async Task DialAsync(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        public async Task DialAsync(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
             using (requestGuard.TryEnter())
             {
                 var conn = mainConnection;
-                var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
+                var s = $"{calledTelNum}|{callingTelNum}|{channelGroup}|{option}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_DIAL, 0, s);
                 await OffHookAsync(conn);
                 await conn.RequestAsync(req);
@@ -1198,7 +1198,7 @@ namespace ipsc6.agent.client
             await XferAsync(connectionInfo, channel, groupId, workerNum, customString);
         }
 
-        public async Task Xfer(CallInfo callInfo, string groupId, string workerNum = "", string customString = "")
+        public async Task XferAsync(CallInfo callInfo, string groupId, string workerNum = "", string customString = "")
         {
             await XferAsync(callInfo.CtiServer, callInfo.Channel, groupId, workerNum, customString);
         }
@@ -1206,7 +1206,7 @@ namespace ipsc6.agent.client
         public async Task XferAsync(string groupId, string workerNum = "", string customString = "")
         {
             CallInfo callInfo = HeldCalls.First();
-            await Xfer(callInfo, groupId, workerNum, customString);
+            await XferAsync(callInfo, groupId, workerNum, customString);
         }
 
         public async Task XferConsultAsync(string groupId, string workerNum = "", string customString = "")
@@ -1221,43 +1221,43 @@ namespace ipsc6.agent.client
             }
         }
 
-        public async Task XferExtAsync(CtiServer connectionInfo, int channel, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        public async Task XferExtAsync(CtiServer connectionInfo, int channel, string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
-                var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
+                var s = $"{calledTelNum}|{callingTelNum}|{channelGroup}|{option}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER_EX, channel, s);
                 await conn.RequestAsync(req);
             }
         }
 
-        public async Task XferExtAsync(int connectionIndex, int channel, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        public async Task XferExtAsync(int connectionIndex, int channel, string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
             var connectionInfo = ctiServers[connectionIndex];
-            await XferExtAsync(connectionInfo, channel, calledTelnum, callingTelnum, channelGroup, option);
+            await XferExtAsync(connectionInfo, channel, calledTelNum, callingTelNum, channelGroup, option);
         }
 
-        public async Task XferExtAsync(CallInfo callInfo, string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        public async Task XferExtAsync(CallInfo callInfo, string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
             var connectionInfo = callInfo.CtiServer;
             var channel = callInfo.Channel;
-            await XferExtAsync(connectionInfo, channel, calledTelnum, callingTelnum, channelGroup, option);
+            await XferExtAsync(connectionInfo, channel, calledTelNum, callingTelNum, channelGroup, option);
         }
 
-        public async Task XferExtAsync(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        public async Task XferExtAsync(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
             CallInfo callInfo = HeldCalls.First();
-            await XferExtAsync(callInfo, calledTelnum, callingTelnum, channelGroup, option);
+            await XferExtAsync(callInfo, calledTelNum, callingTelNum, channelGroup, option);
         }
 
-        public async Task XferExtConsultAsync(string calledTelnum, string callingTelnum = "", string channelGroup = "", string option = "")
+        public async Task XferExtConsultAsync(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
             using (requestGuard.TryEnter())
             {
                 CallInfo callInfo = HeldCalls.First();
                 var conn = GetConnection(callInfo.CtiServer);
-                var s = $"{calledTelnum}|{callingTelnum}|{channelGroup}|{option}";
+                var s = $"{calledTelNum}|{callingTelNum}|{channelGroup}|{option}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT_EX, -1, s);
                 await conn.RequestAsync(req);
             }
@@ -1484,10 +1484,16 @@ namespace ipsc6.agent.client
 
         public async Task DequeueAsync(QueueInfo queueInfo)
         {
+            var connectionIndex = GetConnetionIndex(queueInfo.CtiServer);
+            await DequeueAsync(connectionIndex, queueInfo.Channel);
+        }
+
+        public async Task DequeueAsync(int connectionIndex, int channel)
+        {
             using (requestGuard.TryEnter())
             {
-                var conn = GetConnection(queueInfo.CtiServer);
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, queueInfo.Channel);
+                var conn = GetConnection(connectionIndex);
+                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, channel);
                 await conn.RequestAsync(req);
             }
         }

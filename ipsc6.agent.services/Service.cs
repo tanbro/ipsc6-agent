@@ -35,7 +35,7 @@ namespace ipsc6.agent.services
 
         #region 内部方法
 
-        internal client.Agent agent;
+        private client.Agent agent;
 
         private readonly Models.Model Model = new();
 
@@ -457,7 +457,7 @@ namespace ipsc6.agent.services
                 State = obj.EventType,
                 Type = obj.Type,
                 ProcessId = obj.ProcessId,
-                CallingNo = obj.CallingNo,
+                CallingTelNum = obj.CallingTelNum,
                 WorkerNum = obj.WorkerNum,
                 CustomeString = obj.CustomeString,
                 Groups = (
@@ -474,6 +474,53 @@ namespace ipsc6.agent.services
             return GetModel().QueueInfos;
         }
 
+        public async Task Dequeue(int ctiIndex, int channel)
+        {
+            await agent.DequeueAsync(ctiIndex, channel);
+        }
+
+        #endregion
+
+        #region 拨号、转接、咨询
+        public async Task Dial(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
+        {
+            await agent.DialAsync(calledTelNum, callingTelNum, channelGroup, option);
+        }
+
+        public async Task Xfer(int ctiIndex, int channel, string groupId, string workerNum = "", string customString = "")
+        {
+            await agent.XferAsync(ctiIndex, channel, groupId, workerNum, customString);
+        }
+
+        public async Task Xfer(string groupId, string workerNum = "", string customString = "")
+        {
+            await agent.XferAsync(groupId, workerNum, customString);
+        }
+
+        public async Task XferConsult(string groupId, string workerNum = "", string customString = "")
+        {
+            await agent.XferConsultAsync(groupId, workerNum, customString);
+        }
+
+        public async Task XferExt(int ctiIndex, int channel, string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
+        {
+            await agent.XferExtAsync(ctiIndex, channel, calledTelNum, callingTelNum, channelGroup, option);
+        }
+
+        public async Task XferExt(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
+        {
+            await agent.XferExtAsync(calledTelNum, callingTelNum, channelGroup, option);
+        }
+
+        public async Task XferExtConsult(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
+        {
+            await agent.XferExtConsultAsync(calledTelNum, callingTelNum, channelGroup, option);
+        }
+
+        public async Task CallIvr(string ivrId, client.IvrInvokeType invokeType = client.IvrInvokeType.Keep, string customString = "")
+        {
+            await agent.CallIvrAsync(ivrId, invokeType, customString);
+        }
         #endregion
     }
 #pragma warning restore VSTHRD200
