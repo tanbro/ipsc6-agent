@@ -8,13 +8,13 @@ using System.Windows.Data;
 
 namespace ipsc6.agent.wpfapp.Converters
 {
-    [ValueConversion(typeof(IReadOnlyCollection<client.QueueInfo>), typeof(string))]
+    [ValueConversion(typeof(IReadOnlyCollection<services.Models.QueueInfo>), typeof(string))]
     public class QueueListToTitleConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null) return "0";
-            var v = value as IReadOnlyCollection<client.QueueInfo>;
+            var v = value as IReadOnlyCollection<services.Models.QueueInfo>;
             if (v.Count < 100) return $"{v.Count}";
             if (v.Count < 1000) return $"{v.Count / 100}00+";
             if (v.Count < 10000) return $"{v.Count / 1000}K+";
@@ -27,14 +27,14 @@ namespace ipsc6.agent.wpfapp.Converters
         }
     }
 
-    [ValueConversion(typeof(client.QueueInfo), typeof(string))]
+    [ValueConversion(typeof(services.Models.QueueInfo), typeof(string))]
     public class QueueToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null) return "";
-            var v = value as client.QueueInfo;
-            return v.ToString();
+            var v = (services.Models.QueueInfo)value;
+            return $"{v.CallingNo}";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

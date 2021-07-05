@@ -105,6 +105,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             App.mainService.OnTeleStateChanged += MainService_OnTeleStateChanged;
             App.mainService.OnSipRegisterStateChanged += MainService_OnSipRegisterStateChanged;
             App.mainService.OnSipCallStateChanged += MainService_OnSipCallStateChanged;
+            App.mainService.OnQueueInfoEvent += MainService_OnQueueInfoEvent;
         }
         #endregion
 
@@ -491,6 +492,13 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 排队列表
+
+        private static void MainService_OnQueueInfoEvent(object sender, services.Events.QueueInfoEventArgs e)
+        {
+            var svc = App.mainService;
+            Instance.QueueInfos = svc.GetQueueInfos();
+        }
+
         private static bool isQueuePopupOpened;
         public bool IsQueuePopupOpened
         {
@@ -504,14 +512,24 @@ namespace ipsc6.agent.wpfapp.ViewModels
             Instance.IsQueuePopupOpened = !isQueuePopupOpened;
         }
 
-        //static readonly IRelayCommand dequeueCommand = new AsyncRelayCommand<object>(DoDequeueAsync);
-        //public IRelayCommand DequeueCommand => dequeueCommand;
-        //static async Task DoDequeueAsync(object paramter)
-        //{
-        //    var queueInfo = paramter as client.QueueInfo;
-        //    var agent = Controllers.AgentController.Agent;
-        //    await agent.DequeueAsync(queueInfo);
-        //}
+        private static IReadOnlyCollection<services.Models.QueueInfo> queueInfos = new services.Models.QueueInfo[] { };
+        public IReadOnlyCollection<services.Models.QueueInfo> QueueInfos
+        {
+            get => queueInfos;
+            set => SetProperty(ref queueInfos, value);
+        }
+
+        private static readonly IRelayCommand dequeueCommand = new RelayCommand<object>(DoDequeue);
+        public IRelayCommand DequeueCommand => dequeueCommand;
+        private static async void DoDequeue(object paramter)
+        {
+            var queueInfo = (services.Models.QueueInfo)paramter;
+            var svc = App.mainService;
+            using (await Utils.CommandGuard.CreateAsync())
+            {
+                await svc.Dequeue(queueInfo.CtiIndex, queueInfo.Channel);
+            }
+        }
         #endregion
 
 
