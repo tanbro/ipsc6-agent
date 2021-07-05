@@ -102,6 +102,6 @@ namespace ipsc6.agent.client
         public static bool operator ==(CallInfo left, CallInfo right) => EqualityComparer<CallInfo>.Default.Equals(left, right);
         public static bool operator !=(CallInfo left, CallInfo right) => !(left == right);
         public override string ToString() =>
-            $"<{GetType().Name} Connection={CtiServer}, Channel={Channel}, IsHeld={IsHeld}, HoldType={HoldType}, CallDirection={CallDirection}, RemoteTelnum={RemoteTelNum}>";
+            $"<{GetType().Name} Connection={CtiServer}, Channel={Channel}, IsHeld={IsHeld}, HoldType={HoldType}, CallDirection={CallDirection}, RemoteTelNum={RemoteTelNum}>";
     }
 }

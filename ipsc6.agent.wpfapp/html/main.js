@@ -211,6 +211,66 @@ const dequeue = (ctiIndex, channel) => {
   _ws.send(JSON.stringify(req));
 };
 
+const dial = (calledTeleNum) => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "dial",
+    params: [calledTeleNum],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+const xfer = (groupId, workerNum="") => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "dial",
+    params: [groupId, workerNum],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+const xferConsult = (groupId, workerNum="") => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "xferConsult",
+    params: [groupId, workerNum],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+const xferExt = (calledTeleNum) => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "xferExt",
+    params: [calledTeleNum],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+const xferExtConsult = (calledTeleNum) => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "xferExtConsult",
+    params: [calledTeleNum],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+const callIvr = (ivrId, invokeType=0, customeString="") => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "callIvr",
+    params: [ivrId, invokeType, customeString],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
 document.getElementById("frmLogin").addEventListener("submit", ev=>{
   ev.preventDefault();
   const form = ev.submitter.form;
