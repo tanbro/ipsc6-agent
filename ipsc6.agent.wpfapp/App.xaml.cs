@@ -61,28 +61,31 @@ namespace ipsc6.agent.wpfapp
                 services.Service.Initial();
                 try
                 {
-                    LocalRpcTargetFunc[] localRpcCreators = {
-                        (_, _) => mainService,
-                        (_, _) => guiService,
-                    };
-                    server.Server rpcServer = new(localRpcCreators);
-                    CancellationTokenSource rpcServerCanceller = new();
-                    Task rpcServerTask = Task.Run(() => rpcServer.RunAsync(rpcServerCanceller.Token));
-                    try
+                    using (mainService)
+                    using (guiService)
                     {
-                        _ = ViewModels.MainViewModel.Instance; // ensure lazy create
-                        if (new Views.LoginWindow().ShowDialog() == true)
+                        LocalRpcTargetFunc[] localRpcCreators = {
+                            (_, _) => mainService,
+                            (_, _) => guiService,
+                        };
+                        server.Server rpcServer = new(localRpcCreators);
+                        CancellationTokenSource rpcServerCanceller = new();
+                        Task rpcServerTask = Task.Run(() => rpcServer.RunAsync(rpcServerCanceller.Token));
+                        try
                         {
-                            new Views.MainWindow().ShowDialog();
+                            _ = ViewModels.MainViewModel.Instance; // ensure lazy create
+                            if (new Views.LoginWindow().ShowDialog() == true)
+                            {
+                                new Views.MainWindow().ShowDialog();
+                            }
                         }
-                    }
-                    finally
-                    {
-                        rpcServerCanceller.Cancel();
+                        finally
+                        {
+                            rpcServerCanceller.Cancel();
 #pragma warning disable VSTHRD002
-                        rpcServerTask.Wait();
+                            rpcServerTask.Wait();
 #pragma warning restore VSTHRD002
-                        mainService.DestroyAgent();
+                        }
                     }
                 }
                 finally

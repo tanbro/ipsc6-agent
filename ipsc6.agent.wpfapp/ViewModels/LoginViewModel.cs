@@ -47,8 +47,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         public static async void DoLogin()
         {
-            var svc = App.mainService;
-
             using (await Utils.CommandGuard.CreateAsync(loginCommand))
             {
                 try
@@ -59,7 +57,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 }
                 catch (Exception err)
                 {
-                    svc.DestroyAgent();
                     if (err is client.ConnectionException)
                     {
                         logger.ErrorFormat("DoLogin - 登录失败: {0}", err);
@@ -97,7 +94,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     }
                     catch (Exception err)
                     {
-                        svc.DestroyAgent();
                         logger.ErrorFormat("DoLoginAsync - 登录失败: {0}", err);
                         if (err is client.ConnectionException)
                         {
@@ -111,7 +107,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
                                 );
                             });
 #pragma warning restore CS4014
-
                         }
                         throw;
                     }

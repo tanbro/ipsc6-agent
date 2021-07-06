@@ -7,19 +7,19 @@ var _ws = null; // typ
 
 const startSock = (url = "ws://127.0.0.1:9696/jsonrpc") => {
   _ws = new WebSocket(url);
-  console.log(`${_ws.url} opening.`);
+  console.log(`${_ws.url} opening ...`);
 
   _ws.onopen = (e) => {
-    console.log(`${e.target.url} onopen.`);
+    console.log(`${e.target.url} open.`);
   };
 
   _ws.onclose = (e) => {
-    console.error(`${e.target.url} onclose. ${e.code}`);
+    console.error(`${e.target.url} close: ${e.code}`);
     setTimeout(() => startSock(e.target.url), 5000);
   };
 
   _ws.onmessage = (e) => {
-    console.log(`${e.target.url} onmessage. ${e.data}`);
+    console.log(`${e.target.url} message: ${e.data}`);
   };
 };
 
@@ -35,6 +35,16 @@ const echo = (s) => {
     jsonrpc: "2.0",
     id: randomId(),
     method: "echo",
+    params: [s],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+const throwAnException = (s) => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "throwAnException",
     params: [s],
   };
   _ws.send(JSON.stringify(req));

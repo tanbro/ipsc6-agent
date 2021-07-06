@@ -12,8 +12,37 @@ using System.IO;
 namespace ipsc6.agent.services
 {
 #pragma warning disable VSTHRD200
-    public class Service
+    public class Service : IDisposable
     {
+        #region Dispose
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    DestroyAgent();
+                }
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
+        // ~Service()
+        // {
+        //     // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
         #region Demo methods
         public string Echo(string message)
         {
@@ -30,13 +59,16 @@ namespace ipsc6.agent.services
 
         public event EventHandler OnEchoTriggered;
 
-        public static void ThrowAnException(string message) => throw new Exception(message);
+        public static void ThrowAnException(string message)
+        {
+            throw new InvalidOperationException(message);
+        }
         #endregion
 
         #region 内部方法
 
         private client.Agent agent;
-
+        private bool disposedValue;
         private readonly Models.Model Model = new();
 
         internal static void Initial()
@@ -49,16 +81,23 @@ namespace ipsc6.agent.services
             client.Agent.Release();
         }
 
-        internal void DestroyAgent()
+        private void DestroyAgent()
         {
-            if (agent == null) return;
+            if (agent == null)
+            {
+                return;
+            }
+
             agent.Dispose();
             agent = null;
         }
 
         internal void CreateAgent(IEnumerable<string> addresses, ushort localPort, string localAddress)
         {
-            if (agent != null) throw new InvalidOperationException();
+            if (agent != null)
+            {
+                DestroyAgent();
+            }
             agent = new client.Agent(addresses, localPort, localAddress);
 
             agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
@@ -566,7 +605,6 @@ namespace ipsc6.agent.services
         {
             await agent.KickOutAsync(workerNum);
         }
-
         #endregion
     }
 #pragma warning restore VSTHRD200
