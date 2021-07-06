@@ -101,18 +101,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         logger.ErrorFormat("DoLoginAsync - 登录失败: {0}", err);
                         if (err is client.ConnectionException)
                         {
-                            _ = Task.Run(() =>
-                             {
-                                 dispatcher.Invoke(() =>
-                                 {
-                                     MessageBox.Show(
-                                         $"登录失败\r\n\r\n{err}",
-                                         Application.Current.MainWindow.Title,
-                                         MessageBoxButton.OK, MessageBoxImage.Error
-                                     );
-                                 });
+#pragma warning disable CS4014
+                            dispatcher.InvokeAsync(() =>
+                            {
+                                MessageBox.Show(
+                                    $"登录失败\r\n\r\n{err}",
+                                    Application.Current.MainWindow.Title,
+                                    MessageBoxButton.OK, MessageBoxImage.Error
+                                );
+                            });
+#pragma warning restore CS4014
 
-                             });
                         }
                         throw;
                     }

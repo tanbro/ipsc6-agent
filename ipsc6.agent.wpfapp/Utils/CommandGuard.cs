@@ -22,26 +22,9 @@ namespace ipsc6.agent.wpfapp.Utils
             {
                 if (disposing)
                 {
-                    // 释放托管状态(托管对象)
-                    semaphore.Release();
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        try
-                        {
-                            foreach (var command in commands)
-                            {
-                                command.NotifyCanExecuteChanged();
-                            }
-                        }
-                        finally
-                        {
-                            Mouse.OverrideCursor = null;
-                        }
-                    });
+                    Application.Current.Dispatcher.Invoke(Release);
                 }
-
-                // 释放未托管的资源(未托管的对象)并重写终结器
-                // 将大型字段设置为 null
+                semaphore.Release();
                 disposedValue = true;
             }
         }
@@ -62,29 +45,31 @@ namespace ipsc6.agent.wpfapp.Utils
 
         public async ValueTask DisposeAsync()
         {
+            await DisposeAsyncCore();
 
             Dispose(disposing: false);
 #pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
             GC.SuppressFinalize(this);
 #pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
-            await Task.CompletedTask;
+        }
+
+#pragma warning disable VSTHRD200
+        protected async ValueTask DisposeAsyncCore()
+#pragma warning restore VSTHRD200
+        {
+            await Application.Current.Dispatcher.InvokeAsync(Release);
         }
 
         private static readonly SemaphoreSlim semaphore = new(1);
         private readonly IReadOnlyCollection<IRelayCommand> commands;
 
-        private CommandGuard()
-        {
-            commands = new IRelayCommand[] { };
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                Mouse.OverrideCursor = Cursors.Wait;
-            });
-        }
-
         private CommandGuard(IEnumerable<IRelayCommand> commands)
         {
             this.commands = new HashSet<IRelayCommand>(commands);
+        }
+
+        private CommandGuard Initial()
+        {
             Application.Current.Dispatcher.Invoke(() =>
             {
                 Mouse.OverrideCursor = Cursors.Wait;
@@ -93,6 +78,35 @@ namespace ipsc6.agent.wpfapp.Utils
                     command.NotifyCanExecuteChanged();
                 }
             });
+            return this;
+        }
+
+        private void Release()
+        {
+            try
+            {
+                foreach (var command in commands)
+                {
+                    command.NotifyCanExecuteChanged();
+                }
+            }
+            finally
+            {
+                Mouse.OverrideCursor = null;
+            }
+        }
+
+        private async Task<CommandGuard> InitialAsync()
+        {
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                Mouse.OverrideCursor = Cursors.Wait;
+                foreach (var command in commands)
+                {
+                    command.NotifyCanExecuteChanged();
+                }
+            });
+            return this;
         }
 
         public static CommandGuard Create()
@@ -110,7 +124,7 @@ namespace ipsc6.agent.wpfapp.Utils
         public static CommandGuard Create(IEnumerable<IRelayCommand> commands)
         {
             semaphore.Wait();
-            return new CommandGuard(commands);
+            return new CommandGuard(commands).Initial();
         }
 
         public static async Task<CommandGuard> CreateAsync()
@@ -128,14 +142,8 @@ namespace ipsc6.agent.wpfapp.Utils
         public static async Task<CommandGuard> CreateAsync(IEnumerable<IRelayCommand> commands)
         {
             await semaphore.WaitAsync();
-            return new CommandGuard(commands);
+            return await new CommandGuard(commands).InitialAsync();
         }
-
-        //#pragma warning disable VSTHRD200
-        //        private async Task DisposeAsyncCore()
-        //#pragma warning restore VSTHRD200
-        //        {
-        //        }
 
         public static bool IsGuarding => semaphore.CurrentCount == 0;
         public static int CurrentCount => semaphore.CurrentCount;
