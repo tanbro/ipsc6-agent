@@ -1,15 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <NoWarn>IDE0008,IDE0058</NoWarn>
+    </PropertyGroup>
 
-  <!-- NuGet Package References -->
-  <ItemGroup>
-      <PackageReference Include="Microsoft.VisualStudio.Threading" Version="16.10.56" />
-      <PackageReference Include="EmbedIO" Version="3.4.3" />
-      <PackageReference Include="StreamJsonRpc" Version="2.8.21" />
-  </ItemGroup>
+    <!-- NuGet Package References -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.VisualStudio.Threading" Version="16.10.56" />
+        <PackageReference Include="EmbedIO" Version="3.4.3" />
+        <PackageReference Include="StreamJsonRpc" Version="2.8.21" />
+    </ItemGroup>
 
 </Project>

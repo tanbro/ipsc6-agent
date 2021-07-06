@@ -541,7 +541,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             var svc = App.mainService;
 
-            var dialog = new Dialogs.PromptDialog()
+            Dialogs.PromptDialog dialog = new()
             {
                 DataContext = new Dictionary<string, object> {
                             { "Title", "转接" },
@@ -572,7 +572,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             var svc = App.mainService;
 
-            var dialog = new Dialogs.PromptDialog()
+            Dialogs.PromptDialog dialog = new()
             {
                 DataContext = new Dictionary<string, object> {
                     { "Title", "转接" },
@@ -603,7 +603,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async Task DoDialAsync()
         {
             var svc = App.mainService;
-            var dialog = new Dialogs.PromptDialog()
+            Dialogs.PromptDialog dialog = new()
             {
                 DataContext = new Dictionary<string, object> {
                     { "Title", "拨号" },
@@ -623,7 +623,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async Task DoXferExtAsync()
         {
             var svc = App.mainService;
-            var dialog = new Dialogs.PromptDialog()
+            Dialogs.PromptDialog dialog = new()
             {
                 DataContext = new Dictionary<string, object> {
                     { "Title", "向外转移" },
@@ -643,7 +643,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async Task DoXferExtConsultAsync()
         {
             var svc = App.mainService;
-            var dialog = new Dialogs.PromptDialog()
+            Dialogs.PromptDialog dialog = new()
             {
                 DataContext = new Dictionary<string, object> {
                     { "Title", "向外咨询" },
@@ -669,7 +669,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             string ivrString;
 
             {
-                var dialog = new Dialogs.PromptDialog()
+                Dialogs.PromptDialog dialog = new()
                 {
                     DataContext = new Dictionary<string, object> {
                         { "Title", "转 IVR" },
@@ -680,7 +680,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 ivrId = dialog.InputText;
             }
             {
-                var dialog = new Dialogs.PromptDialog()
+                Dialogs.PromptDialog dialog = new()
                 {
                     DataContext = new Dictionary<string, object> {
                         { "Title", "转 IVR" },
@@ -694,7 +694,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     ivrType = (client.IvrInvokeType)Enum.Parse(typeof(client.IvrInvokeType), dialog.InputText);
             }
             {
-                var dialog = new Dialogs.PromptDialog()
+                Dialogs.PromptDialog dialog = new()
                 {
                     DataContext = new Dictionary<string, object> {
                         { "Title", "转 IVR" },
@@ -723,52 +723,52 @@ namespace ipsc6.agent.wpfapp.ViewModels
             string s;
 
             {
-                var dialog = new Dialogs.PromptDialog()
+                Dialogs.PromptDialog dialog = new()
                 {
                     DataContext = new Dictionary<string, object> {
-                { "Title", "发送 CTI 命令" },
-                { "Label", "输入 CTI 服务器节点序号" },
-                { "InputText", "0" },
-            }
+                        { "Title", "发送 CTI 命令" },
+                        { "Label", "输入 CTI 服务器节点序号" },
+                        { "InputText", "0" },
+                    }
                 };
                 if (dialog.ShowDialog() != true) return;
                 connIndex = int.Parse(dialog.InputText);
             }
 
             {
-                var dialog = new Dialogs.PromptDialog()
+                Dialogs.PromptDialog dialog = new()
                 {
                     DataContext = new Dictionary<string, object> {
-                { "Title", "发送 CTI 命令" },
-                { "Label", "输入 CTI 命令名称" },
-                { "InputText", "REMOTE_MSG_LISTEN" },
-            }
+                        { "Title", "发送 CTI 命令" },
+                        { "Label", "输入 CTI 命令名称" },
+                        { "InputText", "REMOTE_MSG_LISTEN" },
+                    }
                 };
                 if (dialog.ShowDialog() != true) return;
                 msgTyp = (client.MessageType)Enum.Parse(typeof(client.MessageType), dialog.InputText);
             }
 
             {
-                var dialog = new Dialogs.PromptDialog()
+                Dialogs.PromptDialog dialog = new()
                 {
                     DataContext = new Dictionary<string, object> {
-                { "Title", "发送 CTI 命令" },
-                { "Label", "输入 CTI 命令参数的整数部分" },
-                { "InputText", "-1" },
-            }
+                        { "Title", "发送 CTI 命令" },
+                        { "Label", "输入 CTI 命令参数的整数部分" },
+                        { "InputText", "-1" },
+                    }
                 };
                 if (dialog.ShowDialog() != true) return;
                 n = int.Parse(dialog.InputText);
             }
 
             {
-                var dialog = new Dialogs.PromptDialog()
+                Dialogs.PromptDialog dialog = new()
                 {
                     DataContext = new Dictionary<string, object> {
-                { "Title", "发送 CTI 命令" },
-                { "Label", "输入 CTI 命令参数的字符串部分" },
-                { "InputText", "" },
-            }
+                        { "Title", "发送 CTI 命令" },
+                        { "Label", "输入 CTI 命令参数的字符串部分" },
+                        { "InputText", "" },
+                    }
                 };
                 if (dialog.ShowDialog() != true) return;
                 s = dialog.InputText;

@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
 using LocalRpcTargetFunc = System.Func<EmbedIO.WebSockets.WebSocketModule, EmbedIO.WebSockets.IWebSocketContext, object>;
+
 
 namespace ipsc6.agent.server
 {
@@ -46,13 +48,13 @@ namespace ipsc6.agent.server
         public async Task RunAsync(CancellationToken cancellation)
         {
             using var webServer = CreateWebServer();
-            await webServer.RunAsync(cancellation);
+            await webServer.RunAsync(cancellation).ConfigureAwait(false);
         }
 
         public async Task RunAsync()
         {
             using var webServer = CreateWebServer();
-            await webServer.RunAsync();
+            await webServer.RunAsync().ConfigureAwait(false);
         }
 
     }

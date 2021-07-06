@@ -44,7 +44,7 @@ namespace ipsc6.agent.client
         }
 
         // Flag: Has Dispose already been called?
-        private bool disposedValue = false;
+        private bool disposedValue;
 
         public void Dispose()
         {
@@ -148,11 +148,11 @@ namespace ipsc6.agent.client
         }
 
         public int MainConnectionIndex { get; private set; } = -1;
-        private Connection mainConnection => connections[MainConnectionIndex];
+        private Connection MainConnection => connections[MainConnectionIndex];
         public CtiServer MainConnectionInfo => (MainConnectionIndex < 0) ? null : ctiServers[MainConnectionIndex];
 
         public event EventHandler OnMainConnectionChanged;
-        public int AgentId => mainConnection.AgentId;
+        public int AgentId => MainConnection.AgentId;
 
         public string DisplayName { get; private set; }
         public int AgentChannel { get; private set; } = -1;
@@ -172,7 +172,7 @@ namespace ipsc6.agent.client
         public TeleState TeleState { get; private set; } = TeleState.OnHook;
         public event EventHandler<TeleStateChangedEventArgs> OnTeleStateChanged;
 
-        readonly HashSet<QueueInfo> queueInfos = new();
+        private readonly HashSet<QueueInfo> queueInfos = new();
         public IReadOnlyCollection<QueueInfo> QueueInfos => queueInfos;
         public event EventHandler<QueueInfoEventArgs> OnQueueInfoReceived;
 
@@ -196,7 +196,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        void Conn_OnServerSend(object sender, ServerSentEventArgs e)
+        private void Conn_OnServerSend(object sender, ServerSentEventArgs e)
         {
             try
             {
@@ -239,7 +239,7 @@ namespace ipsc6.agent.client
 
         private AgentStateWorkType cachedStateWorkType;
 
-        void ProcessStateChangedMessage(CtiServer ctiServer, ServerSentMessage msg)
+        private void ProcessStateChangedMessage(CtiServer ctiServer, ServerSentMessage msg)
         {
             AgentStateWorkType newState;
             var newWorkType = (WorkType)msg.N2;
@@ -276,10 +276,10 @@ namespace ipsc6.agent.client
                 if (newState.AgentState is AgentState.Ring or AgentState.Work
                     && currIndex != MainConnectionIndex)
                 {
-                    oldMainConnObj = mainConnection;
+                    oldMainConnObj = MainConnection;
                     // 先修改 index
                     MainConnectionIndex = currIndex;
-                    logger.InfoFormat("切换主服务节点到 {0}", mainConnection);
+                    logger.InfoFormat("切换主服务节点到 {0}", MainConnection);
                 }
             }
 
@@ -301,7 +301,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        void ProcessTeleStateChangedMessage(CtiServer _, ServerSentMessage msg)
+        private void ProcessTeleStateChangedMessage(CtiServer _, ServerSentMessage msg)
         {
             TeleState oldState;
             TeleState newState = (TeleState)msg.N1;
@@ -342,9 +342,9 @@ namespace ipsc6.agent.client
             }
         }
 
-        readonly static QueueEventType[] aliveQueueEventTypes = { QueueEventType.Join, QueueEventType.Wait };
+        private static readonly QueueEventType[] aliveQueueEventTypes = { QueueEventType.Join, QueueEventType.Wait };
 
-        void ProcessQueueInfoMessage(CtiServer ctiServer, ServerSentMessage msg)
+        private void ProcessQueueInfoMessage(CtiServer ctiServer, ServerSentMessage msg)
         {
             var queueInfo = new QueueInfo(ctiServer, msg, groups);
             bool isAlive = aliveQueueEventTypes.Contains(queueInfo.EventType);
@@ -360,7 +360,7 @@ namespace ipsc6.agent.client
             OnQueueInfoReceived?.Invoke(this, new QueueInfoEventArgs(ctiServer, queueInfo));
         }
 
-        void ProcessHoldInfoMessage(CtiServer ctiServer, ServerSentMessage msg)
+        private void ProcessHoldInfoMessage(CtiServer ctiServer, ServerSentMessage msg)
         {
             var channel = msg.N1;
             var holdEventType = (HoldEventType)msg.N2;
@@ -379,7 +379,7 @@ namespace ipsc6.agent.client
             OnHoldInfoReceived?.Invoke(this, new HoldInfoEventArgs(ctiServer, callInfo));
         }
 
-        void ProcessDataMessage(CtiServer ctiServer, ServerSentMessage msg)
+        private void ProcessDataMessage(CtiServer ctiServer, ServerSentMessage msg)
         {
             switch ((ServerSentMessageSubType)msg.N1)
             {
@@ -646,9 +646,9 @@ namespace ipsc6.agent.client
         public IReadOnlyList<Group> Groups => groups;
         public event EventHandler OnGroupReceived;
 
-        List<Group> cachedGroups = new();
+        private List<Group> cachedGroups = new();
 
-        void DoOnGroupIdList(CtiServer _, ServerSentMessage msg)
+        private void DoOnGroupIdList(CtiServer _, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var itGroups = from s in msg.S.Split(Constants.VerticalBarDelimiter)
@@ -660,7 +660,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        void DoOnGroupNameList(CtiServer _, ServerSentMessage msg)
+        private void DoOnGroupNameList(CtiServer _, ServerSentMessage msg)
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var names = msg.S.Split(Constants.VerticalBarDelimiter);
@@ -721,7 +721,7 @@ namespace ipsc6.agent.client
         }
 
         public event EventHandler<ChannelAssignedEventArgs> OnChannelAssigned;
-        void DoOnChannel(CtiServer ctiServer, ServerSentMessage msg)
+        private void DoOnChannel(CtiServer ctiServer, ServerSentMessage msg)
         {
             var evt = new ChannelAssignedEventArgs(ctiServer, msg.N2);
             lock (this)
@@ -732,7 +732,7 @@ namespace ipsc6.agent.client
         }
 
         public event EventHandler<AgentDisplayNameReceivedEventArgs> OnAgentDisplayNameReceived;
-        void DoOnAgentId(CtiServer ctiServer, ServerSentMessage msg)
+        private void DoOnAgentId(CtiServer ctiServer, ServerSentMessage msg)
         {
             var evt = new AgentDisplayNameReceivedEventArgs(ctiServer, msg.S);
             lock (this)
@@ -744,11 +744,11 @@ namespace ipsc6.agent.client
 
         public event EventHandler<ConnectionInfoStateChangedEventArgs> OnConnectionStateChanged;
 
-        static readonly ConnectionState[] disconntedStates = { ConnectionState.Lost, ConnectionState.Failed, ConnectionState.Closed };
-        static readonly AgentState[] workingStates = { AgentState.Ring, AgentState.Work };
+        private static readonly ConnectionState[] disconntedStates = { ConnectionState.Lost, ConnectionState.Failed, ConnectionState.Closed };
+        private static readonly AgentState[] workingStates = { AgentState.Ring, AgentState.Work };
 
-        private bool isEverLostAllConnections = false;
-        void Conn_OnConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
+        private bool isEverLostAllConnections;
+        private void Conn_OnConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
         {
             var conn = sender as Connection;
             var connIdx = connections.IndexOf(conn);
@@ -954,7 +954,7 @@ namespace ipsc6.agent.client
                     WorkerNum = workerNum;
                     this.password = password;
                     logger.InfoFormat("主服务节点 [{0}]({1}|{2}) 首次连接 ... ", MainConnectionIndex, MainConnectionInfo.Host, MainConnectionInfo.Port);
-                    await mainConnection.OpenAsync(
+                    await MainConnection.OpenAsync(
                         MainConnectionInfo.Host, MainConnectionInfo.Port,
                         workerNum, password,
                         flag: 1
@@ -998,20 +998,20 @@ namespace ipsc6.agent.client
                     }
                     savedRunningState = RunningState;
                     RunningState = AgentRunningState.Stopping;
-                    isMainNotConnected = !mainConnection.Connected;
+                    isMainNotConnected = !MainConnection.Connected;
                 }
                 try
                 {
                     // 首先，主节点
                     if (isMainNotConnected)
                     {
-                        logger.WarnFormat("主节点连接 {0} 已经关闭！", mainConnection, graceful);
+                        logger.WarnFormat("主节点连接 {0} 已经关闭！", MainConnection, graceful);
                     }
                     else
                     {
-                        logger.DebugFormat("关闭主节点连接 {0} graceful={1}...", mainConnection, graceful);
-                        await mainConnection.CloseAsync(graceful, flag: 1);
-                        logger.DebugFormat("关闭主节点连接 {0} graceful={1} 完毕.", mainConnection, graceful);
+                        logger.DebugFormat("关闭主节点连接 {0} graceful={1}...", MainConnection, graceful);
+                        await MainConnection.CloseAsync(graceful, flag: 1);
+                        logger.DebugFormat("关闭主节点连接 {0} graceful={1} 完毕.", MainConnection, graceful);
                     }
 
                     // 然后其他节点
@@ -1035,9 +1035,9 @@ namespace ipsc6.agent.client
                                 {
                                     switch (exce)
                                     {
-                                        case DisconnectionTimeoutException _:
-                                        case ErrorResponse _:
-                                        case InvalidOperationException _:
+                                        case DisconnectionTimeoutException:
+                                        case ErrorResponse:
+                                        case InvalidOperationException:
                                             logger.DebugFormat("关闭从节点连接 {0} 失败, 将强行关闭: {1}", conn, exce);
                                             await conn.CloseAsync(graceful: false, flag: 0);
                                             break;
@@ -1094,7 +1094,7 @@ namespace ipsc6.agent.client
         {
             using (requestGuard.TryEnter())
             {
-                return await mainConnection.RequestAsync(args, timeout);
+                return await MainConnection.RequestAsync(args, timeout);
             }
         }
 
@@ -1114,7 +1114,7 @@ namespace ipsc6.agent.client
             {
                 var s = string.Join("|", ids);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNON, s);
-                await mainConnection.RequestAsync(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
@@ -1134,7 +1134,7 @@ namespace ipsc6.agent.client
             {
                 var s = string.Join("|", ids);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNOFF, s);
-                await mainConnection.RequestAsync(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
@@ -1143,7 +1143,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONTINUE);
-                await mainConnection.RequestAsync(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
@@ -1165,7 +1165,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_PAUSE, (int)workType);
-                await mainConnection.RequestAsync(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
@@ -1173,7 +1173,7 @@ namespace ipsc6.agent.client
         {
             using (requestGuard.TryEnter())
             {
-                var conn = mainConnection;
+                var conn = MainConnection;
                 var s = $"{calledTelNum}|{callingTelNum}|{channelGroup}|{option}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_DIAL, 0, s);
                 await OffHookAsync(conn);
@@ -1214,7 +1214,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 CallInfo callInfo = HeldCalls.FirstOrDefault();
-                var conn = (callInfo == null) ? mainConnection : GetConnection(callInfo.CtiServer);
+                var conn = (callInfo == null) ? MainConnection : GetConnection(callInfo.CtiServer);
                 var s = $"{workerNum}|{groupId}|{customString}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT, -1, s);
                 await conn.RequestAsync(req);
@@ -1363,16 +1363,16 @@ namespace ipsc6.agent.client
                     channel = WorkingChannelInfo.Channel;
                 }
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_BREAK_SESS, channel, customString);
-                await mainConnection.RequestAsync(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
-        static readonly SemaphoreSlim sipSemaphore = new(1);
+        private static readonly SemaphoreSlim sipCallSema = new(1);
 
         public async Task AnswerAsync()
         {
             logger.Debug("Answer");
-            await sipSemaphore.WaitAsync();
+            await sipCallSema.WaitAsync();
             try
             {
                 await SyncFactory.StartNew(() =>
@@ -1392,14 +1392,14 @@ namespace ipsc6.agent.client
             }
             finally
             {
-                sipSemaphore.Release();
+                sipCallSema.Release();
             }
         }
 
         public async Task HangupAsync()
         {
             logger.Debug("Hangup");
-            await sipSemaphore.WaitAsync();
+            await sipCallSema.WaitAsync();
             try
             {
                 await SyncFactory.StartNew(() =>
@@ -1414,12 +1414,12 @@ namespace ipsc6.agent.client
             }
             finally
             {
-                sipSemaphore.Release();
+                sipCallSema.Release();
             }
         }
 
-        TaskCompletionSource<object> offHookServerTcs;
-        TaskCompletionSource<object> offHookClientTcs;
+        private TaskCompletionSource<object> offHookServerTcs;
+        private TaskCompletionSource<object> offHookClientTcs;
         public bool IsOffHooking { get; private set; }
 
         public const int DefaultOffHookTimeoutMilliSeconds = 5000;
@@ -1587,7 +1587,7 @@ namespace ipsc6.agent.client
             {
                 var s = $"{workerNum}|{groupId}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCESIGNOFF, -1, s);
-                await mainConnection.RequestAsync(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
@@ -1596,7 +1596,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEIDLE, -1, workerNum);
-                await mainConnection.RequestAsync(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
@@ -1606,7 +1606,7 @@ namespace ipsc6.agent.client
             {
                 var s = $"{workerNum}|{(int)workType}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEPAUSE, -1, s);
-                await mainConnection.RequestAsync(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
@@ -1615,7 +1615,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_KICKOUT, -1, workerNum);
-                await mainConnection.RequestAsync(req);
+                await MainConnection.RequestAsync(req);
             }
         }
 
@@ -1639,9 +1639,9 @@ namespace ipsc6.agent.client
                     {
                         throw new InvalidOperationException($"Invalid state: {connections[index].State}");
                     }
-                    connObj = mainConnection;
+                    connObj = MainConnection;
                     MainConnectionIndex = index;
-                    logger.InfoFormat("切换主服务节点到 {0}", mainConnection);
+                    logger.InfoFormat("切换主服务节点到 {0}", MainConnection);
                 }
                 OnMainConnectionChanged?.Invoke(this, EventArgs.Empty);
                 // 再通知原来的主，无论能否通知成功
@@ -1650,8 +1650,8 @@ namespace ipsc6.agent.client
             }
         }
 
-        readonly HashSet<Sip.Account> sipAccountCollection = new();
-        readonly HashSet<SipAccount> sipAccounts = new();
+        private readonly HashSet<Sip.Account> sipAccountCollection = new();
+        private readonly HashSet<SipAccount> sipAccounts = new();
         public IReadOnlyCollection<SipAccount> SipAccounts => sipAccounts;
 
     }

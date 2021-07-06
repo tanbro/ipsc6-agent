@@ -55,11 +55,14 @@ namespace ipsc6.agent.server
         public override bool CanWrite => Context.WebSocket.State == WebSocketState.Open;
 
         /// <inheritdoc />
-        protected override ValueTask FlushAsync(CancellationToken cancellationToken) => default;
+        protected override ValueTask FlushAsync(CancellationToken cancellationToken)
+        {
+            return default;
+        }
 
         protected override async ValueTask<JsonRpcMessage> ReadCoreAsync(CancellationToken cancellationToken)
         {
-            byte[] data = await receiveQueue.DequeueAsync(cancellationToken);
+            byte[] data = await receiveQueue.DequeueAsync(cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
             return Formatter.Deserialize(new ReadOnlySequence<byte>(data));
         }
@@ -78,7 +81,7 @@ namespace ipsc6.agent.server
             cancellationToken.ThrowIfCancellationRequested();
             if (e.SendTask != null)
             {
-                await e.SendTask.WithCancellation(cancellationToken);
+                await e.SendTask.WithCancellation(cancellationToken).ConfigureAwait(false);
             }
         }
 
