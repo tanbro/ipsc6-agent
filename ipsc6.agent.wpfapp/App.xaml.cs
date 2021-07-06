@@ -57,7 +57,7 @@ namespace ipsc6.agent.wpfapp
 
             try
             {
-                logger.Debug("Initial()");
+                logger.Debug("services Initial()");
                 services.Service.Initial();
                 try
                 {
@@ -70,7 +70,7 @@ namespace ipsc6.agent.wpfapp
                         };
                         server.Server rpcServer = new(localRpcCreators);
                         CancellationTokenSource rpcServerCanceller = new();
-                        Task rpcServerTask = Task.Run(() => rpcServer.RunAsync(rpcServerCanceller.Token));
+                        var rpcServerTask = Task.Run(() => rpcServer.RunAsync(rpcServerCanceller.Token));
                         try
                         {
                             _ = ViewModels.MainViewModel.Instance; // ensure lazy create
@@ -90,7 +90,7 @@ namespace ipsc6.agent.wpfapp
                 }
                 finally
                 {
-                    logger.Debug("Release()");
+                    logger.Debug("services Release()");
                     services.Service.Release();
                 }
             }
@@ -105,7 +105,7 @@ namespace ipsc6.agent.wpfapp
         {
             e.Handled = true;
             logger.ErrorFormat("Application UnhandledException: {0}", e.Exception);
-            _ = MessageBox.Show(
+            MessageBox.Show(
                 $"程序运行过程中出现了未捕获的异常。\r\n\r\n{e.Exception}",
                 Current.MainWindow.Title,
                 MessageBoxButton.OK, MessageBoxImage.Error

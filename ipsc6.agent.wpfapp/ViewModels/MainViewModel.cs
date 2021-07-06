@@ -613,10 +613,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 呼叫(外)
-        private static readonly IRelayCommand dialCommand = new AsyncRelayCommand(DoDialAsync);
+        private static readonly IRelayCommand dialCommand = new RelayCommand(DoDial);
         public IRelayCommand DialCommand => dialCommand;
 
-        private static async Task DoDialAsync()
+        private static async void DoDial()
         {
             var svc = App.mainService;
             Dialogs.PromptDialog dialog = new()
