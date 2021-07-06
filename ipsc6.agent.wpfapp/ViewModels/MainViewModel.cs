@@ -116,20 +116,22 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var ss = svc.GetWorkerNum();
             Instance.WorkerNumber = ss[0];
             Instance.DisplayName = ss[1];
-            RefreshExecutables();
         }
 
         private static void MainService_OnStatusChanged(object sender, services.Events.StatusChangedEventArgs e)
         {
             Instance.Status = new AgentStateWorkType(e.NewState, e.NewWorkType);
-            RefreshExecutables();
         }
 
         private static string workerNum;
         public string WorkerNumber
         {
             get => workerNum;
-            set => SetProperty(ref workerNum, value);
+            set
+            {
+                if (SetProperty(ref workerNum, value))
+                    RefreshExecutables();
+            }
         }
         private static string displayName;
         public string DisplayName
@@ -142,7 +144,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public AgentStateWorkType Status
         {
             get => status;
-            set => SetProperty(ref status, value);
+            set
+            {
+                if (SetProperty(ref status, value))
+                    RefreshExecutables();
+            }
         }
         #endregion
 
@@ -172,14 +178,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             var svc = App.mainService;
             Instance.Groups = svc.GetGroups();
-            RefreshExecutables();
         }
 
         private static IReadOnlyCollection<services.Models.Group> groups;
         public IReadOnlyCollection<services.Models.Group> Groups
         {
             get => groups;
-            set => SetProperty(ref groups, value);
+            set
+            {
+                if (SetProperty(ref groups, value))
+                    RefreshExecutables();
+            }
         }
 
         private static readonly IRelayCommand signGroupCommand = new RelayCommand<object>(DoSignGroup, CanSignGroup);
@@ -215,7 +224,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         #endregion
 
-        #region Command 打开状态弹出窗
+        #region Command 状态
         private static bool isStatePopupOpened;
         public bool IsStatePopupOpened
         {
@@ -237,9 +246,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (!allowedAgentStates.Any(x => x == status.Item1)) return false;
             return true;
         }
-        #endregion
 
-        #region Command 修改状态
         private static readonly List<AgentStateWorkType> stateOperationItems = new()
         {
             new AgentStateWorkType(client.AgentState.Idle, client.WorkType.Unknown),
@@ -303,7 +310,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public client.TeleState TeleState
         {
             get => teleState;
-            set => SetProperty(ref teleState, value);
+            set
+            {
+                if (SetProperty(ref teleState, value))
+                    RefreshExecutables();
+            }
         }
 
         #endregion
@@ -337,7 +348,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public IReadOnlyCollection<services.Models.SipAccount> SipAccounts
         {
             get => sipAccounts;
-            set => SetProperty(ref sipAccounts, value);
+            set
+            {
+                if (SetProperty(ref sipAccounts, value))
+                    RefreshExecutables();
+            }
         }
         private static readonly IRelayCommand answerCommand = new RelayCommand(DoAnswer, CanAnswer);
         public IRelayCommand AnswerCommand => answerCommand;
@@ -405,14 +420,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var svc = App.mainService;
             Instance.Calls = svc.GetCalls();
             Instance.HeldCalls = Instance.Calls.Where(x => x.IsHeld).ToList();
-            RefreshExecutables();
         }
 
         private static IReadOnlyCollection<services.Models.CallInfo> calls = new services.Models.CallInfo[] { };
         public IReadOnlyCollection<services.Models.CallInfo> Calls
         {
             get => calls;
-            set => SetProperty(ref calls, value);
+            set
+            {
+                if (SetProperty(ref calls, value))
+                    RefreshExecutables();
+            }
         }
 
         private static IReadOnlyCollection<services.Models.CallInfo> heldCalls = new services.Models.CallInfo[] { };
@@ -532,7 +550,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
-
         #region 座席咨询
         static readonly IRelayCommand xferConsultCommand = new RelayCommand(DoXferConsult);
         public IRelayCommand XferConsultCommand => xferConsultCommand;
@@ -594,7 +611,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
             await svc.Xfer(groupId.Trim(), workerNum.Trim());
         }
         #endregion
-
 
         #region 呼叫(外)
         private static readonly IRelayCommand dialCommand = new AsyncRelayCommand(DoDialAsync);
