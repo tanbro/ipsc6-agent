@@ -14,10 +14,7 @@ namespace ipsc6.agent.wpfapp.Config
 {
     static class Manager
     {
-        static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Manager));
-
-        static IConfigurationRoot configurationRoot;
-        public static IConfigurationRoot ConfigurationRoot => configurationRoot;
+        public static IConfigurationRoot ConfigurationRoot { get; private set; }
 
         public static void Initialize()
         {
@@ -29,23 +26,29 @@ namespace ipsc6.agent.wpfapp.Config
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
             var cmdArgs = Environment.GetCommandLineArgs();
-
-            if (cmdArgs.Length > 1)
-                logger.DebugFormat("CommandLineArgs: {0}", string.Join(" ", cmdArgs));
-
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(Path.Combine(new string[] {
                     "Config", "settings.json"
-                }), optional: false)
+                }), optional: true)
+#if DEBUG
+                .AddJsonFile(Path.Combine(new string[] {
+                    "Config", "settings.development.json"
+                }), optional: true)
+#endif
                 .AddJsonFile(Path.Combine(new string[] {
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     versionInfo.ProductName, "User", "settings.json"
                 }), optional: true)
+#if DEBUG
+                .AddJsonFile(Path.Combine(new string[] {
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    versionInfo.ProductName, "User", "settings.development.json"
+                }), optional: true)
+#endif
                 .AddEnvironmentVariables(prefix: "IPSC6AGENT_")
                 .AddCommandLine(cmdArgs);
-
-            configurationRoot = builder.Build();
+            ConfigurationRoot = builder.Build();
             return ConfigurationRoot;
         }
 

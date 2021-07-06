@@ -20,12 +20,18 @@ namespace ipsc6.agent.wpfapp.Utils
         {
             if (!disposedValue)
             {
-                if (disposing)
-                {
-                    Application.Current.Dispatcher.Invoke(Release);
-                }
                 semaphore.Release();
-                disposedValue = true;
+                try
+                {
+                    if (disposing)
+                    {
+                        Application.Current.Dispatcher.Invoke(ReleaseCore);
+                    }
+                }
+                finally
+                {
+                    disposedValue = true;
+                }
             }
         }
 
@@ -57,7 +63,7 @@ namespace ipsc6.agent.wpfapp.Utils
         protected async ValueTask DisposeAsyncCore()
 #pragma warning restore VSTHRD200
         {
-            await Application.Current.Dispatcher.InvokeAsync(Release);
+            await Application.Current.Dispatcher.InvokeAsync(ReleaseCore);
         }
 
         private static readonly SemaphoreSlim semaphore = new(1);
@@ -68,20 +74,36 @@ namespace ipsc6.agent.wpfapp.Utils
             this.commands = new HashSet<IRelayCommand>(commands);
         }
 
-        private CommandGuard Initial()
+        private void InitialCore()
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Mouse.OverrideCursor = Cursors.Wait;
+            try
             {
-                Mouse.OverrideCursor = Cursors.Wait;
                 foreach (var command in commands)
                 {
                     command.NotifyCanExecuteChanged();
                 }
-            });
+            }
+            catch
+            {
+                Mouse.OverrideCursor = null;
+                throw;
+            }
+        }
+
+        private CommandGuard Initial()
+        {
+            Application.Current.Dispatcher.Invoke(InitialCore);
             return this;
         }
 
-        private void Release()
+        private async Task<CommandGuard> InitialAsync()
+        {
+            await Application.Current.Dispatcher.InvokeAsync(InitialCore);
+            return this;
+        }
+
+        private void ReleaseCore()
         {
             try
             {
@@ -96,50 +118,33 @@ namespace ipsc6.agent.wpfapp.Utils
             }
         }
 
-        private async Task<CommandGuard> InitialAsync()
+        public static CommandGuard Enter()
         {
-            await Application.Current.Dispatcher.InvokeAsync(() =>
-            {
-                Mouse.OverrideCursor = Cursors.Wait;
-                foreach (var command in commands)
-                {
-                    command.NotifyCanExecuteChanged();
-                }
-            });
-            return this;
+            return Enter(Array.Empty<IRelayCommand>());
         }
 
-        public static CommandGuard Create()
+        public static CommandGuard Enter(IRelayCommand command)
         {
-            IRelayCommand[] commands = new IRelayCommand[] { };
-            return Create(commands);
+            return Enter(new IRelayCommand[] { command });
         }
 
-        public static CommandGuard Create(IRelayCommand command)
-        {
-            IRelayCommand[] commands = new IRelayCommand[] { command };
-            return Create(commands);
-        }
-
-        public static CommandGuard Create(IEnumerable<IRelayCommand> commands)
+        public static CommandGuard Enter(IEnumerable<IRelayCommand> commands)
         {
             semaphore.Wait();
             return new CommandGuard(commands).Initial();
         }
 
-        public static async Task<CommandGuard> CreateAsync()
+        public static async Task<CommandGuard> EnterAsync()
         {
-            IRelayCommand[] commands = new IRelayCommand[] { };
-            return await CreateAsync(commands);
+            return await EnterAsync(Array.Empty<IRelayCommand>());
         }
 
-        public static async Task<CommandGuard> CreateAsync(IRelayCommand command)
+        public static async Task<CommandGuard> EnterAsync(IRelayCommand command)
         {
-            IRelayCommand[] commands = new IRelayCommand[] { command };
-            return await CreateAsync(commands);
+            return await EnterAsync(new IRelayCommand[] { command });
         }
 
-        public static async Task<CommandGuard> CreateAsync(IEnumerable<IRelayCommand> commands)
+        public static async Task<CommandGuard> EnterAsync(IEnumerable<IRelayCommand> commands)
         {
             await semaphore.WaitAsync();
             return await new CommandGuard(commands).InitialAsync();

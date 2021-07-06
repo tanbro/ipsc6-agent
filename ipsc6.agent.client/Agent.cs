@@ -178,7 +178,7 @@ namespace ipsc6.agent.client
 
         public event EventHandler<HoldInfoEventArgs> OnHoldInfoReceived;
 
-        readonly HashSet<CallInfo> calls = new();
+        private readonly HashSet<CallInfo> calls = new();
         public IReadOnlyCollection<CallInfo> Calls => calls;
 
         public IReadOnlyCollection<CallInfo> HeldCalls
@@ -321,17 +321,17 @@ namespace ipsc6.agent.client
                     calls.Clear();
                 }
                 // Offhook 请求的对应的自动摘机
-                if (IsOffHooking)
+                if (offhookSemaphore.CurrentCount < 1)
                 {
                     switch (newState)
                     {
                         case TeleState.OffHook:
                             logger.Debug("TeleStateChangedMessage - Server side Offhooking Succees");
-                            offHookServerTcs.SetResult(null);
+                            offHookServerTcs.TrySetResult(null);
                             break;
                         default:
                             logger.Debug("TeleStateChangedMessage - Server side Offhooking Fail");
-                            offHookServerTcs.SetCanceled();
+                            offHookServerTcs.TrySetCanceled();
                             break;
                     }
                 }
@@ -521,21 +521,21 @@ namespace ipsc6.agent.client
             SipCall callObj = new(e.Call);
             lock (this)
             {
-                if (IsOffHooking)
+                if (offhookSemaphore.CurrentCount < 1)
                 {
                     logger.Debug("TeleStateChangedMessage - Client side Offhooking: Answer ...");
                     try
                     {
-                        using (var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
+                        using (var prm = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
                         {
-                            e.Call.answer(cop);
+                            e.Call.answer(prm);
                         }
                         logger.Debug("TeleStateChangedMessage - Client side Offhooking: Answer ok");
-                        offHookClientTcs.SetResult(null);
+                        offHookClientTcs.TrySetResult(null);
                     }
                     catch (Exception exce)
                     {
-                        offHookClientTcs.SetException(exce);
+                        offHookClientTcs.TrySetException(exce);
                         throw;
                     }
                 }
@@ -634,7 +634,9 @@ namespace ipsc6.agent.client
         {
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var values = from s in msg.S.Split(Constants.VerticalBarDelimiter)
+#pragma warning disable CA1305
                          select int.Parse(s);
+#pragma warning restore CA1305
             lock (this)
             {
                 privilegeExternCollection.UnionWith(values);
@@ -1205,7 +1207,11 @@ namespace ipsc6.agent.client
 
         public async Task XferAsync(string groupId, string workerNum = "", string customString = "")
         {
-            CallInfo callInfo = HeldCalls.First();
+            CallInfo callInfo = HeldCalls.FirstOrDefault();
+            if (callInfo == null)
+            {
+                throw new InvalidOperationException("没有任何被保持的呼叫，无法执行转接操作");
+            }
             await XferAsync(callInfo, groupId, workerNum, customString);
         }
 
@@ -1214,6 +1220,10 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 CallInfo callInfo = HeldCalls.FirstOrDefault();
+                if (callInfo == null)
+                {
+                    throw new InvalidOperationException("没有任何被保持的呼叫，无法执行咨询操作");
+                }
                 var conn = (callInfo == null) ? MainConnection : GetConnection(callInfo.CtiServer);
                 var s = $"{workerNum}|{groupId}|{customString}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT, -1, s);
@@ -1247,7 +1257,11 @@ namespace ipsc6.agent.client
 
         public async Task XferExtAsync(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
-            CallInfo callInfo = HeldCalls.First();
+            CallInfo callInfo = HeldCalls.FirstOrDefault();
+            if (callInfo == null)
+            {
+                throw new InvalidOperationException("没有任何被保持的呼叫，无法执行转接操作");
+            }
             await XferExtAsync(callInfo, calledTelNum, callingTelNum, channelGroup, option);
         }
 
@@ -1255,7 +1269,11 @@ namespace ipsc6.agent.client
         {
             using (requestGuard.TryEnter())
             {
-                CallInfo callInfo = HeldCalls.First();
+                CallInfo callInfo = HeldCalls.FirstOrDefault();
+                if (callInfo == null)
+                {
+                    throw new InvalidOperationException("没有任何被保持的呼叫，无法执行咨询操作");
+                }
                 var conn = GetConnection(callInfo.CtiServer);
                 var s = $"{calledTelNum}|{callingTelNum}|{channelGroup}|{option}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT_EX, -1, s);
@@ -1319,7 +1337,11 @@ namespace ipsc6.agent.client
                         from item in calls
                         where !item.IsHeld
                         select item
-                    ).First();
+                    ).FirstOrDefault();
+                }
+                if (callInfo == null)
+                {
+                    throw new InvalidOperationException("没有任何未被保持的呼叫，无法执行保持操作");
                 }
                 var conn = GetConnection(callInfo.CtiServer);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HOLD);
@@ -1350,7 +1372,11 @@ namespace ipsc6.agent.client
 
         public async Task UnHoldAsync()
         {
-            var callInfo = HeldCalls.First();
+            var callInfo = HeldCalls.FirstOrDefault();
+            if (callInfo == null)
+            {
+                throw new InvalidOperationException("没有任何被保持的呼叫，无法执行取消保持操作");
+            }
             await UnHoldAsync(callInfo);
         }
 
@@ -1379,14 +1405,16 @@ namespace ipsc6.agent.client
                 {
                     lock (this)
                     {
-                        var call = (
+                        var iterIncomingCalls =
                             from c in sipAccountCollection.SelectMany(x => x.Calls)
                             let ci = c.getInfo()
                             where ci.state == pjsip_inv_state.PJSIP_INV_STATE_INCOMING
-                            select c
-                        ).First();
+                            select c;
                         using var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK };
-                        call.answer(cop);
+                        foreach (var call in iterIncomingCalls)
+                        {
+                            call.answer(cop);
+                        }
                     }
                 });
             }
@@ -1420,23 +1448,28 @@ namespace ipsc6.agent.client
 
         private TaskCompletionSource<object> offHookServerTcs;
         private TaskCompletionSource<object> offHookClientTcs;
-        public bool IsOffHooking { get; private set; }
 
         public const int DefaultOffHookTimeoutMilliSeconds = 5000;
+        private readonly SemaphoreSlim offhookSemaphore = new(1);
 
         internal async Task OffHookAsync(Connection connection, int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
         {
-            logger.DebugFormat("OffHook - 服务节点 [{0}] 回呼请求开始", connection);
-            lock (this)
-            {
-                if (IsOffHooking)
-                    throw new InvalidOperationException();
-                IsOffHooking = true;
-                offHookServerTcs = new TaskCompletionSource<object>();
-                offHookClientTcs = new TaskCompletionSource<object>();
-            }
+            await offhookSemaphore.WaitAsync();
             try
             {
+                bool isContinue;
+                lock (this)
+                {
+                    isContinue = TeleState != TeleState.OffHook;
+                }
+                if (!isContinue)
+                {
+                    logger.DebugFormat("OffHook - 服务节点 [{0}] 上该座席已经处于 OffHook 状态，无需回呼请求", connection);
+                    return;
+                }
+                logger.DebugFormat("OffHook - 服务节点 [{0}] 回呼请求开始", connection);
+                offHookServerTcs = new();
+                offHookClientTcs = new();
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
                 await connection.RequestAsync(req);
                 var timeoutTask = Task.Delay(millisecondsTimeout);
@@ -1460,7 +1493,7 @@ namespace ipsc6.agent.client
             }
             finally
             {
-                IsOffHooking = false;
+                offhookSemaphore.Release();
             }
         }
 

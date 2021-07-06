@@ -47,7 +47,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         public static async void DoLogin()
         {
-            using (await Utils.CommandGuard.CreateAsync(loginCommand))
+            using (await Utils.CommandGuard.EnterAsync(loginCommand))
             {
                 try
                 {
@@ -79,7 +79,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var dispatcher = Application.Current.Dispatcher;
             var svc = App.mainService;
 
-            using (await Utils.CommandGuard.CreateAsync(loginCommand))
+            using (await Utils.CommandGuard.EnterAsync(loginCommand))
             {
                 LoginViewModel.workerNum = workerNum;
                 LoginViewModel.password = password;
@@ -127,7 +127,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static void CreateAgentInstance()
         {
             var svc = App.mainService;
-            IConfigurationRoot cfgRoot = Config.Manager.ConfigurationRoot;
+            var cfgRoot = Config.Manager.ConfigurationRoot;
             Config.Ipsc cfgIpsc = new();
             cfgRoot.GetSection(nameof(Config.Ipsc)).Bind(cfgIpsc);
             logger.InfoFormat(

@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace ipsc6.agent.client
 {
-    class DisposableSingleSemaphore : IDisposable
+    internal class DisposableSingleSemaphore : IDisposable
     {
         private readonly SemaphoreSlim _semaphoreSlim;
 
@@ -43,7 +43,7 @@ namespace ipsc6.agent.client
         }
     }
 
-    class RequestGuard
+    internal class RequestGuard
     {
         private readonly SemaphoreSlim semaphore = new(1);
 

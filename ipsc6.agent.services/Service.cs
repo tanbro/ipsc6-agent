@@ -46,13 +46,13 @@ namespace ipsc6.agent.services
         #region Demo methods
         public string Echo(string message)
         {
-            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs() { Message = message });
+            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs { Message = message });
             return message;
         }
 
         public async Task<string> EchoWithDelay(string message, int milliseconds)
         {
-            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs() { Message = message });
+            OnEchoTriggered?.Invoke(this, new Events.EchoTriggeredEventArgs { Message = message });
             await Task.Delay(milliseconds);
             return message;
         }
@@ -146,7 +146,7 @@ namespace ipsc6.agent.services
                 Model.WorkType = e.NewState.WorkType;
                 ReloadCalls();
             }
-            OnStatusChanged?.Invoke(this, new Events.StatusChangedEventArgs()
+            OnStatusChanged?.Invoke(this, new Events.StatusChangedEventArgs
             {
                 OldState = e.OldState.AgentState,
                 OldWorkType = e.OldState.WorkType,
@@ -162,7 +162,7 @@ namespace ipsc6.agent.services
         {
             Model.TeleState = e.NewState;
             ReloadCalls();
-            OnTeleStateChanged?.Invoke(this, new Events.TeleStateChangedEventArgs()
+            OnTeleStateChanged?.Invoke(this, new Events.TeleStateChangedEventArgs
             {
                 OldState = e.OldState,
                 NewState = e.NewState,
@@ -213,7 +213,7 @@ namespace ipsc6.agent.services
         private void Agent_OnConnectionStateChanged(object sender, client.ConnectionInfoStateChangedEventArgs e)
         {
             ReloadCtiServers();
-            OnCtiConnectionStateChanged?.Invoke(this, new Events.CtiConnectionStateChangedEventArgs()
+            OnCtiConnectionStateChanged?.Invoke(this, new Events.CtiConnectionStateChangedEventArgs
             {
                 CtiIndex = agent.GetConnetionIndex(e.ConnectionInfo),
                 OldState = e.OldState,
@@ -236,7 +236,7 @@ namespace ipsc6.agent.services
             {
                 Model.CtiServers = (
                     from t in agent.CtiServers.Select((value, index) => (index, value))
-                    select new Models.CtiServer()
+                    select new Models.CtiServer
                     {
                         Host = t.value.Host,
                         Port = t.value.Port,
@@ -269,7 +269,7 @@ namespace ipsc6.agent.services
             {
                 Model.Groups = (
                     from x in agent.Groups
-                    select new Models.Group() { Id = x.Id, Name = x.Name, IsSigned = x.IsSigned }
+                    select new Models.Group { Id = x.Id, Name = x.Name, IsSigned = x.IsSigned }
                 ).ToList();
             }
             OnSignedGroupsChanged?.Invoke(this, EventArgs.Empty);
@@ -333,6 +333,7 @@ namespace ipsc6.agent.services
         private void Agent_OnSipCallStateChanged(object sender, EventArgs e)
         {
             ReloadSipAccounts();
+            ReloadCalls();
             OnSipCallStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -353,7 +354,7 @@ namespace ipsc6.agent.services
                 {
                     Model.SipAccounts = (
                         from a in agent.SipAccounts
-                        select new Models.SipAccount()
+                        select new Models.SipAccount
                         {
                             CtiIndex = a.ConnectionIndex,
                             IsValid = a.IsValid,
@@ -362,7 +363,7 @@ namespace ipsc6.agent.services
                             LastRegisterError = a.LastRegisterError,
                             Calls = (
                                 from c in a.Calls
-                                select new Models.SipCall()
+                                select new Models.SipCall
                                 {
                                     Id = c.Id,
                                     LocalUri = c.LocalUri,
@@ -399,14 +400,14 @@ namespace ipsc6.agent.services
         {
             var callInfo = CreateCallInfo(e.Value);
             ReloadCalls();
-            OnRingCallReceived?.Invoke(this, new Events.CallInfoEventArgs() { Call = callInfo });
+            OnRingCallReceived?.Invoke(this, new Events.CallInfoEventArgs { Call = callInfo });
         }
 
         private void Agent_OnHoldInfoReceived(object sender, client.HoldInfoEventArgs e)
         {
             var callInfo = CreateCallInfo(e.Value);
             ReloadCalls();
-            OnHeldCallReceived?.Invoke(this, new Events.CallInfoEventArgs() { Call = callInfo });
+            OnHeldCallReceived?.Invoke(this, new Events.CallInfoEventArgs { Call = callInfo });
         }
 
         private Models.CallInfo CreateCallInfo(client.CallInfo value)
@@ -483,12 +484,12 @@ namespace ipsc6.agent.services
                     select CreateQueueInfo(obj)
                 ).ToList();
             }
-            OnQueueInfoEvent?.Invoke(this, new Events.QueueInfoEventArgs() { QueueInfo = CreateQueueInfo(e.Value) });
+            OnQueueInfoEvent?.Invoke(this, new Events.QueueInfoEventArgs { QueueInfo = CreateQueueInfo(e.Value) });
         }
 
         private Models.QueueInfo CreateQueueInfo(client.QueueInfo obj)
         {
-            return new Models.QueueInfo()
+            return new Models.QueueInfo
             {
                 CtiIndex = agent.GetConnetionIndex(obj.CtiServer),
                 Channel = obj.Channel,
@@ -501,7 +502,7 @@ namespace ipsc6.agent.services
                 CustomeString = obj.CustomeString,
                 Groups = (
                     from x in obj.Groups
-                    select new Models.Group() { Id = x.Id, Name = x.Name, IsSigned = x.IsSigned }
+                    select new Models.Group { Id = x.Id, Name = x.Name, IsSigned = x.IsSigned }
                 ).ToList(),
             };
         }

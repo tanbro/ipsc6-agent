@@ -45,7 +45,8 @@
                 CornerRadius="0 0 5 5">
                 <Button Style="{StaticResource ScoreButtonStyle}" Command="{Binding HoldPopupCommand}">
                     <StackPanel>
-                        <TextBlock Text="{Binding HeldCalls.Count, Mode=OneWay}"/>
+                        <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
+                                   Text="{Binding HeldCalls.Count, Mode=OneWay}"/>
                         <Popup StaysOpen="False" IsOpen="{Binding IsHoldPopupOpened}">
                             <ContentControl>
                                 <ListBox ItemsSource="{Binding HeldCalls, Mode=OneWay}">

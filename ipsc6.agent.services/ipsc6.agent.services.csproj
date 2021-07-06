@@ -3,6 +3,7 @@
         <TargetFrameworks>net461;net48;net5.0</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <Platforms>x86;x64</Platforms>
+        <NoWarn>IDE0008,IDE0010,IDE0011,IDE0058</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
