@@ -4,10 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008/"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
-             d:DataContext="{d:DesignInstance vm:MainViewModel}"
+             xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"             
+             d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              x:Name="WorkerStatusPannelUserControl"
              Width="128" Height="64">
 
@@ -141,13 +141,9 @@
                             </Popup>
                         </StackPanel>
                     </Button>
-                    <!--
-                    Background="{Binding AgentBasicInfo.AgentStateWorkType, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
-                    -->
 
-                    <TextBlock Grid.Column="2" Style="{StaticResource MyScoreBoardNumberTextRightThinStyle}">
-                        01:23:45
-                    </TextBlock>
+                    <TextBlock Grid.Column="2" Style="{StaticResource MyScoreBoardNumberTextRightThinStyle}"
+                               Text="{Binding StatusDuration, Mode=OneWay, StringFormat='{}{0:h\\:mm\\:ss}'}"/>
                 </Grid>
 
             </Border>

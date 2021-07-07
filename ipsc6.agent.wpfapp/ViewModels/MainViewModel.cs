@@ -112,6 +112,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
             App.mainService.OnSipRegisterStateChanged += MainService_OnSipRegisterStateChanged;
             App.mainService.OnSipCallStateChanged += MainService_OnSipCallStateChanged;
             App.mainService.OnQueueInfoEvent += MainService_OnQueueInfoEvent;
+
+#pragma warning disable VSTHRD110 // 观察异步调用的结果
+            Task.Run(async () =>
+#pragma warning restore VSTHRD110 // 观察异步调用的结果
+            {
+                while (true)
+                {
+                    await Task.Delay(1000);
+                    UpdateStatusDuration();
+                }
+            });
         }
         #endregion
 
@@ -127,6 +138,13 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static void MainService_OnStatusChanged(object sender, services.Events.StatusChangedEventArgs e)
         {
             Instance.Status = new AgentStateWorkType(e.NewState, e.NewWorkType);
+            lastStatusTime = DateTime.UtcNow;
+            UpdateStatusDuration();
+        }
+
+        private static void UpdateStatusDuration()
+        {
+            Instance.StatusDuration = DateTime.UtcNow - lastStatusTime;
         }
 
         private static string workerNum;
@@ -156,6 +174,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     NotifyStateRelativeCommandsExecutable();
             }
         }
+
+        private static DateTime lastStatusTime = DateTime.UtcNow;
+        private static TimeSpan statusDuration;
+        public TimeSpan StatusDuration
+        {
+            get => statusDuration;
+            set => SetProperty(ref statusDuration, value);
+        }
+
         #endregion
 
         #region Group
