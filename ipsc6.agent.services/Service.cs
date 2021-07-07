@@ -421,8 +421,10 @@ namespace ipsc6.agent.services
                 HoldType = value.HoldType,
                 RemoteTeleNum = value.RemoteTelNum,
                 RemoteLoc = value.RemoteLocation,
+                H24CallCount = value.H24CallCount,
+                H48CallCount = value.H48CallCount,
                 WorkerNum = value.WorkerNum,
-                GroupId = value.SkillGroupId,
+                GroupId = value.GroupId,
                 IvrPath = value.IvrPath,
                 CustomString = value.CustomString,
             };

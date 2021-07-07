@@ -30,7 +30,7 @@
 
 !!! Warning "Deprecated"
 
-    应使用 [`dequeue`](../queue.md#排队抢接) 代替这个功能
+    应使用 [`dequeue`](queue.md#排队抢接) 代替这个功能
 
 -   **Method**: `intercept`
 

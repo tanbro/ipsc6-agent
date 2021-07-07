@@ -51,12 +51,13 @@ nav:
 
 plugins:
   - search
-  - with-pdf:
-      enabled_if_env: ENABLE_PDF_EXPORT
-      toc_title: 目录
-      toc_level: 3
-      cover_title: "IPSC6 座席客户端"
-      cover_subtitle: "开发人员指南"
+  # Not available on Windows
+  # - with-pdf:
+  #     enabled_if_env: ENABLE_PDF_EXPORT
+  #     toc_title: 目录
+  #     toc_level: 3
+  #     cover_title: "IPSC6 座席客户端"
+  #     cover_subtitle: "开发人员指南"
 
 theme:
   name: material
@@ -114,5 +115,5 @@ markdown_extensions:
       slugify: !!python/name:pymdownx.slugs.uslugify
   # 3rd extensions
   - plantuml_markdown:
-      # server: http://www.plantuml.com/plantuml
+      server: http://www.plantuml.com/plantuml
       format: svg

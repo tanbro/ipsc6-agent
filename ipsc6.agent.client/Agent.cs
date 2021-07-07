@@ -198,42 +198,35 @@ namespace ipsc6.agent.client
 
         private void Conn_OnServerSend(object sender, ServerSentEventArgs e)
         {
-            try
+
+            var conn = sender as Connection;
+            var msg = e.Message;
+            var index = connections.IndexOf(conn);
+            var ctiServer = ctiServers[index];
+            switch (msg.Type)
             {
-                var conn = sender as Connection;
-                var msg = e.Message;
-                var index = connections.IndexOf(conn);
-                var ctiServer = ctiServers[index];
-                switch (msg.Type)
-                {
-                    case MessageType.REMOTE_MSG_SETSTATE:
-                        /// 状态改变
-                        ProcessStateChangedMessage(ctiServer, msg);
-                        break;
-                    case MessageType.REMOTE_MSG_SETTELESTATE:
-                        /// 电话状态改变
-                        ProcessTeleStateChangedMessage(ctiServer, msg);
-                        break;
-                    case MessageType.REMOTE_MSG_QUEUEINFO:
-                        /// 排队信息
-                        ProcessQueueInfoMessage(ctiServer, msg);
-                        break;
-                    case MessageType.REMOTE_MSG_HOLDINFO:
-                        /// 保持信息
-                        ProcessHoldInfoMessage(ctiServer, msg);
-                        break;
-                    case MessageType.REMOTE_MSG_SENDDATA:
-                        /// 其他各种数据
-                        ProcessDataMessage(ctiServer, msg);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            catch (Exception exce)
-            {
-                logger.ErrorFormat("OnServerSend - {0}: {1}\r\n{2}", sender, e.Message, exce);
-                throw;
+                case MessageType.REMOTE_MSG_SETSTATE:
+                    /// 状态改变
+                    ProcessStateChangedMessage(ctiServer, msg);
+                    break;
+                case MessageType.REMOTE_MSG_SETTELESTATE:
+                    /// 电话状态改变
+                    ProcessTeleStateChangedMessage(ctiServer, msg);
+                    break;
+                case MessageType.REMOTE_MSG_QUEUEINFO:
+                    /// 排队信息
+                    ProcessQueueInfoMessage(ctiServer, msg);
+                    break;
+                case MessageType.REMOTE_MSG_HOLDINFO:
+                    /// 保持信息
+                    ProcessHoldInfoMessage(ctiServer, msg);
+                    break;
+                case MessageType.REMOTE_MSG_SENDDATA:
+                    /// 其他各种数据
+                    ProcessDataMessage(ctiServer, msg);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -364,18 +357,15 @@ namespace ipsc6.agent.client
         {
             var channel = msg.N1;
             var holdEventType = (HoldEventType)msg.N2;
-            var callInfo = new CallInfo(ctiServer, channel, msg.S)
-            {
-                IsHeld = holdEventType != HoldEventType.Cancel,
-                HoldType = holdEventType,
-            };
-            logger.DebugFormat("HoldInfoMessage - {0}: {1}", callInfo.IsHeld ? "UnHold" : "Hold", callInfo);
-            // 改写 Call Collection(remove then add)
+            var isHeld = holdEventType != HoldEventType.Cancel;
+            CallInfo callInfo;
             lock (this)
             {
-                calls.Remove(callInfo);
-                calls.Add(callInfo);
+                callInfo = calls.First(x => x.CtiServer == ctiServer && x.Channel == channel);
+                callInfo.IsHeld = isHeld;
+                callInfo.HoldType = holdEventType;
             }
+            logger.DebugFormat("HoldInfoMessage - {0}: {1}", isHeld ? "UnHold" : "Hold", callInfo);
             OnHoldInfoReceived?.Invoke(this, new HoldInfoEventArgs(ctiServer, callInfo));
         }
 

@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +16,8 @@ namespace ipsc6.agent.wpfapp
     public partial class App : Application
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(App));
+
+        internal static Views.LoginWindow LoginWindow { get; private set; }
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
@@ -74,7 +73,17 @@ namespace ipsc6.agent.wpfapp
                         try
                         {
                             _ = ViewModels.MainViewModel.Instance; // ensure lazy create
-                            if (new Views.LoginWindow().ShowDialog() == true)
+                            bool isLoginOk;
+                            LoginWindow = new Views.LoginWindow();
+                            try
+                            {
+                                isLoginOk = LoginWindow.ShowDialog() == true;
+                            }
+                            finally
+                            {
+                                LoginWindow = null;
+                            }
+                            if (isLoginOk)
                             {
                                 new Views.MainWindow().ShowDialog();
                             }

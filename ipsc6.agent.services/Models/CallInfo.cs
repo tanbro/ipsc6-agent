@@ -16,6 +16,8 @@ namespace ipsc6.agent.services.Models
         public client.HoldEventType HoldType { get; internal set; }
         public string RemoteTeleNum { get; internal set; }
         public string RemoteLoc { get; internal set; }
+        public int H24CallCount { get; internal set; }
+        public int H48CallCount { get; internal set; }
         public string WorkerNum { get; internal set; }
         public string GroupId { get; internal set; }
         public string IvrPath { get; internal set; }

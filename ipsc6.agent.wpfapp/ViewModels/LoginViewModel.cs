@@ -45,13 +45,21 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static readonly IRelayCommand loginCommand = new RelayCommand(DoLogin, CanLogin);
         public IRelayCommand LoginCommand => loginCommand;
 
+        private static bool isLoginCompleted;
+
         public static async void DoLogin()
         {
+            if (isLoginCompleted)
+            {
+                throw new InvalidOperationException();
+            }
+
             using (await Utils.CommandGuard.EnterAsync(loginCommand))
             {
                 try
                 {
                     await ExecuteLoginAsync();
+                    isLoginCompleted = true;
                     window.DialogResult = true;
                     window.Close();
                 }
@@ -88,7 +96,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 {
                     try
                     {
+                        if (isLoginCompleted)
+                        {
+                            throw new InvalidOperationException();
+                        }
                         await ExecuteLoginAsync();
+                        isLoginCompleted = true;
                         window.DialogResult = true;
                         window.Close();
                     }
@@ -112,14 +125,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     }
                 });
             }
-
         }
 
-        private static bool CanLogin()
+        internal static bool CanLogin()
         {
             if (string.IsNullOrEmpty(workerNum) || string.IsNullOrEmpty(password))
                 return false;
             if (Utils.CommandGuard.IsGuarding)
+                return false;
+            if (App.LoginWindow == null)
                 return false;
             return true;
         }
