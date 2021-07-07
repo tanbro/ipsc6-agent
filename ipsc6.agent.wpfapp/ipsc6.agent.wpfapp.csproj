@@ -11,7 +11,7 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
-	<NoWarn>IDE0008,IDE0011,IDE0058,VSTHRD111</NoWarn>
+    <NoWarn>IDE0008,IDE0011,IDE0058,VSTHRD111</NoWarn>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -86,8 +86,10 @@
     <Compile Include="Converters\AgentCallsToHoldPanelTitleConverter.cs" />
     <Compile Include="Converters\AgentCallsToNumberTitleConverter.cs" />
     <Compile Include="Converters\AgentCallToTextConverter.cs" />
+    <Compile Include="Converters\AgentCtiServerConverters.cs" />
     <Compile Include="Converters\AgentGroupsToNumberTitleConverter.cs" />
     <Compile Include="Converters\AgentQueueConverters.cs" />
+    <Compile Include="Converters\AgentSipUaConverters.cs" />
     <Compile Include="Converters\AgentStateToBrushConverter.cs" />
     <Compile Include="Converters\AgentStateToTextConverter.cs" />
     <Compile Include="Converters\AgentTeleStateConverters.cs" />

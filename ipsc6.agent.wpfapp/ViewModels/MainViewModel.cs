@@ -103,6 +103,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         static MainViewModel()
         {
+            App.mainService.OnCtiConnectionStateChanged += MainService_OnCtiConnectionStateChanged;
             App.mainService.OnLoginCompleted += MainService_OnLoginCompleted;
             App.mainService.OnStatusChanged += MainService_OnStatusChanged;
             App.mainService.OnSignedGroupsChanged += MainService_OnSignedGroupsChanged;
@@ -112,6 +113,34 @@ namespace ipsc6.agent.wpfapp.ViewModels
             App.mainService.OnSipRegisterStateChanged += MainService_OnSipRegisterStateChanged;
             App.mainService.OnSipCallStateChanged += MainService_OnSipCallStateChanged;
             App.mainService.OnQueueInfoEvent += MainService_OnQueueInfoEvent;
+        }
+
+        #endregion
+
+        #region Agent Status
+        private static void MainService_OnCtiConnectionStateChanged(object sender, services.Events.CtiConnectionStateChangedEventArgs e)
+        {
+            var svc = App.mainService;
+            Instance.CtiServices = svc.GetCtiServers();
+        }
+
+        private static IReadOnlyCollection<services.Models.CtiServer> ctiServices = Array.Empty<services.Models.CtiServer>();
+        public IReadOnlyCollection<services.Models.CtiServer> CtiServices
+        {
+            get => ctiServices;
+            set
+            {
+                if (SetProperty(ref ctiServices, value))
+                    NotifyStateRelativeCommandsExecutable();
+            }
+        }
+
+        private static void MainService_OnLoginCompleted(object sender, EventArgs e)
+        {
+            var svc = App.mainService;
+            var ss = svc.GetWorkerNum();
+            Instance.WorkerNumber = ss[0];
+            Instance.DisplayName = ss[1];
 
 #pragma warning disable VSTHRD110 // 观察异步调用的结果
             Task.Run(async () =>
@@ -124,16 +153,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 }
             });
         }
-        #endregion
 
-        #region Agent Status
-        private static void MainService_OnLoginCompleted(object sender, EventArgs e)
-        {
-            var svc = App.mainService;
-            var ss = svc.GetWorkerNum();
-            Instance.WorkerNumber = ss[0];
-            Instance.DisplayName = ss[1];
-        }
+        private static bool IsMainConnectionOk => ctiServices.Any(x => x.State == client.ConnectionState.Ok && x.IsMain);
 
         private static void MainService_OnStatusChanged(object sender, services.Events.StatusChangedEventArgs e)
         {
@@ -249,6 +270,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static bool CanSignGroup(object _)
         {
+            if (!IsMainConnectionOk) return false;
             if (Utils.CommandGuard.IsGuarding)
                 return false;
             client.AgentState[] allowedAgentStates = { client.AgentState.OnLine, client.AgentState.Idle, client.AgentState.Pause, client.AgentState.Leave };
@@ -320,6 +342,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static bool CanSetState(object parameter)
         {
+            if (!IsMainConnectionOk) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
             client.AgentState[] allowedAgentStates = { client.AgentState.Idle, client.AgentState.Pause, client.AgentState.Leave };
             if (!allowedAgentStates.Any(x => x == status.Item1)) return false;
@@ -490,6 +513,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static bool CanHold()
         {
+            if (!IsMainConnectionOk) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
             if (status.Item1 != client.AgentState.Work) return false;
             if (!calls.Any(x => !x.IsHeld)) return false;
@@ -517,6 +541,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static bool CanUnHold(object parameter)
         {
+            if (!IsMainConnectionOk) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
             var svc = App.mainService;
             if (status.Item1 != client.AgentState.Work) return false;
@@ -604,6 +629,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         private static bool CanDequeue(object paramter)
         {
+            if (!IsMainConnectionOk) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
             return true;
         }
