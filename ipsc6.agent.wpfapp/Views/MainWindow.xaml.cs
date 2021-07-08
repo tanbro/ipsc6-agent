@@ -26,7 +26,17 @@ namespace ipsc6.agent.wpfapp.Views
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = ViewModels.MainViewModel.Instance;
+
+            var viewModel = ViewModels.MainViewModel.Instance; ;
+            DataContext = viewModel;
+
+            viewModel.StartTimer();
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            var viewModel = DataContext as ViewModels.MainViewModel;
+            viewModel.StopTimer();
         }
 
         private void InfoPanel_MouseDown(object sender, MouseButtonEventArgs e)
@@ -69,5 +79,6 @@ namespace ipsc6.agent.wpfapp.Views
             //    vm.Snapped = false;
             //}
         }
+
     }
 }

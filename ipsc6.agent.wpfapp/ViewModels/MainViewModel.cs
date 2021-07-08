@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -78,6 +79,49 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => mainPanelVisibility;
             set => SetProperty(ref mainPanelVisibility, value);
         }
+
+        private CancellationTokenSource timerCanceller;
+        private Task timerTask;
+
+        internal void StartTimer()
+        {
+            var dispatcher = Application.Current.Dispatcher;
+            timerCanceller = new();
+            timerTask = dispatcher.InvokeAsync(async () =>
+            {
+                while (!timerCanceller.IsCancellationRequested)
+                {
+                    DoOnTimer();
+                    try
+                    {
+                        await Task.Delay(360, timerCanceller.Token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        break;
+                    }
+                }
+            }).Task;
+        }
+
+        internal void StopTimer()
+        {
+            using (timerCanceller)
+            {
+                timerCanceller.Cancel();
+#pragma warning disable VSTHRD002
+                timerTask.Wait();
+#pragma warning restore VSTHRD002
+            }
+        }
+
+        private static void DoOnTimer()
+        {
+            if (lastStatusTime != null)
+            {
+                Instance.StatusDuration = DateTime.UtcNow - lastStatusTime;
+            }
+        }
         #endregion
 
         #region ctor
@@ -122,6 +166,13 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             var svc = App.mainService;
             Instance.CtiServices = svc.GetCtiServers();
+            ResetStatusTimeSpan();
+        }
+
+        private static void ResetStatusTimeSpan()
+        {
+            lastStatusTime = DateTime.UtcNow;
+            Instance.StatusDuration = new();
         }
 
         private static IReadOnlyCollection<services.Models.CtiServer> ctiServices = Array.Empty<services.Models.CtiServer>();
@@ -141,17 +192,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var ss = svc.GetWorkerNum();
             Instance.WorkerNumber = ss[0];
             Instance.DisplayName = ss[1];
-
-#pragma warning disable VSTHRD110 // 观察异步调用的结果
-            Task.Run(async () =>
-#pragma warning restore VSTHRD110 // 观察异步调用的结果
-            {
-                while (true)
-                {
-                    await Task.Delay(1000);
-                    UpdateStatusDuration();
-                }
-            });
         }
 
         private static bool IsMainConnectionOk => ctiServices.Any(x => x.State == client.ConnectionState.Ok && x.IsMain);
@@ -159,13 +199,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static void MainService_OnStatusChanged(object sender, services.Events.StatusChangedEventArgs e)
         {
             Instance.Status = new AgentStateWorkType(e.NewState, e.NewWorkType);
-            lastStatusTime = DateTime.UtcNow;
-            UpdateStatusDuration();
-        }
-
-        private static void UpdateStatusDuration()
-        {
-            Instance.StatusDuration = DateTime.UtcNow - lastStatusTime;
+            ResetStatusTimeSpan();
         }
 
         private static string workerNum;
@@ -196,7 +230,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
         }
 
-        private static DateTime lastStatusTime = DateTime.UtcNow;
+        private static DateTime lastStatusTime;
         private static TimeSpan statusDuration;
         public TimeSpan StatusDuration
         {

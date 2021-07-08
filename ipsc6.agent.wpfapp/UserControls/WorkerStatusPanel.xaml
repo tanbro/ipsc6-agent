@@ -143,7 +143,7 @@
                     </Button>
 
                     <TextBlock Grid.Column="2" Style="{StaticResource MyScoreBoardNumberTextRightThinStyle}"
-                               Text="{Binding StatusDuration, Mode=OneWay, StringFormat='{}{0:h\\:mm\\:ss}'}"/>
+                               Text="{Binding StatusDuration, Mode=OneWay, StringFormat='{}{0:h\\:mm\\:ss}', FallbackValue='-:--:--'}"/>
                 </Grid>
 
             </Border>
