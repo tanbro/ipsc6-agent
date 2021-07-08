@@ -27,7 +27,7 @@ namespace ipsc6.agent.wpfapp.Views
         {
             InitializeComponent();
 
-            var viewModel = ViewModels.MainViewModel.Instance; ;
+            var viewModel = ViewModels.MainViewModel.Instance;
             DataContext = viewModel;
 
             viewModel.StartTimer();
@@ -39,7 +39,7 @@ namespace ipsc6.agent.wpfapp.Views
             viewModel.StopTimer();
         }
 
-        private void InfoPanel_MouseDown(object sender, MouseButtonEventArgs e)
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
                 DragMove();

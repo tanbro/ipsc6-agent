@@ -32,5 +32,11 @@ namespace ipsc6.agent.wpfapp.Views
             var vm = DataContext as ViewModels.LoginViewModel;
             vm.Password = (sender as PasswordBox).Password;
         }
+
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                DragMove();
+        }
     }
 }

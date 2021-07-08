@@ -11,6 +11,7 @@
         ResizeMode="NoResize" WindowStyle="None" WindowStartupLocation="CenterScreen"
         BorderBrush="#FF5E91E4" BorderThickness="1"
         d:DataContext="{d:DesignData Type=vm:LoginViewModel}"
+        MouseDown="Window_MouseDown"
     >
 
     <Window.Resources>
@@ -75,6 +76,7 @@
 
                     <TextBox x:Name="textboxName" Grid.Column="1" Margin="16 8 16 8" FontSize="14"
                              InputMethod.IsInputMethodEnabled="False"
+                             IsEnabled="{Binding IsAllowEditWorkerNum, Mode=OneWay}"
                              Text="{Binding WorkerNum}">
                         <TextBox.Style>
                             <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
@@ -113,7 +115,8 @@
                     </Label>
 
                     <PasswordBox  x:Name="textboxPassword"
-                                  Grid.Column="1" Margin="16 8 16 8" FontSize="14" PasswordChanged="PasswordChanged">
+                                  Grid.Column="1" Margin="16 8 16 8" FontSize="14" PasswordChanged="PasswordChanged"
+                                  IsEnabled="{Binding IsAllowEditPassword, Mode=OneWay}">
                         <PasswordBox.Style>
                             <Style xmlns:sys="clr-namespace:System;assembly=mscorlib" TargetType="{x:Type PasswordBox}">
                                 <Style.Resources>

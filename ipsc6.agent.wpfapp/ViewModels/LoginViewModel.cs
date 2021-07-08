@@ -42,6 +42,20 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
         }
 
+        private static bool isAllowEditWorkerNum = true;
+        public bool IsAllowEditWorkerNum
+        {
+            get => isAllowEditWorkerNum;
+            set => SetProperty(ref isAllowEditWorkerNum, value);
+        }
+
+        private static bool isAllowEditPassword = true;
+        public bool IsAllowEditPassword
+        {
+            get => isAllowEditPassword;
+            set => SetProperty(ref isAllowEditPassword, value);
+        }
+
         private static readonly IRelayCommand loginCommand = new RelayCommand(DoLogin, CanLogin);
         public IRelayCommand LoginCommand => loginCommand;
 
@@ -54,31 +68,41 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 throw new InvalidOperationException();
             }
 
-            using (await Utils.CommandGuard.EnterAsync(loginCommand))
+            Instance.IsAllowEditWorkerNum = false;
+            Instance.IsAllowEditPassword = false;
+            try
             {
-                try
+                using (await Utils.CommandGuard.EnterAsync(loginCommand))
                 {
-                    await ExecuteLoginAsync();
-                    isLoginCompleted = true;
-                    window.DialogResult = true;
-                    window.Close();
-                }
-                catch (Exception err)
-                {
-                    if (err is client.ConnectionException)
+                    try
                     {
-                        logger.ErrorFormat("DoLogin - 登录失败: {0}", err);
-                        MessageBox.Show(
-                            $"登录失败\r\n\r\n{err}",
-                            Application.Current.MainWindow.Title,
-                            MessageBoxButton.OK, MessageBoxImage.Error
-                        );
+                        await ExecuteLoginAsync();
+                        isLoginCompleted = true;
+                        window.DialogResult = true;
+                        window.Close();
                     }
-                    else
+                    catch (Exception err)
                     {
-                        throw;
+                        if (err is client.ConnectionException)
+                        {
+                            logger.ErrorFormat("DoLogin - 登录失败: {0}", err);
+                            MessageBox.Show(
+                                $"登录失败\r\n\r\n{err}",
+                                Application.Current.MainWindow.Title,
+                                MessageBoxButton.OK, MessageBoxImage.Error
+                            );
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
                 }
+            }
+            finally
+            {
+                Instance.IsAllowEditWorkerNum = true;
+                Instance.IsAllowEditPassword = true;
             }
         }
 
