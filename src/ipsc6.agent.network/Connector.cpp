@@ -61,6 +61,7 @@ void Connector::Release() {
     if (receiveThread->IsAlive) {
         receiveThread->Join();
     }
+    delete receiveCancelTokenSource;
 }
 
 Connector ^

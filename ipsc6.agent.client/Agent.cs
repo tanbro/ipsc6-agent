@@ -350,7 +350,7 @@ namespace ipsc6.agent.client
                 if (isAlive)
                     queueInfos.Add(queueInfo);
             }
-            OnQueueInfoReceived?.Invoke(this, new QueueInfoEventArgs(ctiServer, queueInfo));
+            OnQueueInfoReceived?.Invoke(this, new(ctiServer, queueInfo));
         }
 
         private void ProcessHoldInfoMessage(CtiServer ctiServer, ServerSentMessage msg)
@@ -366,7 +366,7 @@ namespace ipsc6.agent.client
                 callInfo.HoldType = holdEventType;
             }
             logger.DebugFormat("HoldInfoMessage - {0}: {1}", isHeld ? "UnHold" : "Hold", callInfo);
-            OnHoldInfoReceived?.Invoke(this, new HoldInfoEventArgs(ctiServer, callInfo));
+            OnHoldInfoReceived?.Invoke(this, new(ctiServer, callInfo));
         }
 
         private void ProcessDataMessage(CtiServer ctiServer, ServerSentMessage msg)
@@ -531,7 +531,7 @@ namespace ipsc6.agent.client
                 }
                 ReloadSipAccountCollection();
             }
-            OnSipCallStateChanged?.Invoke(this, new SipCallEventArgs(callObj));
+            OnSipCallStateChanged?.Invoke(this, new(callObj));
         }
 
         private void Acc_OnCallStateChanged(object sender, Sip.CallEventArgs e)
@@ -541,7 +541,7 @@ namespace ipsc6.agent.client
             {
                 ReloadSipAccountCollection();
             }
-            OnSipCallStateChanged?.Invoke(this, new SipCallEventArgs(callObj));
+            OnSipCallStateChanged?.Invoke(this, new(callObj));
         }
 
         private void Acc_OnCallDisconnected(object sender, Sip.CallEventArgs e)
@@ -551,7 +551,7 @@ namespace ipsc6.agent.client
             {
                 ReloadSipAccountCollection();
             }
-            OnSipCallStateChanged?.Invoke(this, new SipCallEventArgs(callObj));
+            OnSipCallStateChanged?.Invoke(this, new(callObj));
         }
 
         public event EventHandler<CustomStringReceivedEventArgs> OnCustomStringReceived;
@@ -583,9 +583,9 @@ namespace ipsc6.agent.client
                 calls.Add(callInfo);
             }
             OnWorkingChannelInfoReceived?.Invoke(this,
-                new WorkingChannelInfoReceivedEventArgs(ctiServer, workingChannelInfo));
+                new(ctiServer, workingChannelInfo));
             OnRingInfoReceived?.Invoke(this,
-                new RingInfoReceivedEventArgs(ctiServer, callInfo));
+                new(ctiServer, callInfo));
         }
 
         public WorkingChannelInfo WorkingChannelInfo { get; private set; }
@@ -599,7 +599,7 @@ namespace ipsc6.agent.client
                 WorkingChannelInfo = workingChannelInfo;
             }
             OnWorkingChannelInfoReceived?.Invoke(this,
-                new WorkingChannelInfoReceivedEventArgs(ctiServer, workingChannelInfo));
+                new(ctiServer, workingChannelInfo));
         }
 
         private readonly HashSet<Privilege> privilegeCollection = new();
@@ -756,7 +756,7 @@ namespace ipsc6.agent.client
                 {
                     if (!isEverLostAllConnections)
                     {
-                        if (connections.All(x => !x.Connected))
+                        if (!connections.Any(x => x.State == ConnectionState.Ok))
                         {
                             isEverLostAllConnections = true;
                             logger.Warn("丢失了所有 CTI 服务节点的连接!");
