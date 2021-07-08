@@ -22,9 +22,7 @@ IPSC 座席客户端软件 （以下常简称为“座席”、“座席软件�
 
     请注意浏览器与座席程序之间的连线:
 
-    - 座席程序在 `localhost` 打开端口进行监听，提供 WebService
+    - 座席程序在 `127.0.0.1`/`localhost` 打开 TCP 端口进行监听，提供 WebService
     - 浏览器和座席程序之间通过 JSONRPC over WebSocket 进行通信
-
-    **这是座席程序唯一的可编程控制方式。**
 
 --8<-- "includes/glossary.md"

@@ -5,7 +5,7 @@
     "tasks": [
         {
             "label": "build",
-            "command": "${config:python.pythonPath}",
+            "command": "${config:python.defaultInterpreterPath}",
             "args": [
                 "-m",
                 "mkdocs",
@@ -19,7 +19,7 @@
         },
         {
             "label": "build pdf",
-            "command": "${config:python.pythonPath}",
+            "command": "${config:python.defaultInterpreterPath}",
             "args": [
                 "-m",
                 "mkdocs",
@@ -35,7 +35,7 @@
         },
         {
             "label": "serve",
-            "command": "${config:python.pythonPath}",
+            "command": "${config:python.defaultInterpreterPath}",
             "args": [
                 "-m",
                 "mkdocs",
