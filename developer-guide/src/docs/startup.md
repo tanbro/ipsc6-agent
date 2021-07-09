@@ -4,11 +4,11 @@
 
 座席程序的命令行参数详见 [配置项列表](config.md#命令行参数配置) 中的相同。这些参数将覆盖配置文件中的设置。
 
-eg:
+!!! example
 
-```powershell
-ipsc6.agent.wpfapp.exe Ipsc.ServerList=192.168.2.107 WebServer.ListenPort=8080
-```
+    ```powershell
+    ipsc6.agent.wpfapp.exe Ipsc:ServerList:0="192.168.2.100" WebServer:ListenPort="8080"
+    ```
 
 ## 从浏览器启动
 
@@ -34,9 +34,11 @@ Windows Registry Editor Version 5.00
 
 例如这样的超链接:
 
-```html
-<a href="ipsc6-agent-launch:">启动座席程序</a>
-```
+!!! example
+
+    ```html
+    <a href="ipsc6-agent-launch:">启动座席程序</a>
+    ```
 
 点击这个超链接后，座席程序将会启动。
 
@@ -44,8 +46,10 @@ Windows Registry Editor Version 5.00
 
 我们甚至可以为启动连接加上命令行参数，例如：
 
-```html
-<a href="ipsc6-agent-launch:--WebServer:ListenPort 8080">启动座席程序</a>
-```
+!!! example
+
+    ```html
+    <a href="ipsc6-agent-launch:--WebServer:ListenPort 8080">启动座席程序</a>
+    ```
 
 --8<-- "includes/glossary.md"

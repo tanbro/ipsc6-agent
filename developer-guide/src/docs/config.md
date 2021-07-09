@@ -47,7 +47,7 @@
 
 其中的多层键值，也可以采用非嵌套的方式书写，如:
 
-!!!example
+!!! example
 
     ```json
     {
@@ -61,7 +61,7 @@
 
 或
 
-!!!example
+!!! example
 
     ```json
     {
@@ -82,7 +82,7 @@
 
 假设我们使用环境变量配置本地 Web 服务器端口 `WebServer:ListenPort` 选项为`8080`，则应这样设定环境变量:
 
-!!!example
+!!! example
 
     ```bat
     set IPSC6AGENT_WebServer__ListenPort=8080
@@ -93,7 +93,7 @@
 
 !!!example
 
-    ```bat
+    ```batch
     set IPSC6AGENT_Ipsc__ServerList__0="192.168.2.100"
     set IPSC6AGENT_Ipsc__ServerList__1="192.168.2.200"
     ```
@@ -107,7 +107,7 @@
 
 假设我们使用命令行参数配置 CTI 服务器地址列表为 192.168.2.100 与 192.168.2.101，那么启动命令应是：
 
-!!!example
+!!! example
 
     ```powershell
     ipsc6.agent.wpfapp.exe --Ipsc:ServerList:0 "192.168.2.100" --Ipsc:ServerList:1 "192.168.2.101"
@@ -120,7 +120,7 @@
 
 例如：
 
-!!!example
+!!! example
 
     -   以下命令使用 `=` 设置键和值：
 
@@ -140,7 +140,7 @@
         app.exe --SomeKey "Some key set from double hyphen"
         ```
 
-!!!warning
+!!! warning
 
     在同一命令中，请勿将使用 `=` 的命令行参数键值对与使用空格的键值对混合使用。
 
