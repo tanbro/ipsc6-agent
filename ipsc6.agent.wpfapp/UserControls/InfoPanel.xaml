@@ -9,68 +9,71 @@
              d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              >
 
-    <Grid Width="236" Height="72" Background="{StaticResource MyInfoPannelBackgroud}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="36"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Border CornerRadius="5 0 0 0"  Background="{StaticResource MyInfoPannelBackgroud}">
 
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <Grid Width="236" Height="72">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="36"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <TextBlock Grid.Column="0"
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
                        Style="{StaticResource MyNumberTextStyle}"
                        Margin="4" VerticalAlignment="Center"
                        FontSize="24"
                        Text="13012345678" 
                            />
-            <!--
+                <!--
                 FontFamily="/AgentWpfApp;component/Fonts/#LCD 14"
                 Text="130123456"
                 Text="{Binding RingInfo.TeleNum}"
                 -->
 
-            <TextBlock Grid.Column="1" Style="{StaticResource MyCommonText}"
+                <TextBlock Grid.Column="1" Style="{StaticResource MyCommonText}"
                            Margin="4" VerticalAlignment="Center"
                            d:Text="RingInfo.Location"
                            Text="广东 广州"/>
-            <!--
+                <!--
                 Text="广东 广州"
                 Text="{Binding RingInfo.Location}"
                 -->
 
-        </Grid>
+            </Grid>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0"
+                <TextBlock Grid.Column="0"
                        Style="{StaticResource MyNumberTextStyle}"
                        Margin="4" VerticalAlignment="Center"
                        d:Text="RingInfo.IvrPath"
                        Text="1-2-3"/>
-            <!--
+                <!--
                 Text="[1-2-3]"/>
                 Text="{Binding RingInfo.IvrPath}
                 -->
 
-            <TextBlock Grid.Column="1" Style="{StaticResource MyCommonText}"
+                <TextBlock Grid.Column="1" Style="{StaticResource MyCommonText}"
                            Margin="4" VerticalAlignment="Center"
                            d:Text="RingInfo.BizName"
                            Text="话费查询"/>
-            <!--
+                <!--
                 Text="话费查询"
                 Text="{Binding RingInfo.BizName}"
                 -->
 
+            </Grid>
         </Grid>
-    </Grid>
+    </Border>
 
 </UserControl>

@@ -8,8 +8,9 @@
         mc:Ignorable="d"
         Title="登录"
         Height="325" Width="350"
+        Background="Transparent"
         ResizeMode="NoResize" WindowStyle="None" WindowStartupLocation="CenterScreen"
-        BorderBrush="#FF5E91E4" BorderThickness="1"
+        
         d:DataContext="{d:DesignData Type=vm:LoginViewModel}"
         MouseDown="Window_MouseDown"
     >
@@ -31,133 +32,134 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Background="#FF5E91E4">
-            <Border CornerRadius="32" Background="White" Width="64" Height="64" VerticalAlignment="Top" HorizontalAlignment="Center"  Margin="0 8 0 0">
-                <Canvas Name="svg2" Width="50" Height="50">
-                    <Canvas.RenderTransform>
-                        <TranslateTransform X="0" Y="0"/>
-                    </Canvas.RenderTransform>
-                    <Path Fill="#FF0060AB" Stretch="Fill" Height="48" Width="48">
-                        <Path.Data>
-                            <PathGeometry Figures="M 15.12386 222.49178 C 9.8637 220.61206 5.36462 217.51247 2.5610301 213.83678 L 0 210.47909 5.56543 204.7107 c 16.48465 -17.08579 39.66879 -41.66384 39.66879 -42.05381 0 -0.24664 -2.21203 -0.52674 -4.91563 -0.62243 -14.92977 -0.52842 -26.67557 -8.42949 -33.3446499 -22.43003 -3.2753701 -6.87605 -3.43835 -7.67693 -3.37793 -16.59961 0.0528 -7.79763 0.4786799 -10.44136 2.5312299 -15.71284 1.35727 -3.4858 3.71056 -8.12642 5.22955 -10.31249 2.95732 -4.25607 20.5163 -24.250383 41.36288 -47.099663 7.05647 -7.73438 15.53632 -17.08567 18.84412 -20.78066 l 6.01418 -6.71816 20.08529 -0.0787 20.0853 -0.0787 -1.89817 2.10937 c -15.890941 17.65913 -76.55612 85.363903 -78.80266 87.946943 -4.02439 4.62718 -4.93851 7.32641 -4.93851 14.58252 0 8.41744 2.7007 12.95702 9.8561 16.56701 3.50456 1.7681 10.93713 2.94049 13.91054 2.19421 1.27924 -0.32107 8.12095 -7.05328 16.0649 -15.80777 12.42222 -13.6897 14.22215 -15.31778 17.60693 -15.92592 5.16375 -0.92776 10.67758 0.48737 13.88976 3.56482 3.46727 3.32187 5.90481 10.63068 5.30883 15.91821 -0.5465 4.84861 2.41293 1.4189 -45.17015 52.34794 l -35.56434 38.06516 -4.74816 -0.0412 c -2.61149 -0.0226 -6.27438 -0.58654 -8.13977 -1.25314 z m 86.98381 -23.38689 c 1.97742 -2.23089 17.93905 -20.01895 35.4703 -39.52901 17.53125 -19.51006 34.74702 -38.67306 38.25727 -42.58445 7.59964 -8.4681 8.30648 -9.9591 8.48252 -17.89285 0.23495 -10.58896 -5.41968 -17.156943 -16.57239 -19.249203 -7.50044 -1.40709 -8.67335 -0.61651 -23.58123 15.894683 -12.81648 14.19486 -14.1698 15.41119 -17.73085 15.93599 -4.17509 0.6153 -8.88311 -0.4174 -12.39579 -2.71899 -4.83541 -3.16829 -7.96648 -14.05423 -5.7399 -19.95628 0.63546 -1.68441 18.03037 -22.013533 38.65537 -45.175833 l 37.5 -42.11327 7.03125 -0.0578 c 5.86374 -0.0482 7.97195 0.38722 12.69656 2.62237 3.11593 1.47409 6.83233 4.06709 8.25868 5.76221 l 2.59337 3.08204 -3.18277 3.37767 c -7.14005 7.57726 -40.99084 45.91391 -40.99084 46.42288 0 0.3017 2.27587 0.54854 5.05749 0.54854 24.54839 0 42.26811 24.879583 35.69452 50.117293 -3.02608 11.6179 -6.05079 15.60155 -41.5985 54.78691 -9.07349 10.002 -19.87089 21.91996 -23.99421 26.48437 l -7.49697 8.29892 -20.00459 0 -20.00459 0 3.5953 -4.05618 z" FillRule="NonZero"/>
-                        </Path.Data>
-                    </Path>
-                </Canvas>
-            </Border>
-            <TextBlock VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0 0 0 4"
+        <Border Grid.Row="0" Background="#FF5E91E4" BorderBrush="#FF5E91E4" BorderThickness="1 1 1 0" CornerRadius="5 5 0 0">
+            <Grid>
+                <Border CornerRadius="32" Background="White" Width="64" Height="64" VerticalAlignment="Top" HorizontalAlignment="Center"  Margin="0 8 0 0">
+                    <Canvas Name="svg2" Width="50" Height="50">
+                        <Canvas.RenderTransform>
+                            <TranslateTransform X="0" Y="0"/>
+                        </Canvas.RenderTransform>
+                        <Path Fill="#FF0060AB" Stretch="Fill" Height="48" Width="48">
+                            <Path.Data>
+                                <PathGeometry Figures="M 15.12386 222.49178 C 9.8637 220.61206 5.36462 217.51247 2.5610301 213.83678 L 0 210.47909 5.56543 204.7107 c 16.48465 -17.08579 39.66879 -41.66384 39.66879 -42.05381 0 -0.24664 -2.21203 -0.52674 -4.91563 -0.62243 -14.92977 -0.52842 -26.67557 -8.42949 -33.3446499 -22.43003 -3.2753701 -6.87605 -3.43835 -7.67693 -3.37793 -16.59961 0.0528 -7.79763 0.4786799 -10.44136 2.5312299 -15.71284 1.35727 -3.4858 3.71056 -8.12642 5.22955 -10.31249 2.95732 -4.25607 20.5163 -24.250383 41.36288 -47.099663 7.05647 -7.73438 15.53632 -17.08567 18.84412 -20.78066 l 6.01418 -6.71816 20.08529 -0.0787 20.0853 -0.0787 -1.89817 2.10937 c -15.890941 17.65913 -76.55612 85.363903 -78.80266 87.946943 -4.02439 4.62718 -4.93851 7.32641 -4.93851 14.58252 0 8.41744 2.7007 12.95702 9.8561 16.56701 3.50456 1.7681 10.93713 2.94049 13.91054 2.19421 1.27924 -0.32107 8.12095 -7.05328 16.0649 -15.80777 12.42222 -13.6897 14.22215 -15.31778 17.60693 -15.92592 5.16375 -0.92776 10.67758 0.48737 13.88976 3.56482 3.46727 3.32187 5.90481 10.63068 5.30883 15.91821 -0.5465 4.84861 2.41293 1.4189 -45.17015 52.34794 l -35.56434 38.06516 -4.74816 -0.0412 c -2.61149 -0.0226 -6.27438 -0.58654 -8.13977 -1.25314 z m 86.98381 -23.38689 c 1.97742 -2.23089 17.93905 -20.01895 35.4703 -39.52901 17.53125 -19.51006 34.74702 -38.67306 38.25727 -42.58445 7.59964 -8.4681 8.30648 -9.9591 8.48252 -17.89285 0.23495 -10.58896 -5.41968 -17.156943 -16.57239 -19.249203 -7.50044 -1.40709 -8.67335 -0.61651 -23.58123 15.894683 -12.81648 14.19486 -14.1698 15.41119 -17.73085 15.93599 -4.17509 0.6153 -8.88311 -0.4174 -12.39579 -2.71899 -4.83541 -3.16829 -7.96648 -14.05423 -5.7399 -19.95628 0.63546 -1.68441 18.03037 -22.013533 38.65537 -45.175833 l 37.5 -42.11327 7.03125 -0.0578 c 5.86374 -0.0482 7.97195 0.38722 12.69656 2.62237 3.11593 1.47409 6.83233 4.06709 8.25868 5.76221 l 2.59337 3.08204 -3.18277 3.37767 c -7.14005 7.57726 -40.99084 45.91391 -40.99084 46.42288 0 0.3017 2.27587 0.54854 5.05749 0.54854 24.54839 0 42.26811 24.879583 35.69452 50.117293 -3.02608 11.6179 -6.05079 15.60155 -41.5985 54.78691 -9.07349 10.002 -19.87089 21.91996 -23.99421 26.48437 l -7.49697 8.29892 -20.00459 0 -20.00459 0 3.5953 -4.05618 z" FillRule="NonZero"/>
+                            </Path.Data>
+                        </Path>
+                    </Canvas>
+                </Border>
+                <TextBlock VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0 0 0 4"
                        Foreground="White" FontStyle="Oblique" FontSize="26">
                 欢迎使用坐席客户端
-            </TextBlock>
-        </Grid>
+                </TextBlock>
+            </Grid>
+        </Border>
 
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="150"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-
-            <Grid Grid.Row="0" FocusManager.FocusedElement="{Binding ElementName=textboxName}"
-                  IsEnabled="{Binding IsAllowInput, Mode=OneWay}">
+        <Border Grid.Row="1" Background="White" BorderBrush="#FF5E91E4" BorderThickness="1 0 1 1" CornerRadius="0 0 5 5">
+            <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="50"/>
-                    <RowDefinition Height="50"/>
-                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="150"/>
+                    <RowDefinition/>
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
+                <Grid Grid.Row="0" FocusManager.FocusedElement="{Binding ElementName=textboxName}"
+                  IsEnabled="{Binding IsAllowInput, Mode=OneWay}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="50"/>
+                    </Grid.RowDefinitions>
 
-                    <Label Target="{Binding ElementName=textboxName}"
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Target="{Binding ElementName=textboxName}"
                            VerticalAlignment="Center" Margin="8">
-                        登录工号(_N)
-                    </Label>
+                            登录工号(_N)
+                        </Label>
 
-                    <TextBox x:Name="textboxName" Grid.Column="1" Margin="16 8 16 8" FontSize="14"
+                        <TextBox x:Name="textboxName" Grid.Column="1" Margin="16 8 16 8" FontSize="14"
                              InputMethod.IsInputMethodEnabled="False"
                              Text="{Binding WorkerNum}">
-                        <TextBox.Style>
-                            <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
-                                <Style.Resources>
-                                    <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
-                                        <VisualBrush.Visual>
-                                            <Label Content="输入工号" Foreground="Gray" />
-                                        </VisualBrush.Visual>
-                                    </VisualBrush>
-                                </Style.Resources>
-                                <Style.Triggers>
-                                    <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
-                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                                    </Trigger>
-                                    <Trigger Property="Text" Value="{x:Null}">
-                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                                    </Trigger>
-                                    <Trigger Property="IsKeyboardFocused" Value="True">
-                                        <Setter Property="Background" Value="White" />
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBox.Style>
-                    </TextBox>
+                            <TextBox.Style>
+                                <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                    <Style.Resources>
+                                        <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                                            <VisualBrush.Visual>
+                                                <Label Content="输入工号" Foreground="Gray" />
+                                            </VisualBrush.Visual>
+                                        </VisualBrush>
+                                    </Style.Resources>
+                                    <Style.Triggers>
+                                        <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
+                                            <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                        </Trigger>
+                                        <Trigger Property="Text" Value="{x:Null}">
+                                            <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                        </Trigger>
+                                        <Trigger Property="IsKeyboardFocused" Value="True">
+                                            <Setter Property="Background" Value="White" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
 
-                </Grid>
+                    </Grid>
 
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Label Target="{Binding ElementName=textboxPassword}"
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Label Target="{Binding ElementName=textboxPassword}"
                            VerticalAlignment="Center" Margin="8">
-                        登录密码(_P)
-                    </Label>
+                            登录密码(_P)
+                        </Label>
 
-                    <PasswordBox  x:Name="textboxPassword"
+                        <PasswordBox  x:Name="textboxPassword"
                                   Grid.Column="1" Margin="16 8 16 8" FontSize="14" PasswordChanged="PasswordChanged">
-                        <PasswordBox.Style>
-                            <Style xmlns:sys="clr-namespace:System;assembly=mscorlib" TargetType="{x:Type PasswordBox}">
-                                <Style.Resources>
-                                    <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
-                                        <VisualBrush.Visual>
-                                            <Label Content="输入密码" Foreground="Gray"/>
-                                        </VisualBrush.Visual>
-                                    </VisualBrush>
-                                </Style.Resources>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Password}" Value="{x:Null}">
-                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                                    </DataTrigger>
-                                    <Trigger Property="IsKeyboardFocused" Value="True">
-                                        <Setter Property="Background" Value="White"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </PasswordBox.Style>
-                    </PasswordBox>
-                </Grid>
+                            <PasswordBox.Style>
+                                <Style xmlns:sys="clr-namespace:System;assembly=mscorlib" TargetType="{x:Type PasswordBox}">
+                                    <Style.Resources>
+                                        <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                                            <VisualBrush.Visual>
+                                                <Label Content="输入密码" Foreground="Gray"/>
+                                            </VisualBrush.Visual>
+                                        </VisualBrush>
+                                    </Style.Resources>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Password}" Value="{x:Null}">
+                                            <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                        </DataTrigger>
+                                        <Trigger Property="IsKeyboardFocused" Value="True">
+                                            <Setter Property="Background" Value="White"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </PasswordBox.Style>
+                        </PasswordBox>
+                    </Grid>
 
 
-                <CheckBox x:Name="checkboxSavePassword" Grid.Row="2"
+                    <CheckBox x:Name="checkboxSavePassword" Grid.Row="2"
                           Margin="16 8 16 8"
                           VerticalAlignment="Center" FontSize="14" Foreground="DarkGray"
                           IsChecked="True" Content="记住密码" />
-            </Grid>
+                </Grid>
 
-            <Grid Grid.Row="2">
-                <Button Style="{StaticResource MyCommonButton}"
+                <Grid Grid.Row="2">
+                    <Button Style="{StaticResource MyCommonButton}"
                         IsDefault="True"
                         FontSize="20" FontWeight="Bold" Margin="16 8 16 8"
                         Content="登&#160;&#160;&#160;&#160;录"
                         Command="{Binding LoginCommand}"/>
-                <!--CommandParameter="{Binding ElementName=textboxPassword}-->
-                <!--Background="#FF5E91E4" Foreground="White"-->
+                    <!--CommandParameter="{Binding ElementName=textboxPassword}-->
+                    <!--Background="#FF5E91E4" Foreground="White"-->
+                </Grid>
             </Grid>
-
-        </Grid>
-
-
+        </Border>
 
     </Grid>
 </Window>

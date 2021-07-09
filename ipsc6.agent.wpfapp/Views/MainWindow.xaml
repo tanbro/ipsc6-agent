@@ -13,6 +13,7 @@
         Title="IPSC6 座席工具条"
         SizeToContent="WidthAndHeight"
         WindowStyle="None" ResizeMode="NoResize"
+        Background="Transparent"
         LocationChanged="Window_LocationChanged"
         Closed="Window_Closed"
         MouseDown="Window_MouseDown"
@@ -25,42 +26,48 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
 
-    <Grid Width="1280" Background="Transparent">
-        <!--Background="{StaticResource MyBackgroud}"-->
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition x:Name="rowdefMain" Height="72" />
             <RowDefinition x:Name="rowdefBottom" Height="8"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Visibility="{Binding MainPanelVisibility, Mode=OneWay}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+        <Border Grid.Row="0" CornerRadius="5 5 0 0" BorderThickness="1 1 1 0" BorderBrush="DarkGray"
+                  Background="{StaticResource MyBackgroud}">
 
-            <uc:InfoPanel Grid.Column="0" Margin="0 0 0 1"/>
-            <uc:DialPanel Grid.Column="1" Margin="1 0 0 1"/>
-            <uc:QueuePanel Grid.Column="2" Margin="1 0 0 1"/>
-            <uc:MainToolBar Grid.Column="3" Margin="1 0 0 1"/>
-            <uc:HoldPanel Grid.Column="4" Margin="1 0 0 1"/>
-            <uc:WorkerStatusPanel Grid.Column="5" Margin="1 0 0 1"/>
-            <uc:GroupPanel Grid.Column="6" Margin="1 0 0 1"/>
-            <uc:SysStatusPanel Grid.Column="7" Margin="1 0 0 1"/>
-            <uc:AdvPanel Grid.Column="8" Margin="1 0 0 1"/>
-            <uc:PreferencePanel Grid.Column="9" Margin="1 0 0 0"/>
-        </Grid>
+            <Grid Width="1278"
+                  Visibility="{Binding MainPanelVisibility, Mode=OneWay}" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-        <Border Grid.Row="1" BorderThickness="1 0 1 1" CornerRadius="0 0 5 5"
+                <uc:InfoPanel Grid.Column="0"/>
+                <uc:DialPanel Grid.Column="1" Margin="1 0 0 0"/>
+                <uc:QueuePanel Grid.Column="2" Margin="1 0 0 0"/>
+                <uc:MainToolBar Grid.Column="3" Margin="1 0 0 0"/>
+                <uc:HoldPanel Grid.Column="4" Margin="1 0 0 0"/>
+                <uc:WorkerStatusPanel Grid.Column="5" Margin="1 0 0 0"/>
+                <uc:GroupPanel Grid.Column="6" Margin="1 0 0 0"/>
+                <uc:SysStatusPanel Grid.Column="7" Margin="1 0 0 0"/>
+                <uc:AdvPanel Grid.Column="8" Margin="1 0 0 0"/>
+                <uc:PreferencePanel Grid.Column="9" Margin="1 0 0 0"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" BorderThickness="1" CornerRadius="0 0 5 5"
                 Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
                 BorderBrush="DarkGray"/>
     </Grid>
+
 
 </Window>

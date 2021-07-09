@@ -67,8 +67,8 @@ namespace ipsc6.agent.wpfapp
                             (_, _) => mainService,
                             (_, _) => guiService,
                         };
+                        using CancellationTokenSource rpcServerCanceller = new();
                         server.Server rpcServer = new(localRpcCreators);
-                        CancellationTokenSource rpcServerCanceller = new();
                         var rpcServerTask = Task.Run(() => rpcServer.RunAsync(rpcServerCanceller.Token));
                         try
                         {
@@ -83,7 +83,7 @@ namespace ipsc6.agent.wpfapp
                             {
                                 LoginWindow = null;
                             }
-                            //if (isLoginOk)
+                            if (isLoginOk)
                             {
                                 new Views.MainWindow().ShowDialog();
                             }
