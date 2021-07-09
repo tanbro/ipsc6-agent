@@ -56,7 +56,8 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0" FocusManager.FocusedElement="{Binding ElementName=textboxName}">
+            <Grid Grid.Row="0" FocusManager.FocusedElement="{Binding ElementName=textboxName}"
+                  IsEnabled="{Binding IsAllowInput, Mode=OneWay}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="50"/>
@@ -76,7 +77,6 @@
 
                     <TextBox x:Name="textboxName" Grid.Column="1" Margin="16 8 16 8" FontSize="14"
                              InputMethod.IsInputMethodEnabled="False"
-                             IsEnabled="{Binding IsAllowEditWorkerNum, Mode=OneWay}"
                              Text="{Binding WorkerNum}">
                         <TextBox.Style>
                             <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
@@ -115,8 +115,7 @@
                     </Label>
 
                     <PasswordBox  x:Name="textboxPassword"
-                                  Grid.Column="1" Margin="16 8 16 8" FontSize="14" PasswordChanged="PasswordChanged"
-                                  IsEnabled="{Binding IsAllowEditPassword, Mode=OneWay}">
+                                  Grid.Column="1" Margin="16 8 16 8" FontSize="14" PasswordChanged="PasswordChanged">
                         <PasswordBox.Style>
                             <Style xmlns:sys="clr-namespace:System;assembly=mscorlib" TargetType="{x:Type PasswordBox}">
                                 <Style.Resources>
@@ -144,7 +143,6 @@
                           Margin="16 8 16 8"
                           VerticalAlignment="Center" FontSize="14" Foreground="DarkGray"
                           IsChecked="True" Content="记住密码" />
-
             </Grid>
 
             <Grid Grid.Row="2">

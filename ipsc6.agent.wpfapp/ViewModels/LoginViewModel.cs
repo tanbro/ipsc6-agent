@@ -42,18 +42,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
         }
 
-        private static bool isAllowEditWorkerNum = true;
-        public bool IsAllowEditWorkerNum
+        private static bool isAllowInput = true;
+        public bool IsAllowInput
         {
-            get => isAllowEditWorkerNum;
-            set => SetProperty(ref isAllowEditWorkerNum, value);
-        }
-
-        private static bool isAllowEditPassword = true;
-        public bool IsAllowEditPassword
-        {
-            get => isAllowEditPassword;
-            set => SetProperty(ref isAllowEditPassword, value);
+            get => isAllowInput;
+            set => SetProperty(ref isAllowInput, value);
         }
 
         private static readonly IRelayCommand loginCommand = new RelayCommand(DoLogin, CanLogin);
@@ -68,8 +61,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 throw new InvalidOperationException();
             }
 
-            Instance.IsAllowEditWorkerNum = false;
-            Instance.IsAllowEditPassword = false;
+            Instance.IsAllowInput = false;
             try
             {
                 using (await Utils.CommandGuard.EnterAsync(loginCommand))
@@ -101,8 +93,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
             finally
             {
-                Instance.IsAllowEditWorkerNum = true;
-                Instance.IsAllowEditPassword = true;
+                Instance.IsAllowInput = true;
             }
         }
 
