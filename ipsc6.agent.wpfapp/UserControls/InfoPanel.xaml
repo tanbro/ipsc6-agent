@@ -11,6 +11,7 @@
              >
 
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <conv:TelNumMaskConverter x:Key="TelNumMaskConverter"/>
     </UserControl.Resources>
 
@@ -28,37 +29,122 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0"
-                       Style="{StaticResource MyNumberTextStyle}"
-                       Margin="4" HorizontalAlignment="Right" VerticalAlignment="Center"
-                       FontSize="18"
-                       Text="{Binding CurrentCallInfo.RemoteTelNum, Mode=OneWay, Converter={StaticResource TelNumMaskConverter}}"/>
+                <TextBlock
+                    Grid.Column="0"
+                    Style="{StaticResource MyCommonText}"
+                    HorizontalAlignment="Center"  VerticalAlignment="Center"
+                    FontSize="20"
+                    Text="当前无呼叫"
+                    Visibility="{Binding IsNotCurrentCallActive, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
+                />
+
+                <TextBlock
+                    Grid.Column="0"
+                    Style="{StaticResource MyNumberTextStyle}"
+                    Margin="4" VerticalAlignment="Center"
+                    FontSize="20"
+                    Text="{Binding CurrentCallInfo.RemoteTelNum, Mode=OneWay, Converter={StaticResource TelNumMaskConverter}}"
+                    Visibility="{Binding IsCurrentCallActive, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
+                />
 
                 <TextBlock Grid.Column="1" Style="{StaticResource MyCommonText}"
                            Margin="4" VerticalAlignment="Center"
                            TextWrapping="Wrap"
-                           Text="{Binding CurrentCallInfo.RemoteLoc, Mode=OneWay}"/>
+                           Text="{Binding CurrentCallInfo.RemoteLoc, Mode=OneWay}"
+                />
 
             </Grid>
 
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0"
                        Style="{StaticResource MyNumberTextStyle}"
-                       Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap"
-                       Text="{Binding CurrentCallInfo.IvrPath, Mode=OneWay}"/>
+                       Margin="4" VerticalAlignment="Center" TextWrapping="WrapWithOverflow"
+                       Text="{Binding CurrentCallInfo.IvrPath, Mode=OneWay, StringFormat='IVR: {0}'}"/>
 
-                <TextBlock Grid.Column="1" Style="{StaticResource MyCommonText}"
-                           Margin="4" VerticalAlignment="Center"
-                           Text="话费查询"/>
-                <!--
-                Text="话费查询"
-                Text="{Binding RingInfo.BizName}"
-                -->
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Style="{StaticResource MyCommonText}" FontSize="14">
+                            24H呼次
+                        </TextBlock>
+                        <TextBlock Grid.Column="1"
+                                   Style="{StaticResource MyNumberTextStyle}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   Margin="0 0 2 0"
+                                   Text="{Binding CurrentCallInfo.H24CallCount, Mode=OneWay, FallbackValue='0'}"/>
+                    </Grid>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Style="{StaticResource MyCommonText}" FontSize="14">
+                            48H呼次
+                        </TextBlock>
+                        <TextBlock Grid.Column="1"
+                                   Style="{StaticResource MyNumberTextStyle}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   Margin="0 0 2 0"
+                                   Text="{Binding CurrentCallInfo.H24CallCount, Mode=OneWay, FallbackValue='0'}"/>
+                    </Grid>
+                </Grid>
+
+                <Grid Grid.Column="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Style="{StaticResource MyCommonText}"
+                            FontSize="12">
+                            日呼量
+                        </TextBlock>
+                        <TextBlock Grid.Column="1"
+                                   Style="{StaticResource MyNumberTextStyle}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   Margin="0 0 2 0"
+                                   Text="{Binding Stats.DailyCallCount, Mode=OneWay, FallbackValue='0', StringFormat='{}{0:0,000}'}"/>
+                        <!--StringFormat='{}{0:0,0}'-->
+                    </Grid>
+
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Style="{StaticResource MyNumberTextStyle}"
+                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Margin="0 0 2 0"
+                        Text="{Binding Stats.DailyCallDuration, Mode=OneWay, FallbackValue='0:00:00'}"
+                    />
+
+                </Grid>
+
 
             </Grid>
         </Grid>

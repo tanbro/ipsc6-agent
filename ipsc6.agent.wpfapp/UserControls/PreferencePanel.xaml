@@ -41,7 +41,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Border CornerRadius="0 5 5 0">
+    <Border CornerRadius="0 5 0 0">
 
         <Grid Height="64" Width="42">
             <Grid.RowDefinitions>

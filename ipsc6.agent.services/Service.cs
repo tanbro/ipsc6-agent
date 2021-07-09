@@ -620,7 +620,10 @@ namespace ipsc6.agent.services
             {
                 Model.Stats.CopyFromAgent(agent);
             }
+            OnStatsChanged?.Invoke(this, EventArgs.Empty);
         }
+
+        public event EventHandler OnStatsChanged;
 
         public Models.Stats GetStats()
         {

@@ -155,8 +155,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             App.mainService.OnSipRegisterStateChanged += MainService_OnSipRegisterStateChanged;
             App.mainService.OnSipCallStateChanged += MainService_OnSipCallStateChanged;
             App.mainService.OnQueueInfoEvent += MainService_OnQueueInfoEvent;
+            App.mainService.OnStatsChanged += MainService_OnStatsChanged;
         }
-
         #endregion
 
         #region Agent Status
@@ -243,11 +243,37 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 信息面板
+
+        private static void MainService_OnStatsChanged(object sender, EventArgs e)
+        {
+            var svc = App.mainService;
+            Instance.Stats = svc.GetStats();
+        }
+
         private static services.Models.CallInfo currentCallInfo;
         public services.Models.CallInfo CurrentCallInfo
         {
             get => currentCallInfo;
-            set => SetProperty(ref currentCallInfo, value);
+            set
+            {
+                if (SetProperty(ref currentCallInfo, value))
+                {
+                    IsCurrentCallActive = value != null;
+                    IsNotCurrentCallActive = !IsCurrentCallActive;
+                }
+            }
+        }
+        private static bool isCurrentCallActive = false;
+        public bool IsCurrentCallActive
+        {
+            get => isCurrentCallActive;
+            set => SetProperty(ref isCurrentCallActive, value);
+        }
+        private static bool isNotCurrentCallActive = true;
+        public bool IsNotCurrentCallActive
+        {
+            get => isNotCurrentCallActive;
+            set => SetProperty(ref isNotCurrentCallActive, value);
         }
 
         private static services.Models.Stats stats;
