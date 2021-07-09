@@ -8,9 +8,8 @@
         mc:Ignorable="d"
         Title="登录"
         Height="325" Width="350"
-        Background="Transparent"
-        ResizeMode="NoResize" WindowStyle="None" WindowStartupLocation="CenterScreen"
-        
+        Background="Transparent" AllowsTransparency="True"
+        ResizeMode="NoResize" WindowStyle="None" WindowStartupLocation="CenterScreen"        
         d:DataContext="{d:DesignData Type=vm:LoginViewModel}"
         MouseDown="Window_MouseDown"
     >

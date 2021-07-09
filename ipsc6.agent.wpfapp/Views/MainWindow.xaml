@@ -13,7 +13,7 @@
         Title="IPSC6 座席工具条"
         SizeToContent="WidthAndHeight"
         WindowStyle="None" ResizeMode="NoResize"
-        Background="Transparent"
+        Background="Transparent" AllowsTransparency="True"
         LocationChanged="Window_LocationChanged"
         Closed="Window_Closed"
         MouseDown="Window_MouseDown"
