@@ -25,7 +25,8 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
 
-    <Grid Width="1280" Background="{StaticResource MyBackgroud}">
+    <Grid Width="1280" Background="Transparent">
+        <!--Background="{StaticResource MyBackgroud}"-->
         <Grid.RowDefinitions>
             <RowDefinition x:Name="rowdefMain" Height="72" />
             <RowDefinition x:Name="rowdefBottom" Height="8"/>
@@ -57,7 +58,7 @@
             <uc:PreferencePanel Grid.Column="9" Margin="1 0 0 0"/>
         </Grid>
 
-        <Border Grid.Row="1" BorderThickness="1 0 1 1"
+        <Border Grid.Row="1" BorderThickness="1 0 1 1" CornerRadius="0 0 5 5"
                 Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
                 BorderBrush="DarkGray"/>
     </Grid>

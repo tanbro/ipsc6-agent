@@ -83,7 +83,7 @@ namespace ipsc6.agent.wpfapp
                             {
                                 LoginWindow = null;
                             }
-                            if (isLoginOk)
+                            //if (isLoginOk)
                             {
                                 new Views.MainWindow().ShowDialog();
                             }

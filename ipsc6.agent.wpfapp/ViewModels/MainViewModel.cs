@@ -86,6 +86,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         internal void StartTimer()
         {
             var dispatcher = Application.Current.Dispatcher;
+            ResetStatusTimeSpan();
             timerCanceller = new();
             timerTask = dispatcher.InvokeAsync(async () =>
             {
@@ -117,10 +118,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static void DoOnTimer()
         {
-            if (lastStatusTime != null)
-            {
-                Instance.StatusDuration = DateTime.UtcNow - lastStatusTime;
-            }
+            Instance.StatusDuration = DateTime.UtcNow - lastStatusTime;
         }
         #endregion
 
@@ -219,7 +217,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             set => SetProperty(ref displayName, value);
         }
 
-        private static AgentStateWorkType status;
+        private static AgentStateWorkType status = Tuple.Create(client.AgentState.NotExist, client.WorkType.Unknown);
         public AgentStateWorkType Status
         {
             get => status;
