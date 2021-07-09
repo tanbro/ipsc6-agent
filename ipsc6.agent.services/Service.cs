@@ -627,7 +627,7 @@ namespace ipsc6.agent.services
 
         public Models.Stats GetStats()
         {
-            return Model.Stats;
+            return GetModel().Stats;
         }
 
         #endregion

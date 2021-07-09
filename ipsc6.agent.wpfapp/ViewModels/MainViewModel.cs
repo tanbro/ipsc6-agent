@@ -243,7 +243,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 信息面板
-
         private static void MainService_OnStatsChanged(object sender, EventArgs e)
         {
             var svc = App.mainService;
