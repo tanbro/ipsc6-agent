@@ -46,7 +46,9 @@
         <converters:AgentStateToBrushConverter x:Key="AgentStateToBrushConverter"/>
 
         <Style x:Key="MyStateLightStyle" TargetType="Border">
-            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="CornerRadius" Value="7"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="White"/>
             <Setter Property="Height" Value="12"/>
             <Setter Property="Width" Value="12"/>
         </Style>
@@ -64,8 +66,7 @@
 
             <Border Grid.Row="0"
                 CornerRadius="5 5 0 0"
-                Background="{StaticResource MyGroupTitleBackground}" 
-            >
+                Background="{StaticResource MyGroupTitleBackground}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*"/>
@@ -75,24 +76,17 @@
                     <TextBlock Grid.Column="0"
                                Style="{StaticResource MyScoreBoardTitleTextStyle}"
                                Margin="4 0 4 0" HorizontalAlignment="Left"
-                               Text="{Binding DisplayName, Mode=OneWay}"
-                    >
-                        <!--小美-->
-                    </TextBlock>
+                               Text="{Binding DisplayName, Mode=OneWay}"/>
 
                     <TextBlock Grid.Column="1" Style="{StaticResource MyScoreBoardTitleTextStyle}"
                                Margin="4 0 4 0" HorizontalAlignment="Right"
-                               Text="{Binding WorkerNumber, Mode=OneWay}"
-                    >
-                    <!--1001-->
-                    </TextBlock>
+                               Text="{Binding WorkerNumber, Mode=OneWay}"/>
                 </Grid>
             </Border>
 
             <Border Grid.Row="1"
                 Background="{StaticResource MyBackgroud}"
-                CornerRadius="0 0 5 5"
-            >
+                CornerRadius="0 0 5 5">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*"/>
@@ -101,8 +95,7 @@
 
                     <Button Grid.Column="0"
                             Style="{StaticResource WorkerStatusButtonStyle}"
-                            Command="{Binding StatePopupCommand}"
-                            >
+                            Command="{Binding StatePopupCommand}">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -110,29 +103,29 @@
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" HorizontalAlignment="Center"
-                                    Text="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
-                                />
+                                    Text="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"/>
                                 <Border Grid.Column="1" HorizontalAlignment="Center"
                                     Style="{StaticResource MyStateLightStyle}"
-                                    Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
-                                 />
+                                    Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"/>
                             </Grid>
                             <Popup x:Name="StatePopup" StaysOpen="False"
                                    IsOpen="{Binding IsStatePopupOpened}">
                                 <ListBox ItemsSource="{Binding StateOperationItems, Mode=OneWay}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <Button Margin="4"
-                                                    Command="{Binding ElementName=WorkerStatusPannelUserControl, Path=DataContext.SetStateCommand}"
-                                                    CommandParameter="{Binding}">
+                                            <Button
+                                                Style="{StaticResource MyCommonButton}"
+                                                Cursor="Hand"
+                                                Command="{Binding ElementName=WorkerStatusPannelUserControl, Path=DataContext.SetStateCommand}"
+                                                CommandParameter="{Binding}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock
                                                            Text="{Binding Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
-                                                           Margin="4"/>
+                                                           Margin="2 0 2 0"/>
                                                     <Border
                                                         Style="{StaticResource MyStateLightStyle}"
                                                         Background="{Binding Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
-                                                        Margin="4"/>
+                                                       Margin="2 0 2 0"/>
                                                 </StackPanel>
                                             </Button>
                                         </DataTemplate>
