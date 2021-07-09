@@ -68,6 +68,12 @@ namespace ipsc6.agent.client
         SipRegistrarList = 13,
 
         /// <summary>
+        /// 当天工作信息
+        /// </summary>
+        /// nParam=当天通话次数 pcParam=当天通话时长（秒，字符串）
+        TodayWorkInfo = 16,
+
+        /// <summary>
         /// 录音状态,=0为停止录音,产生停止录音事件;=1录音事件,产生开始录音事件
         /// </summary>
         RecordState = 22,

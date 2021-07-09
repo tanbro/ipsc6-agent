@@ -382,6 +382,9 @@ namespace ipsc6.agent.client
                 case ServerSentMessageSubType.SipRegistrarList:
                     DoOnSipRegistrarList(ctiServer, msg);
                     break;
+                case ServerSentMessageSubType.TodayWorkInfo:
+                    DoOnTodayWorkInfo(ctiServer, msg);
+                    break;
                 case ServerSentMessageSubType.GroupIdList:
                     DoOnGroupIdList(ctiServer, msg);
                     break;
@@ -412,6 +415,18 @@ namespace ipsc6.agent.client
                 default:
                     break;
             }
+        }
+
+        public Stats Stats { get; } = new();
+
+        private void DoOnTodayWorkInfo(CtiServer _, ServerSentMessage msg)
+        {
+            Stats.DailyCallCount = (uint)msg.N2;
+            Stats.DailyCallDuration = TimeSpan.FromSeconds(
+#pragma warning disable CA1305
+                double.Parse(msg.S)
+#pragma warning restore CA1305
+            );
         }
 
         public event EventHandler OnSignedGroupsChanged;
