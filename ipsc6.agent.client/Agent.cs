@@ -418,7 +418,7 @@ namespace ipsc6.agent.client
         }
 
         public Stats Stats { get; } = new();
-
+        public event EventHandler OnStatsChanged;
         private void DoOnTodayWorkInfo(CtiServer _, ServerSentMessage msg)
         {
             Stats.DailyCallCount = (uint)msg.N2;
@@ -427,6 +427,7 @@ namespace ipsc6.agent.client
                 double.Parse(msg.S)
 #pragma warning restore CA1305
             );
+            OnStatsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler OnSignedGroupsChanged;

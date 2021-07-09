@@ -94,6 +94,7 @@
     <Compile Include="Converters\AgentStateToTextConverter.cs" />
     <Compile Include="Converters\AgentTeleStateConverters.cs" />
     <Compile Include="Converters\BooleanToPinIconConverter.cs" />
+    <Compile Include="Converters\TelNumMaskConverter.cs" />
     <Compile Include="Dialogs\PromptDialog.xaml.cs">
       <DependentUpon>PromptDialog.xaml</DependentUpon>
     </Compile>

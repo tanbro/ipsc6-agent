@@ -70,7 +70,7 @@
                                                     </ContentControl>
                                                     <TextBlock Grid.Column="1" VerticalAlignment="Center"
                                                                Foreground="DarkBlue"
-                                                               Text="{Binding RemoteTeleNum}"/>
+                                                               Text="{Binding RemoteTelNum}"/>
                                                 </Grid>
                                                 <Button Grid.Column="1" Style="{StaticResource MyCommonButton}"
                                                         Margin="4" Height="48" Width="48"

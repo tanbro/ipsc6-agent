@@ -271,12 +271,22 @@ const xferExtConsult = (calledTeleNum) => {
   _ws.send(JSON.stringify(req));
 };
 
-const callIvr = (ivrId, invokeType=0, customeString="") => {
+const callIvr = (ivrId, invokeType=0, customString="") => {
   const req = {
     jsonrpc: "2.0",
     id: randomId(),
     method: "callIvr",
-    params: [ivrId, invokeType, customeString],
+    params: [ivrId, invokeType, customString],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+const getStats = () => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "getStats",
+    params: [],
   };
   _ws.send(JSON.stringify(req));
 };

@@ -23,13 +23,13 @@ namespace ipsc6.agent.wpfapp
         {
             try
             {
-                _ = log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.config"));
+                log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.config"));
                 logger.Warn("\r\n!!!!!!!!!!!!!!!!!!!! Startup !!!!!!!!!!!!!!!!!!!!\r\n");
             }
             catch (Exception err)
             {
                 logger.ErrorFormat("日志配置加载失败: {0}\r\n^^^^^^^^^^^^^^^^^^^^ Shutdown ^^^^^^^^^^^^^^^^^^^^\r\n", err);
-                _ = MessageBox.Show(
+                MessageBox.Show(
                     $"应用程序日志配置加载失败，程序无法运行，即将退出。\r\n\r\n{err}",
                     "错误",
                     MessageBoxButton.OK, MessageBoxImage.Error
@@ -45,7 +45,7 @@ namespace ipsc6.agent.wpfapp
             catch (Exception err)
             {
                 logger.ErrorFormat("配置文件加载失败: {0}\r\n^^^^^^^^^^^^^^^^^^^^ Shutdown ^^^^^^^^^^^^^^^^^^^^\r\n", err);
-                _ = MessageBox.Show(
+                MessageBox.Show(
                     $"应用程序配置文件加载失败，程序无法运行，即将退出。\r\n\r\n{err}",
                     "错误",
                     MessageBoxButton.OK, MessageBoxImage.Error

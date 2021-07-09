@@ -197,6 +197,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static void MainService_OnStatusChanged(object sender, services.Events.StatusChangedEventArgs e)
         {
             Instance.Status = new AgentStateWorkType(e.NewState, e.NewWorkType);
+            if (e.NewState != client.AgentState.Work)
+            {
+                Instance.CurrentCallInfo = null;
+            }
             ResetStatusTimeSpan();
         }
 
@@ -236,6 +240,22 @@ namespace ipsc6.agent.wpfapp.ViewModels
             set => SetProperty(ref statusDuration, value);
         }
 
+        #endregion
+
+        #region 信息面板
+        private static services.Models.CallInfo currentCallInfo;
+        public services.Models.CallInfo CurrentCallInfo
+        {
+            get => currentCallInfo;
+            set => SetProperty(ref currentCallInfo, value);
+        }
+
+        private static services.Models.Stats stats;
+        public services.Models.Stats Stats
+        {
+            get => stats;
+            set => SetProperty(ref stats, value);
+        }
         #endregion
 
         #region Group
@@ -394,6 +414,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             Instance.TeleState = e.NewState;
             ReloadCalls();
+            if (e.NewState == client.TeleState.OnHook)
+            {
+                Instance.CurrentCallInfo = null;
+            }
         }
 
         private static client.TeleState teleState;
@@ -495,7 +519,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         #endregion
 
-        #region Call 保持, 取消保持, 保持列表
+        #region 振铃, 保持, 取消保持, 保持列表
         private static void MainService_OnHeldCallReceived(object sender, services.Events.CallInfoEventArgs e)
         {
             ReloadCalls();
@@ -504,6 +528,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static void MainService_OnRingCallReceived(object sender, services.Events.CallInfoEventArgs e)
         {
             ReloadCalls();
+            Instance.CurrentCallInfo = e.Call;
         }
 
         private static void ReloadCalls()

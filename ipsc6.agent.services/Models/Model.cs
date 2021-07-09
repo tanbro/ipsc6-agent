@@ -20,5 +20,6 @@ namespace ipsc6.agent.services.Models
         public IReadOnlyCollection<SipAccount> SipAccounts { get; internal set; } = new List<SipAccount>();
         public IReadOnlyCollection<CallInfo> Calls { get; internal set; } = new List<CallInfo>();
         public IReadOnlyCollection<QueueInfo> QueueInfos { get; internal set; } = new List<QueueInfo>();
+        public Stats Stats { get; internal set; } = new();
     }
 }

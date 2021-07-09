@@ -65,7 +65,7 @@ namespace ipsc6.agent.services
         }
         #endregion
 
-        #region 内部方法
+        #region Create/Release
 
         private client.Agent agent;
         private bool disposedValue;
@@ -120,9 +120,10 @@ namespace ipsc6.agent.services
 
             agent.OnQueueInfoReceived += Agent_OnQueueInfoReceived;
 
+            agent.OnStatsChanged += Agent_OnStatsChanged;
+
             ReloadCtiServers();
         }
-
         #endregion
 
         #region status
@@ -419,7 +420,7 @@ namespace ipsc6.agent.services
                 Direction = value.CallDirection,
                 IsHeld = value.IsHeld,
                 HoldType = value.HoldType,
-                RemoteTeleNum = value.RemoteTelNum,
+                RemoteTelNum = value.RemoteTelNum,
                 RemoteLoc = value.RemoteLocation,
                 H24CallCount = value.H24CallCount,
                 H48CallCount = value.H48CallCount,
@@ -609,6 +610,25 @@ namespace ipsc6.agent.services
             await agent.KickOutAsync(workerNum);
         }
         #endregion
+
+        #region Stats - 通话统计信息
+
+        private void Agent_OnStatsChanged(object sender, EventArgs e)
+        {
+            var agent = sender as client.Agent;
+            lock (this)
+            {
+                Model.Stats.CopyFromAgent(agent);
+            }
+        }
+
+        public Models.Stats GetStats()
+        {
+            return Model.Stats;
+        }
+
+        #endregion
+
     }
 #pragma warning restore VSTHRD200
 }
