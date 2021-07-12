@@ -30,6 +30,7 @@
     <!-- Local Project References -->
     <ItemGroup>
         <ProjectReference Include="..\ipsc6.agent.client\ipsc6.agent.client.csproj" />
+        <ProjectReference Include="..\ipsc6.agent.config\ipsc6.agent.config.csproj" />
         <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
     </ItemGroup>
 

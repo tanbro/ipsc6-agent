@@ -100,7 +100,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         internal static async Task DoLoginAsync(string workerNum, string password)
         {
             var dispatcher = Application.Current.Dispatcher;
-            var svc = App.mainService;
+            var svc = App.MainService;
 
             using (await Utils.CommandGuard.EnterAsync(loginCommand))
             {
@@ -153,27 +153,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
             return true;
         }
 
-        private static void CreateAgentInstance()
-        {
-            var svc = App.mainService;
-            var cfgRoot = Config.Manager.ConfigurationRoot;
-            Config.Ipsc cfgIpsc = new();
-            cfgRoot.GetSection(nameof(Config.Ipsc)).Bind(cfgIpsc);
-            logger.InfoFormat(
-                "CreateAgentInstance - ServerList: {0}, LocalPort: {1}, LocalAddress: \"{2}\"",
-                (cfgIpsc.ServerList == null) ? "<null>" : $"\"{string.Join(",", cfgIpsc.ServerList)}\"",
-                cfgIpsc.LocalPort,
-                cfgIpsc.LocalAddress);
-            svc.CreateAgent(cfgIpsc.ServerList, cfgIpsc.LocalPort, cfgIpsc.LocalAddress);
-        }
-
         private static async Task ExecuteLoginAsync()
         {
-            var svc = App.mainService;
-            CreateAgentInstance();
-            logger.Debug("ExecuteLoginAsync - 开始登录 ...");
+            var svc = App.MainService;
+            logger.Info("ExecuteLoginAsync - 开始登录...");
             await svc.LogInAsync(workerNum, password);
-            logger.Info("ExecuteLoginAsync - 登录成功");
+            logger.Info("ExecuteLoginAsync - 登录成功!");
         }
 
     }

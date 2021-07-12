@@ -10,9 +10,9 @@ using System.Windows;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 
-namespace ipsc6.agent.wpfapp.Config
+namespace ipsc6.agent.wpfapp
 {
-    static class Manager
+    internal static class ConfigManager
     {
         public static IConfigurationRoot ConfigurationRoot { get; private set; }
 

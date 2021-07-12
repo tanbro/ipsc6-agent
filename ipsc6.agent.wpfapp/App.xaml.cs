@@ -1,3 +1,5 @@
+using ipsc6.agent.services;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
 using System.Threading;
@@ -19,6 +21,9 @@ namespace ipsc6.agent.wpfapp
 
         internal static Views.LoginWindow LoginWindow { get; private set; }
 
+        internal static Service MainService { get; private set; }
+        internal static GuiService GuiService { get; private set; }
+
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             try
@@ -38,9 +43,14 @@ namespace ipsc6.agent.wpfapp
                 return;
             }
 
+            config.Ipsc cfgIpsc;
             try
             {
-                Config.Manager.Initialize();
+                ConfigManager.Initialize();
+                var cfgRoot = ConfigManager.ConfigurationRoot;
+                cfgIpsc = new();
+                cfgRoot.GetSection(nameof(config.Ipsc)).Bind(cfgIpsc);
+                logger.InfoFormat("Config.Ipsc: {0}", cfgIpsc);
             }
             catch (Exception err)
             {
@@ -56,59 +66,62 @@ namespace ipsc6.agent.wpfapp
 
             try
             {
-                logger.Debug("services Initial()");
-                services.Service.Initial();
-                try
+                logger.Debug("create RPC Server");
+                using (MainService = new(cfgIpsc))
+                using (GuiService = new())
                 {
-                    using (mainService)
-                    using (guiService)
+                    LocalRpcTargetFunc[] localRpcCreators = {
+                        (_, _) => MainService,
+                        (_, _) => GuiService,
+                    };
+                    using CancellationTokenSource rpcServerCanceller = new();
+                    server.Server rpcServer = new(localRpcCreators);
+                    using var rpcServerRunningTask = Task.Run(() => rpcServer.RunAsync(rpcServerCanceller.Token));
+                    try
                     {
-                        LocalRpcTargetFunc[] localRpcCreators = {
-                            (_, _) => mainService,
-                            (_, _) => guiService,
-                        };
-                        using CancellationTokenSource rpcServerCanceller = new();
-                        server.Server rpcServer = new(localRpcCreators);
-                        var rpcServerTask = Task.Run(() => rpcServer.RunAsync(rpcServerCanceller.Token));
+                        logger.Debug("create MainViewModel");
+                        _ = ViewModels.MainViewModel.Instance; // ensure lazy create
+                        logger.Debug("show LoginWindow");
+                        bool isLoginOk;
+                        LoginWindow = new();
                         try
                         {
-                            _ = ViewModels.MainViewModel.Instance; // ensure lazy create
-                            bool isLoginOk;
-                            LoginWindow = new Views.LoginWindow();
-                            try
-                            {
-                                isLoginOk = LoginWindow.ShowDialog() == true;
-                            }
-                            finally
-                            {
-                                LoginWindow = null;
-                            }
-                            if (isLoginOk)
-                            {
-                                new Views.MainWindow().ShowDialog();
-                            }
+                            isLoginOk = LoginWindow.ShowDialog() == true;
                         }
                         finally
                         {
-                            rpcServerCanceller.Cancel();
-#pragma warning disable VSTHRD002
-                            rpcServerTask.Wait();
-#pragma warning restore VSTHRD002
+                            LoginWindow = null;
+                        }
+                        if (isLoginOk)
+                        {
+                            logger.Debug("show MainWindow");
+                            new Views.MainWindow().ShowDialog();
                         }
                     }
+                    finally
+                    {
+                        logger.Debug("close RPC Server");
+                        rpcServerCanceller.Cancel();
+#pragma warning disable VSTHRD002
+                        try
+                        {
+                            rpcServerRunningTask.Wait();
+                        }
+                        catch (OperationCanceledException) { }
+#pragma warning restore VSTHRD002
+                    }
                 }
-                finally
-                {
-                    logger.Debug("services Release()");
-                    services.Service.Release();
-                }
+
             }
             finally
             {
+                logger.Debug("Shutdown app");
                 Shutdown();
                 logger.Warn("\r\n^^^^^^^^^^^^^^^^^^^^ Shutdown ^^^^^^^^^^^^^^^^^^^^\r\n");
             }
         }
+
+
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
@@ -121,7 +134,5 @@ namespace ipsc6.agent.wpfapp
             );
         }
 
-        internal static services.Service mainService = new();
-        internal static GuiService guiService = new();
     }
 }

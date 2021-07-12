@@ -1,12 +1,11 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
-
-using Newtonsoft.Json;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.IO;
+
 
 [assembly: InternalsVisibleTo("ipsc6.agent.wpfapp")]
 namespace ipsc6.agent.services
@@ -14,20 +13,29 @@ namespace ipsc6.agent.services
 #pragma warning disable VSTHRD200
     public class Service : IDisposable
     {
+        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Service));
+
         #region Dispose
+        private bool disposedValue;
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
                 if (disposing)
                 {
-                    DestroyAgent();
+                    if (agent != null)
+                    {
+                        agent.Dispose();
+                        agent = null;
+                    }
+                    client.Agent.Release();
                 }
                 disposedValue = true;
             }
         }
 
-        // // TODO: 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
+        // // 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
         // ~Service()
         // {
         //     // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
@@ -40,7 +48,6 @@ namespace ipsc6.agent.services
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
-
         #endregion
 
         #region Demo methods
@@ -59,46 +66,26 @@ namespace ipsc6.agent.services
 
         public event EventHandler OnEchoTriggered;
 
-        public static void ThrowAnException(string message)
+        public void ThrowAnException(string message)
         {
             throw new InvalidOperationException(message);
         }
         #endregion
 
-        #region Create/Release
+        #region Ctor/Dtor
 
         private client.Agent agent;
-        private bool disposedValue;
-        private readonly Models.Model Model = new();
+        private readonly Models.Model model;
 
-        internal static void Initial()
+        public Service(config.Ipsc cfgIpsc)
         {
+            if (cfgIpsc is null)
+                throw new ArgumentNullException(nameof(cfgIpsc));
+
             client.Agent.Initial();
-        }
-
-        internal static void Release()
-        {
-            client.Agent.Release();
-        }
-
-        private void DestroyAgent()
-        {
-            if (agent == null)
-            {
-                return;
-            }
-
-            agent.Dispose();
-            agent = null;
-        }
-
-        internal void CreateAgent(IEnumerable<string> addresses, ushort localPort, string localAddress)
-        {
             if (agent != null)
-            {
-                DestroyAgent();
-            }
-            agent = new client.Agent(addresses, localPort, localAddress);
+                throw new InvalidOperationException();
+            agent = new client.Agent(cfgIpsc.ServerList, cfgIpsc.LocalPort, cfgIpsc.LocalAddress);
 
             agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
 
@@ -122,6 +109,8 @@ namespace ipsc6.agent.services
 
             agent.OnStatsChanged += Agent_OnStatsChanged;
 
+            model = new();
+
             ReloadCtiServers();
         }
         #endregion
@@ -132,8 +121,8 @@ namespace ipsc6.agent.services
 
         private void Agent_OnAgentDisplayNameReceived(object sender, client.AgentDisplayNameReceivedEventArgs e)
         {
-            Model.DisplayName = agent.DisplayName;
-            Model.WorkerNum = agent.WorkerNum;
+            model.DisplayName = agent.DisplayName;
+            model.WorkerNum = agent.WorkerNum;
             OnLoginCompleted?.Invoke(this, EventArgs.Empty);
         }
 
@@ -141,10 +130,10 @@ namespace ipsc6.agent.services
 
         private void Agent_OnAgentStateChanged(object sender, client.AgentStateChangedEventArgs e)
         {
-            lock (Model)
+            lock (model)
             {
-                Model.State = e.NewState.AgentState;
-                Model.WorkType = e.NewState.WorkType;
+                model.State = e.NewState.AgentState;
+                model.WorkType = e.NewState.WorkType;
                 ReloadCalls();
             }
             OnStatusChanged?.Invoke(this, new Events.StatusChangedEventArgs
@@ -161,7 +150,7 @@ namespace ipsc6.agent.services
 
         private void Agent_OnTeleStateChanged(object sender, client.TeleStateChangedEventArgs e)
         {
-            Model.TeleState = e.NewState;
+            model.TeleState = e.NewState;
             ReloadCalls();
             OnTeleStateChanged?.Invoke(this, new Events.TeleStateChangedEventArgs
             {
@@ -177,12 +166,12 @@ namespace ipsc6.agent.services
 
         public IReadOnlyList<string> GetWorkerNum()
         {
-            return new List<string> { Model.WorkerNum, Model.DisplayName };
+            return new List<string> { model.WorkerNum, model.DisplayName };
         }
 
         public IReadOnlyList<int> GetStatus()
         {
-            return new List<int> { (int)Model.State, (int)Model.WorkType };
+            return new List<int> { (int)model.State, (int)model.WorkType };
         }
 
         public async Task SetBusy(client.WorkType workType = client.WorkType.PauseBusy)
@@ -200,9 +189,9 @@ namespace ipsc6.agent.services
 #pragma warning disable SYSLIB0011
             using MemoryStream ms = new();
             BinaryFormatter formatter = new();
-            lock (Model)
+            lock (model)
             {
-                formatter.Serialize(ms, Model);
+                formatter.Serialize(ms, model);
             }
             ms.Position = 0;
             return (Models.Model)formatter.Deserialize(ms);
@@ -233,9 +222,9 @@ namespace ipsc6.agent.services
 
         private void ReloadCtiServers()
         {
-            lock (Model)
+            lock (model)
             {
-                Model.CtiServers = (
+                model.CtiServers = (
                     from t in agent.CtiServers.Select((value, index) => (index, value))
                     select new Models.CtiServer
                     {
@@ -266,9 +255,9 @@ namespace ipsc6.agent.services
 
         private void ReloadGroups()
         {
-            lock (Model)
+            lock (model)
             {
-                Model.Groups = (
+                model.Groups = (
                     from x in agent.Groups
                     select new Models.Group { Id = x.Id, Name = x.Name, IsSigned = x.IsSigned }
                 ).ToList();
@@ -349,11 +338,11 @@ namespace ipsc6.agent.services
 
         private void ReloadSipAccounts()
         {
-            lock (Model)
+            lock (model)
             {
                 if (agent != null && agent.SipAccounts != null)
                 {
-                    Model.SipAccounts = (
+                    model.SipAccounts = (
                         from a in agent.SipAccounts
                         select new Models.SipAccount
                         {
@@ -433,9 +422,9 @@ namespace ipsc6.agent.services
 
         private void ReloadCalls()
         {
-            lock (Model)
+            lock (model)
             {
-                Model.Calls = (
+                model.Calls = (
                     from primeCallInfo in agent.Calls
                     select CreateCallInfo(primeCallInfo)
                 ).ToList();
@@ -480,9 +469,9 @@ namespace ipsc6.agent.services
 
         private void Agent_OnQueueInfoReceived(object sender, client.QueueInfoEventArgs e)
         {
-            lock (Model)
+            lock (model)
             {
-                Model.QueueInfos = (
+                model.QueueInfos = (
                     from obj in agent.QueueInfos
                     select CreateQueueInfo(obj)
                 ).ToList();
@@ -618,7 +607,7 @@ namespace ipsc6.agent.services
             var agent = sender as client.Agent;
             lock (this)
             {
-                Model.Stats.CopyFromAgent(agent);
+                model.Stats.CopyFromAgent(agent);
             }
             OnStatsChanged?.Invoke(this, EventArgs.Empty);
         }

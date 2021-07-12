@@ -80,8 +80,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Config\Ipsc.cs" />
-    <Compile Include="Config\Manager.cs" />
+    <Compile Include="ConfigManager.cs" />
     <Compile Include="Converters\AgentCallDirectionConverters.cs" />
     <Compile Include="Converters\AgentCallsToHoldPanelTitleConverter.cs" />
     <Compile Include="Converters\AgentCallsToNumberTitleConverter.cs" />
@@ -246,6 +245,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ipsc6.agent.client\ipsc6.agent.client.csproj" />
+    <ProjectReference Include="..\ipsc6.agent.config\ipsc6.agent.config.csproj" />
     <ProjectReference Include="..\ipsc6.agent.server\ipsc6.agent.server.csproj" />
     <ProjectReference Include="..\ipsc6.agent.services\ipsc6.agent.services.csproj" />
     <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
@@ -292,6 +292,9 @@
     <PackageReference Include="MahApps.Metro.IconPacks">
       <Version>4.8.0</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

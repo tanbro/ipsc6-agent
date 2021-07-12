@@ -83,8 +83,12 @@ namespace ipsc6.agent.client
         internal static Endpoint SipEndpoint;
         internal static TaskFactory SyncFactory;
 
+        public static bool IsInitialized { get; private set; }
+
         public static void Initial()
         {
+            if (IsInitialized)
+                throw new InvalidOperationException("Initialized already");
             logger.Info("Initial");
 
             logger.Debug("network.Connector.Initial()");
@@ -112,10 +116,13 @@ namespace ipsc6.agent.client
             }
             logger.Debug("pjsua2 endpoint starts");
             SipEndpoint.libStart();
+            IsInitialized = true;
         }
 
         public static void Release()
         {
+            if (!IsInitialized)
+                throw new InvalidOperationException("Not initialized yet");
             logger.Info("Release");
 
             logger.Debug("network.Connector.Release()");
@@ -124,6 +131,7 @@ namespace ipsc6.agent.client
             logger.Debug("destory pjsua2 Endpoint");
             SipEndpoint.libDestroy();
             SipEndpoint.Dispose();
+            IsInitialized = false;
         }
 
         private readonly RequestGuard requestGuard = new();
