@@ -11,14 +11,13 @@
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         FontSize="16"
         Title="IPSC6 座席工具条"
-        SizeToContent="WidthAndHeight"
-        WindowStyle="None" ResizeMode="NoResize"
+        Topmost="True" WindowStyle="None" ResizeMode="NoResize"
+		Height="Auto" Width="Auto" SizeToContent="WidthAndHeight"
         Background="Transparent" AllowsTransparency="True"
-        LocationChanged="Window_LocationChanged"
+        Top="{Binding WindowTop, Mode=OneWayToSource}"
         Closed="Window_Closed"
         MouseDown="Window_MouseDown"
         >
-    <!--Height="{Binding Snapped, Mode=OneWay, Converter={StaticResource SnappedBooleanToMainWindowHeightConverter}}"-->
 
     <Window.Resources>
         <converters:AgentStateToTextConverter x:Key="AgentStateToTextConverter"/>
@@ -26,18 +25,18 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
 
-
-    <Grid>
+    <Grid VerticalAlignment="Bottom">
         <Grid.RowDefinitions>
-            <RowDefinition x:Name="rowdefMain" Height="72" />
-            <RowDefinition x:Name="rowdefBottom" Height="8"/>
+            <RowDefinition Height="72" />
+            <RowDefinition Height="8"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" CornerRadius="5 5 0 0" BorderThickness="1 1 1 0" BorderBrush="DarkGray"
-                  Background="{StaticResource MyBackgroud}">
+        <Border Grid.Row="0" CornerRadius="5 6 0 0" BorderThickness="1 1 1 0"
+                Visibility="{Binding MainPanelVisibility, Mode=OneWay}"
+                BorderBrush="{StaticResource MyBorderBrush}" Background="{StaticResource MyBackgroud}"
+                >
 
-            <Grid Width="1278"
-                  Visibility="{Binding MainPanelVisibility, Mode=OneWay}" >
+            <Grid Width="1278">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto"/>
@@ -62,12 +61,16 @@
                 <uc:AdvPanel Grid.Column="8" Margin="1 0 0 0"/>
                 <uc:PreferencePanel Grid.Column="9" Margin="1 0 0 0"/>
             </Grid>
+
         </Border>
 
-        <Border Grid.Row="1" BorderThickness="1" CornerRadius="0 0 5 5"
-                Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
-                BorderBrush="DarkGray"/>
+        <Border Grid.Row="1" CornerRadius="0 0 5 5" BorderThickness="1 0 1 1" BorderBrush="{StaticResource MyBorderBrush}">
+            <Border Width="1278" Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"/>
+        </Border>
+
     </Grid>
+
+
 
 
 </Window>

@@ -37,40 +37,142 @@ namespace ipsc6.agent.wpfapp.ViewModels
             Instance.Pinned = !pinned;
         }
 
+        private static bool isSnappingSetTop;
         private static bool snapped = false;
         public bool Snapped
         {
             get => snapped;
             set
             {
-                var window = Application.Current.MainWindow;
-                if (value)
+                lock (this)
                 {
-                    window.Height = 8;
-                    window.Top = 0;
-                    MainPanelVisibility = Visibility.Collapsed;
+                    isSnappingSetTop = true;
                 }
-                else
+                try
                 {
-                    window.Height = 80;
-                    MainPanelVisibility = Visibility.Visible;
+                    if (!SetProperty(ref snapped, value))
+                        return;
+
+                    logger.DebugFormat("Snapped::set {0}", value);
+                    var mainWindow = Application.Current.MainWindow;
+                    if (snapped)
+                    {
+                        //MainPanelVisibility = Visibility.Collapsed;
+                        mainWindow.Top = -72;
+                    }
+                    else
+                    {
+                        //MainPanelVisibility = Visibility.Visible;
+                        if (mainWindow.Top < 0)
+                        {
+                            mainWindow.Top = 0;
+                        }
+                    }
                 }
-                SetProperty(ref snapped, value);
+                finally
+                {
+                    lock (this)
+                    {
+                        isSnappingSetTop = false;
+                    }
+                }
             }
         }
 
-        private static double mainWindowHeight;
-        public double MainWindowHeight
+        private static double windowHeight = 80;
+        public double WindowHeight
         {
-            get => mainWindowHeight;
-            set => SetProperty(ref mainWindowHeight, value);
+            get => windowHeight;
+            set => SetProperty(ref windowHeight, value);
         }
 
-        private static double mainWindowTop;
-        public double MainWindowTop
+        private CancellationTokenSource snapDetectCts;
+        private const int snapDetectMillisecondsDelay = 1000;
+
+        private static double windowTop;
+        public double WindowTop
         {
-            get => mainWindowTop;
-            set => SetProperty(ref mainWindowTop, value);
+            get => windowTop;
+
+            set
+            {
+                if (!SetProperty(ref windowTop, value))
+                    return;
+
+                lock (this)
+                {
+                    if (isSnappingSetTop)
+                        return;
+                }
+
+                logger.DebugFormat("snapDetect::Set(value={0})", value);
+
+                var dispatcher = Application.Current.Dispatcher;
+
+#pragma warning disable VSTHRD110 // 观察异步调用的结果
+                dispatcher.Invoke(async () =>
+#pragma warning restore VSTHRD110 // 观察异步调用的结果
+                {
+                    if (windowTop <= 0)
+                    {
+                        bool isToDetectSnap;
+                        lock (this)
+                        {
+                            isToDetectSnap = snapDetectCts == null && !Snapped;
+
+                            if (isToDetectSnap)
+                            {
+                                snapDetectCts = new();
+                            }
+                            else
+                            {
+                                snapDetectCts.Cancel();
+                                logger.Debug("snapDetect: Cancel");
+                            }
+                        }
+                        if (isToDetectSnap)
+                        {
+                            try
+                            {
+                                try
+                                {
+                                    logger.Debug("snapDetect: wait >>>");
+                                    await Task.Delay(snapDetectMillisecondsDelay, snapDetectCts.Token);
+                                    logger.Debug("snapDetect: wait (ok) <<<");
+                                }
+                                catch (TaskCanceledException)
+                                {
+                                    logger.Debug("snapDetect: wait (cancel)<<<");
+                                }
+                                Snapped = !snapDetectCts.IsCancellationRequested;
+                            }
+                            finally
+                            {
+                                lock (this)
+                                {
+                                    snapDetectCts.Dispose();
+                                    snapDetectCts = null;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        lock (this)
+                        {
+                            if (snapDetectCts != null)
+                            {
+                                logger.Debug("snapDetect: Cancel");
+                                snapDetectCts.Cancel();
+                            }
+                            else
+                            {
+                                Snapped = false;
+                            }
+                        }
+                    }
+                });
+            }
         }
 
         private static Visibility mainPanelVisibility = Visibility.Visible;
