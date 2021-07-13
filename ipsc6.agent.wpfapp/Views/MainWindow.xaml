@@ -1,4 +1,5 @@
-<Window x:Class="ipsc6.agent.wpfapp.Views.MainWindow"
+<Window
+        x:Class="ipsc6.agent.wpfapp.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -11,11 +12,15 @@
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         FontSize="16"
         Title="IPSC6 座席工具条"
-        Topmost="True" WindowStyle="None" ResizeMode="NoResize"
-        Background="Transparent" AllowsTransparency="True"
-        Top="{Binding WindowTop, Mode=OneWayToSource}"
+        Topmost="True"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="Transparent"
+        AllowsTransparency="True"
+        Top="{Binding Top, Mode=OneWayToSource}"
         SizeToContent="Manual"
-        Height="72" Width="1280"
+        Height="72"
+        Width="1280"
         Closed="Window_Closed"
         MouseDown="Window_MouseDown"
         MouseEnter="Window_MouseEnter"
@@ -23,36 +28,47 @@
 >
 
     <Window.Resources>
-        <converters:AgentStateToTextConverter x:Key="AgentStateToTextConverter"/>
-        <converters:AgentStateToBrushConverter x:Key="AgentStateToBrushConverter"/>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:AgentStateToTextConverter x:Key="AgentStateToTextConverter" />
+        <converters:AgentStateToBrushConverter x:Key="AgentStateToBrushConverter" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Window.Resources>
 
-    <Grid Width="1280" VerticalAlignment="{Binding RootGridVerticalAlignment, Mode=OneWay}">
+    <Grid
+            Width="1280"
+            VerticalAlignment="{Binding RootGridVerticalAlignment, Mode=OneWay}"
+    >
         <Grid.RowDefinitions>
-            <RowDefinition Height="8"/>
+            <RowDefinition Height="8" />
             <RowDefinition Height="72" />
         </Grid.RowDefinitions>
 
         <Border
-            Grid.Row="0" CornerRadius="0 0 5 5" BorderThickness="1 0 1 1" BorderBrush="{StaticResource MyBorderBrush}"
-            Visibility="{Binding NoShowToolbar, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
-        >
-            <Border
+                Grid.Row="0"
                 CornerRadius="0 0 5 5"
-                Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
+                BorderThickness="1 0 1 1"
+                BorderBrush="{StaticResource MyBorderBrush}"
+                Visibility="{Binding IsHideToolbar, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
+        >
+            <!--Visibility="{Binding IsHideToolbar, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"-->
+            <Border
+                    CornerRadius="0 0 5 5"
+                    Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
             />
         </Border>
 
         <Border
-            Grid.Row="1" CornerRadius="5" BorderThickness="1"
-            BorderBrush="{StaticResource MyBorderBrush}" Background="{StaticResource MyBackgroud}"
-            Visibility="{Binding ShowToolbar, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Grid.Row="1"
+                CornerRadius="5"
+                BorderThickness="1"
+                BorderBrush="{StaticResource MyBorderBrush}"
+                Background="{StaticResource MyBackgroud}"
+                Visibility="{Binding IsShowToolbar, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
         >
+            <!--Visibility="{Binding IsShowToolbar, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"-->
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
@@ -63,23 +79,48 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <uc:InfoPanel Grid.Column="0"/>
-                <uc:DialPanel Grid.Column="1" Margin="1 0 0 0"/>
-                <uc:QueuePanel Grid.Column="2" Margin="1 0 0 0"/>
-                <uc:MainToolBar Grid.Column="3" Margin="1 0 0 0"/>
-                <uc:HoldPanel Grid.Column="4" Margin="1 0 0 0"/>
-                <uc:WorkerStatusPanel Grid.Column="5" Margin="1 0 0 0"/>
-                <uc:GroupPanel Grid.Column="6" Margin="1 0 0 0"/>
-                <uc:SysStatusPanel Grid.Column="7" Margin="1 0 0 0"/>
-                <uc:AdvPanel Grid.Column="8" Margin="1 0 0 0"/>
-                <uc:PreferencePanel Grid.Column="9" Margin="1 0 0 0"/>
+                <uc:InfoPanel Grid.Column="0" />
+                <uc:DialPanel
+                        Grid.Column="1"
+                        Margin="1 0 0 0"
+                />
+                <uc:QueuePanel
+                        Grid.Column="2"
+                        Margin="1 0 0 0"
+                />
+                <uc:MainToolBar
+                        Grid.Column="3"
+                        Margin="1 0 0 0"
+                />
+                <uc:HoldPanel
+                        Grid.Column="4"
+                        Margin="1 0 0 0"
+                />
+                <uc:WorkerStatusPanel
+                        Grid.Column="5"
+                        Margin="1 0 0 0"
+                />
+                <uc:GroupPanel
+                        Grid.Column="6"
+                        Margin="1 0 0 0"
+                />
+                <uc:SysStatusPanel
+                        Grid.Column="7"
+                        Margin="1 0 0 0"
+                />
+                <uc:AdvPanel
+                        Grid.Column="8"
+                        Margin="1 0 0 0"
+                />
+                <uc:PreferencePanel
+                        Grid.Column="9"
+                        Margin="1 0 0 0"
+                />
             </Grid>
 
         </Border>
 
     </Grid>
-
-
 
 
 </Window>

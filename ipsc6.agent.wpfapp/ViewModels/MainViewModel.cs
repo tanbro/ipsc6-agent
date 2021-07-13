@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -25,6 +24,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #region ctor, deor, initial, release ...
         internal void Initial()
         {
+            IsShowToolbar = true;
             RootGridVerticalAlignment = VerticalAlignment.Bottom;
             StartTimer();
         }
@@ -87,58 +87,34 @@ namespace ipsc6.agent.wpfapp.ViewModels
             Instance.Pinned = !pinned;
         }
 
-        private static bool isSnappingSetTop;
-        private static bool snapped = false;
+        private static bool snapped;
         public bool Snapped
         {
             get => snapped;
             set
             {
-                lock (this)
-                {
-                    isSnappingSetTop = true;
-                }
-                try
-                {
-                    if (!SetProperty(ref snapped, value))
-                        return;
+                if (!SetProperty(ref snapped, value))
+                    return;
 
-                    logger.DebugFormat("Snapped::set {0}", value);
-                    var mainWindow = Application.Current.MainWindow;
-                    mainWindow.ReleaseMouseCapture();
-                    if (snapped)
-                    {
-                        ShowToolbar = false;
-                        RootGridVerticalAlignment = VerticalAlignment.Top;
-                        if (mainWindow.Top != 0)
-                        {
-                            mainWindow.Top = 0;
-                        }
-                        //mainWindow.Height = 8;
-                    }
-                    else
-                    {
-                        ShowToolbar = true;
-                        if (mainWindow.Top < 0)
-                        {
-                            mainWindow.Top = 0;
-                        }
-                        RootGridVerticalAlignment = VerticalAlignment.Bottom;
-                        //mainWindow.Height = 72;
-                    }
-                }
-                finally
+                var win = Application.Current.MainWindow;
+                if (value)
                 {
-                    lock (this)
-                    {
-                        isSnappingSetTop = false;
-                    }
+                    IsShowToolbar = false;
+                    RootGridVerticalAlignment = VerticalAlignment.Top;
+                    win.Height = 8;
+                    win.Top = 0;
                 }
+                else
+                {
+                    IsShowToolbar = true;
+                    RootGridVerticalAlignment = VerticalAlignment.Bottom;
+                    win.Height = 72;
+                    if (win.Top < 0)
+                        win.Top = 0;
+                }
+                win.ReleaseMouseCapture();
             }
         }
-
-        private CancellationTokenSource snapDetectCts;
-        private const int snapDetectMillisecondsDelay = 500;
 
         private static VerticalAlignment rootGridVerticalAlignment;
 
@@ -148,189 +124,168 @@ namespace ipsc6.agent.wpfapp.ViewModels
             set => SetProperty(ref rootGridVerticalAlignment, value);
         }
 
-        private static double windowTop;
-        public double WindowTop
+        private CancellationTokenSource snapTimerCanceller;
+        private StateMachines.SnapTopStateMachine snapFsm;
+
+        private void InitialSnappingStateMachine()
         {
-            get => windowTop;
+            var dispatcher = Application.Current.Dispatcher;
+
+            snapFsm = new();
+
+            /// 各个状态的UI动作
+            snapFsm.OnTransitioned(trans =>
+            {
+                switch (trans.Destination)
+                {
+                    case StateMachines.SnapTopState.Final:
+                        dispatcher.Invoke(() =>
+                        {
+                            snapTimerCanceller?.Cancel();
+                            Snapped = false;
+                        });
+                        break;
+
+                    case StateMachines.SnapTopState.Initial:
+                        throw new InvalidOperationException($"{trans.Destination}");
+
+                    case StateMachines.SnapTopState.Snapped:
+                        dispatcher.Invoke(() =>
+                        {
+                            snapTimerCanceller?.Cancel();
+                            Snapped = true;
+                        });
+                        break;
+
+                    case StateMachines.SnapTopState.SnappedWithMouseEnter:
+                        SetSnapTimer(200);
+                        break;
+
+                    case StateMachines.SnapTopState.Unsnapped:
+                        dispatcher.Invoke(() =>
+                        {
+                            snapTimerCanceller?.Cancel();
+                            Snapped = false;
+                        });
+                        break;
+
+                    case StateMachines.SnapTopState.UnsnappedWithMouseLeave:
+                        SetSnapTimer(200);
+                        break;
+
+                    default:
+                        throw new InvalidOperationException($"{trans.Destination}");
+                }
+            });
+
+            /// Snap 的 Initial 状态，需要启动计时器!
+            SetSnapTimer(300);
+        }
+
+        private void SetSnapTimer(int msecs)
+        {
+#pragma warning disable VSTHRD110 // 观察异步调用的结果
+            Application.Current.Dispatcher.Invoke(async () =>
+#pragma warning restore VSTHRD110 // 观察异步调用的结果
+            {
+                bool isCancelled = false;
+                snapTimerCanceller = new();
+                try
+                {
+                    await Task.Delay(msecs, snapTimerCanceller.Token);
+                }
+                catch (TaskCanceledException)
+                {
+                    isCancelled = false;
+                }
+                finally
+                {
+                    snapTimerCanceller.Dispose();
+                    snapTimerCanceller = null;
+                }
+                if (!isCancelled)
+                {
+                    await snapFsm.FireAsync(StateMachines.SnapTopTrigger.Timer);
+                }
+            });
+        }
+
+        private static double top;
+        public double Top  // OneWayToSource !!!
+        {
+            get => top;
 
             set
             {
-                if (!SetProperty(ref windowTop, value))
+                if (!SetProperty(ref top, value))
                     return;
 
-                lock (this)
+                if (Top < 0)
                 {
-                    if (isSnappingSetTop)
-                        return;
+                    if (snapFsm == null || snapFsm.State == StateMachines.SnapTopState.Final)
+                        InitialSnappingStateMachine();
                 }
-
-                var dispatcher = Application.Current.Dispatcher;
-
-#pragma warning disable VSTHRD110 // 观察异步调用的结果
-                dispatcher.Invoke(async () =>
-#pragma warning restore VSTHRD110 // 观察异步调用的结果
+                else if (snapFsm != null)
                 {
-                    if (windowTop <= 0)
+                    StateMachines.SnapTopState[] states =
                     {
-                        lock (this)
-                        {
-                            if (snapDetectCts == null && !Snapped)
-                            {
-                                snapDetectCts = new();
-                            }
-                            else
-                            {
-                                return;
-                            }
-                        }
-                        try
-                        {
-                            try
-                            {
-                                await Task.Delay(snapDetectMillisecondsDelay, snapDetectCts.Token);
-                            }
-                            catch (TaskCanceledException) { }
-                            Snapped = !snapDetectCts.IsCancellationRequested;
-                        }
-                        finally
-                        {
-                            lock (this)
-                            {
-                                snapDetectCts.Dispose();
-                                snapDetectCts = null;
-                            }
-                        }
-                    }
-                    else
+                        StateMachines.SnapTopState.Initial,
+                        StateMachines.SnapTopState.SnappedWithMouseEnter,
+                        StateMachines.SnapTopState.UnsnappedWithMouseLeave,
+                        StateMachines.SnapTopState.Unsnapped,
+                    };
+                    if (states.Contains(snapFsm.State))
                     {
-                        lock (this)
-                        {
-                            if (snapDetectCts != null)
-                            {
-                                snapDetectCts.Cancel();
-                            }
-                            else
-                            {
-                                Snapped = false;
-                            }
-                        }
+                        snapFsm.Fire(StateMachines.SnapTopTrigger.MoveOut);
                     }
-                });
+                }
             }
         }
 
-        private static bool showToolbar = true;
-        public bool NoShowToolbar => !showToolbar;
-        public bool ShowToolbar
+        private static bool isShowToolbar;
+        public bool IsShowToolbar
         {
-            get => showToolbar;
+            get => isShowToolbar;
             set
             {
-                if (SetProperty(ref showToolbar, value))
+                if (SetProperty(ref isShowToolbar, value))
                 {
-                    Application.Current.Dispatcher.Invoke(() => OnPropertyChanged("NoShowToolbar"));
+                    Application.Current.Dispatcher.Invoke(() => OnPropertyChanged("IsHideToolbar"));
                 }
             }
         }
-
-        private CancellationTokenSource mouseEnterCts;
-        private bool IsMouseEntered;
+        public bool IsHideToolbar => !isShowToolbar;
 
         internal void MouseEnter()
         {
-            lock (this)
+            if (snapFsm == null) return;
+
+            StateMachines.SnapTopState[] states =
             {
-                IsMouseEntered = true;
+                StateMachines.SnapTopState.Snapped,
+                StateMachines.SnapTopState.UnsnappedWithMouseLeave,
+            };
+            if (states.Contains(snapFsm.State))
+            {
+                snapFsm.Fire(StateMachines.SnapTopTrigger.MouseEnter);
             }
-            ProcMouseEnterLeave();
         }
 
         internal void MouseLeave()
         {
-            lock (this)
+            if (snapFsm == null) return;
+
+            StateMachines.SnapTopState[] states =
             {
-                IsMouseEntered = false;
+                StateMachines.SnapTopState.SnappedWithMouseEnter,
+                StateMachines.SnapTopState.Unsnapped,
+            };
+            if (states.Contains(snapFsm.State))
+            {
+                snapFsm.Fire(StateMachines.SnapTopTrigger.MouseLeave);
             }
-            ProcMouseEnterLeave();
         }
 
-        private Task mouseEnterLeaveTask;
-
-        private void ProcMouseEnterLeave()
-        {
-            var dispatcher = Application.Current.Dispatcher;
-#pragma warning disable VSTHRD110 // 观察异步调用的结果
-            dispatcher.Invoke(async () =>
-#pragma warning restore VSTHRD110 // 观察异步调用的结果
-            {
-                bool isToBeSnap;
-                lock (this)
-                {
-                    if (IsMouseEntered && Snapped && mouseEnterCts == null)
-                    {
-                        isToBeSnap = false;
-                        if (mouseEnterCts != null)
-                            mouseEnterCts.Cancel();
-                        mouseEnterCts = new();
-                    }
-                    else if (!IsMouseEntered && Snapped && windowTop <= 0)
-                    {
-                        isToBeSnap = true;
-                        if (mouseEnterCts != null)
-                            mouseEnterCts.Cancel();
-                        mouseEnterCts = new();
-                        return;
-                    }
-                    else
-                    {
-                        if (!IsMouseEntered && mouseEnterCts != null)
-                        {
-                            mouseEnterCts.Cancel();
-                        }
-                        return;
-                    }
-                }
-                try
-                {
-                    bool isCancelled = false;
-                    bool isMouseEntered;
-                    try
-                    {
-                        await Task.Delay(500, mouseEnterCts.Token);
-                    }
-                    catch (TaskCanceledException) { isCancelled = true; }
-                    lock (this)
-                    {
-                        isMouseEntered = IsMouseEntered;
-                    }
-                    if (!isCancelled)
-                    {
-                        if (isToBeSnap && isMouseEntered)
-                        {
-                            Snapped = true;
-                        }
-                        else if (!isToBeSnap && isMouseEntered)
-                        {
-                            Snapped = false;
-                        }
-                        else if (!isToBeSnap && !isMouseEntered)
-                        {
-                            Snapped = true;
-                        }
-                    }
-
-                }
-                finally
-                {
-                    lock (this)
-                    {
-                        mouseEnterCts.Dispose();
-                        mouseEnterCts = null;
-                    }
-                }
-
-            });
-        }
 
         private CancellationTokenSource timerCanceller;
         private Task timerTask;

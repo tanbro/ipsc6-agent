@@ -1,0 +1,4 @@
+{
+    "xml.format.closingBracketNewLine": true,
+    "xml.format.splitAttributes": true
+}
