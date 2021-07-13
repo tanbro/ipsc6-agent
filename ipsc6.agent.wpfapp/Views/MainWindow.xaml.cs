@@ -41,7 +41,9 @@ namespace ipsc6.agent.wpfapp.Views
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
+            {
                 DragMove();
+            }
         }
 
         private void Window_MouseEnter(object sender, MouseEventArgs e)

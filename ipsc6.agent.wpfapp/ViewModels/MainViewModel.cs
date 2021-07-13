@@ -112,7 +112,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     if (win.Top < 0)
                         win.Top = 0;
                 }
-                win.ReleaseMouseCapture();
             }
         }
 
@@ -158,7 +157,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         break;
 
                     case StateMachines.SnapTopState.SnappedWithMouseEnter:
-                        SetSnapTimer(200);
+                        SetSnapTimer(250);
                         break;
 
                     case StateMachines.SnapTopState.Unsnapped:
@@ -170,7 +169,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         break;
 
                     case StateMachines.SnapTopState.UnsnappedWithMouseLeave:
-                        SetSnapTimer(200);
+                        SetSnapTimer(250);
                         break;
 
                     default:
@@ -179,7 +178,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             });
 
             /// Snap 的 Initial 状态，需要启动计时器!
-            SetSnapTimer(300);
+            SetSnapTimer(250);
         }
 
         private void SetSnapTimer(int msecs)
@@ -225,11 +224,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     if (snapFsm == null || snapFsm.State == StateMachines.SnapTopState.Final)
                         InitialSnappingStateMachine();
                 }
-                else if (snapFsm != null)
+                else if (snapFsm != null && (!Snapped || Top > 0))
                 {
                     StateMachines.SnapTopState[] states =
                     {
                         StateMachines.SnapTopState.Initial,
+                        StateMachines.SnapTopState.Snapped,
                         StateMachines.SnapTopState.SnappedWithMouseEnter,
                         StateMachines.SnapTopState.UnsnappedWithMouseLeave,
                         StateMachines.SnapTopState.Unsnapped,
