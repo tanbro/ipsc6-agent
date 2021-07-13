@@ -29,13 +29,13 @@ namespace ipsc6.agent.wpfapp.Views
 
             var viewModel = ViewModels.MainViewModel.Instance;
             DataContext = viewModel;
-            viewModel.StartTimer();
+            viewModel.Initial();
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
             var viewModel = DataContext as ViewModels.MainViewModel;
-            viewModel.StopTimer();
+            viewModel.Release();
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
@@ -44,5 +44,16 @@ namespace ipsc6.agent.wpfapp.Views
                 DragMove();
         }
 
+        private void Window_MouseEnter(object sender, MouseEventArgs e)
+        {
+            var viewModel = DataContext as ViewModels.MainViewModel;
+            viewModel.MouseEnter();
+        }
+
+        private void Window_MouseLeave(object sender, MouseEventArgs e)
+        {
+            var viewModel = DataContext as ViewModels.MainViewModel;
+            viewModel.MouseLeave();
+        }
     }
 }

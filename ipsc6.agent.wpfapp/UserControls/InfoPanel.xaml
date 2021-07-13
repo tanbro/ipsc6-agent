@@ -15,7 +15,7 @@
         <conv:TelNumMaskConverter x:Key="TelNumMaskConverter"/>
     </UserControl.Resources>
 
-    <Border CornerRadius="5 0 0 0"  Background="{StaticResource MyInfoPannelBackgroud}">
+    <Border CornerRadius="5 0 0 5" Background="{StaticResource MyInfoPannelBackgroud}">
 
         <Grid Width="236" Height="72">
             <Grid.RowDefinitions>
@@ -32,7 +32,7 @@
                 <TextBlock
                     Grid.Column="0"
                     Style="{StaticResource MyCommonText}"
-                    HorizontalAlignment="Center"  VerticalAlignment="Center"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
                     FontSize="20"
                     Text="当前无呼叫"
                     Visibility="{Binding IsNotCurrentCallActive, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
