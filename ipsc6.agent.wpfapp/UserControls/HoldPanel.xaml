@@ -23,12 +23,12 @@
     </UserControl.Resources>
 
     <Border Width="42" Height="64"
-            BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
+            BorderThickness="1" CornerRadius="6" BorderBrush="{StaticResource MyBorderBrush}"
             HorizontalAlignment="Left" VerticalAlignment="Top">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="28"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition/>
             </Grid.RowDefinitions>
 
 

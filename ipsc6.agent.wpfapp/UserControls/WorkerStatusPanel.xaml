@@ -46,9 +46,9 @@
         <converters:AgentStateToBrushConverter x:Key="AgentStateToBrushConverter"/>
 
         <Style x:Key="MyStateLightStyle" TargetType="Border">
-            <Setter Property="CornerRadius" Value="7"/>
+            <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="BorderBrush" Value="LightGray"/>
             <Setter Property="Height" Value="12"/>
             <Setter Property="Width" Value="12"/>
         </Style>
@@ -56,7 +56,7 @@
     </UserControl.Resources>
 
     <Border Width="128" Height="64"
-            BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
+            BorderThickness="1" CornerRadius="6" BorderBrush="{StaticResource MyBorderBrush}"
             HorizontalAlignment="Left" VerticalAlignment="Top">
         <Grid>
             <Grid.RowDefinitions>
@@ -99,11 +99,12 @@
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="46"/>
-                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" HorizontalAlignment="Center"
-                                    Text="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"/>
+                                           Margin="0 0 2 0"
+                                           Text="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"/>
                                 <Border Grid.Column="1" HorizontalAlignment="Center"
                                     Style="{StaticResource MyStateLightStyle}"
                                     Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"/>
