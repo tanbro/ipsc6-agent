@@ -514,7 +514,7 @@ namespace ipsc6.agent.client
                         acc = new Sip.Account(connectionIndex);
                         acc.OnRegisterStateChanged += Acc_OnRegisterStateChanged;
                         acc.OnIncomingCall += Acc_OnIncomingCall;
-                        acc.OnCallDisconnected += Acc_OnCallDisconnected;
+                        acc.OnCallDisconnected += Acc_OnCallStateChanged;
                         acc.OnCallStateChanged += Acc_OnCallStateChanged;
                         acc.create(cfg);
                         sipAccountCollection.Add(acc);
@@ -546,61 +546,89 @@ namespace ipsc6.agent.client
 
         private void Acc_OnRegisterStateChanged(object sender, EventArgs e)
         {
-            lock (this)
+            SyncFactory.StartNew(async () =>
             {
-                ReloadSipAccountCollection();
-            }
-            OnSipRegisterStateChanged?.Invoke(this, EventArgs.Empty);
+                await pjSemaphore.WaitAsync();
+                try
+                {
+                    lock (this)
+                    {
+                        ReloadSipAccountCollection();
+                    }
+                    /// Fire the event
+                    await Task.Run(() => OnSipRegisterStateChanged?.Invoke(this, EventArgs.Empty));
+                }
+                finally
+                {
+                    pjSemaphore.Release();
+                }
+            });
         }
 
         private void Acc_OnIncomingCall(object sender, Sip.CallEventArgs e)
         {
             SipCall callObj = new(e.Call);
-            // 处理外呼等服务器回呼请求
-            if (isOffHooking)
+
+            SyncFactory.StartNew(async () =>
             {
-                logger.Debug("SipUA_OnIncomingCall - Client side Offhooking: Answer ...");
+                await pjSemaphore.WaitAsync();
                 try
                 {
-                    using (var prm = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
+                    // 处理外呼等服务器回呼请求
+                    if (isOffHooking)
                     {
-                        e.Call.answer(prm);
+                        logger.Debug("SipUA_OnIncomingCall - Client side Offhooking: Answer ...");
+                        try
+                        {
+                            using (var prm = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
+                            {
+                                e.Call.answer(prm);
+                            }
+                            logger.Debug("SipUA_OnIncomingCall - Client side Offhooking: Answer ok");
+                            offHookClientTcs?.TrySetResult(null);
+                        }
+                        catch (Exception exce)
+                        {
+                            offHookClientTcs?.TrySetException(exce);
+                            throw;
+                        }
                     }
-                    logger.Debug("SipUA_OnIncomingCall - Client side Offhooking: Answer ok");
-                    offHookClientTcs?.TrySetResult(null);
+                    lock (this)
+                    {
+                        ReloadSipAccountCollection();
+                    }
+                    // fire the event
+                    await Task.Run(() => OnSipCallStateChanged?.Invoke(this, new(callObj)));
                 }
-                catch (Exception exce)
+                finally
                 {
-                    offHookClientTcs?.TrySetException(exce);
-                    throw;
+                    pjSemaphore.Release();
                 }
-            }
-            lock (this)
-            {
-                ReloadSipAccountCollection();
-            }
-            // fire the event
-            OnSipCallStateChanged?.Invoke(this, new(callObj));
+            });
         }
 
         private void Acc_OnCallStateChanged(object sender, Sip.CallEventArgs e)
         {
             SipCall callObj = new(e.Call);
-            lock (this)
-            {
-                ReloadSipAccountCollection();
-            }
-            OnSipCallStateChanged?.Invoke(this, new(callObj));
-        }
 
-        private void Acc_OnCallDisconnected(object sender, Sip.CallEventArgs e)
-        {
-            SipCall callObj = new(e.Call);
-            lock (this)
+            SyncFactory.StartNew(async () =>
             {
-                ReloadSipAccountCollection();
-            }
-            OnSipCallStateChanged?.Invoke(this, new(callObj));
+                await pjSemaphore.WaitAsync();
+                try
+                {
+                    lock (this)
+                    {
+                        ReloadSipAccountCollection();
+                    }
+                    await Task.Run(() => OnSipCallStateChanged?.Invoke(this, new(callObj)));
+
+                }
+                finally
+                {
+                    pjSemaphore.Release();
+                }
+            });
+
         }
 
         public event EventHandler<CustomStringReceivedEventArgs> OnCustomStringReceived;
@@ -1200,7 +1228,8 @@ namespace ipsc6.agent.client
             {
                 logger.DebugFormat("Dispose {0}", acc);
                 acc.OnIncomingCall -= Acc_OnIncomingCall;
-                acc.OnCallDisconnected -= Acc_OnCallDisconnected;
+                acc.OnRegisterStateChanged -= Acc_OnRegisterStateChanged;
+                acc.OnCallDisconnected -= Acc_OnCallStateChanged;
                 acc.OnCallStateChanged -= Acc_OnCallStateChanged;
                 acc.Dispose();
             }

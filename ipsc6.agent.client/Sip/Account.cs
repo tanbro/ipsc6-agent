@@ -31,14 +31,9 @@ namespace ipsc6.agent.client.Sip
             if (isValid())
             {
                 var info = getInfo();
-                if (info.regIsConfigured)
-                {
-                    _string = $"<{GetType().Name}@{GetHashCode():x8} Id={info.id}, Uri={info.uri}, RegisterStatus={info.regStatus}>";
-                }
-                else
-                {
-                    _string = $"<{GetType().Name}@{GetHashCode():x8} Id={info.id}>";
-                }
+                _string = info.regIsConfigured
+                    ? $"<{GetType().Name}@{GetHashCode():x8} Id={info.id}, Uri={info.uri}, RegisterStatus={info.regStatus}>"
+                    : $"<{GetType().Name}@{GetHashCode():x8} Id={info.id}>";
             }
             else
             {
@@ -46,9 +41,9 @@ namespace ipsc6.agent.client.Sip
             }
             return _string;
         }
-        public override void onRegState(org.pjsip.pjsua2.OnRegStateParam param)
+        public override void onRegState(org.pjsip.pjsua2.OnRegStateParam prm)
         {
-            logger.DebugFormat("RegState - {0} : {1}", getInfo().uri, param.code);
+            logger.DebugFormat("RegState - {0} : {1}", getInfo().uri, prm.code);
             MakeString();
             OnRegisterStateChanged?.Invoke(this, new EventArgs());
         }
@@ -56,9 +51,9 @@ namespace ipsc6.agent.client.Sip
         private readonly HashSet<Call> calls = new();
         public IReadOnlyCollection<Call> Calls => calls;
 
-        public override void onIncomingCall(org.pjsip.pjsua2.OnIncomingCallParam param)
+        public override void onIncomingCall(org.pjsip.pjsua2.OnIncomingCallParam prm)
         {
-            var call = new Call(this, param.callId);
+            var call = new Call(this, prm.callId);
             if (!calls.Add(call)) throw new InvalidOperationException();
             call.OnDisconnected += Call_OnDisconnected;
             call.OnStateChanged += Call_OnStateChanged;
