@@ -1022,24 +1022,56 @@ namespace ipsc6.agent.client
                     savedRunningState = RunningState;
                     RunningState = AgentRunningState.Starting;
                 }
-                // 首先，主节点
+
+                WorkerNum = workerNum;
+                this.password = password;
+
+                // 首先，随机选择一个主节点
+                // 然后尝试连接主节点。如果主节点无法连接，换别的主节点。如果循环一次之后全部无法连接，就认为连接失败。
+                // 连接主节点成功后尝试连接其它节点，无论是否成功。
+                Exception lastestException = null;
+                var unusedIndices = Enumerable.Range(0, ctiServers.Count).ToList();
                 try
                 {
-                    MainConnectionIndex = rand.Next(0, ctiServers.Count);
-                    minorIndices = from i in Enumerable.Range(0, ctiServers.Count)
-                                   where i != MainConnectionIndex
-                                   select i;
-                    WorkerNum = workerNum;
-                    this.password = password;
-                    logger.InfoFormat("主服务节点 [{0}]({1}|{2}) 首次连接 ... ", MainConnectionIndex, MainConnectionInfo.Host, MainConnectionInfo.Port);
-                    await MainConnection.OpenAsync(
-                        MainConnectionInfo.Host, MainConnectionInfo.Port,
-                        workerNum, password,
-                        flag: 1
-                    );
-                    lock (this)
+                    for (int i = 0; unusedIndices.Count > 0 && MainConnectionIndex < 0; ++i)
                     {
-                        RunningState = AgentRunningState.Started;
+                        // 从没有用过的列表里面，随机选择一个主节点
+                        var index = rand.Next(0, unusedIndices.Count);
+                        MainConnectionIndex = unusedIndices[index];
+                        unusedIndices.RemoveAt(index);
+                        logger.InfoFormat("StartUpAsync - [0] 连接主服务节点 [{1}]({2}|{3}) ... ", i, MainConnectionIndex, MainConnectionInfo.Host, MainConnectionInfo.Port);
+                        try
+                        {
+                            await MainConnection.OpenAsync(
+                                MainConnectionInfo.Host, MainConnectionInfo.Port,
+                                workerNum, password,
+                                flag: 1
+                            );
+                        }
+                        catch (Exception exception)
+                        {
+                            MainConnectionIndex = -1;
+                            lastestException = exception;
+                            if (exception is not ConnectionException)
+                            {
+                                throw;
+                            }
+                        }
+                    }
+                    if (MainConnectionIndex >= 0)
+                    {
+                        lock (this)
+                        {
+                            RunningState = AgentRunningState.Started;
+                        }
+                    }
+                    else if (lastestException != null)
+                    {
+                        throw lastestException;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException();
                     }
                 }
                 catch
@@ -1051,13 +1083,23 @@ namespace ipsc6.agent.client
                     throw;
                 }
                 // 然后其他节点
-                var tasks = from i in minorIndices
-                            select connections[i].OpenAsync(
-                                ctiServers[i].Host, ctiServers[i].Port,
-                                workerNum, password,
-                                flag: 0
-                            );
-                await Task.WhenAll(tasks);
+                minorIndices = from i in Enumerable.Range(0, ctiServers.Count)
+                               where i != MainConnectionIndex
+                               select i;
+                foreach (var i in minorIndices)
+                {
+                    var conn = connections[i];
+#pragma warning disable CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
+                    Task.Run(async () =>
+                    {
+                        await conn.OpenAsync(
+                           ctiServers[i].Host, ctiServers[i].Port,
+                           workerNum, password,
+                           flag: 0
+                       );
+                    });
+#pragma warning restore CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
+                }
             }
         }
 
