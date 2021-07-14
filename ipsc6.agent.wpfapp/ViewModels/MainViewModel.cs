@@ -77,11 +77,31 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         #region UI
 
-        private static bool pinned = true;
+        private static bool pinned;
         public bool Pinned
         {
             get => pinned;
-            set => SetProperty(ref pinned, value);
+            set
+            {
+                if (!SetProperty(ref pinned, value))
+                    return;
+
+                if (value && snapFsm != null)
+                {
+                    StateMachines.SnapTopState[] states =
+                    {
+                        StateMachines.SnapTopState.Initial,
+                        StateMachines.SnapTopState.Snapped,
+                        StateMachines.SnapTopState.SnappedWithMouseEnter,
+                        StateMachines.SnapTopState.UnsnappedWithMouseLeave,
+                        StateMachines.SnapTopState.Unsnapped,
+                    };
+                    if (states.Contains(snapFsm.State))
+                    {
+                        snapFsm.Fire(StateMachines.SnapTopTrigger.MoveOut);
+                    }
+                }
+            }
         }
 
         private static readonly IRelayCommand pinCommand = new RelayCommand(DoPin);
@@ -132,6 +152,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private void InitialSnappingStateMachine()
         {
+            if (Pinned) return;
+
             var dispatcher = Application.Current.Dispatcher;
 
             snapFsm = new();
