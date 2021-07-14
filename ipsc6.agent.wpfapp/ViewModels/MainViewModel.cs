@@ -81,6 +81,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public bool Pinned
         {
             get => pinned;
+
             set
             {
                 if (!SetProperty(ref pinned, value))

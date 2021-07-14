@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-
+using System.Windows;
 
 namespace ipsc6.agent.wpfapp
 {
@@ -46,6 +45,15 @@ namespace ipsc6.agent.wpfapp
             await ViewModels.LoginViewModel.DoLoginAsync(workerNum, password);
 #pragma warning restore VSTHRD111
         }
+
+        public void ExitApp(int code = 0)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Application.Current.Shutdown(code);
+            });
+        }
+
 #pragma warning restore VSTHRD200
     }
 }

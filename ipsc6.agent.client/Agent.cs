@@ -39,11 +39,11 @@ namespace ipsc6.agent.client
         }
 
         // 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
-        ~Agent()
-        {
-            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
-            Dispose(disposing: false);
-        }
+        //~Agent()
+        //{
+        // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+        //Dispose(disposing: false);
+        //}
 
         // Flag: Has Dispose already been called?
         private bool disposedValue;
@@ -61,22 +61,17 @@ namespace ipsc6.agent.client
                 if (disposing)
                 {
                     // 释放托管状态(托管对象)
+                    ClearPjSipAccount();
+                    //
+                    foreach (var conn in connections)
+                    {
+                        logger.DebugFormat("Dispose {0}", conn);
+                        conn.Dispose();
+                    }
+                    connections.Clear();
                 }
                 // 释放未托管的资源(未托管的对象)并重写终结器
                 // 将大型字段设置为 null
-                foreach (var sipAcc in sipAccountCollection)
-                {
-                    logger.DebugFormat("Dispose {0}", sipAcc);
-                    sipAcc.Dispose();
-                }
-                sipAccountCollection.Clear();
-                //
-                foreach (var conn in connections)
-                {
-                    logger.DebugFormat("Dispose {0}", conn);
-                    conn.Dispose();
-                }
-                connections.Clear();
                 //
                 disposedValue = true;
             }
@@ -108,11 +103,6 @@ namespace ipsc6.agent.client
                 //epCfg.logConfig.msgLogging = 0;
                 //epCfg.logConfig.writer = SipLogWriter.Instance;
                 SipEndpoint.libInit(epCfg);
-                //if (!SipEndpoint.libIsThreadRegistered())
-                //{
-                //    logger.Debug("pjsua2 endpoint registers thread");
-                //    SipEndpoint.libRegisterThread(Thread.CurrentThread.Name);
-                //}
                 logger.Debug("pjsua2 endpoint creates transport");
                 SipEndpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
             }
@@ -323,6 +313,7 @@ namespace ipsc6.agent.client
                 if (newState == TeleState.OnHook)
                 {
                     calls.Clear();
+                    WorkingChannelInfo = null;
                 }
             }
 
@@ -631,7 +622,7 @@ namespace ipsc6.agent.client
         public event EventHandler<RingInfoReceivedEventArgs> OnRingInfoReceived;
         private void DoOnRing(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var workingChannelInfo = new WorkingChannelInfo(msg.N2);
+            WorkingChannelInfo workingChannelInfo = new(ctiServer, msg.N2);
             var callInfo = new CallInfo(ctiServer, workingChannelInfo.Channel, msg.S);
             logger.DebugFormat("OnRing - {0}", callInfo);
             lock (this)
@@ -648,7 +639,7 @@ namespace ipsc6.agent.client
         public event EventHandler<WorkingChannelInfoReceivedEventArgs> OnWorkingChannelInfoReceived;
         private void DoOnWorkingChannel(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var workingChannelInfo = new WorkingChannelInfo(msg.N2, msg.S);
+            var workingChannelInfo = new WorkingChannelInfo(ctiServer, msg.N2, msg.S);
             logger.DebugFormat("OnWorkingChannel - {0}: {1}", ctiServer, workingChannelInfo.Channel);
             lock (this)
             {
@@ -1153,18 +1144,25 @@ namespace ipsc6.agent.client
                     throw;
                 }
 
-
                 lock (this)
                 {
                     // release Sip Accounts
-                    foreach (var sipAcc in sipAccountCollection)
-                    {
-                        logger.DebugFormat("Dispose {0}", sipAcc);
-                        sipAcc.Dispose();
-                    }
-                    sipAccountCollection.Clear();
+                    ClearPjSipAccount();
                 }
             }
+        }
+
+        private void ClearPjSipAccount()
+        {
+            foreach (var acc in sipAccountCollection)
+            {
+                logger.DebugFormat("Dispose {0}", acc);
+                acc.OnIncomingCall -= Acc_OnIncomingCall;
+                acc.OnCallDisconnected -= Acc_OnCallDisconnected;
+                acc.OnCallStateChanged -= Acc_OnCallStateChanged;
+                acc.Dispose();
+            }
+            sipAccountCollection.Clear();
         }
 
         public bool IsRequesting => requestGuard.IsEntered;
@@ -1293,24 +1291,15 @@ namespace ipsc6.agent.client
 
         public async Task XferAsync(string groupId, string workerNum = "", string customString = "")
         {
-            CallInfo callInfo = HeldCalls.FirstOrDefault();
-            if (callInfo == null)
-            {
-                throw new InvalidOperationException("没有任何被保持的呼叫，无法执行转接操作");
-            }
-            await XferAsync(callInfo, groupId, workerNum, customString);
+            var connectionInfo = WorkingChannelInfo.CtiServer;
+            await XferAsync(connectionInfo, -1, groupId, workerNum, customString);
         }
 
         public async Task XferConsultAsync(string groupId, string workerNum = "", string customString = "")
         {
             using (requestGuard.TryEnter())
             {
-                CallInfo callInfo = HeldCalls.FirstOrDefault();
-                if (callInfo == null)
-                {
-                    throw new InvalidOperationException("没有任何被保持的呼叫，无法执行咨询操作");
-                }
-                var conn = (callInfo == null) ? MainConnection : GetConnection(callInfo.CtiServer);
+                var conn = GetConnection(WorkingChannelInfo.CtiServer);
                 var s = $"{workerNum}|{groupId}|{customString}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT, -1, s);
                 await conn.RequestAsync(req);
@@ -1343,24 +1332,15 @@ namespace ipsc6.agent.client
 
         public async Task XferExtAsync(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
-            CallInfo callInfo = HeldCalls.FirstOrDefault();
-            if (callInfo == null)
-            {
-                throw new InvalidOperationException("没有任何被保持的呼叫，无法执行转接操作");
-            }
-            await XferExtAsync(callInfo, calledTelNum, callingTelNum, channelGroup, option);
+            var connInfo = WorkingChannelInfo.CtiServer;
+            await XferExtAsync(connInfo, -1, calledTelNum, callingTelNum, channelGroup, option);
         }
 
         public async Task XferExtConsultAsync(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
             using (requestGuard.TryEnter())
             {
-                CallInfo callInfo = HeldCalls.FirstOrDefault();
-                if (callInfo == null)
-                {
-                    throw new InvalidOperationException("没有任何被保持的呼叫，无法执行咨询操作");
-                }
-                var conn = GetConnection(callInfo.CtiServer);
+                var conn = GetConnection(WorkingChannelInfo.CtiServer);
                 var s = $"{calledTelNum}|{callingTelNum}|{channelGroup}|{option}";
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT_EX, -1, s);
                 await conn.RequestAsync(req);
@@ -1393,43 +1373,15 @@ namespace ipsc6.agent.client
 
         public async Task CallIvrAsync(string ivrId, IvrInvokeType invokeType = IvrInvokeType.Keep, string customString = "")
         {
-            CallInfo callInfo;
-            lock (this)
-            {
-                callInfo = (
-                    from item in calls
-                    where !item.IsHeld
-                    select item
-                ).FirstOrDefault();
-            }
-            if (callInfo == null)
-            {
-                await CallIvrAsync(MainConnectionInfo, AgentChannel, ivrId, invokeType, customString);
-            }
-            else
-            {
-                await CallIvrAsync(callInfo, ivrId, invokeType, customString);
-            }
+            var connInfo = WorkingChannelInfo.CtiServer;
+            await CallIvrAsync(connInfo, -1, ivrId, invokeType, customString);
         }
 
         public async Task HoldAsync()
         {
             using (requestGuard.TryEnter())
             {
-                CallInfo callInfo;
-                lock (this)
-                {
-                    callInfo = (
-                        from item in calls
-                        where !item.IsHeld
-                        select item
-                    ).FirstOrDefault();
-                }
-                if (callInfo == null)
-                {
-                    throw new InvalidOperationException("没有任何未被保持的呼叫，无法执行保持操作");
-                }
-                var conn = GetConnection(callInfo.CtiServer);
+                var conn = GetConnection(WorkingChannelInfo.CtiServer);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HOLD);
                 await conn.RequestAsync(req);
             }
@@ -1470,12 +1422,9 @@ namespace ipsc6.agent.client
         {
             using (requestGuard.TryEnter())
             {
-                if (channel < 0)
-                {
-                    channel = WorkingChannelInfo.Channel;
-                }
+                var conn = GetConnection(WorkingChannelInfo.CtiServer);
                 var req = new AgentRequestMessage(MessageType.REMOTE_MSG_BREAK_SESS, channel, customString);
-                await MainConnection.RequestAsync(req);
+                await conn.RequestAsync(req);
             }
         }
 
