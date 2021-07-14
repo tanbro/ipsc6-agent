@@ -23,28 +23,42 @@ namespace ipsc6.agent.wpfapp
 
         public static IConfigurationRoot Reload()
         {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            var assembly = Assembly.GetExecutingAssembly();
+            var versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
             var cmdArgs = Environment.GetCommandLineArgs();
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile(Path.Combine(new string[] {
-                    "Config", "settings.json"
-                }), optional: true)
+                .AddJsonFile
+                (
+                    Path.Combine("Config", "settings.json"),
+                    optional: true
+                )
 #if DEBUG
-                .AddJsonFile(Path.Combine(new string[] {
-                    "Config", "settings.development.json"
-                }), optional: true)
+                .AddJsonFile
+                (
+                    Path.Combine("Config", "settings.development.json"),
+                    optional: true
+                )
 #endif
-                .AddJsonFile(Path.Combine(new string[] {
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    versionInfo.ProductName, "User", "settings.json"
-                }), optional: true)
+                .AddJsonFile
+                (
+                    Path.Combine
+                    (
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        versionInfo.ProductName, "settings.json"
+                    ),
+                    optional: true
+                )
 #if DEBUG
-                .AddJsonFile(Path.Combine(new string[] {
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    versionInfo.ProductName, "User", "settings.development.json"
-                }), optional: true)
+                .AddJsonFile
+                (
+                    Path.Combine
+                    (
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        versionInfo.ProductName, "settings.development.json"
+                    ),
+                    optional: true
+                )
 #endif
                 .AddEnvironmentVariables(prefix: "IPSC6AGENT_")
                 .AddCommandLine(cmdArgs);

@@ -328,11 +328,11 @@ namespace ipsc6.agent.client
                     {
                         case TeleState.OffHook:
                             logger.Debug("TeleStateChangedMessage - Server side Offhooking Succees");
-                            offHookServerTcs.TrySetResult(null);
+                            offHookServerTcs?.TrySetResult(null);
                             break;
                         default:
                             logger.Debug("TeleStateChangedMessage - Server side Offhooking Fail");
-                            offHookServerTcs.TrySetCanceled();
+                            offHookServerTcs?.TrySetCanceled();
                             break;
                     }
                 }
@@ -462,7 +462,7 @@ namespace ipsc6.agent.client
             OnSignedGroupsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private SemaphoreSlim pjSemaphore = new(1);
+        private readonly SemaphoreSlim pjSemaphore = new(1);
 
         public event EventHandler<SipRegistrarListReceivedEventArgs> OnSipRegistrarListReceived;
         public event EventHandler OnSipRegisterStateChanged;
@@ -509,7 +509,10 @@ namespace ipsc6.agent.client
                         sipAccountCollection.Add(acc);
                     }
                     /// reload PJ-SIP data
-                    ReloadSipAccountCollection();
+                    lock (this)
+                    {
+                        ReloadSipAccountCollection();
+                    }
                     /// Fire the event
                     await Task.Run(() => OnSipRegistrarListReceived?.Invoke(this, evt));
                 }
@@ -554,11 +557,11 @@ namespace ipsc6.agent.client
                             e.Call.answer(prm);
                         }
                         logger.Debug("TeleStateChangedMessage - Client side Offhooking: Answer ok");
-                        offHookClientTcs.TrySetResult(null);
+                        offHookClientTcs?.TrySetResult(null);
                     }
                     catch (Exception exce)
                     {
-                        offHookClientTcs.TrySetException(exce);
+                        offHookClientTcs?.TrySetException(exce);
                         throw;
                     }
                 }

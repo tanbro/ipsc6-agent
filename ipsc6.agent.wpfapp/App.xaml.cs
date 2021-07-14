@@ -1,7 +1,9 @@
 using ipsc6.agent.services;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -28,7 +30,10 @@ namespace ipsc6.agent.wpfapp
         {
             try
             {
-                log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.config"));
+                var assembly = Assembly.GetExecutingAssembly();
+                var versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+                log4net.GlobalContext.Properties["ProductName"] = versionInfo.ProductName;
+                log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(Path.Combine("Config", "log4net.config")));
                 logger.Warn("\r\n!!!!!!!!!!!!!!!!!!!! Startup !!!!!!!!!!!!!!!!!!!!\r\n");
             }
             catch (Exception err)
