@@ -462,6 +462,8 @@ namespace ipsc6.agent.client
             OnSignedGroupsChanged?.Invoke(this, EventArgs.Empty);
         }
 
+        private SemaphoreSlim pjSemaphore = new(1);
+
         public event EventHandler<SipRegistrarListReceivedEventArgs> OnSipRegistrarListReceived;
         public event EventHandler OnSipRegisterStateChanged;
         public event EventHandler<SipCallEventArgs> OnSipCallStateChanged;
@@ -472,9 +474,10 @@ namespace ipsc6.agent.client
             var val = msg.S.Split(Constants.VerticalBarDelimiter);
             var evt = new SipRegistrarListReceivedEventArgs(val);
 
-            SyncFactory.StartNew(() =>
+            SyncFactory.StartNew(async () =>
             {
-                lock (this)
+                await pjSemaphore.WaitAsync();
+                try
                 {
                     foreach (var addr in evt.Value)
                     {
@@ -505,11 +508,17 @@ namespace ipsc6.agent.client
                         acc.create(cfg);
                         sipAccountCollection.Add(acc);
                     }
+                    /// reload PJ-SIP data
                     ReloadSipAccountCollection();
+                    /// Fire the event
+                    await Task.Run(() => OnSipRegistrarListReceived?.Invoke(this, evt));
                 }
-            }).Wait();
+                finally
+                {
+                    pjSemaphore.Release();
+                }
 
-            OnSipRegistrarListReceived?.Invoke(this, evt);
+            });
         }
 
         private void ReloadSipAccountCollection()
@@ -1407,57 +1416,53 @@ namespace ipsc6.agent.client
             }
         }
 
-        private static readonly SemaphoreSlim sipCallSema = new(1);
 
         public async Task AnswerAsync()
         {
             logger.Debug("Answer");
-            await sipCallSema.WaitAsync();
-            try
+
+            await SyncFactory.StartNew(async () =>
             {
-                await SyncFactory.StartNew(() =>
+                await pjSemaphore.WaitAsync();
+                try
                 {
-                    lock (this)
+                    var iterIncomingCalls =
+                        from c in sipAccountCollection.SelectMany(x => x.Calls)
+                        let ci = c.getInfo()
+                        where ci.state == pjsip_inv_state.PJSIP_INV_STATE_INCOMING
+                        select c;
+                    using var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK };
+                    foreach (var call in iterIncomingCalls)
                     {
-                        var iterIncomingCalls =
-                            from c in sipAccountCollection.SelectMany(x => x.Calls)
-                            let ci = c.getInfo()
-                            where ci.state == pjsip_inv_state.PJSIP_INV_STATE_INCOMING
-                            select c;
-                        using var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK };
-                        foreach (var call in iterIncomingCalls)
-                        {
-                            call.answer(cop);
-                        }
+                        call.answer(cop);
                     }
-                });
-            }
-            finally
-            {
-                sipCallSema.Release();
-            }
+                }
+                finally
+                {
+                    pjSemaphore.Release();
+                }
+            });
+
         }
 
         public async Task HangupAsync()
         {
             logger.Debug("Hangup");
-            await sipCallSema.WaitAsync();
-            try
+
+            await SyncFactory.StartNew(async () =>
             {
-                await SyncFactory.StartNew(() =>
+                await pjSemaphore.WaitAsync();
+                try
                 {
-                    lock (this)
-                    {
-                        SipEndpoint.hangupAllCalls();
-                        // 主动挂机了， Call List 也来一个清空动作
-                        calls.Clear();
-                    }
-                });
-            }
-            finally
-            {
-                sipCallSema.Release();
-            }
+                    SipEndpoint.hangupAllCalls();
+                    // 主动挂机了， Call List 也来一个清空动作
+                    calls.Clear();
+                }
+                finally
+                {
+                    pjSemaphore.Release();
+                }
+            });
         }
 
         private TaskCompletionSource<object> offHookServerTcs;

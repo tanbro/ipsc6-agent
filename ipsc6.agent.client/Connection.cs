@@ -58,7 +58,8 @@ namespace ipsc6.agent.client
                         using (eventThreadCancelSource)
                         {
                             eventThreadCancelSource.Cancel();
-                            eventThread.Join();
+                            if (eventThread.IsAlive)
+                                eventThread.Join();
                         }
                     }
                 }
