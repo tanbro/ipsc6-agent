@@ -21,11 +21,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainViewModel));
 
+        private const double NormalWindowHeight = 72;
+        private const double SnappedWindowHeight = 8;
+
         #region ctor, deor, initial, release ...
         internal void Initial()
         {
             IsShowToolbar = true;
             RootGridVerticalAlignment = VerticalAlignment.Bottom;
+            Application.Current.MainWindow.Height = NormalWindowHeight;
             StartTimer();
         }
 
@@ -101,14 +105,14 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 {
                     IsShowToolbar = false;
                     RootGridVerticalAlignment = VerticalAlignment.Top;
-                    win.Height = 8;
+                    win.Height = SnappedWindowHeight;
                     win.Top = 0;
                 }
                 else
                 {
                     IsShowToolbar = true;
                     RootGridVerticalAlignment = VerticalAlignment.Bottom;
-                    win.Height = 72;
+                    win.Height = NormalWindowHeight;
                     if (win.Top < 0)
                         win.Top = 0;
                 }
@@ -135,25 +139,20 @@ namespace ipsc6.agent.wpfapp.ViewModels
             /// 各个状态的UI动作
             snapFsm.OnTransitioned(trans =>
             {
+                //logger.DebugFormat("SnappingStateMachine - {0} == [{1}] ==> {2}", trans.Source, trans.Trigger, trans.Destination);
                 switch (trans.Destination)
                 {
                     case StateMachines.SnapTopState.Final:
-                        dispatcher.Invoke(() =>
-                        {
-                            snapTimerCanceller?.Cancel();
-                            Snapped = false;
-                        });
+                        snapTimerCanceller?.Cancel();
+                        Snapped = false;
                         break;
 
                     case StateMachines.SnapTopState.Initial:
                         throw new InvalidOperationException($"{trans.Destination}");
 
                     case StateMachines.SnapTopState.Snapped:
-                        dispatcher.Invoke(() =>
-                        {
-                            snapTimerCanceller?.Cancel();
-                            Snapped = true;
-                        });
+                        snapTimerCanceller?.Cancel();
+                        Snapped = true;
                         break;
 
                     case StateMachines.SnapTopState.SnappedWithMouseEnter:
@@ -161,11 +160,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         break;
 
                     case StateMachines.SnapTopState.Unsnapped:
-                        dispatcher.Invoke(() =>
-                        {
-                            snapTimerCanceller?.Cancel();
-                            Snapped = false;
-                        });
+                        snapTimerCanceller?.Cancel();
+                        Snapped = false;
                         break;
 
                     case StateMachines.SnapTopState.UnsnappedWithMouseLeave:

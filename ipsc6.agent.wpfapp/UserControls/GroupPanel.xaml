@@ -16,59 +16,57 @@
         <conv:AgentGroupsToNumberTitleConverter x:Key="AgentGroupsToNumberTitleConverter"/>
     </UserControl.Resources>
 
-    <Border Width="60" Height="64"
-            BorderThickness="1" CornerRadius="6" BorderBrush="{StaticResource MyBorderBrush}"
-            HorizontalAlignment="Left" VerticalAlignment="Top">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="28"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="28"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
 
-            <Border Grid.Row="0"
-                CornerRadius="5 5 0 0"
+        <Border Grid.Row="0"
+                CornerRadius="5 5 0 0" BorderThickness="1 1 1 0"
+                BorderBrush="{StaticResource MyBorderBrush}"
                 Background="{StaticResource MyGroupTitleBackground}" 
             >
-                <TextBlock Style="{StaticResource MyScoreBoardTitleTextStyle}">
+            <TextBlock Style="{StaticResource MyScoreBoardTitleTextStyle}">
                     技能组
-                </TextBlock>
-            </Border>
+            </TextBlock>
+        </Border>
 
-            <Border Grid.Row="1"
-                Background="{StaticResource MyBackgroud}"
-                CornerRadius="0 0 5 5"
-            >
-                <Button Style="{StaticResource ScoreButtonStyle}"
+        <Border Grid.Row="1"
+                CornerRadius="0 0 5 5" BorderThickness="1 0 1 1"
+                BorderBrush="{StaticResource MyBorderBrush}"
+                Background="{StaticResource MyBackgroud}">
+            <Button Style="{StaticResource ScoreButtonStyle}"
                         Command="{Binding GroupPopupCommand}">
-                    <StackPanel>
-                        <TextBlock Text="{Binding Groups, Mode=OneWay, Converter={StaticResource AgentGroupsToNumberTitleConverter}}"/>
-                        <Popup x:Name="SkillPopup" StaysOpen="False"
+                <StackPanel>
+                    <TextBlock Text="{Binding Groups, Mode=OneWay, Converter={StaticResource AgentGroupsToNumberTitleConverter}}"/>
+                    <Popup x:Name="SkillPopup" StaysOpen="False"
                                IsOpen="{Binding IsGroupPopupOpened}">
-                            <ContentControl>
-                                <ListBox ItemsSource="{Binding Groups, Mode=OneWay}">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Background="{StaticResource MyBackgroud}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="48"/>
-                                                    <ColumnDefinition/>
-                                                </Grid.ColumnDefinitions>
-                                                <ToggleButton Grid.Column="0" Margin="2"
+                        <ContentControl>
+                            <ListBox ItemsSource="{Binding Groups, Mode=OneWay}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Background="{StaticResource MyBackgroud}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="48"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <ToggleButton Grid.Column="0" Margin="2"
                                                               Style="{StaticResource MyToggleButton}"
                                                               IsChecked="{Binding IsSigned, Mode=OneWay}"
                                                               Command="{Binding ElementName=GroupPanelUserControl, Path=DataContext.SignGroupCommand}"
                                                               CommandParameter="{Binding Id}"/>
-                                                <TextBlock Grid.Column="1" Text="{Binding Name, Mode=OneWay}" Margin="2"/>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </ContentControl>
-                        </Popup>
-                    </StackPanel>
-                </Button>
-            </Border>
+                                            <TextBlock Grid.Column="1" Text="{Binding Name, Mode=OneWay}" Margin="2"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </ContentControl>
+                    </Popup>
+                </StackPanel>
+            </Button>
+        </Border>
 
-        </Grid>
-    </Border>
+    </Grid>
+
 </UserControl>

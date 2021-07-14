@@ -22,72 +22,69 @@
         <converters:AgentCallDirectionToStringConverter x:Key="AgentCallDirectionToStringConverter"/>
     </UserControl.Resources>
 
-    <Border Width="42" Height="64"
-            BorderThickness="1" CornerRadius="6" BorderBrush="{StaticResource MyBorderBrush}"
-            HorizontalAlignment="Left" VerticalAlignment="Top">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="28"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="28"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
 
 
-            <Border Grid.Row="0"
-                CornerRadius="5 5 0 0"
+        <Border Grid.Row="0"
+                CornerRadius="5 5 0 0" BorderThickness="1 1 1 0" BorderBrush="{StaticResource MyBorderBrush}"
                 Background="{StaticResource MyGroupTitleBackground}" 
             >
-                <TextBlock Style="{StaticResource MyScoreBoardTitleTextStyle}">
+            <TextBlock Style="{StaticResource MyScoreBoardTitleTextStyle}">
                     保持
-                </TextBlock>
-            </Border>
-            <Border Grid.Row="1"
-                Background="{StaticResource MyBackgroud}"
-                CornerRadius="0 0 5 5">
-                <Button Style="{StaticResource ScoreButtonStyle}" Command="{Binding HoldPopupCommand}">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
+            </TextBlock>
+        </Border>
+        <Border Grid.Row="1"
+                CornerRadius="0 0 5 5" BorderThickness="1 0 1 1" BorderBrush="{StaticResource MyBorderBrush}"
+                Background="{StaticResource MyBackgroud}">
+            <Button Style="{StaticResource ScoreButtonStyle}" Command="{Binding HoldPopupCommand}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
                                    Text="{Binding HeldCalls.Count, Mode=OneWay}"/>
-                        <Popup StaysOpen="False" IsOpen="{Binding IsHoldPopupOpened}">
-                            <ContentControl>
-                                <ListBox ItemsSource="{Binding HeldCalls, Mode=OneWay}">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Background="{StaticResource MyBackgroud}">
+                    <Popup StaysOpen="False" IsOpen="{Binding IsHoldPopupOpened}">
+                        <ContentControl>
+                            <ListBox ItemsSource="{Binding HeldCalls, Mode=OneWay}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Background="{StaticResource MyBackgroud}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="160"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid Grid.Column="0">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="160"/>
+                                                    <ColumnDefinition Width="24"/>
                                                     <ColumnDefinition/>
                                                 </Grid.ColumnDefinitions>
-                                                <Grid Grid.Column="0">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="24"/>
-                                                        <ColumnDefinition/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <ContentControl Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                        <iconPacks:PackIconMaterial
+                                                <ContentControl Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <iconPacks:PackIconMaterial
                                                             Foreground="DarkBlue"
                                                             ToolTip="{Binding Direction, Mode=OneWay, Converter={StaticResource AgentCallDirectionToStringConverter}}"
                                                             Kind="{Binding Direction, Mode=OneWay, Converter={StaticResource AgentCallDirectionToMaterialIconConverter}}"/>
-                                                    </ContentControl>
-                                                    <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                                </ContentControl>
+                                                <TextBlock Grid.Column="1" VerticalAlignment="Center"
                                                                Foreground="DarkBlue"
                                                                Text="{Binding RemoteTelNum}"/>
-                                                </Grid>
-                                                <Button Grid.Column="1" Style="{StaticResource MyCommonButton}"
+                                            </Grid>
+                                            <Button Grid.Column="1" Style="{StaticResource MyCommonButton}"
                                                         Margin="4" Height="48" Width="48"
                                                         ToolTip="取消该通话的保持状态(恢复通话)"
                                                         Command="{Binding ElementName=HoldPanelUserControl, Path=DataContext.UnHoldCommand}"
                                                         CommandParameter="{Binding}">
-                                                    <iconPacks:PackIconMaterial Kind="PhoneReturn" Height="36" Width="36"/>
-                                                </Button>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </ContentControl>
-                        </Popup>
-                    </StackPanel>
-                </Button>
-            </Border>
-        </Grid>
-    </Border>
+                                                <iconPacks:PackIconMaterial Kind="PhoneReturn" Height="36" Width="36"/>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </ContentControl>
+                    </Popup>
+                </StackPanel>
+            </Button>
+        </Border>
+    </Grid>
+
 </UserControl>

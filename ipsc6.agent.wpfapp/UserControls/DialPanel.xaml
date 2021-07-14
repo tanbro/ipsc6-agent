@@ -10,13 +10,13 @@
              Width="96" Height="64"
              >
 
-    <Border BorderThickness="1" CornerRadius="6" BorderBrush="{StaticResource MyBorderBrush}"
+    <Border BorderThickness="1" CornerRadius="5" BorderBrush="{StaticResource MyBorderBrush}"
             Width="96" Height="64"
             HorizontalAlignment="Left" VerticalAlignment="Top">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="32"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition/>
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">

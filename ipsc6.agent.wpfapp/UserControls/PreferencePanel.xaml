@@ -41,28 +41,26 @@
         </Style>
     </UserControl.Resources>
 
-    <Border CornerRadius="0 5 0 0">
 
-        <Grid Height="64" Width="42">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="32"/>
-                <RowDefinition Height="32"/>
-            </Grid.RowDefinitions>
+    <Grid Height="64" Width="42">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="32"/>
+            <RowDefinition Height="32"/>
+        </Grid.RowDefinitions>
 
-            <Button Grid.Row="0" Style="{StaticResource PreferenceButtonStyle}">
-                <iconPacks:RemixIcon Height="24" Width="24" Kind="Settings5Fill"/>
-            </Button>
+        <Button Grid.Row="0" Style="{StaticResource PreferenceButtonStyle}">
+            <iconPacks:RemixIcon Height="24" Width="24" Kind="Settings5Fill"/>
+        </Button>
 
-            <Button Grid.Row="1" Style="{StaticResource PreferenceButtonStyle}"
+        <Button Grid.Row="1" Style="{StaticResource PreferenceButtonStyle}"
                 Command="{Binding PinCommand}"
                 >
-                <iconPacks:PackIconRemixIcon
+            <iconPacks:PackIconRemixIcon
                 Height="24" Width="24"
                 Kind="{Binding Pinned, Mode=OneWay, Converter={StaticResource BooleanToRemixPinIconConverter}}"
             />
-            </Button>
+        </Button>
 
-        </Grid>
+    </Grid>
 
-    </Border>
 </UserControl>
