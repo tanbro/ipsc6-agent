@@ -93,9 +93,13 @@ namespace ipsc6.agent.client
         public AgentIdAssignedEventArgs(CtiServer connectionInfo, AgentIdName value) : base(connectionInfo, value) { }
     }
 
-    public class AgentDisplayNameReceivedEventArgs : BaseCtiEventArgs<string>
+    public class AgentDisplayNameReceivedEventArgs : EventArgs
     {
-        public AgentDisplayNameReceivedEventArgs(CtiServer connectionInfo, string value) : base(connectionInfo, value) { }
+        public string DisplayName { get; }
+        public AgentDisplayNameReceivedEventArgs(string displayName) : base()
+        {
+            DisplayName = displayName;
+        }
     }
 
     public class ChannelAssignedEventArgs : BaseCtiEventArgs<int>

@@ -2,8 +2,10 @@ using org.pjsip.pjsua2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+
 
 namespace ipsc6.agent.client
 {
@@ -308,6 +310,7 @@ namespace ipsc6.agent.client
             TeleState newState = (TeleState)msg.N1;
             logger.DebugFormat("TeleStateChanged - {0} --> {1}", TeleState, newState);
             TeleStateChangedEventArgs ev = null;
+
             lock (this)
             {
                 oldState = TeleState;
@@ -321,22 +324,24 @@ namespace ipsc6.agent.client
                 {
                     calls.Clear();
                 }
-                // Offhook 请求的对应的自动摘机
-                if (offhookSemaphore.CurrentCount < 1)
+            }
+
+            // Offhook 请求的对应的自动摘机
+            if (isOffHooking)
+            {
+                switch (newState)
                 {
-                    switch (newState)
-                    {
-                        case TeleState.OffHook:
-                            logger.Debug("TeleStateChangedMessage - Server side Offhooking Succees");
-                            offHookServerTcs?.TrySetResult(null);
-                            break;
-                        default:
-                            logger.Debug("TeleStateChangedMessage - Server side Offhooking Fail");
-                            offHookServerTcs?.TrySetCanceled();
-                            break;
-                    }
+                    case TeleState.OffHook:
+                        logger.Debug("TeleStateChangedMessage - Server side Offhooking Succees");
+                        offHookServerTcs?.TrySetResult(null);
+                        break;
+                    default:
+                        logger.Debug("TeleStateChangedMessage - Server side Offhooking Fail");
+                        offHookServerTcs?.TrySetCanceled();
+                        break;
                 }
             }
+
             if (ev != null)
             {
                 OnTeleStateChanged?.Invoke(this, ev);
@@ -382,6 +387,7 @@ namespace ipsc6.agent.client
             switch ((ServerSentMessageSubType)msg.N1)
             {
                 case ServerSentMessageSubType.AgentId:
+                    // NOTE: AgentID 实际上采用的客户端自行计算的。由于算法与服务器保持了统一，故不采用服务器告知的ID
                     DoOnAgentId(ctiServer, msg);
                     break;
                 case ServerSentMessageSubType.Channel:
@@ -389,6 +395,9 @@ namespace ipsc6.agent.client
                     break;
                 case ServerSentMessageSubType.SipRegistrarList:
                     DoOnSipRegistrarList(ctiServer, msg);
+                    break;
+                case ServerSentMessageSubType.AgentInfo:
+                    DoOnAgentInfo(ctiServer, msg);
                     break;
                 case ServerSentMessageSubType.TodayWorkInfo:
                     DoOnTodayWorkInfo(ctiServer, msg);
@@ -423,6 +432,17 @@ namespace ipsc6.agent.client
                 default:
                     break;
             }
+        }
+
+        private void DoOnAgentInfo(CtiServer _, ServerSentMessage msg)
+        {
+            var jo = JsonSerializer.Deserialize<AgentInfoJson>(msg.S);
+
+            ResetDisplayName(jo.DisplayName);
+            ResetPrivilegeList(jo.Power);
+            ResetPrivilegeExternList(jo.PowerEx);
+            ResetGroupIdList(jo.GroupIdIdList);
+            ResetGroupNameList(jo.GroupIdIdList);
         }
 
         public Stats Stats { get; } = new();
@@ -545,28 +565,30 @@ namespace ipsc6.agent.client
         private void Acc_OnIncomingCall(object sender, Sip.CallEventArgs e)
         {
             SipCall callObj = new(e.Call);
+            // 处理外呼等服务器回呼请求
+            if (isOffHooking)
+            {
+                logger.Debug("SipUA_OnIncomingCall - Client side Offhooking: Answer ...");
+                try
+                {
+                    using (var prm = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
+                    {
+                        e.Call.answer(prm);
+                    }
+                    logger.Debug("SipUA_OnIncomingCall - Client side Offhooking: Answer ok");
+                    offHookClientTcs?.TrySetResult(null);
+                }
+                catch (Exception exce)
+                {
+                    offHookClientTcs?.TrySetException(exce);
+                    throw;
+                }
+            }
             lock (this)
             {
-                if (offhookSemaphore.CurrentCount < 1)
-                {
-                    logger.Debug("TeleStateChangedMessage - Client side Offhooking: Answer ...");
-                    try
-                    {
-                        using (var prm = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK })
-                        {
-                            e.Call.answer(prm);
-                        }
-                        logger.Debug("TeleStateChangedMessage - Client side Offhooking: Answer ok");
-                        offHookClientTcs?.TrySetResult(null);
-                    }
-                    catch (Exception exce)
-                    {
-                        offHookClientTcs?.TrySetException(exce);
-                        throw;
-                    }
-                }
                 ReloadSipAccountCollection();
             }
+            // fire the event
             OnSipCallStateChanged?.Invoke(this, new(callObj));
         }
 
@@ -618,10 +640,8 @@ namespace ipsc6.agent.client
                 calls.Remove(callInfo);
                 calls.Add(callInfo);
             }
-            OnWorkingChannelInfoReceived?.Invoke(this,
-                new(ctiServer, workingChannelInfo));
-            OnRingInfoReceived?.Invoke(this,
-                new(ctiServer, callInfo));
+            OnWorkingChannelInfoReceived?.Invoke(this, new(ctiServer, workingChannelInfo));
+            OnRingInfoReceived?.Invoke(this, new(ctiServer, callInfo));
         }
 
         public WorkingChannelInfo WorkingChannelInfo { get; private set; }
@@ -634,8 +654,7 @@ namespace ipsc6.agent.client
             {
                 WorkingChannelInfo = workingChannelInfo;
             }
-            OnWorkingChannelInfoReceived?.Invoke(this,
-                new(ctiServer, workingChannelInfo));
+            OnWorkingChannelInfoReceived?.Invoke(this, new(ctiServer, workingChannelInfo));
         }
 
         private readonly HashSet<Privilege> privilegeCollection = new();
@@ -643,12 +662,22 @@ namespace ipsc6.agent.client
         public event EventHandler OnPrivilegeCollectionReceived;
         private void DoOnPrivilegeList(CtiServer _, ServerSentMessage msg)
         {
-            if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var values = from s in msg.S.Split(Constants.VerticalBarDelimiter)
-                         select (Privilege)Enum.Parse(typeof(Privilege), s);
+            ResetPrivilegeList(msg.S);
+        }
+
+        private void ResetPrivilegeList(string data)
+        {
+            if (string.IsNullOrWhiteSpace(data)) return;
+            var it = from s in data.Split(Constants.VerticalBarDelimiter)
+                     select (Privilege)Enum.Parse(typeof(Privilege), s);
+            ResetPrivilegeList(it);
+        }
+
+        private void ResetPrivilegeList(IEnumerable<Privilege> data)
+        {
             lock (this)
             {
-                privilegeCollection.UnionWith(values);
+                privilegeCollection.UnionWith(data);
             }
             OnPrivilegeCollectionReceived?.Invoke(this, EventArgs.Empty);
         }
@@ -658,8 +687,13 @@ namespace ipsc6.agent.client
         public event EventHandler OnPrivilegeExternCollectionReceived;
         private void DoOnPrivilegeExternList(CtiServer _, ServerSentMessage msg)
         {
-            if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var values = from s in msg.S.Split(Constants.VerticalBarDelimiter)
+            ResetPrivilegeExternList(msg.S);
+        }
+
+        private void ResetPrivilegeExternList(string data)
+        {
+            if (string.IsNullOrWhiteSpace(data)) return;
+            var values = from s in data.Split(Constants.VerticalBarDelimiter)
 #pragma warning disable CA1305
                          select int.Parse(s);
 #pragma warning restore CA1305
@@ -678,9 +712,12 @@ namespace ipsc6.agent.client
 
         private void DoOnGroupIdList(CtiServer _, ServerSentMessage msg)
         {
-            if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var itGroups = from s in msg.S.Split(Constants.VerticalBarDelimiter)
-                           select new Group(s);
+            ResetGroupIdList(msg.S);
+        }
+
+        private void ResetGroupIdList(IEnumerable<string> data)
+        {
+            var itGroups = from id in data select new Group(id);
             lock (this)
             {
                 groups.Clear();
@@ -688,14 +725,31 @@ namespace ipsc6.agent.client
             }
         }
 
+        private void ResetGroupIdList(string data)
+        {
+            if (string.IsNullOrWhiteSpace(data)) return;
+            var idArray = data.Split(Constants.VerticalBarDelimiter);
+            ResetGroupIdList(idArray);
+        }
+
         private void DoOnGroupNameList(CtiServer _, ServerSentMessage msg)
         {
-            if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var names = msg.S.Split(Constants.VerticalBarDelimiter);
+            ResetGroupNameList(msg.S);
+        }
+        private void ResetGroupNameList(string data)
+        {
+            if (string.IsNullOrWhiteSpace(data)) return;
+            var nameArray = data.Split(Constants.VerticalBarDelimiter);
+            ResetGroupNameList(nameArray);
+
+        }
+
+        private void ResetGroupNameList(IEnumerable<string> data)
+        {
             bool isRestore = false;
             lock (this)
             {
-                foreach (var pair in groups.Zip(names, (first, second) => (first, second)))
+                foreach (var pair in groups.Zip(data, (first, second) => (first, second)))
                 {
                     pair.first.Name = pair.second;
                 }
@@ -762,12 +816,17 @@ namespace ipsc6.agent.client
         public event EventHandler<AgentDisplayNameReceivedEventArgs> OnAgentDisplayNameReceived;
         private void DoOnAgentId(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var evt = new AgentDisplayNameReceivedEventArgs(ctiServer, msg.S);
+            ResetDisplayName(msg.S);
+        }
+
+        private void ResetDisplayName(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return;
             lock (this)
             {
-                DisplayName = evt.Value;
+                DisplayName = s;
             }
-            OnAgentDisplayNameReceived?.Invoke(this, evt);
+            OnAgentDisplayNameReceived?.Invoke(this, new(s));
         }
 
         public event EventHandler<ConnectionInfoStateChangedEventArgs> OnConnectionStateChanged;
@@ -1094,9 +1153,10 @@ namespace ipsc6.agent.client
                     throw;
                 }
 
-                // release Sip Accounts
+
                 lock (this)
                 {
+                    // release Sip Accounts
                     foreach (var sipAcc in sipAccountCollection)
                     {
                         logger.DebugFormat("Dispose {0}", sipAcc);
@@ -1424,6 +1484,11 @@ namespace ipsc6.agent.client
         {
             logger.Debug("Answer");
 
+            if (isOffHooking)
+            {
+                throw new InvalidOperationException("Can not perform a SIP answer when in a Off-Hook requestion");
+            }
+
             await SyncFactory.StartNew(async () =>
             {
                 await pjSemaphore.WaitAsync();
@@ -1434,7 +1499,7 @@ namespace ipsc6.agent.client
                         let ci = c.getInfo()
                         where ci.state == pjsip_inv_state.PJSIP_INV_STATE_INCOMING
                         select c;
-                    using var cop = new CallOpParam { statusCode = pjsip_status_code.PJSIP_SC_OK };
+                    using CallOpParam cop = new() { statusCode = pjsip_status_code.PJSIP_SC_OK };
                     foreach (var call in iterIncomingCalls)
                     {
                         call.answer(cop);
@@ -1445,12 +1510,16 @@ namespace ipsc6.agent.client
                     pjSemaphore.Release();
                 }
             });
-
         }
 
         public async Task HangupAsync()
         {
             logger.Debug("Hangup");
+
+            if (isOffHooking)
+            {
+                throw new InvalidOperationException("Can not perform a SIP hangup when in a Off-Hook requestion");
+            }
 
             await SyncFactory.StartNew(async () =>
             {
@@ -1458,8 +1527,11 @@ namespace ipsc6.agent.client
                 try
                 {
                     SipEndpoint.hangupAllCalls();
-                    // 主动挂机了， Call List 也来一个清空动作
-                    calls.Clear();
+                    lock (this)
+                    {
+                        // 主动挂机了， Call List 也来一个清空动作
+                        calls.Clear();
+                    }
                 }
                 finally
                 {
@@ -1470,13 +1542,13 @@ namespace ipsc6.agent.client
 
         private TaskCompletionSource<object> offHookServerTcs;
         private TaskCompletionSource<object> offHookClientTcs;
-
+        private bool isOffHooking;
         public const int DefaultOffHookTimeoutMilliSeconds = 5000;
-        private readonly SemaphoreSlim offhookSemaphore = new(1);
 
         internal async Task OffHookAsync(Connection connection, int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
         {
-            await offhookSemaphore.WaitAsync();
+            await pjSemaphore.WaitAsync();
+            isOffHooking = true;
             try
             {
                 bool isContinue;
@@ -1515,7 +1587,8 @@ namespace ipsc6.agent.client
             }
             finally
             {
-                offhookSemaphore.Release();
+                pjSemaphore.Release();
+                isOffHooking = false;
             }
         }
 

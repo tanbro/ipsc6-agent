@@ -68,6 +68,15 @@ namespace ipsc6.agent.client
         SipRegistrarList = 13,
 
         /// <summary>
+        /// 各种座席客户端相关的数据
+        /// </summary>
+        /// N = {{ AgentID }}
+        /// S = JSON
+        /// JSON example:
+        /// {"powerex": "", "agentid": 1021275263, "username": "USER1001", "power": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], "svrtime": "2021-07-14 10:46:43", "agentgroup": ["AGENTGROUP1"], "custom": "", "telemode": 2, "synch_interval": 120, "agentch": -1, "agentgroupname": ["GROUP_1"], "udl": "", "auto_checkin_skillgroup": true}
+        AgentInfo = 15,
+
+        /// <summary>
         /// 当天工作信息
         /// </summary>
         /// nParam=当天通话次数 pcParam=当天通话时长（秒，字符串）
