@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -7,7 +6,7 @@ namespace ipsc6.agent.client
     public class AgentInfoJson
     {
         [JsonPropertyName("powerex")]
-        public string PowerEx { get; set; }
+        public string PowerExt { get; set; }
 
         [JsonPropertyName("agentid")]
         public int AgentId { get; set; }
@@ -16,10 +15,10 @@ namespace ipsc6.agent.client
         public string DisplayName { get; set; }
 
         [JsonPropertyName("power")]
-        public IEnumerable<Privilege> Power;
+        public IEnumerable<Privilege> Power { get; set; }
 
-        [JsonPropertyName("svrtime")]
-        public DateTime ServerTime { get; set; }
+        //[JsonPropertyName("svrtime")]
+        //public DateTime ServerTime { get; set; }
 
         [JsonPropertyName("agentgroup")]
         public IList<string> GroupIdIdList { get; set; }
@@ -36,8 +35,8 @@ namespace ipsc6.agent.client
         [JsonPropertyName("udl")]
         public string Udl { get; set; }
 
-        [JsonPropertyName("auto_checkin_skillgroup")]
-        public bool AutoCheckinSkillgroup { get; set; }
+        //[JsonPropertyName("auto_checkin_skillgroup")]
+        //public bool AutoCheckinSkillgroup { get; set; }
 
         [JsonPropertyName("custom")]
         public string Custom { get; set; }

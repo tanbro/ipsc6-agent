@@ -440,7 +440,7 @@ namespace ipsc6.agent.client
 
             ResetDisplayName(jo.DisplayName);
             ResetPrivilegeList(jo.Power);
-            ResetPrivilegeExternList(jo.PowerEx);
+            ResetPrivilegeExternList(jo.PowerExt);
             ResetGroupIdList(jo.GroupIdIdList);
             ResetGroupNameList(jo.GroupIdIdList);
         }
