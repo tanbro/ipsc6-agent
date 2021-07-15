@@ -34,21 +34,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private Task rpcServerRunningTask;
         private CancellationTokenSource rpcServerRunningCanceller;
 
-        private Window loginWindow;
-        internal Window LoginWindow
-        {
-            get
-            {
-                if (loginWindow == null)
-                {
-                    loginWindow = new Views.LoginWindow();
-                }
-                return loginWindow;
-            }
-
-            set => loginWindow = value;
-        }
-
         internal readonly config.Ipsc cfgIpsc = new();
         internal readonly config.Window cfgWindow = new();
 
@@ -94,18 +79,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (!cfgWindow.NoStartupLoginDialog)
             {
                 // 默认的方式：直接显示登录对话窗
-                bool isLoginSucceed;
-                try
-                {
-                    loginWindow = new Views.LoginWindow();
-                    isLoginSucceed = LoginWindow.ShowDialog().Value;
-                }
-                finally
-                {
-                    loginWindow = null;
-                }
                 // 登录失败否则就退出函数返回假
-                if (!isLoginSucceed)
+                if (!new Views.LoginWindow().ShowDialog().Value)
                 {
                     return false;
                 }
@@ -127,13 +102,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     mainWindow.Top = -1;
                     break;
                 case config.MainWindowStartupMode.Hide:
-                    mainWindow.WindowState = WindowState.Minimized;
+                    mainWindow.Hide();
                     break;
                 default:
                     break;
             }
-
-            StartTimer();
 
             return true;
         }
@@ -178,7 +151,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region UI
-
         internal void ShowMainWindow()
         {
             var window = Application.Current.Windows.OfType<Window>().Last() ?? Application.Current.MainWindow;
@@ -189,7 +161,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 Snapped = false;
                 window.Topmost = true;
             }
-            window.WindowState = WindowState.Normal;
+            window.Show();
             window.Activate();
             window.Focus();
         }
@@ -441,7 +413,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private CancellationTokenSource timerCanceller;
         private Task timerTask;
 
-        private void StartTimer()
+        internal void StartTimer()
         {
             var dispatcher = Application.Current.Dispatcher;
             ResetStatusTimeSpan();

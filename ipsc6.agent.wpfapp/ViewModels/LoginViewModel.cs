@@ -52,50 +52,58 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static bool isLoginCompleted;
 
+        private static Window GetOrCreateWindow()
+        {
+            var window = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x is Views.LoginWindow);
+            return window ?? new Views.LoginWindow();
+        }
+
         public static async void DoLogin()
         {
-            if (isLoginCompleted)
-            {
-                throw new InvalidOperationException();
-            }
+            var dispatcher = Application.Current.Dispatcher;
 
-            Instance.IsAllowInput = false;
-            try
+            using (await Utils.CommandGuard.EnterAsync(loginCommand))
             {
-                using (await Utils.CommandGuard.EnterAsync(loginCommand))
+                if (isLoginCompleted)
                 {
-                    var window = MainViewModel.Instance.LoginWindow;
-                    try
+                    throw new InvalidOperationException();
+                }
+
+                var window = GetOrCreateWindow() as Views.LoginWindow;
+#pragma warning disable CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
+                dispatcher.InvokeAsync(() =>
+                {
+                    window.ShowDialog();
+                });
+#pragma warning restore CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
+
+                try
+                {
+                    await ExecuteLoginAsync();
+                    isLoginCompleted = true;
+                    window.DialogResult = true;
+                    window.Close();
+                }
+                catch (Exception err)
+                {
+                    if (err is client.ConnectionException)
                     {
-                        await ExecuteLoginAsync();
-                        isLoginCompleted = true;
-                        window.DialogResult = true;
-                        window.Close();
+                        logger.ErrorFormat("DoLogin - 登录失败: {0}", err);
+                        MessageBox.Show(
+                            $"登录失败\r\n\r\n{err}",
+                            Application.Current.MainWindow.Title,
+                            MessageBoxButton.OK, MessageBoxImage.Error
+                        );
                     }
-                    catch (Exception err)
+                    else
                     {
-                        if (err is client.ConnectionException)
-                        {
-                            logger.ErrorFormat("DoLogin - 登录失败: {0}", err);
-                            MessageBox.Show(
-                                $"登录失败\r\n\r\n{err}",
-                                Application.Current.MainWindow.Title,
-                                MessageBoxButton.OK, MessageBoxImage.Error
-                            );
-                        }
-                        else
-                        {
-                            throw;
-                        }
+                        throw;
                     }
                 }
             }
-            finally
-            {
-                Instance.IsAllowInput = true;
-            }
         }
 
+        /// 这个是专门给 RPC 使用的
         internal static async Task DoLoginAsync(string workerNum, string password, IEnumerable<string> serverList)
         {
             var dispatcher = Application.Current.Dispatcher;
@@ -103,42 +111,63 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
             using (await Utils.CommandGuard.EnterAsync(loginCommand))
             {
+                if (isLoginCompleted)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                Window window = null;
+                dispatcher.Invoke(() =>
+                {
+                    window = GetOrCreateWindow();
+                });
+
                 LoginViewModel.workerNum = workerNum;
                 LoginViewModel.password = password;
 
-                await dispatcher.Invoke(async () =>
+#pragma warning disable CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
+                dispatcher.InvokeAsync(() =>
                 {
-                    var window = MainViewModel.Instance.LoginWindow;
-                    try
+                    window.ShowDialog();
+                });
+#pragma warning restore CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
+
+                try
+                {
+                    await ExecuteLoginAsync(serverList);
+                    isLoginCompleted = true;
+                    dispatcher.Invoke(() =>
                     {
-                        if (isLoginCompleted)
-                        {
-                            throw new InvalidOperationException();
-                        }
-                        await ExecuteLoginAsync(serverList);
-                        isLoginCompleted = true;
                         window.DialogResult = true;
                         window.Close();
-                    }
-                    catch (Exception err)
+                    });
+                }
+                catch (Exception err)
+                {
+                    logger.ErrorFormat("DoLoginAsync - 登录失败: {0}", err);
+                    if (err is client.ConnectionException)
                     {
-                        logger.ErrorFormat("DoLoginAsync - 登录失败: {0}", err);
-                        if (err is client.ConnectionException)
-                        {
 #pragma warning disable CS4014
-                            dispatcher.InvokeAsync(() =>
-                            {
-                                MessageBox.Show(
-                                    $"登录失败\r\n\r\n{err}",
-                                    Application.Current.MainWindow.Title,
-                                    MessageBoxButton.OK, MessageBoxImage.Error
-                                );
-                            });
+                        dispatcher.InvokeAsync(() =>
+                        {
+                            MessageBox.Show(
+                                $"登录失败\r\n\r\n{err}",
+                                Application.Current.MainWindow.Title,
+                                MessageBoxButton.OK, MessageBoxImage.Error
+                            );
+                        });
 #pragma warning restore CS4014
-                        }
-                        throw;
                     }
-                });
+                    else
+                    {
+#pragma warning disable CS4014
+                        dispatcher.InvokeAsync(() =>
+                        {
+                            throw err;
+                        });
+#pragma warning restore CS4014
+                    }
+                }
             }
         }
 
@@ -155,6 +184,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             var svc = MainViewModel.Instance.MainService;
             var mainViewModel = MainViewModel.Instance;
+
             if (serverList is null)
             {
                 serverList = mainViewModel.cfgIpsc.ServerList;
@@ -163,9 +193,20 @@ namespace ipsc6.agent.wpfapp.ViewModels
             {
                 serverList = mainViewModel.cfgIpsc.ServerList;
             }
+
             logger.Info("ExecuteLoginAsync - 开始登录...");
-            await svc.LogInAsync(workerNum, password, serverList);
-            logger.Info("ExecuteLoginAsync - 登录成功!");
+            Instance.IsAllowInput = false;
+            try
+            {
+                await svc.LogInAsync(workerNum, password, serverList);
+                logger.Info("ExecuteLoginAsync - 登录成功!");
+            }
+            finally
+            {
+                Instance.IsAllowInput = true;
+            }
+
+            mainViewModel.StartTimer();
         }
 
     }
