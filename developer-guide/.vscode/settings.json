@@ -1,8 +1,0 @@
-{
-    "python.defaultInterpreterPath": "${workspaceFolder}/venv/Scripts/python.exe",
-    // "plantuml.render": "server",
-    // "plantuml.server": "https://www.plantuml.com/plantuml",
-    "yaml.customTags": [
-        "tag:yaml.org,2002:python/name:pymdownx.slugs.uslugify"
-    ]
-}

@@ -46,6 +46,10 @@
 
 ## 获取音频设备列表
 
+!!! caution
+
+    该方法尚未实现
+
 -   **Method**: `getSoundDevices`
 
 -   **Params**: 无
@@ -63,6 +67,10 @@
     可能出现数组中的每一个 [SoundDevice][] 对象的 `isCurrentPlaybackDevice` 或 `isCurrentCaptureDevice` 属性都是 `false` 的情况。
 
 ## 选用音频设备
+
+!!! caution
+
+    该方法尚未实现
 
 选择声音采集和回放设备。
 

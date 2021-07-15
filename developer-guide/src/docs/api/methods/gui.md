@@ -23,7 +23,11 @@
 
 -   **Method**: `exitApp`
 
--   **Params**: 无
+-   **Params**:
+
+    | Argument | Type      | Default | Description |
+    | -------- | --------- | ------- | ----------- |
+    | `code`   | `Integer` | `0`     | 进程结束码  |
 
 -   **Result**: `null`
 
