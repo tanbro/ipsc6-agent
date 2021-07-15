@@ -17,10 +17,10 @@ namespace ipsc6.agent.wpfapp
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(App));
 
-        internal static Views.LoginWindow LoginWindow { get; private set; }
-
         internal Assembly Assembly { get; private set; }
         internal FileVersionInfo VersionInfo { get; private set; }
+
+        internal bool IsStartupOk { get; private set; }
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
@@ -51,7 +51,7 @@ namespace ipsc6.agent.wpfapp
                 logger.ErrorFormat("日志配置加载失败: {0}\r\n^^^^^^^^^^^^^^^^^^^^ Shutdown ^^^^^^^^^^^^^^^^^^^^\r\n", err);
                 MessageBox.Show(
                     $"日志配置加载失败，程序无法运行，即将退出。\r\n\r\n{err}",
-                    VersionInfo.ProductName,
+                    VersionInfo.FileDescription,
                     MessageBoxButton.OK, MessageBoxImage.Error
                 );
                 Shutdown(2);
@@ -67,12 +67,14 @@ namespace ipsc6.agent.wpfapp
                 logger.ErrorFormat("配置信息加载失败: {0}\r\n^^^^^^^^^^^^^^^^^^^^ Shutdown ^^^^^^^^^^^^^^^^^^^^\r\n", err);
                 MessageBox.Show(
                     $"配置信息加载失败，程序无法运行，即将退出。\r\n\r\n{err}",
-                    VersionInfo.ProductName,
+                    VersionInfo.FileDescription,
                     MessageBoxButton.OK, MessageBoxImage.Error
                 );
                 Shutdown(3);
                 return;
             }
+
+            IsStartupOk = true;
         }
 
 

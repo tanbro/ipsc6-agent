@@ -36,14 +36,24 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         internal Window LoginWindow { get; private set; }
 
+        private readonly config.Ipsc cfgIpsc = new();
+        private readonly config.Window cfgWindow = new();
+
         internal bool Initial()
         {
             // 注意这里尚未登录
 
+            var app = Application.Current as App;
+            if (!app.IsStartupOk)
+            {
+                return false;
+            }
+
             /// 非 GUI 的初始化
             var cfgRoot = ConfigManager.ConfigurationRoot;
-            config.Ipsc cfgIpsc = new();
             cfgRoot.GetSection(nameof(config.Ipsc)).Bind(cfgIpsc);
+            cfgRoot.GetSection(nameof(config.Window)).Bind(cfgWindow);
+
             MainService = services.Service.Create(cfgIpsc);
             MainService.OnCtiConnectionStateChanged += MainService_OnCtiConnectionStateChanged;
             MainService.OnLoginCompleted += MainService_OnLoginCompleted;
@@ -67,34 +77,50 @@ namespace ipsc6.agent.wpfapp.ViewModels
             rpcServerRunningCanceller = new();
             rpcServerRunningTask = Task.Run(() => rpcServer.RunAsync(rpcServerRunningCanceller.Token));
 
+            /// 登录
+            if (!cfgWindow.NoStartupLoginDialog)
+            {
+                // 默认的方式：直接显示登录对话窗
+                bool isLoginSucceed;
+                try
+                {
+                    LoginWindow = new Views.LoginWindow();
+                    isLoginSucceed = LoginWindow.ShowDialog().Value;
+                }
+                finally
+                {
+                    LoginWindow = null;
+                }
+                // 登录失败否则就退出函数返回假
+                if (!isLoginSucceed)
+                {
+                    return false;
+                }
+            }
+
             /// GUI 的一些初始化
-            var win = Application.Current.MainWindow;
+            var mainWindow = Application.Current.MainWindow;
             IsShowToolbar = true;
             RootGridVerticalAlignment = VerticalAlignment.Bottom;
-            win.Height = NormalWindowHeight;
+            mainWindow.Height = NormalWindowHeight;
 
-            // 默认的方式：直接显示登录对话窗
-            bool isLoginSucceed;
-            try
+            switch (cfgWindow.MainWindowStartupMode)
             {
-                LoginWindow = new Views.LoginWindow();
-                isLoginSucceed = LoginWindow.ShowDialog().Value;
-            }
-            finally
-            {
-                LoginWindow = null;
+                case config.MainWindowStartupMode.Normal:
+                    mainWindow.Activate();
+                    mainWindow.Focus();
+                    break;
+                case config.MainWindowStartupMode.Snapped:
+                    mainWindow.Top = -1;
+                    break;
+                case config.MainWindowStartupMode.Hide:
+                    mainWindow.WindowState = WindowState.Minimized;
+                    break;
+                default:
+                    break;
             }
 
-            // 登录成功，直接显示主窗口
-            if (isLoginSucceed)
-            {
-                StartTimer();
-            }
-            // 否则就退出
-            else
-            {
-                return false;
-            }
+            StartTimer();
 
             return true;
         }
@@ -103,17 +129,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             StopTimer();
 
-            rpcServerRunningCanceller.Cancel();
+            rpcServerRunningCanceller?.Cancel();
             try
             {
 #pragma warning disable VSTHRD002 // 避免有问题的同步等待
-                rpcServerRunningTask.Wait();
+                rpcServerRunningTask?.Wait();
 #pragma warning restore VSTHRD002 // 避免有问题的同步等待
             }
             catch (TaskCanceledException) { }
 
-            MainService.Dispose();
-            GuiService.Dispose();
+            MainService?.Dispose();
+            GuiService?.Dispose();
         }
 
         private static IRelayCommand[] GetStateRelativeCommands()
@@ -426,15 +452,21 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private void StopTimer()
         {
-            if (timerCanceller != null)
+
+            try
             {
-                using (timerCanceller)
+                timerCanceller?.Cancel();
+                try
                 {
-                    timerCanceller.Cancel();
 #pragma warning disable VSTHRD002
                     timerTask?.Wait();
 #pragma warning restore VSTHRD002
                 }
+                catch (TaskCanceledException) { }
+            }
+            finally
+            {
+                timerCanceller?.Dispose();
             }
         }
 

@@ -42,6 +42,7 @@ namespace ipsc6.agent.wpfapp.Views
             {
                 viewModel.CloseMainWindow();
             }
+
         }
 
         /// 一些 WinForm 的 UI 初始化
