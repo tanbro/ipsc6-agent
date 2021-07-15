@@ -35,11 +35,13 @@
 
 -   **Result**: `null`
 
-!!! tip
+!!! info
 
-    座席程序在执行该方法时，会首先尝试注销。如果无法注销，将返回错误。
+    该方法不与 CTI 服务器通信
 
-    当座席正在通话时， CTI 服务器不允许注销。
+!!! important
+
+    该方法仅在座席客户端桌面程序的登录成功，主窗口完成构建后有效。
 
 !!! attention
 
@@ -47,7 +49,7 @@
 
 ## 隐藏主窗口
 
--   **Method**: `hideMainWindow`
+-   **Method**: `hideApp`
 
 -   **Params**: 无
 
@@ -63,7 +65,7 @@
 
 ## 显示主窗口
 
--   **Method**: `showMainWindow`
+-   **Method**: `showApp`
 
 -   **Params**: 无
 

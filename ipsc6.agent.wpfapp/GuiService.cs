@@ -53,6 +53,18 @@ namespace ipsc6.agent.wpfapp
             });
         }
 
+        public void ShowApp()
+        {
+            var mainViewModel = ViewModels.MainViewModel.Instance;
+            mainViewModel.ShowMainWindow();
+        }
+
+        public void HideApp()
+        {
+            var mainViewModel = ViewModels.MainViewModel.Instance;
+            mainViewModel.HideMainWindow();
+        }
+
 #pragma warning restore VSTHRD200
     }
 }

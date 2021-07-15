@@ -153,32 +153,46 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #region UI
         internal void ShowMainWindow()
         {
-            var window = Application.Current.Windows.OfType<Window>().Last() ?? Application.Current.MainWindow;
-            if (window == null)
-                return;
-            if (window is Views.MainWindow)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                Snapped = false;
-                window.Topmost = true;
-            }
-            window.Show();
-            window.Activate();
-            window.Focus();
+                var window = Application.Current.Windows.OfType<Window>().Last() ?? Application.Current.MainWindow;
+                if (window == null)
+                    return;
+                if (window is Views.MainWindow)
+                {
+                    Snapped = false;
+                    window.Topmost = true;
+                }
+                window.Show();
+                window.Activate();
+                window.Focus();
+            });
         }
 
         internal bool IsExiting { get; private set; }
 
         internal void CloseMainWindow()
         {
-            foreach (var window in Application.Current.Windows.OfType<Window>())
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                if (window is not Views.MainWindow)
+                foreach (var window in Application.Current.Windows.OfType<Window>())
                 {
-                    window.Close();
+                    if (window is not Views.MainWindow)
+                    {
+                        window.Close();
+                    }
                 }
-            }
-            IsExiting = true;
-            Application.Current.MainWindow?.Close();
+                IsExiting = true;
+                Application.Current.MainWindow?.Close();
+            });
+        }
+
+        internal void HideMainWindow()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Application.Current.MainWindow?.Hide();
+            });
         }
 
         private static bool pinned;

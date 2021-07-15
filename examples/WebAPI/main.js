@@ -301,6 +301,26 @@ const exitApp = () => {
   _ws.send(JSON.stringify(req));
 };
 
+const showApp = () => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "showApp",
+    params: [],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+const hideApp = () => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "hideApp",
+    params: [],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
 document.getElementById("frmLogin").addEventListener("submit", ev=>{
   ev.preventDefault();
   const form = ev.submitter.form;
