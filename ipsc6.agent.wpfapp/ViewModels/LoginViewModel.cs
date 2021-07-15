@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -94,7 +96,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
         }
 
-        internal static async Task DoLoginAsync(string workerNum, string password)
+        internal static async Task DoLoginAsync(string workerNum, string password, IEnumerable<string> serverList)
         {
             var dispatcher = Application.Current.Dispatcher;
             var svc = MainViewModel.Instance.MainService;
@@ -113,7 +115,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         {
                             throw new InvalidOperationException();
                         }
-                        await ExecuteLoginAsync();
+                        await ExecuteLoginAsync(serverList);
                         isLoginCompleted = true;
                         window.DialogResult = true;
                         window.Close();
@@ -149,11 +151,20 @@ namespace ipsc6.agent.wpfapp.ViewModels
             return true;
         }
 
-        private static async Task ExecuteLoginAsync()
+        private static async Task ExecuteLoginAsync(IEnumerable<string> serverList = null)
         {
             var svc = MainViewModel.Instance.MainService;
+            var mainViewModel = MainViewModel.Instance;
+            if (serverList is null)
+            {
+                serverList = mainViewModel.cfgIpsc.ServerList;
+            }
+            else if (serverList.Count() == 0)
+            {
+                serverList = mainViewModel.cfgIpsc.ServerList;
+            }
             logger.Info("ExecuteLoginAsync - 开始登录...");
-            await svc.LogInAsync(workerNum, password);
+            await svc.LogInAsync(workerNum, password, serverList);
             logger.Info("ExecuteLoginAsync - 登录成功!");
         }
 

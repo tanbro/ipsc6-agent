@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -34,12 +36,12 @@ namespace ipsc6.agent.wpfapp
         #endregion
 
 #pragma warning disable VSTHRD200
-        public async Task LogIn(string workerNum, string password)
+        public async Task LogIn(string workerNum, string password, IEnumerable<string> serverList = null)
         {
             /// 改 UI 的输入框
             ViewModels.LoginViewModel.Instance.WorkerNum = workerNum;
 #pragma warning disable VSTHRD111
-            await ViewModels.LoginViewModel.DoLoginAsync(workerNum, password);
+            await ViewModels.LoginViewModel.DoLoginAsync(workerNum, password, serverList);
 #pragma warning restore VSTHRD111
         }
 

@@ -8,16 +8,20 @@
 
 -   **Params**:
 
-    | Argument    | Type     | Default | Description |
-    | ----------- | -------- | ------- | ----------- |
-    | `workerNum` | `String` | -       | 登录工号    |
-    | `password`  | `String` | -       | 登录密码    |
+    | Argument     | Type     | Default | Description        |
+    | ------------ | -------- | ------- | ------------------ |
+    | `workerNum`  | `String` | -       | 登录工号           |
+    | `password`   | `String` | -       | 登录密码           |
+    | `serverList` | `Array`  | `null`  | CTI 服务器地址列表 |
+
+    `serverList`
+    : 其数组元素应是 `String` 类型。 如果传入 `null`(默认) 或空数组，座席程序将根据配置项设置的地址列表连接 CTI 服务器。
 
 -   **Result**: `null`
 
 !!! important
 
-    该方法仅在座席客户端桌面程序的登录对话框正在显示、等待用户输入时有效。
+    该方法仅在座席客户端桌面程序已经初始化完毕，但还没有的登录时有效。
 
 ## 退出
 

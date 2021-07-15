@@ -179,9 +179,9 @@ namespace ipsc6.agent.services
             });
         }
 
-        internal async Task LogInAsync(string workerNum, string password)
+        internal async Task LogInAsync(string workerNum, string password, IEnumerable<string> serverList)
         {
-            await agent.StartUpAsync(_cfgIpsc.ServerList, workerNum, password);
+            await agent.StartUpAsync(serverList, workerNum, password);
         }
 
         public IReadOnlyList<string> GetWorkerNum()

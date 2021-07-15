@@ -50,12 +50,12 @@ const throwAnException = (s) => {
   _ws.send(JSON.stringify(req));
 };
 
-const logIn = (workerNum, password) => {
+const logIn = (workerNum, password, serverList=null) => {
   const req = {
     jsonrpc: "2.0",
     id: randomId(),
     method: "logIn",
-    params: [workerNum, password],
+    params: [workerNum, password, serverList],
   };
   _ws.send(JSON.stringify(req));
 };

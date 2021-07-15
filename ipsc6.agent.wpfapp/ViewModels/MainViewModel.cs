@@ -34,10 +34,23 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private Task rpcServerRunningTask;
         private CancellationTokenSource rpcServerRunningCanceller;
 
-        internal Window LoginWindow { get; private set; }
+        private Window loginWindow;
+        internal Window LoginWindow
+        {
+            get
+            {
+                if (loginWindow == null)
+                {
+                    loginWindow = new Views.LoginWindow();
+                }
+                return loginWindow;
+            }
 
-        private readonly config.Ipsc cfgIpsc = new();
-        private readonly config.Window cfgWindow = new();
+            set => loginWindow = value;
+        }
+
+        internal readonly config.Ipsc cfgIpsc = new();
+        internal readonly config.Window cfgWindow = new();
 
         internal bool Initial()
         {
@@ -84,12 +97,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 bool isLoginSucceed;
                 try
                 {
-                    LoginWindow = new Views.LoginWindow();
+                    loginWindow = new Views.LoginWindow();
                     isLoginSucceed = LoginWindow.ShowDialog().Value;
                 }
                 finally
                 {
-                    LoginWindow = null;
+                    loginWindow = null;
                 }
                 // 登录失败否则就退出函数返回假
                 if (!isLoginSucceed)
