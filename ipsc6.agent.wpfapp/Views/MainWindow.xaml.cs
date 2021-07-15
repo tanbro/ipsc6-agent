@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -41,11 +40,8 @@ namespace ipsc6.agent.wpfapp.Views
             /// ViewModel 初始化
             if (!viewModel.Initial())
             {
-                return;
+                viewModel.CloseMainWindow();
             }
-
-            /// 最后才是显示 NotifyIcon
-            notifyIcon.Visible = true;
         }
 
         /// 一些 WinForm 的 UI 初始化
@@ -59,14 +55,13 @@ namespace ipsc6.agent.wpfapp.Views
                 menuItemExit
             });
 
-            var notifyIconUri = @"pack://application:,,,/Icons/App.ico";
-            var notifyIconRes = Application.GetResourceStream(new Uri(notifyIconUri));
+            var notifyIconRes = Application.GetResourceStream(new Uri(@"pack://application:,,,/Icons/App.ico"));
             notifyIcon = new()
             {
-                Icon = new Icon(notifyIconRes.Stream),
+                Icon = new(notifyIconRes.Stream),
                 Text = Title,
                 ContextMenuStrip = notifyMenu,
-                Visible = false,
+                Visible = true,
             };
             notifyIcon.DoubleClick += NotifyIcon_DoubleClick;
         }

@@ -29,6 +29,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #region ctor, deor, initial, release ...
         internal services.Service MainService { get; private set; }
         internal GuiService GuiService { get; private set; }
+
         private server.Server rpcServer;
         private Task rpcServerRunningTask;
         private CancellationTokenSource rpcServerRunningCanceller;
@@ -77,7 +78,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             try
             {
                 LoginWindow = new Views.LoginWindow();
-                isLoginSucceed = LoginWindow.ShowDialog() == true;
+                isLoginSucceed = LoginWindow.ShowDialog().Value;
             }
             finally
             {
@@ -92,7 +93,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
             // 否则就退出
             else
             {
-                CloseMainWindow();
                 return false;
             }
 
@@ -138,24 +138,36 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         #endregion
 
-
         #region UI
 
         internal void ShowMainWindow()
         {
-            var win = Application.Current.MainWindow as Views.MainWindow;
-            win.WindowState = WindowState.Normal;
-            win.Topmost = true;
-            Snapped = false;
+            var window = Application.Current.Windows.OfType<Window>().Last() ?? Application.Current.MainWindow;
+            if (window == null)
+                return;
+            if (window is Views.MainWindow)
+            {
+                Snapped = false;
+                window.Topmost = true;
+            }
+            window.WindowState = WindowState.Normal;
+            window.Activate();
+            window.Focus();
         }
 
         internal bool IsExiting { get; private set; }
 
         internal void CloseMainWindow()
         {
-            var win = Application.Current.MainWindow as Views.MainWindow;
+            foreach (var window in Application.Current.Windows.OfType<Window>())
+            {
+                if (window is not Views.MainWindow)
+                {
+                    window.Close();
+                }
+            }
             IsExiting = true;
-            win.Close();
+            Application.Current.MainWindow?.Close();
         }
 
         private static bool pinned;
