@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-
+using Microsoft.Extensions.Configuration;
 using Microsoft.Toolkit.Mvvm.Input;
 
 using org.pjsip.pjsua2;
 
 #pragma warning disable VSTHRD100
+
+using LocalRpcTargetFunc = System.Func<EmbedIO.WebSockets.WebSocketModule, EmbedIO.WebSockets.IWebSocketContext, object>;
 
 namespace ipsc6.agent.wpfapp.ViewModels
 {
@@ -25,17 +27,93 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private const double SnappedWindowHeight = 8;
 
         #region ctor, deor, initial, release ...
-        internal void Initial()
+        internal services.Service MainService { get; private set; }
+        internal GuiService GuiService { get; private set; }
+        private server.Server rpcServer;
+        private Task rpcServerRunningTask;
+        private CancellationTokenSource rpcServerRunningCanceller;
+
+        internal Window LoginWindow { get; private set; }
+
+        internal bool Initial()
         {
+            // 注意这里尚未登录
+
+            /// 非 GUI 的初始化
+            var cfgRoot = ConfigManager.ConfigurationRoot;
+            config.Ipsc cfgIpsc = new();
+            cfgRoot.GetSection(nameof(config.Ipsc)).Bind(cfgIpsc);
+            MainService = services.Service.Create(cfgIpsc);
+            MainService.OnCtiConnectionStateChanged += MainService_OnCtiConnectionStateChanged;
+            MainService.OnLoginCompleted += MainService_OnLoginCompleted;
+            MainService.OnStatusChanged += MainService_OnStatusChanged;
+            MainService.OnSignedGroupsChanged += MainService_OnSignedGroupsChanged;
+            MainService.OnRingCallReceived += MainService_OnRingCallReceived;
+            MainService.OnHeldCallReceived += MainService_OnHeldCallReceived;
+            MainService.OnTeleStateChanged += MainService_OnTeleStateChanged;
+            MainService.OnSipRegisterStateChanged += MainService_OnSipRegisterStateChanged;
+            MainService.OnSipCallStateChanged += MainService_OnSipCallStateChanged;
+            MainService.OnQueueInfoEvent += MainService_OnQueueInfoEvent;
+            MainService.OnStatsChanged += MainService_OnStatsChanged;
+
+            GuiService = new();
+
+            LocalRpcTargetFunc[] localRpcCreators = {
+                (_, _) => MainService,
+                (_, _) => GuiService,
+            };
+            rpcServer = new(localRpcCreators);
+            rpcServerRunningCanceller = new();
+            rpcServerRunningTask = Task.Run(() => rpcServer.RunAsync(rpcServerRunningCanceller.Token));
+
+            /// GUI 的一些初始化
+            var win = Application.Current.MainWindow;
             IsShowToolbar = true;
             RootGridVerticalAlignment = VerticalAlignment.Bottom;
-            Application.Current.MainWindow.Height = NormalWindowHeight;
-            StartTimer();
+            win.Height = NormalWindowHeight;
+
+            // 默认的方式：直接显示登录对话窗
+            bool isLoginSucceed;
+            try
+            {
+                LoginWindow = new Views.LoginWindow();
+                isLoginSucceed = LoginWindow.ShowDialog() == true;
+            }
+            finally
+            {
+                LoginWindow = null;
+            }
+
+            // 登录成功，直接显示主窗口
+            if (isLoginSucceed)
+            {
+                StartTimer();
+            }
+            // 否则就退出
+            else
+            {
+                CloseMainWindow();
+                return false;
+            }
+
+            return true;
         }
 
         internal void Release()
         {
             StopTimer();
+
+            rpcServerRunningCanceller.Cancel();
+            try
+            {
+#pragma warning disable VSTHRD002 // 避免有问题的同步等待
+                rpcServerRunningTask.Wait();
+#pragma warning restore VSTHRD002 // 避免有问题的同步等待
+            }
+            catch (TaskCanceledException) { }
+
+            MainService.Dispose();
+            GuiService.Dispose();
         }
 
         private static IRelayCommand[] GetStateRelativeCommands()
@@ -58,24 +136,27 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
         }
 
-        static MainViewModel()
-        {
-            App.MainService.OnCtiConnectionStateChanged += MainService_OnCtiConnectionStateChanged;
-            App.MainService.OnLoginCompleted += MainService_OnLoginCompleted;
-            App.MainService.OnStatusChanged += MainService_OnStatusChanged;
-            App.MainService.OnSignedGroupsChanged += MainService_OnSignedGroupsChanged;
-            App.MainService.OnRingCallReceived += MainService_OnRingCallReceived;
-            App.MainService.OnHeldCallReceived += MainService_OnHeldCallReceived;
-            App.MainService.OnTeleStateChanged += MainService_OnTeleStateChanged;
-            App.MainService.OnSipRegisterStateChanged += MainService_OnSipRegisterStateChanged;
-            App.MainService.OnSipCallStateChanged += MainService_OnSipCallStateChanged;
-            App.MainService.OnQueueInfoEvent += MainService_OnQueueInfoEvent;
-            App.MainService.OnStatsChanged += MainService_OnStatsChanged;
-        }
         #endregion
 
 
         #region UI
+
+        internal void ShowMainWindow()
+        {
+            var win = Application.Current.MainWindow as Views.MainWindow;
+            win.WindowState = WindowState.Normal;
+            win.Topmost = true;
+            Snapped = false;
+        }
+
+        internal bool IsExiting { get; private set; }
+
+        internal void CloseMainWindow()
+        {
+            var win = Application.Current.MainWindow as Views.MainWindow;
+            IsExiting = true;
+            win.Close();
+        }
 
         private static bool pinned;
         public bool Pinned
@@ -333,12 +414,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private void StopTimer()
         {
-            using (timerCanceller)
+            if (timerCanceller != null)
             {
-                timerCanceller.Cancel();
+                using (timerCanceller)
+                {
+                    timerCanceller.Cancel();
 #pragma warning disable VSTHRD002
-                timerTask.Wait();
+                    timerTask?.Wait();
 #pragma warning restore VSTHRD002
+                }
             }
         }
 
@@ -351,7 +435,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #region Agent Status
         private static void MainService_OnCtiConnectionStateChanged(object sender, services.Events.CtiConnectionStateChangedEventArgs e)
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             Instance.CtiServices = svc.GetCtiServers();
             ResetStatusTimeSpan();
         }
@@ -375,7 +459,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static void MainService_OnLoginCompleted(object sender, EventArgs e)
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             var ss = svc.GetWorkerNum();
             Instance.WorkerNumber = ss[0];
             Instance.DisplayName = ss[1];
@@ -434,7 +518,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #region 信息面板
         private static void MainService_OnStatsChanged(object sender, EventArgs e)
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             Instance.Stats = svc.GetStats();
         }
 
@@ -496,7 +580,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static void MainService_OnSignedGroupsChanged(object sender, EventArgs e)
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             Instance.Groups = svc.GetGroups();
         }
 
@@ -516,7 +600,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static async void DoSignGroup(object parameter)
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
 
             if (parameter == null)
                 throw new ArgumentNullException(nameof(parameter));
@@ -588,7 +672,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             logger.DebugFormat("设置状态: {0}", parameter);
 
             var st = parameter as AgentStateWorkType;
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
             {
                 if (st.Item1 == client.AgentState.Idle)
@@ -661,7 +745,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static void ReloadSipAccounts()
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             var dispatcher = Application.Current.Dispatcher;
             Instance.SipAccounts = svc.GetSipAccounts();
             IRelayCommand[] commands = { answerCommand, hangupCommand };
@@ -691,7 +775,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static async void DoAnswer()
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             using (await Utils.CommandGuard.EnterAsync(answerCommand))
             {
                 logger.Debug("摘机");
@@ -711,7 +795,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static async void DoHangup()
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             using (await Utils.CommandGuard.EnterAsync(hangupCommand))
             {
                 logger.Debug("挂机");
@@ -747,7 +831,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static void ReloadCalls()
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             Instance.Calls = svc.GetCalls();
             Instance.HeldCalls = Instance.Calls.Where(x => x.IsHeld).ToList();
         }
@@ -775,7 +859,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static async void DoHold()
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
             {
                 await svc.Hold();
@@ -795,7 +879,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public IRelayCommand UnHoldCommand => unHoldCommand;
         private static async void DoUnHold(object parameter)
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
             {
                 if (parameter == null)
@@ -814,7 +898,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             if (!IsMainConnectionOk) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             if (status.Item1 != client.AgentState.Work) return false;
             if (parameter == null)
             {
@@ -853,7 +937,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static void MainService_OnQueueInfoEvent(object sender, services.Events.QueueInfoEventArgs e)
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             Instance.QueueInfos = svc.GetQueueInfos();
         }
 
@@ -892,7 +976,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async void DoDequeue(object paramter)
         {
             var queueInfo = (services.Models.QueueInfo)paramter;
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             using (await Utils.CommandGuard.EnterAsync())
             {
                 await svc.Dequeue(queueInfo.CtiIndex, queueInfo.Channel);
@@ -912,7 +996,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static async void DoXferConsult()
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
 
             Dialogs.PromptDialog dialog = new()
             {
@@ -943,7 +1027,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static async void DoXfer()
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
 
             Dialogs.PromptDialog dialog = new()
             {
@@ -974,7 +1058,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static async void DoDial()
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             Dialogs.PromptDialog dialog = new()
             {
                 DataContext = new Dictionary<string, object> {
@@ -994,7 +1078,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static async void DoXferExt()
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             Dialogs.PromptDialog dialog = new()
             {
                 DataContext = new Dictionary<string, object> {
@@ -1014,7 +1098,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static async void DoXferExtConsult()
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
             Dialogs.PromptDialog dialog = new()
             {
                 DataContext = new Dictionary<string, object> {
@@ -1034,7 +1118,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static async void DoCallIvr()
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
 
             string ivrId;
             client.IvrInvokeType ivrType;
@@ -1087,7 +1171,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static async void DoAdvCommand()
         {
-            var svc = App.MainService;
+            var svc = Instance.MainService;
 
             int connIndex;
             client.MessageType msgTyp;

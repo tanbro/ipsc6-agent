@@ -24,7 +24,6 @@ namespace ipsc6.agent.wpfapp.Views
         {
             InitializeComponent();
             DataContext = ViewModels.LoginViewModel.Instance;
-            ViewModels.LoginViewModel.Instance.Window = this;
         }
 
         private void PasswordChanged(object sender, RoutedEventArgs e)

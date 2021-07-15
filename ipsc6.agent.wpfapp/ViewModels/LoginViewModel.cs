@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using System.Windows;
 
-using Microsoft.Extensions.Configuration;
 using Microsoft.Toolkit.Mvvm.Input;
 
 #pragma warning disable VSTHRD100
@@ -12,9 +11,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
     public class LoginViewModel : Utils.SingletonObservableObject<LoginViewModel>
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(LoginViewModel));
-
-        private static Views.LoginWindow window;
-        public Views.LoginWindow Window { set => window = value; }
 
         private static string workerNum;
         public string WorkerNum
@@ -66,6 +62,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             {
                 using (await Utils.CommandGuard.EnterAsync(loginCommand))
                 {
+                    var window = MainViewModel.Instance.LoginWindow;
                     try
                     {
                         await ExecuteLoginAsync();
@@ -100,7 +97,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         internal static async Task DoLoginAsync(string workerNum, string password)
         {
             var dispatcher = Application.Current.Dispatcher;
-            var svc = App.MainService;
+            var svc = MainViewModel.Instance.MainService;
 
             using (await Utils.CommandGuard.EnterAsync(loginCommand))
             {
@@ -109,6 +106,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
                 await dispatcher.Invoke(async () =>
                 {
+                    var window = MainViewModel.Instance.LoginWindow;
                     try
                     {
                         if (isLoginCompleted)
@@ -148,14 +146,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 return false;
             if (Utils.CommandGuard.IsGuarding)
                 return false;
-            if (App.LoginWindow == null)
-                return false;
             return true;
         }
 
         private static async Task ExecuteLoginAsync()
         {
-            var svc = App.MainService;
+            var svc = MainViewModel.Instance.MainService;
             logger.Info("ExecuteLoginAsync - 开始登录...");
             await svc.LogInAsync(workerNum, password);
             logger.Info("ExecuteLoginAsync - 登录成功!");

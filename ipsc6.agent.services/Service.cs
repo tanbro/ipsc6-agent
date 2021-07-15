@@ -24,11 +24,7 @@ namespace ipsc6.agent.services
             {
                 if (disposing)
                 {
-                    if (agent != null)
-                    {
-                        agent.Dispose();
-                        agent = null;
-                    }
+                    agent.Dispose();
                     client.Agent.Release();
                 }
                 disposedValue = true;
@@ -66,7 +62,7 @@ namespace ipsc6.agent.services
 
         public event EventHandler OnEchoTriggered;
 
-        public void ThrowAnException(string message)
+        public static void ThrowAnException(string message)
         {
             throw new InvalidOperationException(message);
         }
@@ -74,18 +70,42 @@ namespace ipsc6.agent.services
 
         #region Ctor/Dtor
 
-        private client.Agent agent;
+        private readonly client.Agent agent;
         private readonly Models.Model model;
 
-        public Service(config.Ipsc cfgIpsc)
+        private readonly config.Ipsc _cfgIpsc;
+
+        public static Service Instance { get; private set; }
+
+        private static readonly object _l = new();
+
+        public static Service Create(config.Ipsc cfgIpsc)
+        {
+            if (cfgIpsc is null)
+            {
+                throw new ArgumentNullException(nameof(cfgIpsc));
+            }
+
+            lock (_l)
+            {
+                if (Instance != null)
+                {
+                    throw new InvalidOperationException();
+                }
+                Instance = new Service(cfgIpsc);
+                return Instance;
+            }
+        }
+
+        private Service(config.Ipsc cfgIpsc)
         {
             if (cfgIpsc is null)
                 throw new ArgumentNullException(nameof(cfgIpsc));
+            _cfgIpsc = cfgIpsc;
 
             client.Agent.Initial();
-            if (agent != null)
-                throw new InvalidOperationException();
-            agent = new client.Agent(cfgIpsc.ServerList, cfgIpsc.LocalPort, cfgIpsc.LocalAddress);
+
+            agent = new client.Agent(_cfgIpsc.LocalPort, _cfgIpsc.LocalAddress);
 
             agent.OnAgentDisplayNameReceived += Agent_OnAgentDisplayNameReceived;
 
@@ -161,7 +181,7 @@ namespace ipsc6.agent.services
 
         internal async Task LogInAsync(string workerNum, string password)
         {
-            await agent.StartUpAsync(workerNum, password);
+            await agent.StartUpAsync(_cfgIpsc.ServerList, workerNum, password);
         }
 
         public IReadOnlyList<string> GetWorkerNum()

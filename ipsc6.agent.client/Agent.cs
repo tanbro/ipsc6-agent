@@ -13,36 +13,17 @@ namespace ipsc6.agent.client
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Agent));
 
-        public Agent(IEnumerable<CtiServer> ctiServers, ushort localPort = 0, string localAddress = "")
+        public Agent(ushort localPort = 0, string localAddress = "")
         {
-            foreach (var ctiServer in ctiServers)
-            {
-                var conn = new Connection(localPort, localAddress);
-                conn.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
-                conn.OnServerSentEvent += Conn_OnServerSend;
-                connections.Add(conn);
-                this.ctiServers.Add(ctiServer);
-            }
-        }
-
-        public Agent(IEnumerable<string> addresses, ushort localPort = 0, string localAddress = "")
-        {
-            foreach (var s in addresses)
-            {
-                var ctiServer = new CtiServer(s);
-                var conn = new Connection(localPort, localAddress);
-                conn.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
-                conn.OnServerSentEvent += Conn_OnServerSend;
-                connections.Add(conn);
-                ctiServers.Add(ctiServer);
-            }
+            LocalPort = localPort;
+            LocalAddress = localAddress;
         }
 
         // 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
         //~Agent()
         //{
-        // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
-        //Dispose(disposing: false);
+        //  不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+        //  Dispose(disposing: false);
         //}
 
         // Flag: Has Dispose already been called?
@@ -61,14 +42,8 @@ namespace ipsc6.agent.client
                 if (disposing)
                 {
                     // 释放托管状态(托管对象)
-                    ClearPjSipAccount();
-                    //
-                    foreach (var conn in connections)
-                    {
-                        logger.DebugFormat("Dispose {0}", conn);
-                        conn.Dispose();
-                    }
-                    connections.Clear();
+                    DisposePjSipAccounts();
+                    DisposeConnections();
                 }
                 // 释放未托管的资源(未托管的对象)并重写终结器
                 // 将大型字段设置为 null
@@ -79,6 +54,8 @@ namespace ipsc6.agent.client
 
         internal static Endpoint SipEndpoint;
         internal static TaskFactory SyncFactory;
+        public ushort LocalPort { get; private set; }
+        public string LocalAddress { get; private set; }
 
         public static bool IsInitialized { get; private set; }
 
@@ -1034,7 +1011,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        public async Task StartUpAsync(string workerNum, string password)
+        public async Task StartUpAsync(IEnumerable<string> addresses, string workerNum, string password)
         {
             using (requestGuard.TryEnter())
             {
@@ -1051,6 +1028,15 @@ namespace ipsc6.agent.client
                     RunningState = AgentRunningState.Starting;
                 }
 
+                foreach (var s in addresses)
+                {
+                    var ctiServer = new CtiServer(s);
+                    var conn = new Connection(LocalPort, LocalAddress);
+                    conn.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
+                    conn.OnServerSentEvent += Conn_OnServerSend;
+                    connections.Add(conn);
+                    ctiServers.Add(ctiServer);
+                }
                 WorkerNum = workerNum;
                 this.password = password;
 
@@ -1216,13 +1202,24 @@ namespace ipsc6.agent.client
 
                 lock (this)
                 {
-                    // release Sip Accounts
-                    ClearPjSipAccount();
+                    DisposePjSipAccounts();
+                    DisposeConnections();
                 }
             }
         }
 
-        private void ClearPjSipAccount()
+        private void DisposeConnections()
+        {
+            foreach (var conn in connections)
+            {
+                logger.DebugFormat("Dispose {0}", conn);
+                conn.Dispose();
+            }
+            connections.Clear();
+            ctiServers.Clear();
+        }
+
+        private void DisposePjSipAccounts()
         {
             foreach (var acc in sipAccountCollection)
             {
@@ -1234,6 +1231,7 @@ namespace ipsc6.agent.client
                 acc.Dispose();
             }
             sipAccountCollection.Clear();
+            sipAccounts.Clear();
         }
 
         public bool IsRequesting => requestGuard.IsEntered;
