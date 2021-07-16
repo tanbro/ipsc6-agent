@@ -36,6 +36,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         internal readonly config.Ipsc cfgIpsc = new();
         internal readonly config.Startup cfgWindow = new();
+        internal readonly config.Phone cfgPhone = new();
 
         internal bool Initial()
         {
@@ -45,8 +46,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var cfgRoot = ConfigManager.ConfigurationRoot;
             cfgRoot.GetSection(nameof(config.Ipsc)).Bind(cfgIpsc);
             cfgRoot.GetSection(nameof(config.Startup)).Bind(cfgWindow);
+            cfgRoot.GetSection(nameof(config.Phone)).Bind(cfgPhone);
 
-            MainService = services.Service.Create(cfgIpsc);
+            MainService = services.Service.Create(cfgIpsc, cfgPhone);
             MainService.OnCtiConnectionStateChanged += MainService_OnCtiConnectionStateChanged;
             MainService.OnLoginCompleted += MainService_OnLoginCompleted;
             MainService.OnStatusChanged += MainService_OnStatusChanged;

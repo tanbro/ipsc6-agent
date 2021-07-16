@@ -59,32 +59,55 @@ namespace ipsc6.agent.client
 
         public static bool IsInitialized { get; private set; }
 
-        public static void Initial()
+        public static void Initial(SipConfigArgs sipConfigArgs = null)
         {
             if (IsInitialized)
                 throw new InvalidOperationException("Initialized already");
             logger.Info("Initial");
 
-            logger.Debug("network.Connector.Initial()");
-            network.Connector.Initial();
-
+            /// Get a Synchronized TaskFactory
             SyncFactory = new TaskFactory(TaskScheduler.FromCurrentSynchronizationContext());
 
-            logger.Debug("create pjsua2 endpoint");
+            /// Init PJ SIP UA
+            logger.Info("create pjsua2 endpoint.");
+            sipConfigArgs ??= new SipConfigArgs();
+            if (sipConfigArgs.TransportConfigArgsCollection.Count() == 0)
+            {
+                sipConfigArgs.TransportConfigArgsCollection = new SipTransportConfigArgs[] { new() };
+            }
             SipEndpoint = new Endpoint();
             SipEndpoint.libCreate();
             using (var epCfg = new EpConfig())
-            using (var sipTpConfig = new TransportConfig { port = 5060 })
             {
+                epCfg.uaConfig.maxCalls = 1;
                 //epCfg.logConfig.level = 3;
                 //epCfg.logConfig.msgLogging = 0;
                 //epCfg.logConfig.writer = SipLogWriter.Instance;
                 SipEndpoint.libInit(epCfg);
-                logger.Debug("pjsua2 endpoint creates transport");
-                SipEndpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, sipTpConfig);
+                foreach (var args in sipConfigArgs.TransportConfigArgsCollection)
+                {
+                    logger.DebugFormat("pjsua2 endpoint craete transport: {0}", args);
+                    using TransportConfig cfg = new() { port = args.Port, portRange = args.PortRange };
+                    if (!string.IsNullOrWhiteSpace(args.BoundAddress))
+                    {
+                        cfg.boundAddress = args.BoundAddress;
+                    }
+                    if (!string.IsNullOrWhiteSpace(args.PublicAddress))
+                    {
+                        cfg.publicAddress = args.PublicAddress;
+                    }
+                    SipEndpoint.transportCreate(args.TransportType, cfg);
+                }
             }
-            logger.Debug("pjsua2 endpoint starts");
+            logger.Debug("pjsua2 endpoint start...");
             SipEndpoint.libStart();
+            logger.Debug("pjsua2 endpoint start ok!");
+
+            /// Init our Raknet library
+            logger.Debug("network.Connector.Initial()");
+            network.Connector.Initial();
+
+            /// OK!
             IsInitialized = true;
         }
 
@@ -258,7 +281,7 @@ namespace ipsc6.agent.client
                 // 通知原来的主，无论能否通知成功
                 Task.Run(async () =>
                 {
-                    var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKENAWAY);
+                    AgentRequestMessage req = new(MessageType.REMOTE_MSG_TAKENAWAY);
                     await oldMainConnObj.RequestAsync(req);
                 });
                 // fire the event
@@ -266,7 +289,7 @@ namespace ipsc6.agent.client
             }
             if (oldState != null)
             {
-                var ev = new AgentStateChangedEventArgs(oldState, newState);
+                AgentStateChangedEventArgs ev = new(oldState, newState);
                 OnAgentStateChanged?.Invoke(this, ev);
             }
         }
@@ -320,7 +343,7 @@ namespace ipsc6.agent.client
 
         private void ProcessQueueInfoMessage(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var queueInfo = new QueueInfo(ctiServer, msg, groups);
+            QueueInfo queueInfo = new(ctiServer, msg, groups);
             bool isAlive = aliveQueueEventTypes.Contains(queueInfo.EventType);
             logger.DebugFormat("QueueInfoMessage - {0}", queueInfo);
             // 记录 QueueInfo
@@ -460,7 +483,7 @@ namespace ipsc6.agent.client
             var connectionIndex = GetConnetionIndex(connectionInfo);
             if (string.IsNullOrWhiteSpace(msg.S)) return;
             var val = msg.S.Split(Constants.VerticalBarDelimiter);
-            var evt = new SipRegistrarListReceivedEventArgs(val);
+            SipRegistrarListReceivedEventArgs evt = new(val);
 
             SyncFactory.StartNew(async () =>
             {
@@ -611,16 +634,16 @@ namespace ipsc6.agent.client
         public event EventHandler<CustomStringReceivedEventArgs> OnCustomStringReceived;
         private void DoOnCustomString(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var val = new ServerSentCustomString(ctiServer, msg.N2, msg.S);
-            var evt = new CustomStringReceivedEventArgs(ctiServer, val);
+            ServerSentCustomString val = new(ctiServer, msg.N2, msg.S);
+            CustomStringReceivedEventArgs evt = new(ctiServer, val);
             OnCustomStringReceived?.Invoke(this, evt);
         }
 
         public event EventHandler<IvrDataReceivedEventArgs> OnIvrDataReceived;
         private void DoOnIvrData(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var val = new IvrData(ctiServer, msg.N2, msg.S);
-            var evt = new IvrDataReceivedEventArgs(ctiServer, val);
+            IvrData val = new(ctiServer, msg.N2, msg.S);
+            IvrDataReceivedEventArgs evt = new(ctiServer, val);
             OnIvrDataReceived?.Invoke(this, evt);
         }
 
@@ -628,7 +651,7 @@ namespace ipsc6.agent.client
         private void DoOnRing(CtiServer ctiServer, ServerSentMessage msg)
         {
             WorkingChannelInfo workingChannelInfo = new(ctiServer, msg.N2);
-            var callInfo = new CallInfo(ctiServer, workingChannelInfo.Channel, msg.S);
+            CallInfo callInfo = new(ctiServer, workingChannelInfo.Channel, msg.S);
             logger.DebugFormat("OnRing - {0}", callInfo);
             lock (this)
             {
@@ -644,7 +667,7 @@ namespace ipsc6.agent.client
         public event EventHandler<WorkingChannelInfoReceivedEventArgs> OnWorkingChannelInfoReceived;
         private void DoOnWorkingChannel(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var workingChannelInfo = new WorkingChannelInfo(ctiServer, msg.N2, msg.S);
+            WorkingChannelInfo workingChannelInfo = new(ctiServer, msg.N2, msg.S);
             logger.DebugFormat("OnWorkingChannel - {0}: {1}", ctiServer, workingChannelInfo.Channel);
             lock (this)
             {
@@ -801,7 +824,7 @@ namespace ipsc6.agent.client
         public event EventHandler<ChannelAssignedEventArgs> OnChannelAssigned;
         private void DoOnChannel(CtiServer ctiServer, ServerSentMessage msg)
         {
-            var evt = new ChannelAssignedEventArgs(ctiServer, msg.N2);
+            ChannelAssignedEventArgs evt = new(ctiServer, msg.N2);
             lock (this)
             {
                 AgentChannel = evt.Value;
@@ -836,8 +859,8 @@ namespace ipsc6.agent.client
             var conn = sender as Connection;
             var connIdx = connections.IndexOf(conn);
             var ctiServer = ctiServers[connIdx];
-            var rand = new Random();
-            var evtStateChanged = new ConnectionInfoStateChangedEventArgs(ctiServer, e.OldState, e.NewState);
+            Random rand = new();
+            ConnectionInfoStateChangedEventArgs evtStateChanged = new(ctiServer, e.OldState, e.NewState);
             EventArgs evtMainConnChanged = null;
             Action action = null;
             logger.DebugFormat("{0}: {1} --> {2}", conn, e.OldState, e.NewState);
@@ -1017,7 +1040,7 @@ namespace ipsc6.agent.client
             {
                 AgentRunningState savedRunningState;
                 IEnumerable<int> minorIndices;
-                var rand = new Random();
+                Random rand = new();
                 lock (this)
                 {
                     if (RunningState != AgentRunningState.Stopped)
@@ -1030,8 +1053,8 @@ namespace ipsc6.agent.client
 
                 foreach (var s in addresses)
                 {
-                    var ctiServer = new CtiServer(s);
-                    var conn = new Connection(LocalPort, LocalAddress);
+                    CtiServer ctiServer = new(s);
+                    Connection conn = new(LocalPort, LocalAddress);
                     conn.OnConnectionStateChanged += Conn_OnConnectionStateChanged;
                     conn.OnServerSentEvent += Conn_OnServerSend;
                     connections.Add(conn);
@@ -1268,7 +1291,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var s = string.Join("|", ids);
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNON, s);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_SIGNON, s);
                 await MainConnection.RequestAsync(req);
             }
         }
@@ -1288,7 +1311,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var s = string.Join("|", ids);
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_SIGNOFF, s);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_SIGNOFF, s);
                 await MainConnection.RequestAsync(req);
             }
         }
@@ -1297,7 +1320,7 @@ namespace ipsc6.agent.client
         {
             using (requestGuard.TryEnter())
             {
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONTINUE);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_CONTINUE);
                 await MainConnection.RequestAsync(req);
             }
         }
@@ -1319,7 +1342,7 @@ namespace ipsc6.agent.client
                 throw new ArgumentOutOfRangeException(nameof(workType), $"Invalid work type {workType}");
             using (requestGuard.TryEnter())
             {
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_PAUSE, (int)workType);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_PAUSE, (int)workType);
                 await MainConnection.RequestAsync(req);
             }
         }
@@ -1330,7 +1353,7 @@ namespace ipsc6.agent.client
             {
                 var conn = MainConnection;
                 var s = $"{calledTelNum}|{callingTelNum}|{channelGroup}|{option}";
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_DIAL, 0, s);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_DIAL, 0, s);
                 await OffHookAsync(conn);
                 await conn.RequestAsync(req);
             }
@@ -1342,7 +1365,7 @@ namespace ipsc6.agent.client
             {
                 var conn = GetConnection(connectionInfo);
                 var s = $"{workerNum}|{groupId}|{customString}";
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER, channel, s);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_TRANSFER, channel, s);
                 await conn.RequestAsync(req);
             }
         }
@@ -1370,7 +1393,7 @@ namespace ipsc6.agent.client
             {
                 var conn = GetConnection(WorkingChannelInfo.CtiServer);
                 var s = $"{workerNum}|{groupId}|{customString}";
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT, -1, s);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_CONSULT, -1, s);
                 await conn.RequestAsync(req);
             }
         }
@@ -1381,7 +1404,7 @@ namespace ipsc6.agent.client
             {
                 var conn = GetConnection(connectionInfo);
                 var s = $"{calledTelNum}|{callingTelNum}|{channelGroup}|{option}";
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TRANSFER_EX, channel, s);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_TRANSFER_EX, channel, s);
                 await conn.RequestAsync(req);
             }
         }
@@ -1411,7 +1434,7 @@ namespace ipsc6.agent.client
             {
                 var conn = GetConnection(WorkingChannelInfo.CtiServer);
                 var s = $"{calledTelNum}|{callingTelNum}|{channelGroup}|{option}";
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CONSULT_EX, -1, s);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_CONSULT_EX, -1, s);
                 await conn.RequestAsync(req);
             }
         }
@@ -1422,7 +1445,7 @@ namespace ipsc6.agent.client
             {
                 var conn = GetConnection(connectionInfo);
                 var s = $"{ivrId}|{(int)invokeType}|{customString}";
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_CALLSUBFLOW, channel, s);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_CALLSUBFLOW, channel, s);
                 await conn.RequestAsync(req);
             }
         }
@@ -1451,7 +1474,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(WorkingChannelInfo.CtiServer);
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_HOLD);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_HOLD);
                 await conn.RequestAsync(req);
             }
         }
@@ -1461,7 +1484,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_RETRIEVE, channel);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_RETRIEVE, channel);
                 await conn.RequestAsync(req);
             }
         }
@@ -1492,7 +1515,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(WorkingChannelInfo.CtiServer);
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_BREAK_SESS, channel, customString);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_BREAK_SESS, channel, customString);
                 await conn.RequestAsync(req);
             }
         }
@@ -1582,7 +1605,7 @@ namespace ipsc6.agent.client
                 logger.DebugFormat("OffHook - 服务节点 [{0}] 回呼请求开始", connection);
                 offHookServerTcs = new();
                 offHookClientTcs = new();
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_OFFHOOK);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_OFFHOOK);
                 await connection.RequestAsync(req);
                 var timeoutTask = Task.Delay(millisecondsTimeout);
                 Task[] waitingTasks = { offHookServerTcs.Task, offHookClientTcs.Task };
@@ -1639,7 +1662,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionIndex);
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_GETQUEUE, channel);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_GETQUEUE, channel);
                 await conn.RequestAsync(req);
             }
         }
@@ -1649,7 +1672,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_LISTEN, -1, workerNum);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_LISTEN, -1, workerNum);
                 await OffHookAsync(conn);
                 await conn.RequestAsync(req);
             }
@@ -1667,7 +1690,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_INTERCEPT, -1, workerNum);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_INTERCEPT, -1, workerNum);
                 await conn.RequestAsync(req);
             }
         }
@@ -1683,7 +1706,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_STOPLISTEN, workerNum);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_STOPLISTEN, workerNum);
                 await conn.RequestAsync(req);
             }
         }
@@ -1699,7 +1722,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEINSERT, -1, workerNum);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_FORCEINSERT, -1, workerNum);
                 await OffHookAsync(conn);
                 await conn.RequestAsync(req);
             }
@@ -1716,7 +1739,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var conn = GetConnection(connectionInfo);
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEHANGUP, workerNum);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_FORCEHANGUP, workerNum);
                 await conn.RequestAsync(req);
             }
         }
@@ -1732,7 +1755,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var s = $"{workerNum}|{groupId}";
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCESIGNOFF, -1, s);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_FORCESIGNOFF, -1, s);
                 await MainConnection.RequestAsync(req);
             }
         }
@@ -1741,7 +1764,7 @@ namespace ipsc6.agent.client
         {
             using (requestGuard.TryEnter())
             {
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEIDLE, -1, workerNum);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_FORCEIDLE, -1, workerNum);
                 await MainConnection.RequestAsync(req);
             }
         }
@@ -1751,7 +1774,7 @@ namespace ipsc6.agent.client
             using (requestGuard.TryEnter())
             {
                 var s = $"{workerNum}|{(int)workType}";
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_FORCEPAUSE, -1, s);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_FORCEPAUSE, -1, s);
                 await MainConnection.RequestAsync(req);
             }
         }
@@ -1760,7 +1783,7 @@ namespace ipsc6.agent.client
         {
             using (requestGuard.TryEnter())
             {
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_KICKOUT, -1, workerNum);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_KICKOUT, -1, workerNum);
                 await MainConnection.RequestAsync(req);
             }
         }
@@ -1791,7 +1814,7 @@ namespace ipsc6.agent.client
                 }
                 OnMainConnectionChanged?.Invoke(this, EventArgs.Empty);
                 // 再通知原来的主，无论能否通知成功
-                var req = new AgentRequestMessage(MessageType.REMOTE_MSG_TAKENAWAY);
+                AgentRequestMessage req = new(MessageType.REMOTE_MSG_TAKENAWAY);
                 await connObj.RequestAsync(req);
             }
         }

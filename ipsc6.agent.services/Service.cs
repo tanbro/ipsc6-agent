@@ -79,7 +79,7 @@ namespace ipsc6.agent.services
 
         private static readonly object _l = new();
 
-        public static Service Create(config.Ipsc cfgIpsc)
+        public static Service Create(config.Ipsc cfgIpsc, config.Phone cfgPhone)
         {
             if (cfgIpsc is null)
             {
@@ -92,18 +92,25 @@ namespace ipsc6.agent.services
                 {
                     throw new InvalidOperationException();
                 }
-                Instance = new Service(cfgIpsc);
+                Instance = new Service(cfgIpsc, cfgPhone);
                 return Instance;
             }
         }
 
-        private Service(config.Ipsc cfgIpsc)
+        private Service(config.Ipsc cfgIpsc, config.Phone cfgPhone)
         {
             if (cfgIpsc is null)
                 throw new ArgumentNullException(nameof(cfgIpsc));
             _cfgIpsc = cfgIpsc;
 
-            client.Agent.Initial();
+            client.SipConfigArgs sipCfgArgs = new()
+            {
+                TransportConfigArgsCollection = new client.SipTransportConfigArgs[]
+                {
+                    new(){BoundAddress=cfgPhone.LocalAddress, Port=cfgPhone.LocalSipPort, PublicAddress=cfgPhone.PublicAddress}
+                }
+            };
+            client.Agent.Initial(sipCfgArgs);
 
             agent = new client.Agent(_cfgIpsc.LocalPort, _cfgIpsc.LocalAddress);
 
