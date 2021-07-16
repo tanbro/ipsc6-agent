@@ -1,12 +1,16 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
 
 
 namespace ipsc6.agent.wpfapp
 {
+
     /// <summary>
     /// App.xaml 的交互逻辑
     /// </summary>
@@ -14,13 +18,40 @@ namespace ipsc6.agent.wpfapp
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(App));
 
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
         internal Assembly Assembly { get; private set; }
         internal FileVersionInfo VersionInfo { get; private set; }
 
         internal bool IsStartupOk { get; private set; }
 
+#pragma warning disable IDE0052 // 删除未读的私有成员
+        private static Mutex mutex;
+#pragma warning restore IDE0052 // 删除未读的私有成员
+        private const string mutexName = "181f92f7-3f77-4803-b46b-1da4d1c2a66e";
+
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            // 重复运行
+            bool createdNew;
+            mutex = new(true, mutexName, out createdNew);
+            if (!createdNew)
+            {
+                var currentProcess = Process.GetCurrentProcess();
+                var processes = Process.GetProcessesByName(currentProcess.ProcessName);
+                var process = processes.FirstOrDefault(x => x.Id != currentProcess.Id);
+                if (process != null)
+                {
+                    if (process.MainWindowHandle != IntPtr.Zero)
+                    {
+                        SetForegroundWindow(process.MainWindowHandle);
+                    }
+                }
+                Shutdown(3);
+                return;
+            }
+
             try
             {
                 Assembly = Assembly.GetExecutingAssembly();
@@ -39,6 +70,7 @@ namespace ipsc6.agent.wpfapp
 
             try
             {
+                log4net.GlobalContext.Properties["ProcessId"] = Process.GetCurrentProcess().Id;
                 log4net.GlobalContext.Properties["ProductName"] = VersionInfo.ProductName;
                 log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(Path.Combine("Config", "log4net.config")));
                 logger.WarnFormat("\r\n!!!!!!!!!!!!!!!!!!!! Startup (AssemblyVersion {0}, FileVersion {1}) !!!!!!!!!!!!!!!!!!!!\r\n", Assembly.GetName().Version, VersionInfo.FileVersion);
@@ -67,14 +99,12 @@ namespace ipsc6.agent.wpfapp
                     VersionInfo.FileDescription,
                     MessageBoxButton.OK, MessageBoxImage.Error
                 );
-                Shutdown(3);
+                Shutdown(4);
                 return;
             }
 
             IsStartupOk = true;
         }
-
-
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
