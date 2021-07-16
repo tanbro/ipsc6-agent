@@ -5,9 +5,6 @@ using System.Reflection;
 using System.Windows;
 
 
-
-
-
 namespace ipsc6.agent.wpfapp
 {
     /// <summary>
