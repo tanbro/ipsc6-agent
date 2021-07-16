@@ -56,6 +56,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 cfgRoot.GetSection(nameof(config.Phone)).Bind(cfgPhone);
                 cfgRoot.GetSection(nameof(config.LocalWebServer)).Bind(cfgLocalWebServer);
 
+                if (string.IsNullOrWhiteSpace(cfgPhone.RingerWaveFile))
+                {
+                    cfgPhone.RingerWaveFile = @"Audios/electronic-phone-ringer.wav";
+                }
+
                 MainService = services.Service.Create(cfgIpsc, cfgPhone);
                 MainService.OnCtiConnectionStateChanged += MainService_OnCtiConnectionStateChanged;
                 MainService.OnLoginCompleted += MainService_OnLoginCompleted;

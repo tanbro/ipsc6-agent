@@ -57,6 +57,8 @@ namespace ipsc6.agent.client
         public ushort LocalPort { get; private set; }
         public string LocalAddress { get; private set; }
 
+        private static SipConfigArgs _sipConfigArgs;
+
         public static bool IsInitialized { get; private set; }
 
         public static void Initial(SipConfigArgs sipConfigArgs = null)
@@ -70,10 +72,10 @@ namespace ipsc6.agent.client
 
             /// Init PJ SIP UA
             logger.Info("create pjsua2 endpoint.");
-            sipConfigArgs ??= new SipConfigArgs();
-            if (sipConfigArgs.TransportConfigArgsCollection.Count() == 0)
+            _sipConfigArgs = sipConfigArgs ?? new SipConfigArgs();
+            if (_sipConfigArgs.TransportConfigArgsCollection.Count() == 0)
             {
-                sipConfigArgs.TransportConfigArgsCollection = new SipTransportConfigArgs[] { new() };
+                _sipConfigArgs.TransportConfigArgsCollection = new SipTransportConfigArgs[] { new() };
             }
             SipEndpoint = new Endpoint();
             SipEndpoint.libCreate();
@@ -84,7 +86,7 @@ namespace ipsc6.agent.client
                 //epCfg.logConfig.msgLogging = 0;
                 //epCfg.logConfig.writer = SipLogWriter.Instance;
                 SipEndpoint.libInit(epCfg);
-                foreach (var args in sipConfigArgs.TransportConfigArgsCollection)
+                foreach (var args in _sipConfigArgs.TransportConfigArgsCollection)
                 {
                     logger.DebugFormat("pjsua2 endpoint craete transport: {0}", args);
                     using TransportConfig cfg = new() { port = args.Port, portRange = args.PortRange };
@@ -511,7 +513,7 @@ namespace ipsc6.agent.client
                         cfg.regConfig.firstRetryIntervalSec = 15;
                         cfg.regConfig.registrarUri = $"sip:{addr}";
                         cfg.sipConfig.authCreds.Add(sipAuthCred);
-                        acc = new Sip.Account(connectionIndex);
+                        acc = new Sip.Account(connectionIndex, _sipConfigArgs.RingerWaveFile);
                         acc.OnRegisterStateChanged += Acc_OnRegisterStateChanged;
                         acc.OnIncomingCall += Acc_OnIncomingCall;
                         acc.OnCallDisconnected += Acc_OnCallStateChanged;

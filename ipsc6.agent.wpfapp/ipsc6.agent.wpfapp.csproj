@@ -270,6 +270,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\App.ico" />
+    <Content Include="Audios\electronic-phone-ringer.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Icons\svg\telephone-offhook.svg" />
   </ItemGroup>
   <ItemGroup>

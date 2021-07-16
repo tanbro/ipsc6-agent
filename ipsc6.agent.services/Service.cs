@@ -108,7 +108,8 @@ namespace ipsc6.agent.services
                 TransportConfigArgsCollection = new client.SipTransportConfigArgs[]
                 {
                     new(){BoundAddress=cfgPhone.LocalAddress, Port=cfgPhone.LocalPort, PublicAddress=cfgPhone.PublicAddress}
-                }
+                },
+                RingerWaveFile = cfgPhone.RingerWaveFile
             };
             client.Agent.Initial(sipCfgArgs);
 

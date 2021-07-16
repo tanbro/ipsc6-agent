@@ -73,7 +73,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
 #pragma warning disable CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
                 dispatcher.InvokeAsync(() =>
                 {
-                    window.ShowDialog();
+                    try
+                    {
+                        window.ShowDialog();
+                    }
+                    catch (InvalidOperationException) { }
                 });
 #pragma warning restore CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
 
@@ -128,7 +132,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
 #pragma warning disable CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
                 dispatcher.InvokeAsync(() =>
                 {
-                    window.ShowDialog();
+                    try
+                    {
+                        window.ShowDialog();
+                    }
+                    catch (InvalidOperationException) { }
                 });
 #pragma warning restore CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
 
