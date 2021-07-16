@@ -68,7 +68,7 @@
 
 座席程序的安装程序需要管理员权限。它将:
 
--   把程序文件复制到 `%programfiles(x86)%\HesongInfoTech\ipsc6.agent.wpfapp` 目录
+-   把程序文件复制到 `%programfiles(x86)%\ipsc6.agent.wpfapp` 目录
 -   建立快捷方式
 -   新建注册表项 `HKEY_CLASSES_ROOT\ipsc6-agent-app`
 

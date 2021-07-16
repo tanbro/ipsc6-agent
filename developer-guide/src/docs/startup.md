@@ -26,7 +26,7 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\ipsc6-agent-launch\shell\open]
 
 [HKEY_CLASSES_ROOT\ipsc6-agent-launch\shell\open\command]
-@="\"C:\\Program Files(x86)\\HesongInfoTech\\ipsc6.agent.wpfapp\ipsc6.agent.launch.exe\" \"%1\""
+@="\"C:\\Program Files(x86)\\ipsc6.agent.wpfapp\ipsc6.agent.launch.exe\" \"%1\""
 ```
 
 这样就可以通过 `ipsc6-agent` Protocol 启动程序。
@@ -49,7 +49,7 @@ Windows Registry Editor Version 5.00
 !!! example
 
     ```html
-    <a href="ipsc6-agent-launch:--WebServer:ListenPort 8080">启动座席程序</a>
+    <a href="ipsc6-agent-launch:--WebServer:Port 8080">启动座席程序</a>
     ```
 
 --8<-- "includes/glossary.md"
