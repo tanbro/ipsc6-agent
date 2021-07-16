@@ -44,7 +44,7 @@ namespace ipsc6.agent.wpfapp
             {
                 log4net.GlobalContext.Properties["ProductName"] = VersionInfo.ProductName;
                 log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(Path.Combine("Config", "log4net.config")));
-                logger.Warn("\r\n!!!!!!!!!!!!!!!!!!!! Startup !!!!!!!!!!!!!!!!!!!!\r\n");
+                logger.WarnFormat("\r\n!!!!!!!!!!!!!!!!!!!! Startup (AssemblyVersion {0}, FileVersion {1}) !!!!!!!!!!!!!!!!!!!!\r\n", Assembly.GetName().Version, VersionInfo.FileVersion);
             }
             catch (Exception err)
             {

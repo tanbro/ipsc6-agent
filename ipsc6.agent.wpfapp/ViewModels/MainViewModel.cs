@@ -37,71 +37,95 @@ namespace ipsc6.agent.wpfapp.ViewModels
         internal readonly config.Ipsc cfgIpsc = new();
         internal readonly config.Startup cfgWindow = new();
         internal readonly config.Phone cfgPhone = new();
+        internal readonly config.LocalWebServer cfgLocalWebServer = new();
 
         internal bool Initial()
         {
             // 注意这里尚未登录
 
-            /// 非 GUI 的初始化
-            var cfgRoot = ConfigManager.ConfigurationRoot;
-            cfgRoot.GetSection(nameof(config.Ipsc)).Bind(cfgIpsc);
-            cfgRoot.GetSection(nameof(config.Startup)).Bind(cfgWindow);
-            cfgRoot.GetSection(nameof(config.Phone)).Bind(cfgPhone);
+            Exception iniErr = null;
+            var mainWindow = Application.Current.MainWindow;
 
-            MainService = services.Service.Create(cfgIpsc, cfgPhone);
-            MainService.OnCtiConnectionStateChanged += MainService_OnCtiConnectionStateChanged;
-            MainService.OnLoginCompleted += MainService_OnLoginCompleted;
-            MainService.OnStatusChanged += MainService_OnStatusChanged;
-            MainService.OnSignedGroupsChanged += MainService_OnSignedGroupsChanged;
-            MainService.OnRingCallReceived += MainService_OnRingCallReceived;
-            MainService.OnHeldCallReceived += MainService_OnHeldCallReceived;
-            MainService.OnTeleStateChanged += MainService_OnTeleStateChanged;
-            MainService.OnSipRegisterStateChanged += MainService_OnSipRegisterStateChanged;
-            MainService.OnSipCallStateChanged += MainService_OnSipCallStateChanged;
-            MainService.OnQueueInfoEvent += MainService_OnQueueInfoEvent;
-            MainService.OnStatsChanged += MainService_OnStatsChanged;
-
-            GuiService = new();
-
-            LocalRpcTargetFunc[] localRpcCreators = {
-                (_, _) => MainService,
-                (_, _) => GuiService,
-            };
-            rpcServer = new(localRpcCreators);
-            rpcServerRunningCanceller = new();
-            rpcServerRunningTask = Task.Run(() => rpcServer.RunAsync(rpcServerRunningCanceller.Token));
-
-            /// 登录
-            if (!cfgWindow.LoginNotRequired)
+            try
             {
-                // 默认的方式：直接显示登录对话窗
-                // 登录失败否则就退出函数返回假
-                if (!new Views.LoginWindow().ShowDialog().Value)
+
+                /// 非 GUI 的初始化
+                var cfgRoot = ConfigManager.ConfigurationRoot;
+                cfgRoot.GetSection(nameof(config.Ipsc)).Bind(cfgIpsc);
+                cfgRoot.GetSection(nameof(config.Startup)).Bind(cfgWindow);
+                cfgRoot.GetSection(nameof(config.Phone)).Bind(cfgPhone);
+                cfgRoot.GetSection(nameof(config.LocalWebServer)).Bind(cfgLocalWebServer);
+
+                MainService = services.Service.Create(cfgIpsc, cfgPhone);
+                MainService.OnCtiConnectionStateChanged += MainService_OnCtiConnectionStateChanged;
+                MainService.OnLoginCompleted += MainService_OnLoginCompleted;
+                MainService.OnStatusChanged += MainService_OnStatusChanged;
+                MainService.OnSignedGroupsChanged += MainService_OnSignedGroupsChanged;
+                MainService.OnRingCallReceived += MainService_OnRingCallReceived;
+                MainService.OnHeldCallReceived += MainService_OnHeldCallReceived;
+                MainService.OnTeleStateChanged += MainService_OnTeleStateChanged;
+                MainService.OnSipRegisterStateChanged += MainService_OnSipRegisterStateChanged;
+                MainService.OnSipCallStateChanged += MainService_OnSipCallStateChanged;
+                MainService.OnQueueInfoEvent += MainService_OnQueueInfoEvent;
+                MainService.OnStatsChanged += MainService_OnStatsChanged;
+
+                GuiService = new();
+
+                LocalRpcTargetFunc[] localRpcCreators = {
+                    (_, _) => MainService,
+                    (_, _) => GuiService,
+                };
+                rpcServer = cfgLocalWebServer.Port == 0 ? (new(localRpcCreators)) : (new(localRpcCreators, cfgLocalWebServer.Port));
+                rpcServerRunningCanceller = new();
+                rpcServerRunningTask = Task.Run(() => rpcServer.RunAsync(rpcServerRunningCanceller.Token));
+
+                /// 登录
+                if (!cfgWindow.LoginNotRequired)
                 {
-                    return false;
+                    // 默认的方式：直接显示登录对话窗
+                    // 登录失败否则就退出函数返回假
+                    if (!new Views.LoginWindow().ShowDialog().Value)
+                    {
+                        return false;
+                    }
                 }
+
+                /// GUI 的一些初始化
+                IsShowToolbar = true;
+                RootGridVerticalAlignment = VerticalAlignment.Bottom;
+                mainWindow.Height = NormalWindowHeight;
+
+                switch (cfgWindow.MainWindowStartupMode)
+                {
+                    case config.MainWindowStartupMode.Normal:
+                        mainWindow.Activate();
+                        mainWindow.Focus();
+                        break;
+                    case config.MainWindowStartupMode.Snapped:
+                        mainWindow.Top = -1;
+                        break;
+                    case config.MainWindowStartupMode.Hide:
+                        mainWindow.Hide();
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+            catch (Exception e)
+            {
+                logger.ErrorFormat("Initial: {0}", e);
+                iniErr = e;
             }
 
-            /// GUI 的一些初始化
-            var mainWindow = Application.Current.MainWindow;
-            IsShowToolbar = true;
-            RootGridVerticalAlignment = VerticalAlignment.Bottom;
-            mainWindow.Height = NormalWindowHeight;
-
-            switch (cfgWindow.MainWindowStartupMode)
+            if (iniErr != null)
             {
-                case config.MainWindowStartupMode.Normal:
-                    mainWindow.Activate();
-                    mainWindow.Focus();
-                    break;
-                case config.MainWindowStartupMode.Snapped:
-                    mainWindow.Top = -1;
-                    break;
-                case config.MainWindowStartupMode.Hide:
-                    mainWindow.Hide();
-                    break;
-                default:
-                    break;
+                MessageBox.Show(
+                    $"主窗口视图模型初始化过程中出现了无法处理的异常，程序即将退出。\r\n\r\n{iniErr}",
+                    mainWindow.Title,
+                    MessageBoxButton.OK, MessageBoxImage.Error
+                );
+                return false;
             }
 
             return true;

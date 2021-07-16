@@ -102,9 +102,9 @@ namespace ipsc6.agent.client
         }
     }
 
-    public class ChannelAssignedEventArgs : BaseCtiEventArgs<int>
+    public class ChannelAssignedEventArgs : BaseCtiEventArgs<AgentChannelInfo>
     {
-        public ChannelAssignedEventArgs(CtiServer connectionInfo, int value) : base(connectionInfo, value) { }
+        public ChannelAssignedEventArgs(CtiServer connectionInfo, AgentChannelInfo value) : base(connectionInfo, value) { }
     }
 
     public class WorkingChannelInfoReceivedEventArgs : BaseCtiEventArgs<WorkingChannelInfo>

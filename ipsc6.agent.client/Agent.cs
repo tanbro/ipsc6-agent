@@ -155,7 +155,7 @@ namespace ipsc6.agent.client
         public int AgentId => MainConnection.AgentId;
 
         public string DisplayName { get; private set; }
-        public int AgentChannel { get; private set; } = -1;
+        public AgentChannelInfo AgentChannelInfo { get; private set; }
         public AgentState AgentState { get; private set; } = AgentState.NotExist;
         public WorkType WorkType { get; private set; } = WorkType.Unknown;
         public AgentStateWorkType AgentStateWorkType
@@ -824,16 +824,16 @@ namespace ipsc6.agent.client
         public event EventHandler<ChannelAssignedEventArgs> OnChannelAssigned;
         private void DoOnChannel(CtiServer ctiServer, ServerSentMessage msg)
         {
-            ChannelAssignedEventArgs evt = new(ctiServer, msg.N2);
+            AgentChannelInfo value = new(ctiServer, msg.N2);
             lock (this)
             {
-                AgentChannel = evt.Value;
+                AgentChannelInfo = value;
             }
-            OnChannelAssigned?.Invoke(this, evt);
+            OnChannelAssigned?.Invoke(this, new(ctiServer, value));
         }
 
         public event EventHandler<AgentDisplayNameReceivedEventArgs> OnAgentDisplayNameReceived;
-        private void DoOnAgentId(CtiServer ctiServer, ServerSentMessage msg)
+        private void DoOnAgentId(CtiServer _, ServerSentMessage msg)
         {
             ResetDisplayName(msg.S);
         }

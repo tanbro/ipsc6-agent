@@ -107,7 +107,7 @@ namespace ipsc6.agent.services
             {
                 TransportConfigArgsCollection = new client.SipTransportConfigArgs[]
                 {
-                    new(){BoundAddress=cfgPhone.LocalAddress, Port=cfgPhone.LocalSipPort, PublicAddress=cfgPhone.PublicAddress}
+                    new(){BoundAddress=cfgPhone.LocalAddress, Port=cfgPhone.LocalPort, PublicAddress=cfgPhone.PublicAddress}
                 }
             };
             client.Agent.Initial(sipCfgArgs);
