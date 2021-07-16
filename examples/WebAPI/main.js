@@ -50,12 +50,12 @@ const throwAnException = (s) => {
   _ws.send(JSON.stringify(req));
 };
 
-const logIn = (workerNum, password) => {
+const logIn = (workerNum, password, serverList=null) => {
   const req = {
     jsonrpc: "2.0",
     id: randomId(),
     method: "logIn",
-    params: [workerNum, password],
+    params: [workerNum, password, serverList],
   };
   _ws.send(JSON.stringify(req));
 };
@@ -296,6 +296,26 @@ const exitApp = () => {
     jsonrpc: "2.0",
     id: randomId(),
     method: "exitApp",
+    params: [],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+const showApp = () => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "showApp",
+    params: [],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
+const hideApp = () => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "hideApp",
     params: [],
   };
   _ws.send(JSON.stringify(req));

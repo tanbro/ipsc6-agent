@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-
 
 namespace ipsc6.agent.config
 {
@@ -9,7 +7,7 @@ namespace ipsc6.agent.config
         public ushort LocalPort { get; set; }
         public string LocalAddress { get; set; }
 
-        public IEnumerable<string> ServerList { get; set; }
+        public IList<string> ServerList { get; set; }
 
         public string Name { get; set; }
 
