@@ -32,6 +32,13 @@ namespace ipsc6.agent.wpfapp.Views
         {
             InitializeComponent();
 
+            var app = Application.Current as App;
+            if (!app.IsStartupOk)
+            {
+                Close();
+                return;
+            }
+
             var viewModel = ViewModels.MainViewModel.Instance;
             DataContext = viewModel;
 
@@ -81,20 +88,27 @@ namespace ipsc6.agent.wpfapp.Views
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            logger.Info("窗口已关闭");
-
             notifyIcon?.Dispose();
-            var viewModel = DataContext as ViewModels.MainViewModel;
-            viewModel.Release();
+            var app = Application.Current as App;
+            if (app.IsStartupOk)
+            {
+                logger.Info("窗口已关闭");
+                var viewModel = DataContext as ViewModels.MainViewModel;
+                viewModel.Release();
+            }
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            var viewModel = DataContext as ViewModels.MainViewModel;
-            if (!viewModel.IsExiting)
+            var app = Application.Current as App;
+            if (app.IsStartupOk)
             {
-                WindowState = WindowState.Minimized;
-                e.Cancel = true;
+                var viewModel = DataContext as ViewModels.MainViewModel;
+                if (!viewModel.IsExiting)
+                {
+                    e.Cancel = true;
+                    viewModel.HideMainWindow();
+                }
             }
         }
 

@@ -35,22 +35,16 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private CancellationTokenSource rpcServerRunningCanceller;
 
         internal readonly config.Ipsc cfgIpsc = new();
-        internal readonly config.Window cfgWindow = new();
+        internal readonly config.Startup cfgWindow = new();
 
         internal bool Initial()
         {
             // 注意这里尚未登录
 
-            var app = Application.Current as App;
-            if (!app.IsStartupOk)
-            {
-                return false;
-            }
-
             /// 非 GUI 的初始化
             var cfgRoot = ConfigManager.ConfigurationRoot;
             cfgRoot.GetSection(nameof(config.Ipsc)).Bind(cfgIpsc);
-            cfgRoot.GetSection(nameof(config.Window)).Bind(cfgWindow);
+            cfgRoot.GetSection(nameof(config.Startup)).Bind(cfgWindow);
 
             MainService = services.Service.Create(cfgIpsc);
             MainService.OnCtiConnectionStateChanged += MainService_OnCtiConnectionStateChanged;
@@ -76,7 +70,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             rpcServerRunningTask = Task.Run(() => rpcServer.RunAsync(rpcServerRunningCanceller.Token));
 
             /// 登录
-            if (!cfgWindow.NoStartupLoginDialog)
+            if (!cfgWindow.LoginNotRequired)
             {
                 // 默认的方式：直接显示登录对话窗
                 // 登录失败否则就退出函数返回假

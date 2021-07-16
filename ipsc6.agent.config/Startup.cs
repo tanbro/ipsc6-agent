@@ -11,9 +11,9 @@ namespace ipsc6.agent.config
         Hide,
     }
 
-    public class Window
+    public class Startup
     {
-        public bool NoStartupLoginDialog { get; set; }
+        public bool LoginNotRequired { get; set; }
         public MainWindowStartupMode MainWindowStartupMode { get; set; }
     }
 }
