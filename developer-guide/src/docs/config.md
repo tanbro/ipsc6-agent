@@ -164,7 +164,7 @@
         使用不存在的地址可能导致程序崩溃
 
 本地端口
-: 连接 CTI 服务器端时候，要使用的本地网络端口。
+: 连接 CTI 服务器端时候，要使用的本地网络 **UDP** 端口。
 
     设置为 `0` 表示自动分配端口。
 
@@ -269,21 +269,5 @@ Web 服务网络端口
     |          key           |   type   | required | default |
     | ---------------------- | -------- | -------- | ------- |
     | `Phone:PlaybackDevice` | `String` |          | `""`    |
-
-### 其它设置
-
-工号
-: 如果设置了这个选项，座席程序在登录界面出现时，将这个选项的值自动填写到登录表单的“工号”文本框中。
-
-    |          key          |   type   | required | default |
-    | --------------------- | -------- | -------- | ------- |
-    | `Misc:SavedWorkerNum` | `String` |          |         |
-
-是否存储工号
-: 如果设选项为 `true`，座席程序会在登录成功后，将工号记录在 `%LOCALAPPDATA%\ipsc6.agent.wpfapp\settings.json` 文件的 `Misc.SavedWorkerNum` 属性中。
-
-    |          key           |   type    | required | default |
-    | ---------------------- | --------- | -------- | ------- |
-    | `Misc:IsSaveWorkerNum` | `Boolean` |          | `false` |
 
 --8<-- "includes/glossary.md"

@@ -140,12 +140,12 @@
                             </PasswordBox.Style>
                         </PasswordBox>
                     </Grid>
-
-
+<!--
                     <CheckBox x:Name="checkboxSavePassword" Grid.Row="2"
                           Margin="16 8 16 8"
                           VerticalAlignment="Center" FontSize="14" Foreground="DarkGray"
                           IsChecked="True" Content="记住密码" />
+-->
                 </Grid>
 
                 <Grid Grid.Row="2">
