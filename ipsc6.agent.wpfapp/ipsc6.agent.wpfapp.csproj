@@ -341,6 +341,6 @@
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*" "$(TargetDir)" /D /Y
 xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*" "$(TargetDir)" /D /Y
-xcopy "$(ProjectDir)\Config\log4net.$(ConfigurationName).config" "$(TargetDir)Config\log4net.config" /D /Y</PostBuildEvent>
+copy "$(ProjectDir)Config\log4net.$(ConfigurationName).config" "$(TargetDir)Config\log4net.config" /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>

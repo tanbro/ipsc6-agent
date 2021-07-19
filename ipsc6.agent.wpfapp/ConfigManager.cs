@@ -44,7 +44,7 @@ namespace ipsc6.agent.wpfapp
                 (
                     Path.Combine
                     (
-                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                         versionInfo.ProductName, "settings.json"
                     ),
                     optional: true
