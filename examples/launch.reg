@@ -9,4 +9,4 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\ipsc6-agent-launch\shell\open]
 
 [HKEY_CLASSES_ROOT\ipsc6-agent-launch\shell\open\command]
-@="\"D:\\Repos\\ipsc6-agent\\ipsc6.agent.launch\\bin\\Debug\\ipsc6.agent.launch.exe\" \"%1\""
+@="\"D:\\Repos\\ipsc6-agent\\ipsc6.agent.wpfapp\\bin\\x64\\Debug\\ipsc6.agent.launch.exe\" \"%1\""

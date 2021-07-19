@@ -10,7 +10,6 @@ using System.Windows;
 
 namespace ipsc6.agent.wpfapp
 {
-
     /// <summary>
     /// App.xaml 的交互逻辑
     /// </summary>
