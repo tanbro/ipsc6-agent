@@ -265,10 +265,6 @@
   <ItemGroup>
     <ProjectReference Include="..\ipsc6.agent.client\ipsc6.agent.client.csproj" />
     <ProjectReference Include="..\ipsc6.agent.config\ipsc6.agent.config.csproj" />
-    <ProjectReference Include="..\ipsc6.agent.launch\ipsc6.agent.launch.csproj">
-      <Project>{19c929a9-98ff-4357-b41b-b161441d2e14}</Project>
-      <Name>ipsc6.agent.launch</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ipsc6.agent.server\ipsc6.agent.server.csproj" />
     <ProjectReference Include="..\ipsc6.agent.services\ipsc6.agent.services.csproj" />
     <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
