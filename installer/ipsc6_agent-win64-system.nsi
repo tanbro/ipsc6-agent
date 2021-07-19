@@ -1,6 +1,5 @@
 ﻿!include LogicLib.nsh
 !include Sections.nsh
-!include x64.nsh
 
 ;--------------------------------
 ;Include Modern UI
@@ -9,16 +8,16 @@
 ;--------------------------------
 ;General
 Unicode True
-Name "IPSC6 座席工具条 (x86)"
-OutFile "out\ipsc6_agent_wpfapp-win32-system.exe"
+Name "IPSC6 座席工具条"
+OutFile "out\ipsc6_agent_wpfapp-win64-system.exe"
 Icon "${NSISDIR}\Contrib\Graphics\Icons\nsis3-install.ico"
 UninstallIcon "${NSISDIR}\Contrib\Graphics\Icons\nsis3-uninstall.ico"
 
 ;Default installation folder
-InstallDir "$PROGRAMFILES32\ipsc6-agent-wpfapp"
+InstallDir "$PROGRAMFILES64\ipsc6-agent-wpfapp"
 
 ;Get installation folder from registry if available
-InstallDirRegKey HKLM "Software\ipsc6_agent_wpfapp-win32" ""
+InstallDirRegKey HKLM "Software\ipsc6_agent_wpfapp-win64" ""
 
 ;Request application privileges
 RequestExecutionLevel admin
@@ -62,10 +61,10 @@ Section "!座席工具条" SEC_0
   SetOutPath $INSTDIR
 
   ;MY OWN FILES HERE...
-  File /r /x "*.exp" /x "*.lib" /x "*.pdb" "..\ipsc6.agent.wpfapp\bin\x86\Release\*.*"
+  File /r /x "*.exp" /x "*.lib" /x "*.pdb" "..\ipsc6.agent.wpfapp\bin\x64\Release\*.*"
 
   ;Store installation folder
-  WriteRegStr HKLM "Software\ipsc6_agent_wpfapp-win32" "" $INSTDIR
+  WriteRegStr HKLM "Software\ipsc6_agent_wpfapp-win64" "" $INSTDIR
 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -78,20 +77,15 @@ Section "!座席工具条" SEC_0
   !insertmacro MUI_STARTMENU_WRITE_END
 
   ; Add/Remove list
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win32" \
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win64" \
                   "DisplayName" "$DisplayName"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win32" \
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win64" \
                   "UninstallString" "$\"$INSTDIR\Uninstall.exe$\" /S"
 SectionEnd
 
 Section "URI Scheme Handler" SEC_HANDLER
   SetShellVarContext all
-
-  ${If} ${RunningX64}
-    SetOutPath $PROGRAMFILES64\ipsc6-agent-launch
-  ${Else}
-    SetOutPath $PROGRAMFILES\ipsc6-agent-launch
-  ${EndIf}
+  SetOutPath $PROGRAMFILES64\ipsc6-agent-launch
   CreateDirectory $OUTDIR
 
   ;MY OWN FILES HERE...
@@ -118,20 +112,16 @@ Section "!un.座席工具条" UNSEC_0
   RMDir /r "$SMPROGRAMS\$DisplayName"
 
   ;Remove from Add/Remove list
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win32"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win64"
 
   ;Remove InstalledRegKey only when it is empty
-  DeleteRegKey /ifempty HKLM "Software\ipsc6_agent_wpfapp-win32"
+  DeleteRegKey /ifempty HKLM "Software\ipsc6_agent_wpfapp-win64"
 SectionEnd
 
 Section /o "un.URI Scheme Handler" UNSEC_HANDLER
   SetShellVarContext all
 
-  ${If} ${RunningX64}
-    SetOutPath $PROGRAMFILES64\ipsc6-agent-launch
-  ${Else}
-    SetOutPath $PROGRAMFILES\ipsc6-agent-launch
-  ${EndIf}
+  SetOutPath $PROGRAMFILES64\ipsc6-agent-launch
   RMDir /r $OUTDIR
 
   DeleteRegKey HKCR "ipsc6-agent-launch" 
