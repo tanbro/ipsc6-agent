@@ -2,7 +2,7 @@
 
 该软件在开发、编译、构建、运行期间，使用或依赖的第三方软件有：
 
-|                 Name                 |  License  |                              Web Site                               |
+| Name                                 | License   | Web Site                                                            |
 | ------------------------------------ | --------- | ------------------------------------------------------------------- |
 | Apache log4net                       | Apache    | <https://logging.apache.org/log4net/>                               |
 | CMAKE [^1]                           | BSD       | <https://cmake.org/>                                                |
@@ -16,8 +16,10 @@
 | Microsoft VisualStudio StreamJsonRpc | MIT       | <https://github.com/Microsoft/vs-streamjsonrpc>                     |
 | Microsoft Windows SDK                | [^1] [^2] | <https://developer.microsoft.com/windows/downloads/windows-10-sdk/> |
 | Microsoft WPF                        | MIT       | <https://github.com/dotnet/wpf>                                     |
+| MSBuild [^1]                         | MIT       | <https://github.com/dotnet/msbuild>                                 |
 | Windows Community Toolkit Mvvm       | MIT       | <https://docs.microsoft.com/windows/communitytoolkit/>              |
 | MkDocs [^1]                          | BSD       | <https://www.mkdocs.org/>                                           |
+| NSIS [^1]                            | Zlib      | <https://sourceforge.net/projects/nsis/>                            |
 | PJSIP                                | GPL [^3]  | <https://www.pjsip.org/>                                            |
 | RakNet                               | BSD       | <https://github.com/facebookarchive/RakNet>                         |
 | SWIG [^1]                            | GPL       | <http://www.swig.org/>                                              |
