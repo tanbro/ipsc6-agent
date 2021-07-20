@@ -1,8 +1,4 @@
-﻿!include LogicLib.nsh
-!include Sections.nsh
-!include x64.nsh
-
-;--------------------------------
+﻿;--------------------------------
 ;Include Modern UI
 !include MUI2.nsh
 
@@ -11,8 +7,6 @@
 Unicode True
 Name "IPSC6 座席工具条 (x86)"
 OutFile "out\ipsc6_agent_wpfapp-win32-system.exe"
-Icon "${NSISDIR}\Contrib\Graphics\Icons\nsis3-install.ico"
-UninstallIcon "${NSISDIR}\Contrib\Graphics\Icons\nsis3-uninstall.ico"
 
 ;Default installation folder
 InstallDir "$PROGRAMFILES32\ipsc6-agent-wpfapp"
@@ -20,8 +14,8 @@ InstallDir "$PROGRAMFILES32\ipsc6-agent-wpfapp"
 ;Get installation folder from registry if available
 InstallDirRegKey HKLM "Software\ipsc6_agent_wpfapp-win32" ""
 
-;Request application privileges
-RequestExecutionLevel admin
+ShowInstDetails show
+ShowUnInstDetails show
 
 ;--------------------------------
 ;Variables
@@ -29,14 +23,11 @@ Var DisplayName
 
 ;--------------------------------
 ;Interface Settings
-ShowInstDetails show
-ShowUnInstDetails show
 !define MUI_ABORTWARNING
 !define MUI_UNABORTWARNING
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !define MUI_UNFINISHPAGE_NOAUTOCLOSE
 
-;--------------------------------
 ;Installer pages
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_COMPONENTS
@@ -52,16 +43,20 @@ ShowUnInstDetails show
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_UNPAGE_FINISH
 
-;--------------------------------
-;Languages
+;Language
 !insertmacro MUI_LANGUAGE "SimpChinese"
 
 ;--------------------------------
+!include vcredist_x86.nsh
+!include netfx.nsh
+
+;--------------------------------
+
 Section "!座席工具条" SEC_0
   SetShellVarContext all
   SetOutPath $INSTDIR
 
-  ;MY OWN FILES HERE...
+  ;Program FILES HERE...
   File /r /x "*.exp" /x "*.lib" /x "*.pdb" "..\ipsc6.agent.wpfapp\bin\x86\Release\*.*"
 
   ;Store installation folder
@@ -82,25 +77,6 @@ Section "!座席工具条" SEC_0
                   "DisplayName" "$DisplayName"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win32" \
                   "UninstallString" "$\"$INSTDIR\Uninstall.exe$\" /S"
-SectionEnd
-
-Section "URI Scheme Handler" SEC_HANDLER
-  SetShellVarContext all
-
-  ${If} ${RunningX64}
-    SetOutPath $PROGRAMFILES64\ipsc6-agent-launch
-  ${Else}
-    SetOutPath $PROGRAMFILES\ipsc6-agent-launch
-  ${EndIf}
-  CreateDirectory $OUTDIR
-
-  ;MY OWN FILES HERE...
-  File /r /x "*.pdb" "..\ipsc6.agent.launch\bin\Release\*.*"
-
-  ;URI scheme handler in Registy
-  WriteRegStr HKCR "ipsc6-agent-launch" "" "$\"URL:ipsc6-agent-launch Protocol$\""
-  WriteRegStr HKCR "ipsc6-agent-launch" "URL Protocol" "$\"$\""
-  WriteRegStr HKCR "ipsc6-agent-launch\shell\open\command" "" "$\"$OUTDIR\ipsc6.agent.launch.exe$\" $\"%1$\""
 SectionEnd
 
 ;--------------------------------
@@ -124,17 +100,22 @@ Section "!un.座席工具条" UNSEC_0
   DeleteRegKey /ifempty HKLM "Software\ipsc6_agent_wpfapp-win32"
 SectionEnd
 
-Section /o "un.URI Scheme Handler" UNSEC_HANDLER
-  SetShellVarContext all
-
-  ${If} ${RunningX64}
-    SetOutPath $PROGRAMFILES64\ipsc6-agent-launch
-  ${Else}
-    SetOutPath $PROGRAMFILES\ipsc6-agent-launch
-  ${EndIf}
-  RMDir /r $OUTDIR
-
-  DeleteRegKey HKCR "ipsc6-agent-launch" 
+;------------------------------------------
+;launch Section
+Section "URI 启动程序" SEC_LAUNCH
+  SetOutPath "$PLUGINSDIR\launch"
+  SetCompress off
+  File "out\ipsc6_agent_launch.exe"
+  SetCompress auto
+  DetailPrint "安装 URI Scheme Handler 启动程序 ..."
+  ExecWait '"$OUTDIR\ipsc6_agent_launch.exe" /S' $0
+    BringToFront
+    ${If} $0 == "0"
+        DetailPrint "URI Scheme Handler 启动程序 安装完毕"
+    ${Else}
+        DetailPrint "URI Scheme Handler 启动程序 安装失败: $0"
+        MessageBox MB_ICONEXCLAMATION "错误:$\r$\nURI Scheme Handler 启动程序 安装失败: $0"
+    ${EndIf}
 SectionEnd
 
 ; components/sections
@@ -142,15 +123,13 @@ SectionEnd
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC_0} \
     "运行座席工具条所必须的文件。"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC_HANDLER} \
-    "这是一个系统级的 URI Scheme Handler 程序。当有程序通过访问 ipsc6-agent: 开头的 URL 时，操作系统通过调用该程序启动座席工具条。"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC_LAUNCH} \
+    "这是一个系统级的 URI Scheme Handler 启动程序。当有程序通过访问 ipsc6-agent: 开头的 URL 时，操作系统通过调用该程序启动座席工具条。"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 !insertmacro MUI_UNFUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${UNSEC_0} \
     "删除座席工具条。"
-  !insertmacro MUI_DESCRIPTION_TEXT ${UNSEC_HANDLER} \
-    "这是一个系统级的的 URI Scheme Handler 程序。当有程序通过访问 ipsc6-agent: 开头的 URL 时，操作系统通过调用该程序启动座席工具条。"
 !insertmacro MUI_UNFUNCTION_DESCRIPTION_END
 
 Function .onInit
