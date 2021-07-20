@@ -1,11 +1,7 @@
 using System;
 using System.Diagnostics;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
 using System.IO;
+using System.Reflection;
 using Microsoft.Win32;
 
 namespace ipsc6.agent.launch
@@ -14,6 +10,7 @@ namespace ipsc6.agent.launch
     {
         private const string protocolPrefix = @"ipsc6-agent-launch:";
         private const string executableFileName = @"ipsc6.agent.wpfapp.exe";
+        private const string envWorkingDir = @"IPSC6AGENT_DIR";
 
         private static void Main(string[] args)
         {
@@ -29,63 +26,74 @@ namespace ipsc6.agent.launch
                     : throw new ArgumentException($"Argument must starts with \"{protocolPrefix}\"", nameof(args));
 
                 var strArgs = Uri.UnescapeDataString(href);
+                Console.WriteLine("\n\nArguments: {0}\n", strArgs);
 
                 // WorkingDirectory 路径，按顺序寻找！
-                string workingDir = null;
+                string workingDir;
                 do
                 {
                     // 环境变量
-                    workingDir = Environment.GetEnvironmentVariable("IPSC6_AGENT_DIR");
+                    workingDir = Environment.GetEnvironmentVariable(envWorkingDir);
                     if (!string.IsNullOrWhiteSpace(workingDir))
                     {
+                        Console.WriteLine("\nLookup in: {0} ...", workingDir);
                         if (File.Exists(Path.Combine(workingDir, executableFileName)))
                         {
+                            Console.WriteLine("Found!");
                             break;
                         }
                     }
 
-                    // HKLM Software\ipsc6_agent_wpfapp-win64 (仅 64bits windows)
-                    if (Environment.Is64BitOperatingSystem)
-                    {
-                        workingDir = Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\ipsc6_agent_wpfapp-win64", "", "") as string;
-                        if (!string.IsNullOrWhiteSpace(workingDir))
-                        {
-                            if (File.Exists(Path.Combine(workingDir, executableFileName)))
-                            {
-                                break;
-                            }
-                        }
-                    }
-
-                    // HKLM Software\ipsc6_agent_wpfapp-win32
-                    workingDir = Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\ipsc6_agent_wpfapp-win32", "", "") as string;
-                    if (!string.IsNullOrWhiteSpace(workingDir))
-                    {
-                        if (File.Exists(Path.Combine(workingDir, executableFileName)))
-                        {
-                            break;
-                        }
-                    }
-
-                    // HKCU Software\ipsc6_agent_wpfapp-win64 (仅 64bits windows)
+                    // HKCU Software\ipsc6_agent_wpfapp-win64 (win64/user)
                     if (Environment.Is64BitOperatingSystem)
                     {
                         workingDir = Registry.GetValue(@"HKEY_CURRENT_USER\Software\ipsc6_agent_wpfapp-win64", "", "") as string;
+                        Console.WriteLine("\nLookup in: {0} ...", workingDir);
                         if (!string.IsNullOrWhiteSpace(workingDir))
                         {
                             if (File.Exists(Path.Combine(workingDir, executableFileName)))
                             {
+                                Console.WriteLine("Found!");
                                 break;
                             }
                         }
                     }
 
-                    // HKCU Software\ipsc6_agent_wpfapp-win32 (仅 64bits windows)
+                    // HKCU Software\ipsc6_agent_wpfapp-win32 (win32/user)
                     workingDir = Registry.GetValue(@"HKEY_CURRENT_USER\Software\ipsc6_agent_wpfapp-win32", "", "") as string;
+                    if (!string.IsNullOrWhiteSpace(workingDir))
+                    {
+                        Console.WriteLine("\nLookup in: {0} ...", workingDir);
+                        if (File.Exists(Path.Combine(workingDir, executableFileName)))
+                        {
+                            Console.WriteLine("Found!");
+                            break;
+                        }
+                    }
+
+                    // HKLM Software\ipsc6_agent_wpfapp-win64 (win64/system)
+                    if (Environment.Is64BitOperatingSystem)
+                    {
+                        workingDir = Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\ipsc6_agent_wpfapp-win64", "", "") as string;
+                        Console.WriteLine("\nLookup in: {0} ...", workingDir);
+                        if (!string.IsNullOrWhiteSpace(workingDir))
+                        {
+                            if (File.Exists(Path.Combine(workingDir, executableFileName)))
+                            {
+                                Console.WriteLine("Found!");
+                                break;
+                            }
+                        }
+                    }
+
+                    // HKLM Software\ipsc6_agent_wpfapp-win32 (win32/system)
+                    workingDir = Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\ipsc6_agent_wpfapp-win32", "", "") as string;
+                    Console.WriteLine("\nLookup in: {0} ...", workingDir);
                     if (!string.IsNullOrWhiteSpace(workingDir))
                     {
                         if (File.Exists(Path.Combine(workingDir, executableFileName)))
                         {
+                            Console.WriteLine("Found!");
                             break;
                         }
                     }
@@ -93,22 +101,19 @@ namespace ipsc6.agent.launch
                     // 当前EXE所在目录
                     var assembly = Assembly.GetExecutingAssembly();
                     workingDir = Path.GetDirectoryName(assembly.Location);
+                    Console.WriteLine("\nLookup in: {0} ...", workingDir);
                     if (File.Exists(Path.Combine(workingDir, executableFileName)))
                     {
+                        Console.WriteLine("Found!");
                         break;
                     }
 
-                    // 当前工作目录
-                    workingDir = executableFileName;
-                    if (File.Exists(executableFileName))
-                    {
-                        break;
-                    }
-
-                    // 最后也没有找到
-                    throw new FileNotFoundException("ipsc6-agent 座席客户端可执行文件不存在或无法访问。", executableFileName);
-
+                    // 不管了，直接在当前工作目录执行！
+                    Console.WriteLine("\nNoting was found, use Default WorkingDirectory instead");
+                    workingDir = "";
                 } while (false);
+
+                Console.WriteLine("\nWorkingDirectory: {0}\n", workingDir);
 
                 using Process process = new();
                 {
@@ -121,11 +126,11 @@ namespace ipsc6.agent.launch
             }
             catch (Exception exception)
             {
+                Environment.ExitCode = 1;
                 Console.Error.WriteLine(exception);
                 Console.WriteLine();
-                Console.WriteLine("Press Any Key to continue ...");
+                Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey(true);
-                Environment.Exit(1);
             }
         }
     }

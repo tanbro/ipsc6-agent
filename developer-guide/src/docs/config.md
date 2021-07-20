@@ -9,7 +9,7 @@
     这个配置文件是**必须**的，应在分发时与可执行文件一同打包。
     修改可能性较小的系统级设置，如服务器地址，可以存放在这个文件中。
 
-1. 当前 Windows 账户的 `%LOCALAPPDATA%\ipsc6.agent.wpfapp\settings.json` 文件
+1. 当前 Windows 账户的 `%APPDATA%\ipsc6.agent.wpfapp\settings.json` 文件
 
     这个配置文件是*可选的*。
     用户个性化的设置，如首选放音设备，可以放在这里。
