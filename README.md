@@ -18,6 +18,20 @@ git submodule update --init
 4. 在项目列表中，将 `pjsua` "设为启动项目"
 5. 生成 `pjsua`。生成的库文件在 `lib` 目录，形如 `libpjproject-i386-Win32-vc14-Debug.lib`
 
+如果使用 `MSBuild` 进行构建，命令是:
+
+- Win32 Release 静态库:
+
+  ```powershell
+  msbuild pjproject-vs14.sln -target:pjsua -m -property:Configuration=Release -property:Platform=Win32
+  ```
+
+- x64 Release 静态库:
+
+  ```powershell
+  msbuild pjproject-vs14.sln -target:pjsua -m -property:Configuration=Release -property:Platform=x64
+  ```
+
 ## RakNet
 
 IPSC 一向以来使用这个库进行服务器-坐席客户端的网络通信
@@ -41,13 +55,43 @@ cmake -A Win32 ../..
 
 从而产生 VisualStudio 项目文件。
 
-但是，生成的 `.vcxproj` 项目文件可能有错误。
+但是，生成的 `.vcxproj` 项目文件有一下问题：
+
+1. `Win32` 项目的 “首选的生成工具体系结构” 设置错误:
+
+   > ℹ **Tip**:
+   >
+   > 经测试，构建工具实际上并不会选择意料之外的生成工具体系结构，所以可以忽略这个问题。
+
+   要修复这个错误，我们可以：
+
+   - 使用 IDE 查看这几个项目的属性，将 `配置属性 -> 高级 -> 首选的生成工具体系结构` 修改为 "32 位(x86)"
+
+   - 或者直接修改 `build/Win32/Lib/DLL/RakNetDLL.vcxproj` 文件，将行如
+
+     ```xml
+       <PropertyGroup>
+         <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+       </PropertyGroup>
+     ```
+
+     的改为:
+
+     ```xml
+       <PropertyGroup>
+         <PreferredToolArchitecture>x86</PreferredToolArchitecture>
+       </PropertyGroup>
+     ```
 
 1. 转义字符串错误:
 
-   在低版本的 `Windows` (如 `Windows 7`) 上生成的 `.vcxproj` 项目文件中可能存在转义字符错误。
+   > ℹ **Tip**:
+   >
+   > 这个错误只出现在静态库构建对象的项目文件中。而我们并不需要 RakNet 的静态库，所以可以忽略这个问题。
 
-   使用文本编辑器打开生成的 `Visual Studio` 项目文件， `build/Win32/Lib/LibStatic/RakNetLibStatic.vcxproj`，找到
+   生成的 `RakNetLibStatic.vcxproj` 项目文件中可能存在转义字符错误。
+
+   使用文本编辑器打开生成的 `Visual Studio` 项目文件， `build/{Win32|x64}/Lib/LibStatic/RakNetLibStatic.vcxproj`，找到
 
    ```xml
    <AdditionalOptions>%(AdditionalOptions) /machine:X86 LIBCMTD.lib "MSVCRT.lib&amp;quot"%3B""</AdditionalOptions>
@@ -55,47 +99,25 @@ cmake -A Win32 ../..
 
    设置项，将 这样包含错误转义字符的选项改为 `%(AdditionalOptions) /machine:X86 LIBCMTD.lib MSVCRT.lib` 。
 
-1. “首选的生成工具体系结构”设置错误:
+然后进行构建，方法是：
 
-   我们可以：
-   
-   - 使用 IDE 查看这几个项目的属性，将 `配置属性 -> 高级 -> 首选的生成工具体系结构` 修改为 "32 位(x86)"
-   
-   - 或者直接修改 `*.vcxproj` 文件，将行如
-   
-     ```xml
-       <PropertyGroup>
-         <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-       </PropertyGroup>
-     ```
-   
-     的改为:
-   
-     ```xml
-       <PropertyGroup>
-         <PreferredToolArchitecture>x86</PreferredToolArchitecture>
-       </PropertyGroup>
-     ```
-
-然后构建。
-
-- 使用 `VisualStudio` 打开解决方案/项目构建
+- 使用 `VisualStudio` 打开解决方案，构建项目 `RakNetDLL`
 
 - 或者使用 `CMake` 命令:
 
   - 构建 `Debug` 目标:
 
     ```sh
-    cmake --build . --config Debug
+    cmake --build . --target RakNetDLL --config Debug
     ```
 
   - 构建 `Release` 目标:
 
     ```sh
-    cmake --build . --config Release
+    cmake --build . --target RakNetDLL --config Release
     ```
 
-`x86_64` 的构建与之类似，在 `x64` 目录，使用 `x64 Native Tools Command Prompt for VS` 重复上述过程即可。
+`x86_64` 的构建与之类似，在 `x64` 目录，使用 `x64 Native Tools Command Prompt for VS` 重复上述过程即可（注意替换目标架构参数为`x64`）。
 
 最后，为了确保将所需头文件复制到 `include` 目录，执行:
 
