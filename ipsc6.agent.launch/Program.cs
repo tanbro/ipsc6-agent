@@ -36,7 +36,7 @@ namespace ipsc6.agent.launch
                     workingDir = Environment.GetEnvironmentVariable(envWorkingDir);
                     if (!string.IsNullOrWhiteSpace(workingDir))
                     {
-                        Console.WriteLine("\nLookup in: {0} ...", workingDir);
+                        Console.WriteLine("\nLookup in {0} ...", workingDir);
                         if (File.Exists(Path.Combine(workingDir, executableFileName)))
                         {
                             Console.WriteLine("Found!");
@@ -48,9 +48,9 @@ namespace ipsc6.agent.launch
                     if (Environment.Is64BitOperatingSystem)
                     {
                         workingDir = Registry.GetValue(@"HKEY_CURRENT_USER\Software\ipsc6_agent_wpfapp-win64", "", "") as string;
-                        Console.WriteLine("\nLookup in: {0} ...", workingDir);
                         if (!string.IsNullOrWhiteSpace(workingDir))
                         {
+                            Console.WriteLine("\nLookup in {0} ...", workingDir);
                             if (File.Exists(Path.Combine(workingDir, executableFileName)))
                             {
                                 Console.WriteLine("Found!");
@@ -63,7 +63,7 @@ namespace ipsc6.agent.launch
                     workingDir = Registry.GetValue(@"HKEY_CURRENT_USER\Software\ipsc6_agent_wpfapp-win32", "", "") as string;
                     if (!string.IsNullOrWhiteSpace(workingDir))
                     {
-                        Console.WriteLine("\nLookup in: {0} ...", workingDir);
+                        Console.WriteLine("\nLookup in {0} ...", workingDir);
                         if (File.Exists(Path.Combine(workingDir, executableFileName)))
                         {
                             Console.WriteLine("Found!");
@@ -75,9 +75,9 @@ namespace ipsc6.agent.launch
                     if (Environment.Is64BitOperatingSystem)
                     {
                         workingDir = Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\ipsc6_agent_wpfapp-win64", "", "") as string;
-                        Console.WriteLine("\nLookup in: {0} ...", workingDir);
                         if (!string.IsNullOrWhiteSpace(workingDir))
                         {
+                            Console.WriteLine("\nLookup in {0} ...", workingDir);
                             if (File.Exists(Path.Combine(workingDir, executableFileName)))
                             {
                                 Console.WriteLine("Found!");
@@ -88,9 +88,9 @@ namespace ipsc6.agent.launch
 
                     // HKLM Software\ipsc6_agent_wpfapp-win32 (win32/system)
                     workingDir = Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\ipsc6_agent_wpfapp-win32", "", "") as string;
-                    Console.WriteLine("\nLookup in: {0} ...", workingDir);
                     if (!string.IsNullOrWhiteSpace(workingDir))
                     {
+                        Console.WriteLine("\nLookup in {0} ...", workingDir);
                         if (File.Exists(Path.Combine(workingDir, executableFileName)))
                         {
                             Console.WriteLine("Found!");
@@ -101,11 +101,14 @@ namespace ipsc6.agent.launch
                     // 当前EXE所在目录
                     var assembly = Assembly.GetExecutingAssembly();
                     workingDir = Path.GetDirectoryName(assembly.Location);
-                    Console.WriteLine("\nLookup in: {0} ...", workingDir);
-                    if (File.Exists(Path.Combine(workingDir, executableFileName)))
+                    if (!string.IsNullOrWhiteSpace(workingDir))
                     {
-                        Console.WriteLine("Found!");
-                        break;
+                       Console.WriteLine("\nLookup in {0} ...", workingDir);
+                        if (File.Exists(Path.Combine(workingDir, executableFileName)))
+                        {
+                            Console.WriteLine("Found!");
+                            break;
+                        }
                     }
 
                     // 不管了，直接在当前工作目录执行！
