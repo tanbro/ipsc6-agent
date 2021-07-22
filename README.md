@@ -20,10 +20,22 @@ git submodule update --init
 
 如果使用 `MSBuild` 进行构建，命令是:
 
+- Win32 Debug 静态库:
+
+  ```powershell
+  msbuild pjproject-vs14.sln -target:pjsua -m -property:Configuration=Debug -property:Platform=Win32
+  ```
+
 - Win32 Release 静态库:
 
   ```powershell
   msbuild pjproject-vs14.sln -target:pjsua -m -property:Configuration=Release -property:Platform=Win32
+  ```
+
+- x64 Debug 静态库:
+
+  ```powershell
+  msbuild pjproject-vs14.sln -target:pjsua -m -property:Configuration=Debug -property:Platform=x64
   ```
 
 - x64 Release 静态库:
