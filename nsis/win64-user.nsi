@@ -1,11 +1,12 @@
 ﻿;--------------------------------
-;Include Modern UI
 !include MUI2.nsh
+!include LogicLib.nsh
+!include x64.nsh
 
 ;--------------------------------
 ;General
 Unicode True
-Name "IPSC6 座席工具条"
+Name "IPSC6 座席工具条 (user/x64)"
 OutFile "out\ipsc6_agent_wpfapp-win64-user.exe"
 
 ;Default installation folder
@@ -133,6 +134,12 @@ SectionEnd
 !insertmacro MUI_UNFUNCTION_DESCRIPTION_END
 
 Function .onInit
+  ${IfNot} ${RunningX64}
+    StrCpy $0 "无法安装：该程序无法在 Win32 环境下运行。"
+    MessageBox MB_OK|MB_ICONSTOP "messagebox_text" 
+    Abort $0
+  ${EndIf}
+
   ; https://nsis.sourceforge.io/Graying_out_Section_(define_mandatory_sections)
   # set the section as selected and read-only
   IntOp $0 ${SF_SELECTED} | ${SF_RO}

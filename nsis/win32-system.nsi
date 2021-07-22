@@ -1,11 +1,10 @@
 ﻿;--------------------------------
-;Include Modern UI
 !include MUI2.nsh
 
 ;--------------------------------
 ;General
 Unicode True
-Name "IPSC6 座席工具条 (x86)"
+Name "IPSC6 座席工具条 (system/x86)"
 OutFile "out\ipsc6_agent_wpfapp-win32-system.exe"
 
 ;Default installation folder
