@@ -3,28 +3,71 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:local="clr-namespace:ipsc6.agent.wpfapp.Views"
         mc:Ignorable="d"
         xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
         d:DataContext="{d:DesignData Type=vm:ConfigViewModel}"
-        Title="设置" Height="450" Width="800"
+        Loaded="Window_Loaded"
+        x:Name="configWindow"
+        Topmost="True" WindowStartupLocation="CenterScreen"
+        Height="450" Width="800"
+        Title="设置"
         >
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="48"/>
-        </Grid.RowDefinitions>
+    <ScrollViewer>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <ListBox Grid.Row="0"
-                 ItemsSource="{Binding ServerList}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock
-                        Text="{Binding}"
-                        Margin="2 0 2 0"/>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+            <GroupBox Grid.Row="0" Header="CTI 服务器列表" VerticalAlignment="Top">
+                <StackPanel Orientation="Vertical">
+                    <ListBox ItemsSource="{Binding IpscServerList}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid HorizontalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Width="320"
+                                         InputScope="TelephoneNumber"
+                                         Text="{Binding Path=.}"
+                                />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button>
+                                            <iconPacks:MaterialDesign Kind="Save" />
+                                        </Button>
+                                        <Button Command="{Binding ElementName=configWindow, Path=DataContext.DelIpscServerCommand}"
+                                                CommandParameter="{Binding Path=.}">
+                                            <iconPacks:MaterialDesign Kind="Delete" />
+                                        </Button>
+                                        <Button>
+                                            <iconPacks:MaterialDesign Kind="ArrowUpward" />
+                                        </Button>
+                                        <Button>
+                                            <iconPacks:MaterialDesign Kind="ArrowDownward" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <StackPanel Orientation="Vertical">
+                        <Button Command="{Binding ElementName=configWindow, Path=DataContext.NewIpscServerCommand}">
+                            <iconPacks:MaterialDesign Kind="Add" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
 
-    </Grid>
+            </GroupBox>
+
+            <Frame Grid.Row="1"/>
+            <StackPanel Grid.Row="1">
+                <Button>Close</Button>
+            </StackPanel>
+
+        </Grid>
+    </ScrollViewer>
 </Window>

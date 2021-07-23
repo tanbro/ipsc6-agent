@@ -1038,6 +1038,10 @@ namespace ipsc6.agent.client
 
         public async Task StartUpAsync(IEnumerable<string> addresses, string workerNum, string password)
         {
+            logger.InfoFormat(
+                "StartUpAsync - workerNum=\"{0}\", addresses=\"{1}\"",
+                workerNum, string.Join(", ", addresses)
+            );
             using (requestGuard.TryEnter())
             {
                 AgentRunningState savedRunningState;

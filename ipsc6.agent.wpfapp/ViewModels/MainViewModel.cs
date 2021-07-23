@@ -313,8 +313,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             /// 各个状态的UI动作
             snapFsm.OnTransitioned(trans =>
             {
-        //logger.DebugFormat("SnappingStateMachine - {0} == [{1}] ==> {2}", trans.Source, trans.Trigger, trans.Destination);
-        switch (trans.Destination)
+                //logger.DebugFormat("SnappingStateMachine - {0} == [{1}] ==> {2}", trans.Source, trans.Trigger, trans.Destination);
+                switch (trans.Destination)
                 {
                     case StateMachines.SnapTopState.Final:
                         snapTimerCanceller?.Cancel();
@@ -831,8 +831,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 {
                     dispatcher.Invoke(command.NotifyCanExecuteChanged);
                 }
-        // UI 上的电话状态Icon/Label的转换结果由“TeleState”和注册状态共同计算得出，但是 bingding 只有 TeleState(不规范)，所以这里强行传播给绑定
-        Instance.OnPropertyChanged("TeleState");
+                // UI 上的电话状态Icon/Label的转换结果由“TeleState”和注册状态共同计算得出，但是 bingding 只有 TeleState(不规范)，所以这里强行传播给绑定
+                Instance.OnPropertyChanged("TeleState");
             });
         }
 
@@ -1355,6 +1355,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
+        #region Configure
+        private static readonly IRelayCommand showConfigWindowCmmand = new RelayCommand(DoShowConfigWindow);
+        public IRelayCommand ShowConfigWindowCmmand => showConfigWindowCmmand;
+
+        private static void DoShowConfigWindow()
+        {
+            new Views.ConfigWindow().ShowDialog();
+        }
+        #endregion
     }
 }
 

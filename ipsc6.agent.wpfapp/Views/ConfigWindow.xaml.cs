@@ -25,5 +25,11 @@ namespace ipsc6.agent.wpfapp.Views
 
             DataContext = ViewModels.ConfigViewModel.Instance;
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var viewModel = DataContext as ViewModels.ConfigViewModel;
+            viewModel.Load();
+        }
     }
 }
