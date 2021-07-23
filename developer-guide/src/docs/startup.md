@@ -2,7 +2,9 @@
 
 ## 进程启动参数
 
-座席程序的命令行参数详见 [配置项列表](config.md#命令行参数配置) 中的相同。这些参数将覆盖配置文件中的设置。
+座席程序的命令行参数的使用方法详见 [配置项列表](config.md#命令行参数配置)；参数定义详见 [配置项列表](config.md#配置项列表)。
+
+命令行中指定的参数将覆盖配置文件参数设置。
 
 !!! example
 
@@ -26,11 +28,10 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\ipsc6-agent-launch\shell\open]
 
 [HKEY_CLASSES_ROOT\ipsc6-agent-launch\shell\open\command]
-@="\"C:\\Program Files(x86)\\ipsc6.agent.wpfapp\ipsc6.agent.launch.exe\" \"%1\""
+@="\"C:\\Program Files\\ipsc6-agent-launch\ipsc6.agent.launch.exe\" \"%1\""
 ```
 
-这样就可以通过 `ipsc6-agent` Protocol 启动程序。
-`ipsc6.agent.launch.exe` 专用于座席程序的 Windows Shell 启动。
+这样，当 Windows 操作系统处理以 `ipsc6-agent-launch:` 开头的 URI 时，就会调用 `ipsc6.agent.launch.exe` 启动座席程序。 [^1]
 
 例如这样的超链接:
 
@@ -49,7 +50,29 @@ Windows Registry Editor Version 5.00
 !!! example
 
     ```html
-    <a href="ipsc6-agent-launch:--WebServer:Port 8080">启动座席程序</a>
+    <a href="ipsc6-agent-launch:--WebServer:Port 8080">
+        启动座席程序，在8080端口启动 WebServer
+    </a>
     ```
+
+    ```html
+    <a href="ipsc6-agent-launch:WebServer:Port=8080 Ipsc:ServerList:0=10.10.10.1">
+        启动座席程序，在8080端口启动 WebServer，连接 CTI 服务器 10.10.10.1
+    </a>
+    ```
+
+`ipsc6.agent.launch.exe` 会自动查找并运行座席程序，查找顺序是:
+
+1. 环境变量 `IPSC6AGENT_DIR` 定义的目录
+1. 用户级安装的座席程序
+1. 系统级安装的座席程序
+1. `ipsc6.agent.launch.exe` 自身所在目录(通常是 `%ProgramFiles%\ipsc6-agent-launch`)
+1. 如果以上都没有找到，就在当前工作目录（通常是 `C:\WINDOWS\system32`）尝试直接运行座席程序
+
+!!! tip
+
+    当座席程序不是使用安装包，而是手动复制文件（见 [安装](install.md)）部署时，启动器是无法找到座席程序的。此时，我们可以设置环境变量 `IPSC6AGENT_DIR` 为座席程序所在的目录。
+
+[^1]: 根据 <https://docs.microsoft.com/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa767914(v=vs.85)> 提供的方法。
 
 --8<-- "includes/glossary.md"

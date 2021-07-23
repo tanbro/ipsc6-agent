@@ -1,12 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
 using System.Reflection;
 using System.IO;
-using System.Threading.Tasks;
-using System.Windows;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 
@@ -44,7 +38,7 @@ namespace ipsc6.agent.wpfapp
                 (
                     Path.Combine
                     (
-                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                         versionInfo.ProductName, "settings.json"
                     ),
                     optional: true
