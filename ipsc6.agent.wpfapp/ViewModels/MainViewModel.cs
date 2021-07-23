@@ -89,9 +89,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 {
                     // 默认的方式：直接显示登录对话窗
                     // 登录失败否则就退出函数返回假
-                    if (!new Views.LoginWindow().ShowDialog().Value)
+                    try
                     {
-                        return false;
+                        mainWindow.Hide();
+                        if (!new Views.LoginWindow().ShowDialog().Value)
+                        {
+                            return false;
+                        }
+                    }
+                    finally
+                    {
+                        mainWindow.Show();
                     }
                 }
 
@@ -305,8 +313,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             /// 各个状态的UI动作
             snapFsm.OnTransitioned(trans =>
             {
-                //logger.DebugFormat("SnappingStateMachine - {0} == [{1}] ==> {2}", trans.Source, trans.Trigger, trans.Destination);
-                switch (trans.Destination)
+        //logger.DebugFormat("SnappingStateMachine - {0} == [{1}] ==> {2}", trans.Source, trans.Trigger, trans.Destination);
+        switch (trans.Destination)
                 {
                     case StateMachines.SnapTopState.Final:
                         snapTimerCanceller?.Cancel();
@@ -823,8 +831,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 {
                     dispatcher.Invoke(command.NotifyCanExecuteChanged);
                 }
-                // UI 上的电话状态Icon/Label的转换结果由“TeleState”和注册状态共同计算得出，但是 bingding 只有 TeleState(不规范)，所以这里强行传播给绑定
-                Instance.OnPropertyChanged("TeleState");
+        // UI 上的电话状态Icon/Label的转换结果由“TeleState”和注册状态共同计算得出，但是 bingding 只有 TeleState(不规范)，所以这里强行传播给绑定
+        Instance.OnPropertyChanged("TeleState");
             });
         }
 
