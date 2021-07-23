@@ -9,7 +9,7 @@
 Var VCREDIST_OK
 Section "-SEC_VCREDIST_X64"
     MessageBox MB_OK|MB_ICONINFORMATION \
-        "即将执行 “适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++” 的 64bits 检测程序。期间可能会出现错误提示，但这并不表示安装失败。$\r$\n$\r$\n按 “确定” 开始检测。"
+        "即将执行 “适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++” 的 64-bits 检测程序。期间可能会出现错误提示，但这并不表示安装失败。$\r$\n$\r$\n按 “确定” 开始检测。"
     StrCpy $VCREDIST_OK ""
     SetOutPath "$PLUGINSDIR\vcredist"
     File "..\x64\Release\DummyCppConsoleApp.exe"
@@ -20,6 +20,8 @@ Section "-SEC_VCREDIST_X64"
     ${If} $0 == "0"
         DetailPrint "Visual C++ Runtime 检测通过"
         StrCpy $VCREDIST_OK "1"
+        MessageBox MB_OK|MB_ICONINFORMATION \
+            "“适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++” 检测成功。$\r$\n$\r$\n按 “确定” 继续安装。"
     ${Else}
         DetailPrint "Visual C++ Runtime 检测失败: $0"
     ${EndIf}
