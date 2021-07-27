@@ -89,9 +89,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 {
                     // 默认的方式：直接显示登录对话窗
                     // 登录失败否则就退出函数返回假
-                    if (!new Views.LoginWindow().ShowDialog().Value)
+                    try
                     {
-                        return false;
+                        mainWindow.Hide();
+                        if (!new Views.LoginWindow().ShowDialog().Value)
+                        {
+                            return false;
+                        }
+                    }
+                    finally
+                    {
+                        mainWindow.Show();
                     }
                 }
 
@@ -1347,6 +1355,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
+        #region Configure
+        private static readonly IRelayCommand showConfigWindowCmmand = new RelayCommand(DoShowConfigWindow);
+        public IRelayCommand ShowConfigWindowCmmand => showConfigWindowCmmand;
+
+        private static void DoShowConfigWindow()
+        {
+            new Views.ConfigWindow().ShowDialog();
+        }
+        #endregion
     }
 }
 

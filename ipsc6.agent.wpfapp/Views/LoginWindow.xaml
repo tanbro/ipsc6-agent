@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:ipsc6.agent.wpfapp"
         xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
         mc:Ignorable="d"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         Title="登录"
         Height="325" Width="350"
         Background="Transparent" AllowsTransparency="True"
@@ -45,6 +46,18 @@
                         </Path>
                     </Canvas>
                 </Border>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right">
+                    <Button Height="24" Width="24" Margin="6" Background="Transparent" BorderThickness="0" Foreground="White"
+                            ToolTip="设置"
+                            Command="{Binding ShowConfigWindowCommand}">
+                        <iconPacks:MaterialDesign Height="16" Width="16" Kind="Settings"/>
+                    </Button>
+                    <Button Height="24" Width="24" Margin="6" Background="Transparent" BorderThickness="0" Foreground="White"
+                            ToolTip="关闭"
+                            Command="{Binding CloseCommand}">
+                        <iconPacks:MaterialDesign Height="16" Width="16" Kind="Close"/>
+                    </Button>
+                </StackPanel>
                 <TextBlock VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0 0 0 4"
                        Foreground="White" FontStyle="Oblique" FontSize="26">
                 欢迎使用坐席客户端
@@ -80,6 +93,7 @@
 
                         <TextBox x:Name="textboxName" Grid.Column="1" Margin="16 8 16 8" FontSize="14"
                              InputMethod.IsInputMethodEnabled="False"
+                             InputScope="TelephoneNumber"
                              Text="{Binding WorkerNum}">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">

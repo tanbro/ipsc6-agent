@@ -12,10 +12,30 @@ namespace ipsc6.agent.wpfapp
 
         public static void Initialize()
         {
-            Reload();
+            GetAllSettings();
         }
 
-        public static IConfigurationRoot Reload()
+        public static string UserSettingsPath
+        {
+            get
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                var versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                                    versionInfo.ProductName,
+                                    "settings.json");
+            }
+        }
+
+        public static IConfigurationRoot GetUserSettings()
+        {
+            var builder = new ConfigurationBuilder()
+                .AddJsonFile(UserSettingsPath, optional: true);
+            ConfigurationRoot = builder.Build();
+            return ConfigurationRoot;
+        }
+
+        public static IConfigurationRoot GetAllSettings()
         {
             var assembly = Assembly.GetExecutingAssembly();
             var versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
