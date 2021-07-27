@@ -23,6 +23,7 @@
 
             <GroupBox Grid.Row="0" Header="CTI 服务器列表" VerticalAlignment="Top">
                 <StackPanel Orientation="Vertical">
+                    <TextBlock>修改后，需要退出程序，直到下一次启动程序，修改后的配置才会生效。</TextBlock>
                     <ListBox ItemsSource="{Binding IpscServerList}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>

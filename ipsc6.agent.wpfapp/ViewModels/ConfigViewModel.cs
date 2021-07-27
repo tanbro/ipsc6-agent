@@ -12,11 +12,13 @@ using Microsoft.Toolkit.Mvvm.Input;
 
 namespace ipsc6.agent.wpfapp.ViewModels
 {
-    public class StringConfigField
+    public class ConfigField<T>
     {
-        public string Content { get; set; }
+        public T Content { get; set; }
 
-        public StringConfigField(string content = "")
+        public ConfigField() { }
+
+        public ConfigField(T content)
         {
             Content = content;
         }
@@ -30,13 +32,13 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static IConfigurationRoot userSettings;
 
-        private static readonly config.Ipsc cfgIpsc = new();
-        private static readonly config.LocalWebServer cfgLocalWebServer = new();
-        private static readonly config.Phone cfgPhone = new();
-        private static readonly config.Startup cfgStartup = new();
+        private static config.Ipsc cfgIpsc;
+        private static config.LocalWebServer cfgLocalWebServer;
+        private static config.Phone cfgPhone;
+        private static config.Startup cfgStartup;
 
-        private static ObservableCollection<StringConfigField> ipscServerList = new();
-        public ObservableCollection<StringConfigField> IpscServerList
+        private static ObservableCollection<ConfigField<string>> ipscServerList = new();
+        public ObservableCollection<ConfigField<string>> IpscServerList
         {
             get => ipscServerList;
             set => SetProperty(ref ipscServerList, value);
@@ -49,17 +51,22 @@ namespace ipsc6.agent.wpfapp.ViewModels
             // 重新加载!
             userSettings = ConfigManager.GetUserSettings();
 
+            cfgIpsc = new();
             userSettings.GetSection(nameof(config.Ipsc)).Bind(cfgIpsc);
-            userSettings.GetSection(nameof(config.LocalWebServer)).Bind(cfgLocalWebServer);
-            userSettings.GetSection(nameof(config.Phone)).Bind(cfgPhone);
-            userSettings.GetSection(nameof(config.Startup)).Bind(cfgStartup);
-
             ipscServerList.Clear();
             foreach (var addr in cfgIpsc.ServerList)
             {
-                ipscServerList.Add(new StringConfigField { Content = addr });
+                ipscServerList.Add(new ConfigField<string> { Content = addr });
             }
 
+            cfgLocalWebServer = new();
+            userSettings.GetSection(nameof(config.LocalWebServer)).Bind(cfgLocalWebServer);
+
+            cfgPhone = new();
+            userSettings.GetSection(nameof(config.Phone)).Bind(cfgPhone);
+
+            cfgStartup = new();
+            userSettings.GetSection(nameof(config.Startup)).Bind(cfgStartup);
         }
 
         private static readonly IRelayCommand newIpscServerCommand = new RelayCommand(DoNewIpscServer);
@@ -67,7 +74,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static void DoNewIpscServer()
         {
-            ipscServerList.Add(new StringConfigField { Content = "new address here ..." });
+            ipscServerList.Add(new ConfigField<string>());
         }
 
         private static readonly IRelayCommand delIpscServerCommand = new RelayCommand<object>(DoDelIpscServer);
@@ -75,7 +82,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static void DoDelIpscServer(object item)
         {
-            var val = item as StringConfigField;
+            var val = item as ConfigField<string>;
             ipscServerList.Remove(val);
         }
 
