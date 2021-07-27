@@ -29,7 +29,12 @@ namespace ipsc6.agent.wpfapp.Views
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             var viewModel = DataContext as ViewModels.ConfigViewModel;
-            viewModel.Load();
+            viewModel.Load(sender);
+        }
+
+        private void IpscServerAddressTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            BindingOperations.GetBindingExpression(sender as DependencyObject, TextBox.TextProperty).UpdateSource();
         }
     }
 }

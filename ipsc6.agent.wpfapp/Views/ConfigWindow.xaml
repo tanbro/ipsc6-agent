@@ -26,28 +26,20 @@
                     <ListBox ItemsSource="{Binding IpscServerList}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid HorizontalAlignment="Center">
+                                <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0" Width="320"
-                                         InputScope="TelephoneNumber"
-                                         Text="{Binding Path=.}"
-                                />
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                                        <Button>
-                                            <iconPacks:MaterialDesign Kind="Save" />
-                                        </Button>
-                                        <Button Command="{Binding ElementName=configWindow, Path=DataContext.DelIpscServerCommand}"
+                                    <TextBox Grid.Column="0" MinWidth="320" MaxWidth="640"
+                                             FontSize="24" InputScope="TelephoneNumber"
+                                             x:Name="textBoxIpscServerAddress"
+                                             Text="{Binding Path=Content, Mode=TwoWay}" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Button Height="32" Width="32" FontSize="24"
+                                                Command="{Binding ElementName=configWindow, Path=DataContext.DelIpscServerCommand}"
                                                 CommandParameter="{Binding Path=.}">
-                                            <iconPacks:MaterialDesign Kind="Delete" />
-                                        </Button>
-                                        <Button>
-                                            <iconPacks:MaterialDesign Kind="ArrowUpward" />
-                                        </Button>
-                                        <Button>
-                                            <iconPacks:MaterialDesign Kind="ArrowDownward" />
+                                            <iconPacks:MaterialDesign Height="24" Width="24" Kind="Delete" />
                                         </Button>
                                     </StackPanel>
                                 </Grid>
@@ -65,7 +57,7 @@
 
             <Frame Grid.Row="1"/>
             <StackPanel Grid.Row="1">
-                <Button>Close</Button>
+                <Button Command="{Binding SaveCommand}">保存</Button>
             </StackPanel>
 
         </Grid>
