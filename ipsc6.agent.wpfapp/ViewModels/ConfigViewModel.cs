@@ -15,6 +15,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
     public class StringConfigField
     {
         public string Content { get; set; }
+
+        public StringConfigField(string content = "")
+        {
+            Content = content;
+        }
     }
 
     public class ConfigViewModel : Utils.SingletonObservableObject<ConfigViewModel>
