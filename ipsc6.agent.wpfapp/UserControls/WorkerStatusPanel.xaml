@@ -92,8 +92,8 @@
                 </Grid.ColumnDefinitions>
 
                 <Button Grid.Column="0"
-                            Style="{StaticResource WorkerStatusButtonStyle}"
-                            Command="{Binding StatePopupCommand}">
+                        Style="{StaticResource WorkerStatusButtonStyle}"
+                        Command="{Binding StatePopupCommand}">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -101,8 +101,8 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" HorizontalAlignment="Center"
-                                           Margin="0 0 2 0"
-                                           Text="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"/>
+                                       Margin="0 0 2 0"
+                                       Text="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"/>
                             <Border Grid.Column="1" HorizontalAlignment="Center"
                                     Style="{StaticResource MyStateLightStyle}"
                                     Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"/>
@@ -112,19 +112,16 @@
                             <ListBox ItemsSource="{Binding StateOperationItems, Mode=OneWay}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Button
-                                                Style="{StaticResource MyCommonButton}"
+                                        <Button Style="{StaticResource MyCommonButton}"
                                                 Cursor="Hand"
                                                 Command="{Binding ElementName=WorkerStatusPannelUserControl, Path=DataContext.SetStateCommand}"
                                                 CommandParameter="{Binding}">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock
-                                                           Text="{Binding Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
+                                                <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
                                                            Margin="2 0 2 0"/>
-                                                <Border
-                                                        Style="{StaticResource MyStateLightStyle}"
+                                                <Border Style="{StaticResource MyStateLightStyle}"
                                                         Background="{Binding Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
-                                                       Margin="2 0 2 0"/>
+                                                        Margin="2 0 2 0"/>
                                             </StackPanel>
                                         </Button>
                                     </DataTemplate>
@@ -135,7 +132,7 @@
                 </Button>
 
                 <TextBlock Grid.Column="2" Style="{StaticResource MyScoreBoardNumberTextRightThinStyle}"
-                               Text="{Binding StatusDuration, Mode=OneWay, StringFormat='{}{0:h\\:mm\\:ss}', FallbackValue='-:--:--'}"/>
+                           Text="{Binding StatusDuration, Mode=OneWay, StringFormat='{}{0:h\\:mm\\:ss}', FallbackValue='-:--:--'}"/>
             </Grid>
 
         </Border>

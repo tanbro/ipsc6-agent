@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1094,7 +1095,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
-        #region 座席咨询
+        #region 座席咨询,转移
         private static readonly IRelayCommand xferConsultCommand = new RelayCommand(DoXferConsult);
         public IRelayCommand XferConsultCommand => xferConsultCommand;
 
@@ -1123,9 +1124,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
             await svc.XferConsult(groupId.Trim(), workerNum.Trim());
         }
-        #endregion
 
-        #region 座席转移
         private static readonly IRelayCommand xferCommand = new RelayCommand(DoXfer);
         public IRelayCommand XferCommand => xferCommand;
 
@@ -1154,6 +1153,14 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
             await svc.Xfer(groupId.Trim(), workerNum.Trim());
         }
+
+        private static IReadOnlyCollection<services.Models.Group> allGroups;
+        public IReadOnlyCollection<services.Models.Group> AllGroups
+        {
+            get => allGroups;
+            set => SetProperty(ref allGroups, value);
+        }
+
         #endregion
 
         #region 外呼, 外转, 外咨
