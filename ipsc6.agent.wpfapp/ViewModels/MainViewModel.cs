@@ -1231,7 +1231,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (!IsMainConnectionOk) return false;
             if (string.IsNullOrWhiteSpace(inputTelNum)) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
-            if (status.Item1 == client.AgentState.Work) return false;
+            if (status.Item1 != client.AgentState.Work) return false;
             return true;
         }
         #endregion
