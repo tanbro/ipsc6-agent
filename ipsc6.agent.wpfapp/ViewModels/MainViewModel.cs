@@ -176,7 +176,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             return new IRelayCommand[] {
                 statePopupCommand, setStateCommand,
                 groupPopupCommand, signGroupCommand,
-                holdPopupCommand, holdCommand, unHoldCommand
+                holdPopupCommand, holdCommand, unHoldCommand,
+                dialCommand, xferExtCommand, xferExtConsultCommand
             };
         }
 
@@ -1149,6 +1150,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 if (SetProperty(ref inputTelNum, value))
                 {
                     dialCommand.NotifyCanExecuteChanged();
+                    xferExtCommand.NotifyCanExecuteChanged();
                 }
             }
         }
@@ -1159,50 +1161,61 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async void DoDial()
         {
             var svc = Instance.MainService;
-            await svc.Dial(inputTelNum.Trim());
+            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
+            {
+                await svc.Dial(inputTelNum.Trim());
+            }
         }
 
         public static bool CanDial()
         {
+            if (!IsMainConnectionOk) return false;
             if (string.IsNullOrWhiteSpace(inputTelNum)) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if (status.Item1 != client.AgentState.Idle) return false;
             return true;
         }
 
-        private static readonly IRelayCommand xferExtCommand = new RelayCommand(DoXferExt);
+        private static readonly IRelayCommand xferExtCommand = new RelayCommand(DoXferExt, CanXferExt);
         public IRelayCommand XferExtCommand => xferExtCommand;
 
         private static async void DoXferExt()
         {
             var svc = Instance.MainService;
-            Dialogs.PromptDialog dialog = new()
+            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
             {
-                DataContext = new Dictionary<string, object> {
-                    { "Title", "向外转移" },
-                    { "Label", "输入拨打的号码" }
-                }
-            };
-            if (dialog.ShowDialog() != true) return;
-            var inputText = dialog.InputText;
-            await svc.XferExt(inputText);
+                await svc.XferExt(inputTelNum.Trim());
+            }
         }
 
+        public static bool CanXferExt()
+        {
+            if (!IsMainConnectionOk) return false;
+            if (string.IsNullOrWhiteSpace(inputTelNum)) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if (status.Item1 != client.AgentState.Work) return false;
+            return true;
+        }
 
-        private static readonly IRelayCommand xferExtConsultCommand = new RelayCommand(DoXferExtConsult);
+        private static readonly IRelayCommand xferExtConsultCommand = new RelayCommand(DoXferExtConsult, CanXferExtConsult);
         public IRelayCommand XferExtConsultCommand => xferExtConsultCommand;
 
         private static async void DoXferExtConsult()
         {
             var svc = Instance.MainService;
-            Dialogs.PromptDialog dialog = new()
+            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
             {
-                DataContext = new Dictionary<string, object> {
-                    { "Title", "向外咨询" },
-                    { "Label", "输入拨打的号码" }
-                }
-            };
-            if (dialog.ShowDialog() != true) return;
-            var inputText = dialog.InputText;
-            await svc.XferExtConsult(inputText);
+                await svc.XferExtConsult(inputTelNum.Trim());
+            }
+        }
+
+        public static bool CanXferExtConsult()
+        {
+            if (!IsMainConnectionOk) return false;
+            if (string.IsNullOrWhiteSpace(inputTelNum)) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if (status.Item1 != client.AgentState.Work) return false;
+            return true;
         }
         #endregion
 
