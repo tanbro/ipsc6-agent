@@ -108,7 +108,7 @@ namespace ipsc6.agent.wpfapp
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             e.Handled = true;
-            logger.ErrorFormat("Application_DispatcherUnhandledException: {0}", e.Exception);
+            logger.ErrorFormat("Application Dispatcher Unhandled Exception: {0}", e.Exception);
             MessageBox.Show(
                 $"程序运行过程中出现了未捕获的异常。\r\n\r\n{e.Exception}",
                 VersionInfo.ProductName,
