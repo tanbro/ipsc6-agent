@@ -1138,27 +1138,36 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
-        #region 外呼
-        private static readonly IRelayCommand dialCommand = new RelayCommand(DoDial);
+        #region 外呼, 外转, 外咨
+
+        private static string inputTelNum;
+        public string InputTelNum
+        {
+            get => inputTelNum;
+            set
+            {
+                if (SetProperty(ref inputTelNum, value))
+                {
+                    dialCommand.NotifyCanExecuteChanged();
+                }
+            }
+        }
+
+        private static readonly IRelayCommand dialCommand = new RelayCommand(DoDial, CanDial);
         public IRelayCommand DialCommand => dialCommand;
 
         private static async void DoDial()
         {
             var svc = Instance.MainService;
-            Dialogs.PromptDialog dialog = new()
-            {
-                DataContext = new Dictionary<string, object> {
-                    { "Title", "拨号" },
-                    { "Label", "输入拨打的号码" }
-                }
-            };
-            if (dialog.ShowDialog() != true) return;
-            var inputText = dialog.InputText;
-            await svc.Dial(inputText);
+            await svc.Dial(inputTelNum.Trim());
         }
-        #endregion
 
-        #region 外转
+        public static bool CanDial()
+        {
+            if (string.IsNullOrWhiteSpace(inputTelNum)) return false;
+            return true;
+        }
+
         private static readonly IRelayCommand xferExtCommand = new RelayCommand(DoXferExt);
         public IRelayCommand XferExtCommand => xferExtCommand;
 
@@ -1176,9 +1185,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var inputText = dialog.InputText;
             await svc.XferExt(inputText);
         }
-        #endregion
 
-        #region 外咨
+
         private static readonly IRelayCommand xferExtConsultCommand = new RelayCommand(DoXferExtConsult);
         public IRelayCommand XferExtConsultCommand => xferExtConsultCommand;
 

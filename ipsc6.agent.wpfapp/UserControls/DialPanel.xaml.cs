@@ -23,6 +23,7 @@ namespace ipsc6.agent.wpfapp.UserControls
         public DialPanel()
         {
             InitializeComponent();
+            DataContext = ViewModels.MainViewModel.Instance;
         }
 
     }

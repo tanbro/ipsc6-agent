@@ -320,7 +320,7 @@ namespace ipsc6.agent.client
             }
 
             // Offhook 请求的对应的自动摘机
-            if (isOffHooking)
+            if (offHookSemaphore.CurrentCount < 1)
             {
                 switch (newState)
                 {
@@ -477,6 +477,7 @@ namespace ipsc6.agent.client
 
         private readonly SemaphoreSlim pjSemaphore = new(1);
 
+
         public event EventHandler<SipRegistrarListReceivedEventArgs> OnSipRegistrarListReceived;
         public event EventHandler OnSipRegisterStateChanged;
         public event EventHandler<SipCallEventArgs> OnSipCallStateChanged;
@@ -577,7 +578,7 @@ namespace ipsc6.agent.client
                 try
                 {
                     // 处理外呼等服务器回呼请求
-                    if (isOffHooking)
+                    if (offHookSemaphore.CurrentCount < 1)
                     {
                         logger.Debug("SipUA_OnIncomingCall - Client side Offhooking: Answer ...");
                         try
@@ -1531,7 +1532,7 @@ namespace ipsc6.agent.client
         {
             logger.Debug("Answer");
 
-            if (isOffHooking)
+            if (offHookSemaphore.CurrentCount < 1)
             {
                 throw new InvalidOperationException("Can not perform a SIP answer when in a Off-Hook requestion");
             }
@@ -1563,7 +1564,7 @@ namespace ipsc6.agent.client
         {
             logger.Debug("Hangup");
 
-            if (isOffHooking)
+            if (offHookSemaphore.CurrentCount < 1)
             {
                 throw new InvalidOperationException("Can not perform a SIP hangup when in a Off-Hook requestion");
             }
@@ -1587,15 +1588,15 @@ namespace ipsc6.agent.client
             });
         }
 
+        private readonly SemaphoreSlim offHookSemaphore = new(1);
         private TaskCompletionSource<object> offHookServerTcs;
         private TaskCompletionSource<object> offHookClientTcs;
-        private bool isOffHooking;
+
         public const int DefaultOffHookTimeoutMilliSeconds = 5000;
 
         internal async Task OffHookAsync(Connection connection, int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
         {
-            await pjSemaphore.WaitAsync();
-            isOffHooking = true;
+            await offHookSemaphore.WaitAsync();
             try
             {
                 bool isContinue;
@@ -1634,8 +1635,7 @@ namespace ipsc6.agent.client
             }
             finally
             {
-                pjSemaphore.Release();
-                isOffHooking = false;
+                offHookSemaphore.Release();
             }
         }
 
