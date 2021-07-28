@@ -1095,7 +1095,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 座席咨询
-        static readonly IRelayCommand xferConsultCommand = new RelayCommand(DoXferConsult);
+        private static readonly IRelayCommand xferConsultCommand = new RelayCommand(DoXferConsult);
         public IRelayCommand XferConsultCommand => xferConsultCommand;
 
         private static async void DoXferConsult()
@@ -1105,9 +1105,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
             Dialogs.PromptDialog dialog = new()
             {
                 DataContext = new Dictionary<string, object> {
-                            { "Title", "转接" },
-                            { "Label", "输入要转接的目标。格式： 技能组ID:座席工号" }
-                        }
+                    { "Title", "转接" },
+                    { "Label", "输入要转接的目标。格式： 技能组ID:座席工号" }
+                }
             };
             if (dialog.ShowDialog() != true) return;
             var inputText = dialog.InputText;

@@ -23,7 +23,6 @@ namespace ipsc6.agent.wpfapp.UserControls
         public PreferencePanel()
         {
             InitializeComponent();
-            DataContext = ViewModels.MainViewModel.Instance;
         }
     }
 }
