@@ -1,0 +1,66 @@
+<Window x:Class="ipsc6.agent.wpfapp.Views.ConfigWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:local="clr-namespace:ipsc6.agent.wpfapp.Views"
+        mc:Ignorable="d"
+        xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
+        d:DataContext="{d:DesignData Type=vm:ConfigViewModel}"
+        Loaded="Window_Loaded"
+        x:Name="configWindow"
+        Topmost="True" WindowStartupLocation="CenterScreen"
+        Height="450" Width="800"
+        Title="设置"
+        >
+    <ScrollViewer>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <GroupBox Grid.Row="0" Header="CTI 服务器列表" VerticalAlignment="Top">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock>修改后，需要退出程序，直到下一次启动程序，修改后的配置才会生效。</TextBlock>
+                    <ListBox ItemsSource="{Binding IpscServerList}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" MinWidth="320" MaxWidth="640"
+                                             FontSize="24" InputScope="Url"
+                                             x:Name="textBoxIpscServerAddress"
+                                             Text="{Binding Content}" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Button Height="32" Width="32" FontSize="24"
+                                                Command="{Binding ElementName=configWindow, Path=DataContext.DelIpscServerCommand}"
+                                                CommandParameter="{Binding Path=.}">
+                                            <iconPacks:MaterialDesign Height="24" Width="24" Kind="Delete" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <StackPanel Orientation="Vertical">
+                        <Button Command="{Binding ElementName=configWindow, Path=DataContext.NewIpscServerCommand}">
+                            <iconPacks:MaterialDesign Kind="Add" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+
+            </GroupBox>
+
+            <Frame Grid.Row="1"/>
+            <StackPanel Grid.Row="1">
+                <Button Command="{Binding SaveCommand}">保存</Button>
+            </StackPanel>
+
+        </Grid>
+    </ScrollViewer>
+</Window>

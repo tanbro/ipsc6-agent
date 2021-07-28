@@ -42,14 +42,6 @@ namespace ipsc6.agent.wpfapp.Views
             var viewModel = ViewModels.MainViewModel.Instance;
             DataContext = viewModel;
 
-            InitializeWinFormComponents();
-
-            /// ViewModel 初始化
-            if (!viewModel.Initial())
-            {
-                viewModel.CloseMainWindow();
-            }
-
         }
 
         /// 一些 WinForm 的 UI 初始化
@@ -130,6 +122,21 @@ namespace ipsc6.agent.wpfapp.Views
         {
             var viewModel = DataContext as ViewModels.MainViewModel;
             viewModel.MouseLeave();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            /// ViewModel 初始化
+            var viewModel = ViewModels.MainViewModel.Instance;
+            if (viewModel.Load())
+            {
+                InitializeWinFormComponents();
+            }
+            else
+            {
+                viewModel.CloseMainWindow();
+            }
+            
         }
     }
 }

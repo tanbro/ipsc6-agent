@@ -48,7 +48,8 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Button Grid.Row="0" Style="{StaticResource PreferenceButtonStyle}">
+        <Button Grid.Row="0" Style="{StaticResource PreferenceButtonStyle}"
+                Command="{Binding ShowConfigWindowCmmand}">
             <iconPacks:RemixIcon Height="24" Width="24" Kind="Settings5Fill" />
         </Button>
 

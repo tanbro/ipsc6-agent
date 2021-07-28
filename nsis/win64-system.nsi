@@ -6,7 +6,7 @@
 ;--------------------------------
 ;General
 Unicode True
-Name "IPSC6 座席工具条 (System|x64)"
+Name "IPSC6 座席工具条 (x64 System)"
 OutFile "out\ipsc6_agent_wpfapp-win64-system.exe"
 
 ;Default installation folder
