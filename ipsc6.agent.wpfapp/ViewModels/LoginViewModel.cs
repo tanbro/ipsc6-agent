@@ -199,12 +199,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var svc = MainViewModel.Instance.MainService;
             var mainViewModel = MainViewModel.Instance;
 
-            if (serverList is null)
+            serverList ??= (new string[] { });
+            if (serverList.Count() == 0)
             {
-                serverList = mainViewModel.cfgIpsc.ServerList;
-            }
-            else if (serverList.Count() == 0)
-            {
+                ConfigManager.ConfigurationRoot.Reload();
                 serverList = mainViewModel.cfgIpsc.ServerList;
             }
 

@@ -115,6 +115,7 @@
       <DependentUpon>PromptDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="GuiService.cs" />
+    <Compile Include="ObservableContent.cs" />
     <Compile Include="StateMachines\SnapTopState.cs" />
     <Compile Include="StateMachines\SnapTopStateMachine.cs" />
     <Compile Include="StateMachines\SnapTopTrigger.cs" />

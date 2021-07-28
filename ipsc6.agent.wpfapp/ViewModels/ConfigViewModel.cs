@@ -12,17 +12,6 @@ using Microsoft.Toolkit.Mvvm.Input;
 
 namespace ipsc6.agent.wpfapp.ViewModels
 {
-    public class ConfigField<T>
-    {
-        public T Content { get; set; }
-
-        public ConfigField() { }
-
-        public ConfigField(T content)
-        {
-            Content = content;
-        }
-    }
 
     public class ConfigViewModel : Utils.SingletonObservableObject<ConfigViewModel>
     {
@@ -37,8 +26,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static config.Phone cfgPhone;
         private static config.Startup cfgStartup;
 
-        private static ObservableCollection<ConfigField<string>> ipscServerList = new();
-        public ObservableCollection<ConfigField<string>> IpscServerList
+        private static ObservableCollection<ObservableContent<string>> ipscServerList = new();
+        public ObservableCollection<ObservableContent<string>> IpscServerList
         {
             get => ipscServerList;
             set => SetProperty(ref ipscServerList, value);
@@ -54,9 +43,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
             cfgIpsc = new();
             userSettings.GetSection(nameof(config.Ipsc)).Bind(cfgIpsc);
             ipscServerList.Clear();
-            foreach (var addr in cfgIpsc.ServerList)
+            if (cfgIpsc.ServerList != null)
             {
-                ipscServerList.Add(new ConfigField<string> { Content = addr });
+                foreach (var addr in cfgIpsc.ServerList)
+                {
+                    ipscServerList.Add(new ObservableContent<string> { Content = addr });
+                }
             }
 
             cfgLocalWebServer = new();
@@ -74,7 +66,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static void DoNewIpscServer()
         {
-            ipscServerList.Add(new ConfigField<string>());
+            ipscServerList.Add(new ObservableContent<string>());
         }
 
         private static readonly IRelayCommand delIpscServerCommand = new RelayCommand<object>(DoDelIpscServer);
@@ -82,7 +74,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static void DoDelIpscServer(object item)
         {
-            var val = item as ConfigField<string>;
+            var val = item as ObservableContent<string>;
             ipscServerList.Remove(val);
         }
 
@@ -90,22 +82,22 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public IRelayCommand SaveCommand => saveCommand;
         private static void DoSave()
         {
-            cfgIpsc.ServerList = (from m in ipscServerList select m.Content).ToList();
-
-            Dictionary<string, object> d = new()
+            cfgIpsc.ServerList = (from x in ipscServerList select x.Content).ToList();
+            var data = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object>()
             {
                 { nameof(config.Ipsc), cfgIpsc },
                 { nameof(config.LocalWebServer), cfgLocalWebServer },
                 { nameof(config.Phone), cfgPhone },
                 { nameof(config.Startup), cfgStartup }
-            };
-            JsonSerializerOptions options = new() { WriteIndented = true };
-            var s = JsonSerializer.Serialize(d, options);
-            var data = new UTF8Encoding().GetBytes(s);
+            }, new JsonSerializerOptions { WriteIndented = true });
+
+            Directory.CreateDirectory(Path.GetDirectoryName(ConfigManager.UserSettingsPath));
             using (var fileStream = File.Open(ConfigManager.UserSettingsPath, FileMode.Create))
             {
                 fileStream.Write(data, 0, data.Length);
             }
+
+            userSettings.Reload();
 
             window.Close();
         }
