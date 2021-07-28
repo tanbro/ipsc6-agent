@@ -25,11 +25,5 @@ namespace ipsc6.agent.wpfapp.UserControls
         {
             InitializeComponent();
         }
-
-        private void ShowOrHideSkillPopup(object sender, RoutedEventArgs e)
-        {
-            var popup = FindName("SkillPopup") as Popup;
-            popup.IsOpen = !popup.IsOpen;
-        }
     }
 }
