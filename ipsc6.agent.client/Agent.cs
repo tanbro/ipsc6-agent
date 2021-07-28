@@ -884,11 +884,13 @@ namespace ipsc6.agent.client
                 // 断线处理
                 if (disconntedStates.Contains(e.NewState))
                 {
+                    bool isCancelled = false;
                     var isMain = connIdx == MainConnectionIndex;
                     if (isMain)
                     {
                         if (RunningState != AgentRunningState.Started)
                         {
+                            // 处于启动过程中！
                             logger.WarnFormat(
                                 "主服务节点 [{0}]({1}) 连接断开 (NewState={2} RunningState={3}) 放弃重连.",
                                 connIdx, ctiServers[connIdx], e.NewState, RunningState
@@ -907,7 +909,7 @@ namespace ipsc6.agent.client
                                 // 有的选,但是如果在工作状态,不能变!
                                 if (workingStates.Contains(AgentState))
                                 {
-                                    logger.WarnFormat("主服务节点 [{0}]({1}) 连接断开. 由于处于工作状态, 将继续使用该主节点并发起重连", connIdx, ctiServer);
+                                    logger.WarnFormat("主服务节点 [{0}]({1}) 连接断开. 但是由于处于工作状态, 将继续使用该主节点并发起重连", connIdx, ctiServer);
                                 }
                                 else
                                 {
@@ -929,23 +931,24 @@ namespace ipsc6.agent.client
                                             ConnectionState[] exceptStats = { ConnectionState.Closed, ConnectionState.Closing };
                                             var indices2 = (
                                                 from vi in connections.Select((value, index) => (value, index))
-                                                where vi.index != MainConnectionIndex && exceptStats.All(m => m != vi.value.State)
+                                                where vi.index != MainConnectionIndex && !exceptStats.Contains(vi.value.State)
                                                 select vi.index
                                             ).ToList();
                                             if (indices2.Count > 0)
                                             {
                                                 MainConnectionIndex = indices2[rand.Next(indices2.Count)];
                                                 logger.WarnFormat(
-                                                    "主服务节点 [{0}]({1}) 连接被主动关闭. 虽然找不到其它可用的连接, 仍切换主节点到 [{2}]({3})",
+                                                    "主服务节点 [{0}]({1}) 连接被关闭. 且找不到其它活动连接, 但仍切换主节点到 [{2}]({3})",
                                                     connIdx, ctiServer, MainConnectionIndex, MainConnectionInfo
                                                 );
                                             }
                                             else
                                             {
                                                 logger.WarnFormat(
-                                                    "主服务节点 [{0}]({1}) 连接被主动关闭. 且找不到其它未被主动关闭的连接, 将继续使用该主节点并发起重连",
+                                                    "主服务节点 [{0}]({1}) 连接被关闭. 且找不到其它未被主动关闭的连接, 将放弃重连",
                                                     connIdx, ctiServer
                                                 );
+                                                isCancelled = true;
                                             }
                                         }
                                         break;
@@ -958,39 +961,42 @@ namespace ipsc6.agent.client
                                 }
                             }
                             ///
-                            if (MainConnectionIndex != connIdx)
+                            if (!isCancelled)
                             {
-                                action = new Action(async () =>
+                                if (MainConnectionIndex != connIdx)
                                 {
-                                    logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
-                                    try
+                                    action = new Action(async () =>
                                     {
-                                        await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 0);
-                                        logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
-                                    }
-                                    catch (ConnectionException ex)
-                                    {
-                                        logger.ErrorFormat("从服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
-                                    };
-                                });
-                                // 需要抛出切换新的主服务节事件
-                                evtMainConnChanged = EventArgs.Empty;
-                            }
-                            else
-                            {
-                                action = new Action(async () =>
+                                        logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
+                                        try
+                                        {
+                                            await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 0);
+                                            logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
+                                        }
+                                        catch (ConnectionException ex)
+                                        {
+                                            logger.ErrorFormat("从服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
+                                        };
+                                    });
+                                    // 需要抛出切换新的主服务节事件
+                                    evtMainConnChanged = EventArgs.Empty;
+                                }
+                                else
                                 {
-                                    logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
-                                    try
+                                    action = new Action(async () =>
                                     {
-                                        await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 1);
-                                        logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
-                                    }
-                                    catch (ConnectionException ex)
-                                    {
-                                        logger.ErrorFormat("主服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
-                                    };
-                                });
+                                        logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
+                                        try
+                                        {
+                                            await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 1);
+                                            logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
+                                        }
+                                        catch (ConnectionException ex)
+                                        {
+                                            logger.ErrorFormat("主服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
+                                        };
+                                    });
+                                }
                             }
                         }
                     }
@@ -1002,6 +1008,10 @@ namespace ipsc6.agent.client
                                 "从服务节点 [{0}]({1}) 连接断开 ({2} {3}). 放弃重连.",
                                 connIdx, ctiServer, e.NewState, RunningState
                             );
+                        }
+                        else if (e.NewState == ConnectionState.Closed)
+                        {
+                            logger.WarnFormat("从服务节点 [{0}]({1}) 连接被关闭. 将放弃重连", connIdx, ctiServer);
                         }
                         else
                         {
@@ -1039,12 +1049,29 @@ namespace ipsc6.agent.client
 
         public async Task StartUpAsync(IEnumerable<string> addresses, string workerNum, string password)
         {
+            foreach (var addr in addresses)
+            {
+                if (string.IsNullOrWhiteSpace(addr))
+                {
+                    throw new ArgumentException("地址不得为空", nameof(addresses));
+                }
+                var c = (from s in addresses where s == addr select s).Count();
+                if (c > 1)
+                {
+                    throw new ArgumentException("重复的地址", nameof(addresses));
+                }
+            }
+
             logger.InfoFormat(
                 "StartUpAsync - workerNum=\"{0}\", addresses=\"{1}\"",
                 workerNum, string.Join(", ", addresses)
             );
+
             using (requestGuard.TryEnter())
             {
+                connections.Clear();
+                ctiServers.Clear();
+
                 AgentRunningState savedRunningState;
                 IEnumerable<int> minorIndices;
                 Random rand = new();

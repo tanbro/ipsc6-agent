@@ -46,10 +46,32 @@ namespace ipsc6.agent.wpfapp.ViewModels
             Exception iniErr = null;
             var mainWindow = Application.Current.MainWindow;
 
+            mainWindow.Hide();
+
             try
             {
                 /// 非 GUI 的初始化
                 ReloadConfigure();
+
+                // 如果没有设置服务器地址，就必须要设置
+                cfgIpsc.ServerList ??= new string[] { };
+                while (cfgIpsc.ServerList.Count < 1)
+                {
+                    var r = MessageBox.Show(
+                        "由于没有设置 CTI 服务器地址，该程序无法工作。\r\n是否要进行设置？\r\n\r\n按“是”打开设置窗口，按“否”退出程序。",
+                        mainWindow.Title,
+                        MessageBoxButton.YesNo, MessageBoxImage.Question
+                    );
+                    if (r == MessageBoxResult.No)
+                    {
+                        logger.Warn("未配置 CTI 服务器地址，且选择不进行配置。");
+                        return false;
+                    }
+                    DoShowConfigWindow();
+
+                    ReloadConfigure();
+                    cfgIpsc.ServerList ??= new string[] { };
+                }
 
                 MainService = services.Service.Create(cfgIpsc, cfgPhone);
                 MainService.OnCtiConnectionStateChanged += MainService_OnCtiConnectionStateChanged;
@@ -79,19 +101,14 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 {
                     // 默认的方式：直接显示登录对话窗
                     // 登录失败否则就退出函数返回假
-                    try
+                    if (!new Views.LoginWindow().ShowDialog().Value)
                     {
-                        mainWindow.Hide();
-                        if (!new Views.LoginWindow().ShowDialog().Value)
-                        {
-                            return false;
-                        }
-                    }
-                    finally
-                    {
-                        mainWindow.Show();
+                        logger.Warn("已关闭登录对话窗，放弃登录");
+                        return false;
                     }
                 }
+
+                mainWindow.Show();
 
                 /// GUI 的一些初始化
                 IsShowToolbar = true;
@@ -1214,7 +1231,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (!IsMainConnectionOk) return false;
             if (string.IsNullOrWhiteSpace(inputTelNum)) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
-            if (status.Item1 != client.AgentState.Work) return false;
+            if (status.Item1 == client.AgentState.Work) return false;
             return true;
         }
         #endregion
