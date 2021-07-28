@@ -202,7 +202,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             serverList ??= (new string[] { });
             if (serverList.Count() == 0)
             {
-                ConfigManager.ConfigurationRoot.Reload();
+                mainViewModel.ReloadConfigure();
                 serverList = mainViewModel.cfgIpsc.ServerList;
             }
 

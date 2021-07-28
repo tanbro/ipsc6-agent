@@ -128,7 +128,7 @@ namespace ipsc6.agent.wpfapp.Views
         {
             /// ViewModel 初始化
             var viewModel = ViewModels.MainViewModel.Instance;
-            if (viewModel.Initial())
+            if (viewModel.Load())
             {
                 InitializeWinFormComponents();
             }

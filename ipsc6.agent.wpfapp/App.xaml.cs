@@ -88,7 +88,7 @@ namespace ipsc6.agent.wpfapp
 
             try
             {
-                ConfigManager.Initialize();
+                ConfigManager.GetAllSettings();
             }
             catch (Exception err)
             {

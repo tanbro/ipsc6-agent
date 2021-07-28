@@ -10,11 +10,6 @@ namespace ipsc6.agent.wpfapp
     {
         public static IConfigurationRoot ConfigurationRoot { get; private set; }
 
-        public static void Initialize()
-        {
-            GetAllSettings();
-        }
-
         public static string UserSettingsPath
         {
             get
@@ -31,8 +26,7 @@ namespace ipsc6.agent.wpfapp
         {
             var builder = new ConfigurationBuilder()
                 .AddJsonFile(UserSettingsPath, optional: true);
-            ConfigurationRoot = builder.Build();
-            return ConfigurationRoot;
+            return builder.Build();
         }
 
         public static IConfigurationRoot GetAllSettings()

@@ -33,9 +33,9 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBox Grid.Column="0" MinWidth="320" MaxWidth="640"
-                                             FontSize="24" InputScope="TelephoneNumber"
+                                             FontSize="24" InputScope="Url"
                                              x:Name="textBoxIpscServerAddress"
-                                             Text="{Binding Path=Content, Mode=TwoWay}" />
+                                             Text="{Binding Content}" />
                                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                                         <Button Height="32" Width="32" FontSize="24"
                                                 Command="{Binding ElementName=configWindow, Path=DataContext.DelIpscServerCommand}"

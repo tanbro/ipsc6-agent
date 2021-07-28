@@ -34,12 +34,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private Task rpcServerRunningTask;
         private CancellationTokenSource rpcServerRunningCanceller;
 
-        internal readonly config.Ipsc cfgIpsc = new();
-        internal readonly config.Startup cfgWindow = new();
-        internal readonly config.Phone cfgPhone = new();
-        internal readonly config.LocalWebServer cfgLocalWebServer = new();
+        internal config.Ipsc cfgIpsc;
+        internal config.Startup cfgStartup;
+        internal config.Phone cfgPhone;
+        internal config.LocalWebServer cfgLocalWebServer;
 
-        internal bool Initial()
+        internal bool Load()
         {
             // 注意这里尚未登录
 
@@ -48,18 +48,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
             try
             {
-
                 /// 非 GUI 的初始化
-                var cfgRoot = ConfigManager.ConfigurationRoot;
-                cfgRoot.GetSection(nameof(config.Ipsc)).Bind(cfgIpsc);
-                cfgRoot.GetSection(nameof(config.Startup)).Bind(cfgWindow);
-                cfgRoot.GetSection(nameof(config.Phone)).Bind(cfgPhone);
-                cfgRoot.GetSection(nameof(config.LocalWebServer)).Bind(cfgLocalWebServer);
-
-                if (string.IsNullOrWhiteSpace(cfgPhone.RingerWaveFile))
-                {
-                    cfgPhone.RingerWaveFile = @"Audios/electronic-phone-ringer.wav";
-                }
+                ReloadConfigure();
 
                 MainService = services.Service.Create(cfgIpsc, cfgPhone);
                 MainService.OnCtiConnectionStateChanged += MainService_OnCtiConnectionStateChanged;
@@ -85,7 +75,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 rpcServerRunningTask = Task.Run(() => rpcServer.RunAsync(rpcServerRunningCanceller.Token));
 
                 /// 登录
-                if (!cfgWindow.LoginNotRequired)
+                if (!cfgStartup.LoginNotRequired)
                 {
                     // 默认的方式：直接显示登录对话窗
                     // 登录失败否则就退出函数返回假
@@ -108,7 +98,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 RootGridVerticalAlignment = VerticalAlignment.Bottom;
                 mainWindow.Height = NormalWindowHeight;
 
-                switch (cfgWindow.MainWindowStartupMode)
+                switch (cfgStartup.MainWindowStartupMode)
                 {
                     case config.MainWindowStartupMode.Normal:
                         mainWindow.Activate();
@@ -142,6 +132,26 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
 
             return true;
+        }
+
+        internal void ReloadConfigure()
+        {
+            ConfigManager.GetAllSettings();
+            var cfgRoot = ConfigManager.ConfigurationRoot;
+
+            cfgIpsc = new();
+            cfgRoot.GetSection(nameof(config.Ipsc)).Bind(cfgIpsc);
+            cfgStartup = new();
+            cfgRoot.GetSection(nameof(config.Startup)).Bind(cfgStartup);
+            cfgPhone = new();
+            cfgRoot.GetSection(nameof(config.Phone)).Bind(cfgPhone);
+            cfgLocalWebServer = new();
+            cfgRoot.GetSection(nameof(config.LocalWebServer)).Bind(cfgLocalWebServer);
+
+            if (string.IsNullOrWhiteSpace(cfgPhone.RingerWaveFile))
+            {
+                cfgPhone.RingerWaveFile = @"Audios/electronic-phone-ringer.wav";
+            }
         }
 
         internal void Release()

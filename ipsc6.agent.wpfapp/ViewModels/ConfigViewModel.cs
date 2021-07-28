@@ -8,7 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Toolkit.Mvvm.Input;
-
+using System.Windows;
 
 namespace ipsc6.agent.wpfapp.ViewModels
 {
@@ -42,13 +42,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
             cfgIpsc = new();
             userSettings.GetSection(nameof(config.Ipsc)).Bind(cfgIpsc);
+            cfgIpsc.ServerList ??= new List<string> { };
             ipscServerList.Clear();
-            if (cfgIpsc.ServerList != null)
+            foreach (var addr in cfgIpsc.ServerList)
             {
-                foreach (var addr in cfgIpsc.ServerList)
-                {
-                    ipscServerList.Add(new ObservableContent<string> { Content = addr });
-                }
+                ipscServerList.Add(new ObservableContent<string>(addr));
             }
 
             cfgLocalWebServer = new();
@@ -67,6 +65,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static void DoNewIpscServer()
         {
             ipscServerList.Add(new ObservableContent<string>());
+            saveCommand.NotifyCanExecuteChanged();
         }
 
         private static readonly IRelayCommand delIpscServerCommand = new RelayCommand<object>(DoDelIpscServer);
@@ -76,13 +75,40 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             var val = item as ObservableContent<string>;
             ipscServerList.Remove(val);
+            saveCommand.NotifyCanExecuteChanged();
         }
 
-        private static readonly IRelayCommand saveCommand = new RelayCommand(DoSave, CanSave);
+        private static readonly IRelayCommand saveCommand = new RelayCommand(DoSave);
         public IRelayCommand SaveCommand => saveCommand;
         private static void DoSave()
         {
-            cfgIpsc.ServerList = (from x in ipscServerList select x.Content).ToList();
+            cfgIpsc.ServerList = (
+                from x in ipscServerList
+                where !string.IsNullOrWhiteSpace(x.Content)
+                select x.Content.Trim()
+            ).ToList();
+            if (cfgIpsc.ServerList.Count == 0)
+            {
+                MessageBox.Show(
+                    @"未设置 CTI 服务器地址",
+                    Application.Current.MainWindow.Title,
+                    MessageBoxButton.OK, MessageBoxImage.Error
+                );
+                return;
+            }
+            foreach (var s0 in cfgIpsc.ServerList)
+            {
+                if (cfgIpsc.ServerList.Count(s1 => s0 == s1) > 1)
+                {
+                    MessageBox.Show(
+                        @"设置了重复的 CTI 服务器地址",
+                        Application.Current.MainWindow.Title,
+                        MessageBoxButton.OK, MessageBoxImage.Error
+                    );
+                    return;
+                }
+            }
+
             var data = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object>()
             {
                 { nameof(config.Ipsc), cfgIpsc },
@@ -102,9 +128,5 @@ namespace ipsc6.agent.wpfapp.ViewModels
             window.Close();
         }
 
-        private static bool CanSave()
-        {
-            return true;
-        }
     }
 }
