@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -557,8 +556,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => ctiServices;
             set
             {
-                if (SetProperty(ref ctiServices, value))
-                    NotifyStateRelativeCommandsExecutable();
+                if (!SetProperty(ref ctiServices, value)) return;
+                NotifyStateRelativeCommandsExecutable();
             }
         }
 
@@ -588,8 +587,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => workerNum;
             set
             {
-                if (SetProperty(ref workerNum, value))
-                    NotifyStateRelativeCommandsExecutable();
+                if (!SetProperty(ref workerNum, value)) return;
+                NotifyStateRelativeCommandsExecutable();
             }
         }
         private static string displayName;
@@ -605,8 +604,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => status;
             set
             {
-                if (SetProperty(ref status, value))
-                    NotifyStateRelativeCommandsExecutable();
+                SetProperty(ref status, value);
+                // 这里要无条件刷新！
+                NotifyStateRelativeCommandsExecutable();
             }
         }
 
@@ -633,11 +633,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => currentCallInfo;
             set
             {
-                if (SetProperty(ref currentCallInfo, value))
-                {
-                    IsCurrentCallActive = value != null;
-                    IsNotCurrentCallActive = !IsCurrentCallActive;
-                }
+                if (!SetProperty(ref currentCallInfo, value)) return;
+                IsCurrentCallActive = value != null;
+                IsNotCurrentCallActive = !IsCurrentCallActive;
             }
         }
         private static bool isCurrentCallActive = false;
@@ -695,8 +693,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => groups;
             set
             {
-                if (SetProperty(ref groups, value))
-                    NotifyStateRelativeCommandsExecutable();
+                if (!SetProperty(ref groups, value)) return;
+                NotifyStateRelativeCommandsExecutable();
             }
         }
 
@@ -829,8 +827,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => teleState;
             set
             {
-                if (SetProperty(ref teleState, value))
-                    NotifyStateRelativeCommandsExecutable();
+                if (!SetProperty(ref teleState, value)) return;
+                NotifyStateRelativeCommandsExecutable();
             }
         }
 
@@ -871,8 +869,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => sipAccounts;
             set
             {
-                if (SetProperty(ref sipAccounts, value))
-                    NotifyStateRelativeCommandsExecutable();
+                if (!SetProperty(ref sipAccounts, value)) return;
+                NotifyStateRelativeCommandsExecutable();
             }
         }
         private static readonly IRelayCommand answerCommand = new RelayCommand(DoAnswer, CanAnswer);
@@ -945,11 +943,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public IReadOnlyCollection<services.Models.CallInfo> Calls
         {
             get => calls;
-            set
-            {
-                if (SetProperty(ref calls, value))
-                    NotifyStateRelativeCommandsExecutable();
-            }
+            set => SetProperty(ref calls, value);
         }
 
         private static IReadOnlyCollection<services.Models.CallInfo> heldCalls = new services.Models.CallInfo[] { };
@@ -1001,21 +995,21 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static bool CanUnHold(object parameter)
         {
+
             if (!IsMainConnectionOk) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
-            var svc = Instance.MainService;
             if (status.Item1 != client.AgentState.Work) return false;
-            
-            //client.WorkType[] workTypes =
-            //{
-            //    client.WorkType.Hold,
-            //    client.WorkType.Consult,
-            //};
-            //if (workTypes.Contains(status.Item2)) return true;
-
             if (parameter == null)
             {
-                if (!calls.Any(x => x.IsHeld)) return false;
+                /// NOTE: 不看是否真的有保持的通话，一律以工作类型为准！
+                /// 如果不是，可以用下面的注释代码顶替。
+                /// if (!calls.Any(x => x.IsHeld)) return false;
+                client.WorkType[] workTypes =
+                {
+                    client.WorkType.Hold,
+                    client.WorkType.Consult,
+                };
+                if (!workTypes.Contains(status.Item2)) return false;
             }
             else
             {
@@ -1226,7 +1220,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (data == null) throw new InvalidOperationException();
             var groupId = (string)data;
             var svc = Instance.MainService;
-            using (await Utils.CommandGuard.EnterAsync())
+            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
             {
                 if (Instance.IsXferPopuped)
                 {
