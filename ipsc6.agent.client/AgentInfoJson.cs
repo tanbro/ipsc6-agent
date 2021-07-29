@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -35,8 +36,10 @@ namespace ipsc6.agent.client
         [JsonPropertyName("udl")]
         public string Udl { get; set; }
 
-        //[JsonPropertyName("auto_checkin_skillgroup")]
-        //public bool AutoCheckinSkillgroup { get; set; }
+
+        // Tuple 是 "ID", "Name"
+        [JsonPropertyName("append_allagentgroups")]
+        public IList<Tuple<string, string>> AppendedGroupList { get; set; }
 
         [JsonPropertyName("custom")]
         public string Custom { get; set; }

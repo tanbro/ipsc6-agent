@@ -436,6 +436,43 @@ namespace ipsc6.agent.client
             ResetPrivilegeExternList(jo.PowerExt);
             ResetGroupIdList(jo.GroupIdIdList);
             ResetGroupNameList(jo.GroupIdIdList);
+            AppendAllGroupList(jo.AppendedGroupList);
+        }
+
+        public event EventHandler OnAllGroupListChanged;
+
+        private readonly List<Group> allGroups = new();
+        public IReadOnlyCollection<Group> AllGroups
+        {
+            get
+            {
+                IReadOnlyCollection<Group> result;
+                lock (this)
+                {
+                    result = allGroups.ToList();
+                }
+                return result;
+            }
+        }
+
+        private void AppendAllGroupList(IList<Tuple<string, string>> appendedGroupList)
+        {
+            lock (this)
+            {
+                foreach (var pair in appendedGroupList)
+                {
+                    var obj = allGroups.SingleOrDefault(x => x.Id == pair.Item1);
+                    if (obj != null)
+                    {
+                        obj.Name = pair.Item2;
+                    }
+                    else
+                    {
+                        allGroups.Add(new Group(pair.Item1, pair.Item2));
+                    }
+                }
+            }
+            OnAllGroupListChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public Stats Stats { get; } = new();
@@ -726,8 +763,19 @@ namespace ipsc6.agent.client
             OnPrivilegeExternCollectionReceived?.Invoke(this, EventArgs.Empty);
         }
 
-        readonly List<Group> groups = new();
-        public IReadOnlyList<Group> Groups => groups;
+        private readonly List<Group> groups = new();
+        public IReadOnlyList<Group> Groups
+        {
+            get
+            {
+                IReadOnlyList<Group> result;
+                lock (this)
+                {
+                    result = groups.ToList();
+                }
+                return result;
+            }
+        }
         public event EventHandler OnGroupReceived;
 
         private List<Group> cachedGroups = new();
