@@ -36,10 +36,11 @@ namespace ipsc6.agent.client
         [JsonPropertyName("udl")]
         public string Udl { get; set; }
 
+        [JsonPropertyName("append_agentgroupids")]
+        public IList<string> AppendedGroupIdList { get; set; }
 
-        // Tuple 是 "ID", "Name"
-        [JsonPropertyName("append_allagentgroups")]
-        public IList<IList<string>> AppendedGroupList { get; set; }
+        [JsonPropertyName("append_agentgroupnames")]
+        public IList<string> AppendedGroupNameList { get; set; }
 
         [JsonPropertyName("custom")]
         public string Custom { get; set; }

@@ -436,7 +436,7 @@ namespace ipsc6.agent.client
             ResetPrivilegeExternList(jo.PowerExt);
             ResetGroupIdList(jo.GroupIdIdList);
             ResetGroupNameList(jo.GroupIdIdList);
-            AppendAllGroupList(jo.AppendedGroupList);
+            AppendAllGroupList(jo.AppendedGroupIdList, jo.AppendedGroupNameList);
         }
 
         public event EventHandler OnAllGroupListChanged;
@@ -455,22 +455,28 @@ namespace ipsc6.agent.client
             }
         }
 
-        private void AppendAllGroupList(IList<IList<string>> appendedGroupList)
+        private void AppendAllGroupList(IList<string> idList, IList<string> nameList)
         {
-            if (appendedGroupList == null) return;
-            if (appendedGroupList.Count < 1) return;
+            idList ??= new List<string> { };
+            nameList ??= new List<string> { };
+            if (idList.Count != nameList.Count)
+            {
+                throw new InvalidOperationException("Count of id and name list differs in AppendAllGroupList");
+            }
+            if (idList.Count < 1 || nameList.Count < 1) return;
             lock (this)
             {
-                foreach (var ary in appendedGroupList)
+                for (var i = 0; i < idList.Count; ++i)
                 {
-                    var obj = allGroups.SingleOrDefault(x => x.Id == ary[0]);
+                    var id = idList[i];
+                    var obj = allGroups.SingleOrDefault(x => x.Id == id);
                     if (obj != null)
                     {
-                        obj.Name = ary[1];
+                        obj.Name = nameList[i];
                     }
                     else
                     {
-                        allGroups.Add(new Group(ary[0], ary[1]));
+                        allGroups.Add(new Group(id, nameList[i]));
                     }
                 }
             }
@@ -736,6 +742,7 @@ namespace ipsc6.agent.client
 
         private void ResetPrivilegeList(IEnumerable<Privilege> data)
         {
+            if (data == null) return;
             lock (this)
             {
                 privilegeCollection.UnionWith(data);
@@ -789,6 +796,7 @@ namespace ipsc6.agent.client
 
         private void ResetGroupIdList(IEnumerable<string> data)
         {
+            if (data == null) return;
             var itGroups = from id in data select new Group(id);
             lock (this)
             {
@@ -818,6 +826,7 @@ namespace ipsc6.agent.client
 
         private void ResetGroupNameList(IEnumerable<string> data)
         {
+            if (data == null) return;
             bool isRestore = false;
             lock (this)
             {
