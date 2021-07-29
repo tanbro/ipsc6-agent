@@ -107,23 +107,17 @@
         <Button Grid.Row="0" Grid.Column="1"
                     Style="{StaticResource OnHookButtonStyle}"
                     ToolTip="挂机"
-                    Command="{Binding HangupCommand}"
-                >
-            <!--
-                <iconPacks:BootstrapIcons Kind="TelephoneFill" Height="48" Width="48" RotationAngle="135"/>
-                -->
+                    Command="{Binding HangupCommand}">
             <Image Source="pack://application:,,,/Icons/64/telephone-hangup.png"/>
         </Button>
 
         <Button Grid.Row="0" Grid.Column="2"
                     Style="{StaticResource MyMainButton}"
                     ToolTip="转座席(咨询转)"
-                    Command="{Binding AllGroupPopupCommand}"
-                    CommandParameter="XferConsult">
+                    Command="{Binding XferConsultPopupCommand}">
             <StackPanel>
-                <!--<iconPacks:BootstrapIcons Kind="TelephonePlusFill" Height="48" Width="48"/>-->
                 <Image Source="pack://application:,,,/Icons/64/people-plus.png"/>
-                <Popup>
+                <Popup StaysOpen="False" IsOpen="{Binding IsXferConsultPopuped}">
                     <local:SelectGroupPanel/>
                 </Popup>
             </StackPanel>
@@ -132,11 +126,13 @@
         <Button Grid.Row="0" Grid.Column="3"
                     Style="{StaticResource MyMainButton}"
                     ToolTip="转座席(释放转)"
-                    Command="{Binding AllGroupPopupCommand}"
-                    CommandParameter="Xfer"
-                >
-            <!--<iconPacks:BootstrapIcons Kind="TelephoneForwardFill" Height="48" Width="48"/>-->
-            <Image Source="pack://application:,,,/Icons/64/telehpone-outgoing.png"/>
+                    Command="{Binding XferPopupCommand}">
+            <StackPanel>
+                <Image Source="pack://application:,,,/Icons/64/telehpone-outgoing.png"/>
+                <Popup StaysOpen="False" IsOpen="{Binding IsXferPopuped}">
+                    <local:SelectGroupPanel/>
+                </Popup>
+            </StackPanel>
         </Button>
 
         <Button Grid.Row="0" Grid.Column="4"

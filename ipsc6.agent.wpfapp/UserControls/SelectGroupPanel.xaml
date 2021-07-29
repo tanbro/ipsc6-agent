@@ -8,32 +8,34 @@
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
              d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
-             d:DesignHeight="450" d:DesignWidth="800"
-             Height="240" Width="320">
+             x:Name="SelectGroupPanelUserControl"
+             d:DesignHeight="240" d:DesignWidth="320"
+             FontSize="16" Background="{StaticResource MyBackgroud}"
+             >
+
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="7*"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
 
         <ListBox Grid.Row="0" ScrollViewer.VerticalScrollBarVisibility="Auto"
                  ItemsSource="{Binding Path=AllGroups, Mode=OneWay}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Style="{StaticResource MyCommonText}" Text="{Binding Path=Name, Mode=OneWay}"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Style="{StaticResource MyCommonText}"
+                                   Margin="4" HorizontalAlignment="Left"
+                                   Text="{Binding Path=Name, Mode=OneWay}"/>
+                        <Button Grid.Column="1" Style="{StaticResource MyCommonButton}" Margin="4" HorizontalAlignment="Right"
+                                Command="{Binding ElementName=SelectGroupPanelUserControl, Path=DataContext.SelectGroupOkCommand}"
+                                CommandParameter="{Binding Id}">
+                            选择
+                        </Button>
+                    </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="2">
-            <Button IsDefault="True" Style="{StaticResource MyCommonButton}" Width="48" Margin="4 0 4 0">
-                <TextBlock Text="确定"/>
-            </Button>
-            <Button IsCancel="True" Style="{StaticResource MyCommonButton}" Width="48" Margin="4 0 4 0">
-                <TextBlock Text="取消"/>
-            </Button>
-
-        </StackPanel>
 
     </Grid>
 </UserControl>

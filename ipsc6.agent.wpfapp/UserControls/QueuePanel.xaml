@@ -45,7 +45,7 @@
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource QueueToStringConverter}}"/>
-                                            <Button Content="Dequeue"
+                                            <Button Content="拦截"
                                                     Command="{Binding ElementName=QueuePanelUserControl, Path=DataContext.DequeueCommand}"
                                                     CommandParameter="{Binding}"/>
                                         </StackPanel>

@@ -195,7 +195,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 statePopupCommand, setStateCommand,
                 groupPopupCommand, signGroupCommand,
                 holdPopupCommand, holdCommand, unHoldCommand,
-                dialCommand, xferExtCommand, xferExtConsultCommand
+                dialCommand, xferPopupCommand, xferConsultPopupCommand,
             };
         }
 
@@ -1005,6 +1005,14 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (Utils.CommandGuard.IsGuarding) return false;
             var svc = Instance.MainService;
             if (status.Item1 != client.AgentState.Work) return false;
+            
+            //client.WorkType[] workTypes =
+            //{
+            //    client.WorkType.Hold,
+            //    client.WorkType.Consult,
+            //};
+            //if (workTypes.Contains(status.Item2)) return true;
+
             if (parameter == null)
             {
                 if (!calls.Any(x => x.IsHeld)) return false;
@@ -1161,33 +1169,79 @@ namespace ipsc6.agent.wpfapp.ViewModels
             set => SetProperty(ref allGroups, value);
         }
 
-        private static bool isAllGroupPopupOpened;
-        public bool IsAllGroupPopupOpened
+        #region Xfer Popup
+        private static bool isXferPopuped;
+        public bool IsXferPopuped
         {
-            get => isAllGroupPopupOpened;
-            set => SetProperty(ref isAllGroupPopupOpened, value);
-        }
-
-        private static IRelayCommand allGroupPopupCommand = new RelayCommand<object>(DoAllGroupPopup);
-        public IRelayCommand AllGroupPopupCommand => allGroupPopupCommand;
-
-        public static string allGroupPopupParameter;
-
-        private static void DoAllGroupPopup(object obj)
-        {
-            allGroupPopupParameter = (obj ?? "") as string;
-
-            var svc = Instance.MainService;
-
-            Instance.IsAllGroupPopupOpened = !isAllGroupPopupOpened;
-
-            // 如果要打开，就加载数据！
-            if (Instance.IsAllGroupPopupOpened)
+            get => isXferPopuped;
+            set
             {
-                Instance.AllGroups = svc.GetAllGroups();
-            }            
+                if (!SetProperty(ref isXferPopuped, value)) return;
+                if (value)  // 如果打开，就加载数据！
+                    AllGroups = MainService.GetAllGroups();
+            }
+        }
+        private static readonly IRelayCommand xferPopupCommand = new RelayCommand(DoXferPopup, CanXferPopup);
+        public IRelayCommand XferPopupCommand => xferPopupCommand;
+        private static void DoXferPopup()
+        {
+            Instance.IsXferPopuped = !isXferPopuped;
+        }
+        #endregion
+
+
+        #region XferConsult Popup
+        private static bool isXferConsultPopuped;
+        public bool IsXferConsultPopuped
+        {
+            get => isXferConsultPopuped;
+            set
+            {
+                if (!SetProperty(ref isXferConsultPopuped, value)) return;
+                if (value)  // 如果打开，就加载数据！
+                    AllGroups = MainService.GetAllGroups();
+            }
+        }
+        private static readonly IRelayCommand xferConsultPopupCommand = new RelayCommand(DoXferConsultPopup, CanXferPopup);
+        public IRelayCommand XferConsultPopupCommand => xferConsultPopupCommand;
+        private static void DoXferConsultPopup()
+        {
+            Instance.IsXferConsultPopuped = !isXferConsultPopuped;
+        }
+        #endregion
+
+        private static bool CanXferPopup()
+        {
+            if (!IsMainConnectionOk) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if (status.Item1 != client.AgentState.Work) return false;
+            return true;
         }
 
+        private static readonly IRelayCommand selectGroupOkCommand = new RelayCommand<object>(DoSelectGroupOk);
+        public IRelayCommand SelectGroupOkCommand => selectGroupOkCommand;
+
+        private static async void DoSelectGroupOk(object data)
+        {
+            if (data == null) throw new InvalidOperationException();
+            var groupId = (string)data;
+            var svc = Instance.MainService;
+            using (await Utils.CommandGuard.EnterAsync())
+            {
+                if (Instance.IsXferPopuped)
+                {
+                    logger.DebugFormat("释放转到座席组 {0}", groupId);
+                    await svc.Xfer(groupId);
+                    Instance.IsXferPopuped = false;
+                }
+                else if (Instance.IsXferConsultPopuped)
+                {
+                    logger.DebugFormat("保持转到座席组 {0}", groupId);
+                    await svc.XferConsult(groupId);
+                    Instance.IsXferConsultPopuped = false;
+                }
+            }
+        }
         #endregion
 
         #region 外呼, 外转, 外咨
