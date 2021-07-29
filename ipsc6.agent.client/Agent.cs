@@ -509,7 +509,7 @@ namespace ipsc6.agent.client
             {
                 foreach (var id in ids)
                 {
-                    var groupObj = groups.FirstOrDefault(m => m.Id == id);
+                    var groupObj = groups.SingleOrDefault(m => m.Id == id);
                     if (groupObj == null)
                     {
                         logger.ErrorFormat("DoOnSignedGroupIdList - 技能组 <id=\"{0}\"> 不存在", id);
@@ -1599,7 +1599,7 @@ namespace ipsc6.agent.client
 
         public async Task UnHoldAsync()
         {
-            var callInfo = HeldCalls.FirstOrDefault();
+            var callInfo = HeldCalls.SingleOrDefault();
             if (callInfo == null)
             {
                 throw new InvalidOperationException("没有任何被保持的呼叫，无法执行取消保持操作");
