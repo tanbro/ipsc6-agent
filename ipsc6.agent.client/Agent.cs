@@ -367,7 +367,11 @@ namespace ipsc6.agent.client
             CallInfo callInfo;
             lock (this)
             {
-                callInfo = calls.First(x => x.CtiServer == ctiServer && x.Channel == channel);
+                callInfo = calls.SingleOrDefault(x => x.CtiServer == ctiServer && x.Channel == channel);
+                if (callInfo == null)
+                {
+                    throw new InvalidOperationException($"保持呼叫消息 {ctiServer} {msg} 对应的呼叫信息不存在");
+                }
                 callInfo.IsHeld = isHeld;
                 callInfo.HoldType = holdEventType;
             }
