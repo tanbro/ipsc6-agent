@@ -1161,6 +1161,33 @@ namespace ipsc6.agent.wpfapp.ViewModels
             set => SetProperty(ref allGroups, value);
         }
 
+        private static bool isAllGroupPopupOpened;
+        public bool IsAllGroupPopupOpened
+        {
+            get => isAllGroupPopupOpened;
+            set => SetProperty(ref isAllGroupPopupOpened, value);
+        }
+
+        private static IRelayCommand allGroupPopupCommand = new RelayCommand<object>(DoAllGroupPopup);
+        public IRelayCommand AllGroupPopupCommand => allGroupPopupCommand;
+
+        public static string allGroupPopupParameter;
+
+        private static void DoAllGroupPopup(object obj)
+        {
+            allGroupPopupParameter = (obj ?? "") as string;
+
+            var svc = Instance.MainService;
+
+            Instance.IsAllGroupPopupOpened = !isAllGroupPopupOpened;
+
+            // 如果要打开，就加载数据！
+            if (Instance.IsAllGroupPopupOpened)
+            {
+                Instance.AllGroups = svc.GetAllGroups();
+            }            
+        }
+
         #endregion
 
         #region 外呼, 外转, 外咨

@@ -455,20 +455,22 @@ namespace ipsc6.agent.client
             }
         }
 
-        private void AppendAllGroupList(IList<Tuple<string, string>> appendedGroupList)
+        private void AppendAllGroupList(IList<IList<string>> appendedGroupList)
         {
+            if (appendedGroupList == null) return;
+            if (appendedGroupList.Count < 1) return;
             lock (this)
             {
-                foreach (var pair in appendedGroupList)
+                foreach (var ary in appendedGroupList)
                 {
-                    var obj = allGroups.SingleOrDefault(x => x.Id == pair.Item1);
+                    var obj = allGroups.SingleOrDefault(x => x.Id == ary[0]);
                     if (obj != null)
                     {
-                        obj.Name = pair.Item2;
+                        obj.Name = ary[1];
                     }
                     else
                     {
-                        allGroups.Add(new Group(pair.Item1, pair.Item2));
+                        allGroups.Add(new Group(ary[0], ary[1]));
                     }
                 }
             }

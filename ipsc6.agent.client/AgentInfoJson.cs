@@ -39,7 +39,7 @@ namespace ipsc6.agent.client
 
         // Tuple 是 "ID", "Name"
         [JsonPropertyName("append_allagentgroups")]
-        public IList<Tuple<string, string>> AppendedGroupList { get; set; }
+        public IList<IList<string>> AppendedGroupList { get; set; }
 
         [JsonPropertyName("custom")]
         public string Custom { get; set; }

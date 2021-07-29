@@ -80,84 +80,90 @@
         </Style>
     </UserControl.Resources>
 
-    
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="64"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
 
-            <Button Grid.Row="0" Grid.Column="0"
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="64"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <Button Grid.Row="0" Grid.Column="0"
                     Style="{StaticResource OffHookButtonStyle}"
                     ToolTip="摘机"
                     Command="{Binding AnswerCommand}"
                 >
-                <!--<iconPacks:BootstrapIcons Kind="TelephoneFill" Height="48" Width="48"/>-->
-                <Image Source="pack://application:,,,/Icons/64/telephone-offhook.png"/>
-            </Button>
+            <!--<iconPacks:BootstrapIcons Kind="TelephoneFill" Height="48" Width="48"/>-->
+            <Image Source="pack://application:,,,/Icons/64/telephone-offhook.png"/>
+        </Button>
 
-            <Button Grid.Row="0" Grid.Column="1"
+        <Button Grid.Row="0" Grid.Column="1"
                     Style="{StaticResource OnHookButtonStyle}"
                     ToolTip="挂机"
                     Command="{Binding HangupCommand}"
                 >
-                <!--
+            <!--
                 <iconPacks:BootstrapIcons Kind="TelephoneFill" Height="48" Width="48" RotationAngle="135"/>
                 -->
-                <Image Source="pack://application:,,,/Icons/64/telephone-hangup.png"/>
-            </Button>
+            <Image Source="pack://application:,,,/Icons/64/telephone-hangup.png"/>
+        </Button>
 
-            <Button Grid.Row="0" Grid.Column="2"
+        <Button Grid.Row="0" Grid.Column="2"
                     Style="{StaticResource MyMainButton}"
                     ToolTip="转座席(咨询转)"
-                    Command="{Binding XferConsultCommand}"
-                >
+                    Command="{Binding AllGroupPopupCommand}"
+                    CommandParameter="XferConsult">
+            <StackPanel>
                 <!--<iconPacks:BootstrapIcons Kind="TelephonePlusFill" Height="48" Width="48"/>-->
                 <Image Source="pack://application:,,,/Icons/64/people-plus.png"/>
-            </Button>
+                <Popup>
+                    <local:SelectGroupPanel/>
+                </Popup>
+            </StackPanel>
+        </Button>
 
-            <Button Grid.Row="0" Grid.Column="3"
+        <Button Grid.Row="0" Grid.Column="3"
                     Style="{StaticResource MyMainButton}"
                     ToolTip="转座席(释放转)"
-                    Command="{Binding XferCommand}"
+                    Command="{Binding AllGroupPopupCommand}"
+                    CommandParameter="Xfer"
                 >
-                <!--<iconPacks:BootstrapIcons Kind="TelephoneForwardFill" Height="48" Width="48"/>-->
-                <Image Source="pack://application:,,,/Icons/64/telehpone-outgoing.png"/>
-            </Button>
+            <!--<iconPacks:BootstrapIcons Kind="TelephoneForwardFill" Height="48" Width="48"/>-->
+            <Image Source="pack://application:,,,/Icons/64/telehpone-outgoing.png"/>
+        </Button>
 
-            <Button Grid.Row="0" Grid.Column="4"
+        <Button Grid.Row="0" Grid.Column="4"
                     Style="{StaticResource MyMainButton}"
                     ToolTip="转 IVR"
                     Command="{Binding CallIvrCommand}"
                 >
-                <Image Source="pack://application:,,,/Icons/64/xfer-ivr.png"/>
-            </Button>
+            <Image Source="pack://application:,,,/Icons/64/xfer-ivr.png"/>
+        </Button>
 
-            <Button Grid.Row="0" Grid.Column="5"
+        <Button Grid.Row="0" Grid.Column="5"
                     Style="{StaticResource MyMainButton}"
                     Command="{Binding HoldCommand}"
                     ToolTip="通话保持"
                 >
-                <!--<iconPacks:BootstrapIcons Kind="PauseFill" Height="48" Width="48"/>-->
-                <Image Source="pack://application:,,,/Icons/64/pause.png"/>
-            </Button>
+            <!--<iconPacks:BootstrapIcons Kind="PauseFill" Height="48" Width="48"/>-->
+            <Image Source="pack://application:,,,/Icons/64/pause.png"/>
+        </Button>
 
-            <Button Grid.Row="0" Grid.Column="6"
+        <Button Grid.Row="0" Grid.Column="6"
                     Style="{StaticResource MyMainButton}"
                     Command="{Binding UnHoldCommand}"
                     ToolTip="取消通话保持"
                 >
-                <!--<iconPacks:BootstrapIcons Kind="ReplyFill" Height="48" Width="48"/>-->
-                <Image Source="pack://application:,,,/Icons/64/rewind.png"/>
-            </Button>
-        </Grid>
+            <!--<iconPacks:BootstrapIcons Kind="ReplyFill" Height="48" Width="48"/>-->
+            <Image Source="pack://application:,,,/Icons/64/rewind.png"/>
+        </Button>
+    </Grid>
 
 </UserControl>
