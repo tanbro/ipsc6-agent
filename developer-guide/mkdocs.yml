@@ -4,6 +4,8 @@ copyright: 广州市和声信息技术有限公司 © 2021
 
 docs_dir: src
 
+use_directory_urls: false
+
 nav:
   - index.md
 
@@ -51,16 +53,18 @@ nav:
 
 plugins:
   - search
+  - localsearch
   # Not available on Windows
-  # - with-pdf:
-  #     enabled_if_env: ENABLE_PDF_EXPORT
-  #     toc_title: 目录
-  #     toc_level: 3
-  #     cover_title: "IPSC6 座席客户端"
-  #     cover_subtitle: "开发人员指南"
+  - with-pdf:
+      enabled_if_env: ENABLE_PDF_EXPORT
+      toc_title: 目录
+      toc_level: 3
+      cover_title: "IPSC6 座席客户端"
+      cover_subtitle: "开发人员指南"
 
 theme:
   name: material
+  custom_dir: theme
   language: zh
   font: false
 
@@ -115,5 +119,5 @@ markdown_extensions:
       slugify: !!python/name:pymdownx.slugs.uslugify
   # 3rd extensions
   - plantuml_markdown:
-      server: http://www.plantuml.com/plantuml
+      # server: http://www.plantuml.com/plantuml
       format: svg
