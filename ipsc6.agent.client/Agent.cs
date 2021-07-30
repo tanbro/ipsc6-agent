@@ -550,7 +550,7 @@ namespace ipsc6.agent.client
             var val = msg.S.Split(Constants.VerticalBarDelimiter);
             SipRegistrarListReceivedEventArgs evt = new(val);
 
-            SyncFactory.StartNew((Func<Task>)(async () =>
+            SyncFactory.StartNew(async () =>
             {
                 await pjSemaphore.WaitAsync();
                 try
@@ -598,7 +598,7 @@ namespace ipsc6.agent.client
                     pjSemaphore.Release();
                 }
 
-            }));
+            });
         }
 
         private void ReloadSipAccountCollection()

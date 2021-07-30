@@ -71,7 +71,16 @@ namespace ipsc6.agent.wpfapp
             {
                 log4net.GlobalContext.Properties["ProcessId"] = Process.GetCurrentProcess().Id;
                 log4net.GlobalContext.Properties["ProductName"] = VersionInfo.ProductName;
-                log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(Path.Combine("Config", "log4net.config")));
+                var userLoggingConfigFile = Path.Combine(ConfigManager.UserSettingsPath, "log4net.config");
+                var appLoggingConfigFile = Path.Combine("Config", "log4net.config");
+                if (File.Exists(userLoggingConfigFile))
+                {
+                    log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(userLoggingConfigFile));
+                }
+                else
+                {
+                    log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(appLoggingConfigFile));
+                }
                 logger.WarnFormat("\r\n!!!!!!!!!!!!!!!!!!!! Startup (AssemblyVersion {0}, FileVersion {1}) !!!!!!!!!!!!!!!!!!!!\r\n", Assembly.GetName().Version, VersionInfo.FileVersion);
             }
             catch (Exception err)
