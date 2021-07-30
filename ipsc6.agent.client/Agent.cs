@@ -22,8 +22,8 @@ namespace ipsc6.agent.client
         // 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
         ~Agent()
         {
-          // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
-          Dispose(disposing: false);
+            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+            Dispose(disposing: false);
         }
 
         // Flag: Has Dispose already been called?
@@ -877,7 +877,7 @@ namespace ipsc6.agent.client
                         stateWorkType = cachedStateWorkType.Clone() as AgentStateWorkType;
                     Task.Run(async () =>
                     {
-                        logger.Debug("还原技能");
+                        logger.Debug("还原座席组");
                         await SignInAsync(groupIdList);
                         if (stateWorkType != null)
                         {
@@ -1185,7 +1185,7 @@ namespace ipsc6.agent.client
                         var index = rand.Next(0, unusedIndices.Count);
                         MainConnectionIndex = unusedIndices[index];
                         unusedIndices.RemoveAt(index);
-                        logger.InfoFormat("StartUpAsync - [0] 连接主服务节点 [{1}]({2}|{3}) ... ", i, MainConnectionIndex, MainConnectionInfo.Host, MainConnectionInfo.Port);
+                        logger.InfoFormat("StartUpAsync - {0}. 连接主服务节点 [{1}]({2}|{3}) ... ", i, MainConnectionIndex, MainConnectionInfo.Host, MainConnectionInfo.Port);
                         try
                         {
                             await MainConnection.OpenAsync(
