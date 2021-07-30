@@ -24,13 +24,6 @@ namespace ipsc6.agent.wpfapp.UserControls
         public GroupPanel()
         {
             InitializeComponent();
-            DataContext = ViewModels.MainViewModel.Instance;
-        }
-
-        private void ShowOrHideSkillPopup(object sender, RoutedEventArgs e)
-        {
-            var popup = FindName("SkillPopup") as Popup;
-            popup.IsOpen = !popup.IsOpen;
         }
     }
 }

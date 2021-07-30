@@ -58,6 +58,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
             return window ?? new Views.LoginWindow();
         }
 
+        private static Window GetSingleWindow()
+        {
+            var window = Application.Current.Windows.OfType<Window>().Single(x => x is Views.LoginWindow);
+            return window;
+        }
+
         public static async void DoLogin()
         {
             var dispatcher = Application.Current.Dispatcher;
@@ -193,12 +199,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var svc = MainViewModel.Instance.MainService;
             var mainViewModel = MainViewModel.Instance;
 
-            if (serverList is null)
+            serverList ??= (new string[] { });
+            if (serverList.Count() == 0)
             {
-                serverList = mainViewModel.cfgIpsc.ServerList;
-            }
-            else if (serverList.Count() == 0)
-            {
+                mainViewModel.ReloadConfigure();
                 serverList = mainViewModel.cfgIpsc.ServerList;
             }
 
@@ -215,6 +219,24 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
 
             mainViewModel.StartTimer();
+        }
+
+        private static readonly IRelayCommand closeCommand = new RelayCommand(DoClose);
+        public IRelayCommand CloseCommand => closeCommand;
+
+        private static void DoClose()
+        {
+            var window = GetSingleWindow();
+            window.DialogResult = false;
+            window.Close();
+        }
+
+        private static readonly IRelayCommand showConfigWindowCommand = new RelayCommand(DoShowConfigWindow);
+        public IRelayCommand ShowConfigWindowCommand => showConfigWindowCommand;
+
+        private static void DoShowConfigWindow()
+        {
+            new Views.ConfigWindow().ShowDialog();
         }
 
     }

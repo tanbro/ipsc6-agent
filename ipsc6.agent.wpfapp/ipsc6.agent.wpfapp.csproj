@@ -14,6 +14,21 @@
     <NoWarn>IDE0008,IDE0011,IDE0058,VSTHRD111</NoWarn>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Icons\App.ico</ApplicationIcon>
@@ -100,10 +115,18 @@
       <DependentUpon>PromptDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="GuiService.cs" />
+    <Compile Include="ObservableContent.cs" />
     <Compile Include="StateMachines\SnapTopState.cs" />
     <Compile Include="StateMachines\SnapTopStateMachine.cs" />
     <Compile Include="StateMachines\SnapTopTrigger.cs" />
+    <Compile Include="UserControls\SelectGroupPanel.xaml.cs">
+      <DependentUpon>SelectGroupPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\CommandGuard.cs" />
+    <Compile Include="ViewModels\ConfigViewModel.cs" />
+    <Compile Include="Views\ConfigWindow.xaml.cs">
+      <DependentUpon>ConfigWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
@@ -143,6 +166,14 @@
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Page Include="Dialogs\PromptDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\SelectGroupPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ConfigWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -229,10 +260,9 @@
     <Resource Include="Fonts\LCD14.otf" />
     <Resource Include="Fonts\LCD14Condensed.otf" />
     <Resource Include="Fonts\PathwayGothicOne-Regular.ttf" />
+    <None Include="Config\log4net.Debug.config" />
+    <None Include="Config\log4net.Release.config" />
     <None Include="Config\settings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Properties\Settings.settings">
@@ -307,9 +337,22 @@
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.6.1 %28x86 和 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*" . /D /Y
-xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*" . /D /Y</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*" "$(TargetDir)" /D /Y
+xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*" "$(TargetDir)" /D /Y
+copy "$(ProjectDir)Config\log4net.$(ConfigurationName).config" "$(TargetDir)Config\log4net.config" /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>

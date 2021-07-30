@@ -125,6 +125,7 @@ namespace ipsc6.agent.services
 
             agent.OnGroupReceived += Agent_OnGroupReceived;
             agent.OnSignedGroupsChanged += Agent_OnSignedGroupsChanged;
+            agent.OnAllGroupListChanged += Agent_OnAllGroupListChanged;
 
             agent.OnSipRegistrarListReceived += Agent_OnSipRegistrarListReceived;
             agent.OnSipRegisterStateChanged += Agent_OnSipRegisterStateChanged;
@@ -141,6 +142,7 @@ namespace ipsc6.agent.services
 
             ReloadCtiServers();
         }
+
         #endregion
 
         #region status
@@ -337,6 +339,22 @@ namespace ipsc6.agent.services
         public IReadOnlyCollection<Models.Group> GetGroups()
         {
             return GetModel().Groups;
+        }
+
+        private void Agent_OnAllGroupListChanged(object sender, EventArgs e)
+        {
+            lock (model)
+            {
+                model.AllGroups = (
+                    from x in agent.AllGroups
+                    select new Models.Group { Id = x.Id, Name = x.Name }
+                ).ToList();
+            }
+        }
+
+        public IReadOnlyCollection<Models.Group> GetAllGroups()
+        {
+            return GetModel().AllGroups;
         }
 
         #endregion

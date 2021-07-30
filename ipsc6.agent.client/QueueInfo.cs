@@ -15,6 +15,7 @@ namespace ipsc6.agent.client
         public long ProcessId { get; }
         public string CallingTelNum { get; }
         public string WorkerNum { get; }
+        public long AgentId { get; }
         public string CustomeString { get; }
         private readonly HashSet<Group> groups = new();
         public IReadOnlyCollection<Group> Groups => groups;
@@ -56,6 +57,11 @@ namespace ipsc6.agent.client
                         CallingTelNum = s;
                         break;
                     case 6:
+#pragma warning disable CA1305
+                        AgentId = long.Parse(s);
+#pragma warning restore CA1305
+                        break;
+                    case 7:
                         CustomeString = s;
                         break;
                     default:

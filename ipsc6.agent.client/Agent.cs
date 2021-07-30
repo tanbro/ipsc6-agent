@@ -320,7 +320,7 @@ namespace ipsc6.agent.client
             }
 
             // Offhook 请求的对应的自动摘机
-            if (isOffHooking)
+            if (offHookSemaphore.CurrentCount < 1)
             {
                 switch (newState)
                 {
@@ -367,7 +367,11 @@ namespace ipsc6.agent.client
             CallInfo callInfo;
             lock (this)
             {
-                callInfo = calls.First(x => x.CtiServer == ctiServer && x.Channel == channel);
+                callInfo = calls.SingleOrDefault(x => x.CtiServer == ctiServer && x.Channel == channel);
+                if (callInfo == null)
+                {
+                    throw new InvalidOperationException($"保持呼叫消息 {ctiServer} {msg} 对应的呼叫信息不存在");
+                }
                 callInfo.IsHeld = isHeld;
                 callInfo.HoldType = holdEventType;
             }
@@ -436,6 +440,51 @@ namespace ipsc6.agent.client
             ResetPrivilegeExternList(jo.PowerExt);
             ResetGroupIdList(jo.GroupIdIdList);
             ResetGroupNameList(jo.GroupIdIdList);
+            AppendAllGroupList(jo.AppendedGroupIdList, jo.AppendedGroupNameList);
+        }
+
+        public event EventHandler OnAllGroupListChanged;
+
+        private readonly List<Group> allGroups = new();
+        public IReadOnlyCollection<Group> AllGroups
+        {
+            get
+            {
+                IReadOnlyCollection<Group> result;
+                lock (this)
+                {
+                    result = allGroups.ToList();
+                }
+                return result;
+            }
+        }
+
+        private void AppendAllGroupList(IList<string> idList, IList<string> nameList)
+        {
+            idList ??= new List<string> { };
+            nameList ??= new List<string> { };
+            if (idList.Count != nameList.Count)
+            {
+                throw new InvalidOperationException("Count of id and name list differs in AppendAllGroupList");
+            }
+            if (idList.Count < 1 || nameList.Count < 1) return;
+            lock (this)
+            {
+                for (var i = 0; i < idList.Count; ++i)
+                {
+                    var id = idList[i];
+                    var obj = allGroups.SingleOrDefault(x => x.Id == id);
+                    if (obj != null)
+                    {
+                        obj.Name = nameList[i];
+                    }
+                    else
+                    {
+                        allGroups.Add(new Group(id, nameList[i]));
+                    }
+                }
+            }
+            OnAllGroupListChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public Stats Stats { get; } = new();
@@ -460,7 +509,7 @@ namespace ipsc6.agent.client
             {
                 foreach (var id in ids)
                 {
-                    var groupObj = groups.FirstOrDefault(m => m.Id == id);
+                    var groupObj = groups.SingleOrDefault(m => m.Id == id);
                     if (groupObj == null)
                     {
                         logger.ErrorFormat("DoOnSignedGroupIdList - 技能组 <id=\"{0}\"> 不存在", id);
@@ -476,6 +525,7 @@ namespace ipsc6.agent.client
         }
 
         private readonly SemaphoreSlim pjSemaphore = new(1);
+
 
         public event EventHandler<SipRegistrarListReceivedEventArgs> OnSipRegistrarListReceived;
         public event EventHandler OnSipRegisterStateChanged;
@@ -577,7 +627,7 @@ namespace ipsc6.agent.client
                 try
                 {
                     // 处理外呼等服务器回呼请求
-                    if (isOffHooking)
+                    if (offHookSemaphore.CurrentCount < 1)
                     {
                         logger.Debug("SipUA_OnIncomingCall - Client side Offhooking: Answer ...");
                         try
@@ -696,6 +746,7 @@ namespace ipsc6.agent.client
 
         private void ResetPrivilegeList(IEnumerable<Privilege> data)
         {
+            if (data == null) return;
             lock (this)
             {
                 privilegeCollection.UnionWith(data);
@@ -725,8 +776,19 @@ namespace ipsc6.agent.client
             OnPrivilegeExternCollectionReceived?.Invoke(this, EventArgs.Empty);
         }
 
-        readonly List<Group> groups = new();
-        public IReadOnlyList<Group> Groups => groups;
+        private readonly List<Group> groups = new();
+        public IReadOnlyList<Group> Groups
+        {
+            get
+            {
+                IReadOnlyList<Group> result;
+                lock (this)
+                {
+                    result = groups.ToList();
+                }
+                return result;
+            }
+        }
         public event EventHandler OnGroupReceived;
 
         private List<Group> cachedGroups = new();
@@ -738,6 +800,7 @@ namespace ipsc6.agent.client
 
         private void ResetGroupIdList(IEnumerable<string> data)
         {
+            if (data == null) return;
             var itGroups = from id in data select new Group(id);
             lock (this)
             {
@@ -767,6 +830,7 @@ namespace ipsc6.agent.client
 
         private void ResetGroupNameList(IEnumerable<string> data)
         {
+            if (data == null) return;
             bool isRestore = false;
             lock (this)
             {
@@ -883,11 +947,13 @@ namespace ipsc6.agent.client
                 // 断线处理
                 if (disconntedStates.Contains(e.NewState))
                 {
+                    bool isCancelled = false;
                     var isMain = connIdx == MainConnectionIndex;
                     if (isMain)
                     {
                         if (RunningState != AgentRunningState.Started)
                         {
+                            // 处于启动过程中！
                             logger.WarnFormat(
                                 "主服务节点 [{0}]({1}) 连接断开 (NewState={2} RunningState={3}) 放弃重连.",
                                 connIdx, ctiServers[connIdx], e.NewState, RunningState
@@ -906,7 +972,7 @@ namespace ipsc6.agent.client
                                 // 有的选,但是如果在工作状态,不能变!
                                 if (workingStates.Contains(AgentState))
                                 {
-                                    logger.WarnFormat("主服务节点 [{0}]({1}) 连接断开. 由于处于工作状态, 将继续使用该主节点并发起重连", connIdx, ctiServer);
+                                    logger.WarnFormat("主服务节点 [{0}]({1}) 连接断开. 但是由于处于工作状态, 将继续使用该主节点并发起重连", connIdx, ctiServer);
                                 }
                                 else
                                 {
@@ -928,23 +994,24 @@ namespace ipsc6.agent.client
                                             ConnectionState[] exceptStats = { ConnectionState.Closed, ConnectionState.Closing };
                                             var indices2 = (
                                                 from vi in connections.Select((value, index) => (value, index))
-                                                where vi.index != MainConnectionIndex && exceptStats.All(m => m != vi.value.State)
+                                                where vi.index != MainConnectionIndex && !exceptStats.Contains(vi.value.State)
                                                 select vi.index
                                             ).ToList();
                                             if (indices2.Count > 0)
                                             {
                                                 MainConnectionIndex = indices2[rand.Next(indices2.Count)];
                                                 logger.WarnFormat(
-                                                    "主服务节点 [{0}]({1}) 连接被主动关闭. 虽然找不到其它可用的连接, 仍切换主节点到 [{2}]({3})",
+                                                    "主服务节点 [{0}]({1}) 连接被关闭. 且找不到其它活动连接, 但仍切换主节点到 [{2}]({3})",
                                                     connIdx, ctiServer, MainConnectionIndex, MainConnectionInfo
                                                 );
                                             }
                                             else
                                             {
                                                 logger.WarnFormat(
-                                                    "主服务节点 [{0}]({1}) 连接被主动关闭. 且找不到其它未被主动关闭的连接, 将继续使用该主节点并发起重连",
+                                                    "主服务节点 [{0}]({1}) 连接被关闭. 且找不到其它未被主动关闭的连接, 将放弃重连",
                                                     connIdx, ctiServer
                                                 );
+                                                isCancelled = true;
                                             }
                                         }
                                         break;
@@ -957,39 +1024,42 @@ namespace ipsc6.agent.client
                                 }
                             }
                             ///
-                            if (MainConnectionIndex != connIdx)
+                            if (!isCancelled)
                             {
-                                action = new Action(async () =>
+                                if (MainConnectionIndex != connIdx)
                                 {
-                                    logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
-                                    try
+                                    action = new Action(async () =>
                                     {
-                                        await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 0);
-                                        logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
-                                    }
-                                    catch (ConnectionException ex)
-                                    {
-                                        logger.ErrorFormat("从服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
-                                    };
-                                });
-                                // 需要抛出切换新的主服务节事件
-                                evtMainConnChanged = EventArgs.Empty;
-                            }
-                            else
-                            {
-                                action = new Action(async () =>
+                                        logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
+                                        try
+                                        {
+                                            await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 0);
+                                            logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
+                                        }
+                                        catch (ConnectionException ex)
+                                        {
+                                            logger.ErrorFormat("从服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
+                                        };
+                                    });
+                                    // 需要抛出切换新的主服务节事件
+                                    evtMainConnChanged = EventArgs.Empty;
+                                }
+                                else
                                 {
-                                    logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
-                                    try
+                                    action = new Action(async () =>
                                     {
-                                        await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 1);
-                                        logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
-                                    }
-                                    catch (ConnectionException ex)
-                                    {
-                                        logger.ErrorFormat("主服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
-                                    };
-                                });
+                                        logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
+                                        try
+                                        {
+                                            await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 1);
+                                            logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
+                                        }
+                                        catch (ConnectionException ex)
+                                        {
+                                            logger.ErrorFormat("主服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
+                                        };
+                                    });
+                                }
                             }
                         }
                     }
@@ -1001,6 +1071,10 @@ namespace ipsc6.agent.client
                                 "从服务节点 [{0}]({1}) 连接断开 ({2} {3}). 放弃重连.",
                                 connIdx, ctiServer, e.NewState, RunningState
                             );
+                        }
+                        else if (e.NewState == ConnectionState.Closed)
+                        {
+                            logger.WarnFormat("从服务节点 [{0}]({1}) 连接被关闭. 将放弃重连", connIdx, ctiServer);
                         }
                         else
                         {
@@ -1038,8 +1112,29 @@ namespace ipsc6.agent.client
 
         public async Task StartUpAsync(IEnumerable<string> addresses, string workerNum, string password)
         {
+            foreach (var addr in addresses)
+            {
+                if (string.IsNullOrWhiteSpace(addr))
+                {
+                    throw new ArgumentException("地址不得为空", nameof(addresses));
+                }
+                var c = (from s in addresses where s == addr select s).Count();
+                if (c > 1)
+                {
+                    throw new ArgumentException("重复的地址", nameof(addresses));
+                }
+            }
+
+            logger.InfoFormat(
+                "StartUpAsync - workerNum=\"{0}\", addresses=\"{1}\"",
+                workerNum, string.Join(", ", addresses)
+            );
+
             using (requestGuard.TryEnter())
             {
+                connections.Clear();
+                ctiServers.Clear();
+
                 AgentRunningState savedRunningState;
                 IEnumerable<int> minorIndices;
                 Random rand = new();
@@ -1504,7 +1599,7 @@ namespace ipsc6.agent.client
 
         public async Task UnHoldAsync()
         {
-            var callInfo = HeldCalls.FirstOrDefault();
+            var callInfo = HeldCalls.SingleOrDefault();
             if (callInfo == null)
             {
                 throw new InvalidOperationException("没有任何被保持的呼叫，无法执行取消保持操作");
@@ -1527,7 +1622,7 @@ namespace ipsc6.agent.client
         {
             logger.Debug("Answer");
 
-            if (isOffHooking)
+            if (offHookSemaphore.CurrentCount < 1)
             {
                 throw new InvalidOperationException("Can not perform a SIP answer when in a Off-Hook requestion");
             }
@@ -1559,7 +1654,7 @@ namespace ipsc6.agent.client
         {
             logger.Debug("Hangup");
 
-            if (isOffHooking)
+            if (offHookSemaphore.CurrentCount < 1)
             {
                 throw new InvalidOperationException("Can not perform a SIP hangup when in a Off-Hook requestion");
             }
@@ -1583,15 +1678,15 @@ namespace ipsc6.agent.client
             });
         }
 
+        private readonly SemaphoreSlim offHookSemaphore = new(1);
         private TaskCompletionSource<object> offHookServerTcs;
         private TaskCompletionSource<object> offHookClientTcs;
-        private bool isOffHooking;
+
         public const int DefaultOffHookTimeoutMilliSeconds = 5000;
 
         internal async Task OffHookAsync(Connection connection, int millisecondsTimeout = DefaultOffHookTimeoutMilliSeconds)
         {
-            await pjSemaphore.WaitAsync();
-            isOffHooking = true;
+            await offHookSemaphore.WaitAsync();
             try
             {
                 bool isContinue;
@@ -1630,8 +1725,7 @@ namespace ipsc6.agent.client
             }
             finally
             {
-                pjSemaphore.Release();
-                isOffHooking = false;
+                offHookSemaphore.Release();
             }
         }
 

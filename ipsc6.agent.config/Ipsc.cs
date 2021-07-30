@@ -9,8 +9,6 @@ namespace ipsc6.agent.config
 
         public IList<string> ServerList { get; set; }
 
-        public string Name { get; set; }
-
         public override string ToString()
         {
             return string.Format("<{0} ServerList={1}, LocalPort=\"{2}\", LocalAddress=\"{3}\">",

@@ -11,6 +11,7 @@
         <PackageReference Include="Microsoft.VisualStudio.Threading" Version="16.10.56" />
         <PackageReference Include="EmbedIO" Version="3.4.3" />
         <PackageReference Include="StreamJsonRpc" Version="2.8.21" />
+        <PackageReference Include="log4net" Version="2.0.12" />
     </ItemGroup>
 
 </Project>

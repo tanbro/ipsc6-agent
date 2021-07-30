@@ -24,13 +24,7 @@ namespace ipsc6.agent.wpfapp.UserControls
         public WorkerStatusPanel()
         {
             InitializeComponent();
-            DataContext = ViewModels.MainViewModel.Instance;
         }
 
-        private void ShowOrHideStatePopup(object sender, RoutedEventArgs e)
-        {
-            var popup = FindName("StatePopup") as Popup;
-            popup.IsOpen = !popup.IsOpen;
-        }
     }
 }

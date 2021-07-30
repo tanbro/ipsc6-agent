@@ -11,6 +11,8 @@ namespace ipsc6.agent.server
 {
     public class Server
     {
+        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Server));
+
         public ushort Port { get; }
         public string Path { get; }
 
@@ -20,6 +22,7 @@ namespace ipsc6.agent.server
             localRpcTargetCreators = new LocalRpcTargetFunc[] { localRpcTargetCreator };
             Port = port;
             Path = "/" + path.TrimStart('/');
+            logger.InfoFormat("Port={0}, Path={1}", Port, Path);
         }
 
         public Server(IEnumerable<LocalRpcTargetFunc> localRpcTargetCreators, ushort port = 9696, string path = "/jsonrpc")
@@ -27,6 +30,7 @@ namespace ipsc6.agent.server
             this.localRpcTargetCreators = localRpcTargetCreators ?? throw new ArgumentNullException(nameof(localRpcTargetCreators));
             Port = port;
             Path = "/" + path.TrimStart('/');
+            logger.InfoFormat("Port={0}, Path={1}", Port, Path);
         }
 
         private readonly IEnumerable<LocalRpcTargetFunc> localRpcTargetCreators;
