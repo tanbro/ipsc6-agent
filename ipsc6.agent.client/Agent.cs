@@ -20,11 +20,11 @@ namespace ipsc6.agent.client
         }
 
         // 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
-        //~Agent()
-        //{
-        //  不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
-        //  Dispose(disposing: false);
-        //}
+        ~Agent()
+        {
+          // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+          Dispose(disposing: false);
+        }
 
         // Flag: Has Dispose already been called?
         private bool disposedValue;
@@ -1146,9 +1146,6 @@ namespace ipsc6.agent.client
 
             using (requestGuard.TryEnter())
             {
-                connections.Clear();
-                ctiServers.Clear();
-
                 AgentRunningState savedRunningState;
                 IEnumerable<int> minorIndices;
                 Random rand = new();
@@ -1158,6 +1155,7 @@ namespace ipsc6.agent.client
                     {
                         throw new InvalidOperationException($"Invalid state: {RunningState}");
                     }
+                    DisposeConnections();
                     savedRunningState = RunningState;
                     RunningState = AgentRunningState.Starting;
                 }
@@ -1226,6 +1224,7 @@ namespace ipsc6.agent.client
                 {
                     lock (this)
                     {
+                        DisposeConnections();
                         RunningState = savedRunningState;
                     }
                     throw;
