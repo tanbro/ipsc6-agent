@@ -251,7 +251,7 @@ namespace ipsc6.agent.client
             {
                 newState = new AgentStateWorkType((AgentState)msg.N1, (WorkType)msg.N2);
             }
-            logger.DebugFormat("StateChanged - {0}", newState);
+            logger.DebugFormat("StateChanged - {0} --> {1}", AgentStateWorkType, newState);
             var currIndex = ctiServers.FindIndex(ci => ci == ctiServer);
             AgentStateWorkType oldState = null;
             Connection oldMainConnObj = null;
@@ -374,13 +374,22 @@ namespace ipsc6.agent.client
                 callInfo = calls.SingleOrDefault(x => x.CtiServer == ctiServer && x.Channel == channel);
                 if (callInfo == null)
                 {
-                    throw new InvalidOperationException($"保持呼叫消息 {ctiServer} {msg} 对应的呼叫信息不存在");
+                    if (TeleState == TeleState.OffHook)
+                    {
+                        throw new KeyNotFoundException($"保持呼叫消息 {ctiServer} {msg} 对应的呼叫信息不存在");
+                    }
                 }
-                callInfo.IsHeld = isHeld;
-                callInfo.HoldType = holdEventType;
+                else
+                {
+                    callInfo.IsHeld = isHeld;
+                    callInfo.HoldType = holdEventType;
+                }
             }
-            logger.DebugFormat("HoldInfoMessage - {0}: {1}", isHeld ? "UnHold" : "Hold", callInfo);
-            OnHoldInfoReceived?.Invoke(this, new(ctiServer, callInfo));
+            if (callInfo != null)
+            {
+                logger.DebugFormat("HoldInfoMessage - {0}: {1}", isHeld ? "Hold" : "UnHold", callInfo);
+                OnHoldInfoReceived?.Invoke(this, new(ctiServer, callInfo));
+            }
         }
 
         private void ProcessDataMessage(CtiServer ctiServer, ServerSentMessage msg)
