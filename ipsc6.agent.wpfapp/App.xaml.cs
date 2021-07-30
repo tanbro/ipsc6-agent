@@ -71,7 +71,7 @@ namespace ipsc6.agent.wpfapp
             {
                 log4net.GlobalContext.Properties["ProcessId"] = Process.GetCurrentProcess().Id;
                 log4net.GlobalContext.Properties["ProductName"] = VersionInfo.ProductName;
-                var userLoggingConfigFile = Path.Combine(ConfigManager.UserSettingsPath, "log4net.config");
+                var userLoggingConfigFile = Path.Combine(Path.GetDirectoryName(ConfigManager.UserSettingsPath), "log4net.config");
                 var appLoggingConfigFile = Path.Combine("Config", "log4net.config");
                 if (File.Exists(userLoggingConfigFile))
                 {
