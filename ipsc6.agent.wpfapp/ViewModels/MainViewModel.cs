@@ -173,8 +173,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         internal void Release()
         {
+            logger.Info("Release");
             StopTimer();
 
+            logger.Debug("Release - Stop RPC server");
             rpcServerRunningCanceller?.Cancel();
             try
             {
@@ -184,8 +186,13 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
             catch (TaskCanceledException) { }
 
+            logger.Debug("Release - Dispose Main Service");
             MainService?.Dispose();
+
+            logger.Debug("Release - Dispose GUI Service");
             GuiService?.Dispose();
+
+            logger.Debug("Release - Completed");
         }
 
         private static IRelayCommand[] GetStateRelativeCommands()
@@ -604,8 +611,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => status;
             set
             {
-                SetProperty(ref status, value);
-                // 这里要无条件刷新！
+                if (!SetProperty(ref status, value)) return;
                 NotifyStateRelativeCommandsExecutable();
             }
         }

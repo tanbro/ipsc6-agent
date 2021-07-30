@@ -7,7 +7,7 @@ namespace ipsc6.agent.client
 {
     public struct SipAccount
     {
-        public SipAccount(Sip.Account account)
+        public SipAccount(Sip.MyPjAccount account)
         {
             account = account is not null ? account : throw new ArgumentNullException(nameof(account));
             ConnectionIndex = account.ConnectionIndex;

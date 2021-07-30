@@ -6,7 +6,7 @@ namespace ipsc6.agent.client
 {
     public struct SipCall
     {
-        public SipCall(Sip.Call call)
+        public SipCall(Sip.MyPjCall call)
         {
             call = call is not null ? call : throw new ArgumentNullException(nameof(call));
             var info = call.getInfo();

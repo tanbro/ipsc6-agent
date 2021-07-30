@@ -41,14 +41,18 @@ namespace ipsc6.agent.client
             {
                 if (disposing)
                 {
+                    logger.Info("Dispose - disposing...");
                     // 释放托管状态(托管对象)
+                    logger.Debug("Dispose - dispose PJSip Accounts...");
                     DisposePjSipAccounts();
+                    logger.Debug("Dispose - dispose Connections...");
                     DisposeConnections();
                 }
                 // 释放未托管的资源(未托管的对象)并重写终结器
                 // 将大型字段设置为 null
                 //
                 disposedValue = true;
+                logger.Info("Dispose - disposed!");
             }
         }
 
@@ -71,7 +75,7 @@ namespace ipsc6.agent.client
             SyncFactory = new TaskFactory(TaskScheduler.FromCurrentSynchronizationContext());
 
             /// Init PJ SIP UA
-            logger.Info("create pjsua2 endpoint.");
+            logger.Info("Initial - create pjsua2 endpoint.");
             _sipConfigArgs = sipConfigArgs ?? new SipConfigArgs();
             if (_sipConfigArgs.TransportConfigArgsCollection.Count() == 0)
             {
@@ -88,7 +92,7 @@ namespace ipsc6.agent.client
                 SipEndpoint.libInit(epCfg);
                 foreach (var args in _sipConfigArgs.TransportConfigArgsCollection)
                 {
-                    logger.DebugFormat("pjsua2 endpoint craete transport: {0}", args);
+                    logger.DebugFormat("Initial - pjsua2 endpoint craete transport: {0}", args);
                     using TransportConfig cfg = new() { port = args.Port, portRange = args.PortRange };
                     if (!string.IsNullOrWhiteSpace(args.BoundAddress))
                     {
@@ -101,16 +105,15 @@ namespace ipsc6.agent.client
                     SipEndpoint.transportCreate(args.TransportType, cfg);
                 }
             }
-            logger.Debug("pjsua2 endpoint start...");
+            logger.Debug("Initial - pjsua2 endpoint start");
             SipEndpoint.libStart();
-            logger.Debug("pjsua2 endpoint start ok!");
 
             /// Init our Raknet library
-            logger.Debug("network.Connector.Initial()");
             network.Connector.Initial();
 
             /// OK!
             IsInitialized = true;
+            logger.Debug("Initial - completed");
         }
 
         public static void Release()
@@ -119,13 +122,14 @@ namespace ipsc6.agent.client
                 throw new InvalidOperationException("Not initialized yet");
             logger.Info("Release");
 
-            logger.Debug("network.Connector.Release()");
+            logger.Debug("Release - network.Connector.Release()");
             network.Connector.Release();
 
-            logger.Debug("destory pjsua2 Endpoint");
+            logger.Debug("Release - destory pjsua2 Endpoint");
             SipEndpoint.libDestroy();
             SipEndpoint.Dispose();
             IsInitialized = false;
+            logger.Debug("Release - completed");
         }
 
         private readonly RequestGuard requestGuard = new();
@@ -537,7 +541,7 @@ namespace ipsc6.agent.client
             var val = msg.S.Split(Constants.VerticalBarDelimiter);
             SipRegistrarListReceivedEventArgs evt = new(val);
 
-            SyncFactory.StartNew(async () =>
+            SyncFactory.StartNew((Func<Task>)(async () =>
             {
                 await pjSemaphore.WaitAsync();
                 try
@@ -546,12 +550,13 @@ namespace ipsc6.agent.client
                     {
                         logger.DebugFormat("处理 SipAccount 地址 {0} ...", addr);
                         var uri = $"sip:{WorkerNum}@{addr}";
-                        Sip.Account acc;
+                        Sip.MyPjAccount acc;
                         acc = sipAccountCollection.FirstOrDefault(x => x.getInfo().uri == uri);
                         if (acc != null)
                         {
                             logger.DebugFormat("SipAccount 释放已存在帐户 {0} ...", uri);
                             sipAccountCollection.Remove(acc);
+                            acc.shutdown();
                             acc.Dispose();
                         }
                         logger.DebugFormat("SipAccount 新建帐户 {0} ...", uri);
@@ -563,9 +568,9 @@ namespace ipsc6.agent.client
                         cfg.regConfig.firstRetryIntervalSec = 15;
                         cfg.regConfig.registrarUri = $"sip:{addr}";
                         cfg.sipConfig.authCreds.Add(sipAuthCred);
-                        acc = new Sip.Account(connectionIndex, _sipConfigArgs.RingerWaveFile);
+                        acc = new Sip.MyPjAccount(connectionIndex, _sipConfigArgs.RingerWaveFile);
                         acc.OnRegisterStateChanged += Acc_OnRegisterStateChanged;
-                        acc.OnIncomingCall += Acc_OnIncomingCall;
+                        acc.OnIncomingCall2 += Acc_OnIncomingCall;
                         acc.OnCallDisconnected += Acc_OnCallStateChanged;
                         acc.OnCallStateChanged += Acc_OnCallStateChanged;
                         acc.create(cfg);
@@ -584,7 +589,7 @@ namespace ipsc6.agent.client
                     pjSemaphore.Release();
                 }
 
-            });
+            }));
         }
 
         private void ReloadSipAccountCollection()
@@ -1344,10 +1349,11 @@ namespace ipsc6.agent.client
             foreach (var acc in sipAccountCollection)
             {
                 logger.DebugFormat("Dispose {0}", acc);
-                acc.OnIncomingCall -= Acc_OnIncomingCall;
+                acc.OnIncomingCall2 -= Acc_OnIncomingCall;
                 acc.OnRegisterStateChanged -= Acc_OnRegisterStateChanged;
                 acc.OnCallDisconnected -= Acc_OnCallStateChanged;
                 acc.OnCallStateChanged -= Acc_OnCallStateChanged;
+                acc.shutdown();
                 acc.Dispose();
             }
             sipAccountCollection.Clear();
@@ -1915,7 +1921,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        private readonly HashSet<Sip.Account> sipAccountCollection = new();
+        private readonly HashSet<Sip.MyPjAccount> sipAccountCollection = new();
         private readonly HashSet<SipAccount> sipAccounts = new();
         public IReadOnlyCollection<SipAccount> SipAccounts => sipAccounts;
 

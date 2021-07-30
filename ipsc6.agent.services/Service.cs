@@ -22,12 +22,14 @@ namespace ipsc6.agent.services
         {
             if (!disposedValue)
             {
+                logger.Info("disposing ...");
                 if (disposing)
                 {
                     agent.Dispose();
                     client.Agent.Release();
                 }
                 disposedValue = true;
+                logger.Info("disposing completed.");
             }
         }
 

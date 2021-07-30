@@ -4,26 +4,21 @@ using System.Collections.Generic;
 
 namespace ipsc6.agent.client.Sip
 {
-    public class Account : org.pjsip.pjsua2.Account
+    public class MyPjAccount : org.pjsip.pjsua2.Account
     {
-        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Account));
+        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MyPjAccount));
         public int ConnectionIndex { get; }
         public string RingerWaveFile { get; }
 
-        public Account(int connectionIndex, string ringerWaveFile = "") : base()
+        public MyPjAccount(int connectionIndex, string ringerWaveFile = "") : base()
         {
             ConnectionIndex = connectionIndex;
             RingerWaveFile = ringerWaveFile;
             MakeString();
         }
 
-        ~Account()
-        {
-            shutdown();
-        }
-
         public event RegisterStateChangedEventHandler OnRegisterStateChanged;
-        public event IncomingCallEventHandler OnIncomingCall;
+        public event IncomingCallEventHandler OnIncomingCall2;
         public event CallDisconnectedEventHandler OnCallDisconnected;
         public event CallStateChangedEventHandler OnCallStateChanged;
 
@@ -51,8 +46,8 @@ namespace ipsc6.agent.client.Sip
             OnRegisterStateChanged?.Invoke(this, new EventArgs());
         }
 
-        private readonly HashSet<Call> calls = new();
-        public IReadOnlyCollection<Call> Calls => calls;
+        private readonly HashSet<MyPjCall> calls = new();
+        public IReadOnlyCollection<MyPjCall> Calls => calls;
 
         private static readonly object ringerSentinel = new();
         private static org.pjsip.pjsua2.AudioMedia ringerMedia;
@@ -60,7 +55,7 @@ namespace ipsc6.agent.client.Sip
 
         public override void onIncomingCall(org.pjsip.pjsua2.OnIncomingCallParam prm)
         {
-            var call = new Call(this, prm.callId);
+            var call = new MyPjCall(this, prm.callId);
             if (!calls.Add(call)) throw new InvalidOperationException();
             call.OnDisconnected += Call_OnDisconnected;
             call.OnStateChanged += Call_OnStateChanged;
@@ -89,12 +84,12 @@ namespace ipsc6.agent.client.Sip
                 }
             }
 
-            OnIncomingCall?.Invoke(this, new CallEventArgs(call));
+            OnIncomingCall2?.Invoke(this, new CallEventArgs(call));
         }
 
         private void Call_OnStateChanged(object sender, EventArgs e)
         {
-            var call = sender as Call;
+            var call = sender as MyPjCall;
 
             var ci = call.getInfo();
             org.pjsip.pjsua2.pjsip_inv_state[] states =
@@ -132,7 +127,7 @@ namespace ipsc6.agent.client.Sip
 
         private void Call_OnDisconnected(object sender, EventArgs e)
         {
-            var call = sender as Call;
+            var call = sender as MyPjCall;
             if (!calls.Remove(call)) throw new InvalidOperationException();
             logger.DebugFormat("CallDisconnected - {0} : {1}", this, call);
             OnCallDisconnected?.Invoke(call, new CallEventArgs(call));

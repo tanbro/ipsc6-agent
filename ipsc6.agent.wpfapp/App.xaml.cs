@@ -116,5 +116,9 @@ namespace ipsc6.agent.wpfapp
             );
         }
 
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            logger.Warn("\r\n^^^^^^^^^^^^^^^^^^^^ Exit ^^^^^^^^^^^^^^^^^^^^\r\n");
+        }
     }
 }

@@ -7,8 +7,8 @@ namespace ipsc6.agent.client.Sip
 
     public class CallEventArgs : EventArgs
     {
-        public Call Call { get; }
-        public CallEventArgs(Call call) : base()
+        public MyPjCall Call { get; }
+        public CallEventArgs(MyPjCall call) : base()
         {
             Call = call;
         }

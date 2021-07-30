@@ -5,6 +5,7 @@
              StartupUri="Views/MainWindow.xaml"
 			 ShutdownMode="OnMainWindowClose"
              Startup="Application_Startup"
+             Exit="Application_Exit"
              DispatcherUnhandledException="Application_DispatcherUnhandledException">
     <Application.Resources>
         <ResourceDictionary>
