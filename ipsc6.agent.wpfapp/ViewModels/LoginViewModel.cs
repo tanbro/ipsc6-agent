@@ -96,7 +96,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 }
                 catch (client.ConnectionException err)
                 {
-                    logger.ErrorFormat("DoLogin - 登录失败: {0}", err);
+                    logger.ErrorFormat("DoLogin - CTI服务器连接失败: {0}", err);
                     string errMsg = err switch
                     {
                         client.ConnectionFailedException =>
@@ -107,6 +107,25 @@ namespace ipsc6.agent.wpfapp.ViewModels
                             "网络连接中断。\r\n请检查网络设置。",
                         client.ConnectionClosedException =>
                             "CTI 服务器主动关闭了连接请求。这通常是因为登录工号或密码错误。\r\n请输入正确的登录工号和密码。",
+                        _ => err.ToString(),
+                    };
+                    MessageBox.Show(
+                        $"CTI 服务器连接失败\r\n\r\n{errMsg}",
+                        $"{Application.Current.MainWindow.Title} - {window.Title}",
+                        MessageBoxButton.OK, MessageBoxImage.Warning
+                    );
+                }
+                catch (client.BaseRequestError err)
+                {
+                    logger.ErrorFormat("DoLogin - 登录失败: {0}", err);
+                    string errMsg = err switch
+                    {
+                        client.ErrorResponse =>
+                            $"CTI 服务器返回的登录失败原因: {err.Message}",
+                        client.RequestTimeoutError =>
+                            "CTI 服务器登录请求超时",
+                        client.RequestNotCompleteError =>
+                            "无法进行重复的登录请求",
                         _ => err.ToString(),
                     };
                     MessageBox.Show(
