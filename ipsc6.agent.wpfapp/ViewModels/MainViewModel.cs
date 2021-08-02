@@ -802,14 +802,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (!IsMainConnectionOk) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
             client.AgentState[] allowedAgentStates = { client.AgentState.Idle, client.AgentState.Pause, client.AgentState.Leave };
-            if (!allowedAgentStates.Any(x => x == status.Item1)) return false;
-
+            if (!allowedAgentStates.Contains(status.Item1)) return false;
             if (parameter != null)
             {
                 var t = parameter as AgentStateWorkType;
                 if (t.Item1 == status.Item1 && t.Item2 == status.Item2) return false;
             }
-
             return true;
         }
         #endregion
@@ -1014,6 +1012,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     client.WorkType.Consult,
                 };
                 if (!workTypes.Contains(status.Item2)) return false;
+                // 如果有多个保持的，就得选中具体的call，不能用这个按钮
+                if (heldCalls.Count > 1) return false;
             }
             else
             {
@@ -1213,6 +1213,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (!IsMainConnectionOk) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
             if (status.Item1 != client.AgentState.Work) return false;
+            if (heldCalls.Count > 0) return false;
             return true;
         }
 
@@ -1226,6 +1227,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var svc = Instance.MainService;
             using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
+                if (heldCalls.Count > 0)
+                {
+                    MessageBox.Show(
+                       "保持通话列表非空，不允许转接或咨询",
+                       Application.Current.MainWindow.Title,
+                       MessageBoxButton.OK, MessageBoxImage.Information
+                   );
+                    return;
+                }
                 if (Instance.IsXferPopuped)
                 {
                     logger.DebugFormat("释放转到座席组 {0}", groupId);
@@ -1252,8 +1262,13 @@ namespace ipsc6.agent.wpfapp.ViewModels
             {
                 if (SetProperty(ref inputTelNum, value))
                 {
-                    dialCommand.NotifyCanExecuteChanged();
-                    xferExtCommand.NotifyCanExecuteChanged();
+                    foreach (var cmd in new IRelayCommand[]
+                    {
+                        dialCommand, xferExtCommand, xferExtConsultCommand
+                    })
+                    {
+                        cmd.NotifyCanExecuteChanged();
+                    }
                 }
             }
         }
@@ -1297,6 +1312,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (string.IsNullOrWhiteSpace(inputTelNum)) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
             if (status.Item1 != client.AgentState.Work) return false;
+            if (heldCalls.Count > 0) return false;
             return true;
         }
 
@@ -1318,6 +1334,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (string.IsNullOrWhiteSpace(inputTelNum)) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
             if (status.Item1 != client.AgentState.Work) return false;
+            if (heldCalls.Count > 0) return false;
             return true;
         }
         #endregion

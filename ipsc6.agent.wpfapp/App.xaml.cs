@@ -123,7 +123,7 @@ namespace ipsc6.agent.wpfapp
                     logger.ErrorFormat("Application Dispatcher Unhandled Exception - CTI ErrorResponse: {0}", e.Exception);
                     MessageBox.Show(
                         $"发送到 CTI 服务器的请求返回了错误结果 ({(e.Exception as client.ErrorResponse).Code})。\r\n\r\n{e.Exception.Message}",
-                        VersionInfo.ProductName,
+                        Current.MainWindow.Title,
                         MessageBoxButton.OK, MessageBoxImage.Warning
                     );
                     break;
@@ -131,7 +131,7 @@ namespace ipsc6.agent.wpfapp
                     logger.ErrorFormat("Application Dispatcher Unhandled Exception - CTI RequestTimeoutError: {0}", e.Exception);
                     MessageBox.Show(
                         "发送到 CTI 服务器的请求超时。",
-                        VersionInfo.ProductName,
+                        Current.MainWindow.Title,
                         MessageBoxButton.OK, MessageBoxImage.Error
                     );
                     break;
@@ -139,7 +139,7 @@ namespace ipsc6.agent.wpfapp
                     logger.ErrorFormat("Application Dispatcher Unhandled Exception - CTI RequestNotCompleteError: {0}", e.Exception);
                     MessageBox.Show(
                         "由于已经有 CTI 服务请求正在执行，现在无法进行新的请求。",
-                        VersionInfo.ProductName,
+                        Current.MainWindow.Title,
                         MessageBoxButton.OK, MessageBoxImage.Information
                     );
                     break;
@@ -147,7 +147,7 @@ namespace ipsc6.agent.wpfapp
                     logger.ErrorFormat("Application Dispatcher Unhandled Exception - {0}", e.Exception);
                     MessageBox.Show(
                         $"程序运行过程中出现了未捕获的异常。\r\n\r\n{e.Exception}",
-                        VersionInfo.ProductName,
+                        Current.MainWindow.Title,
                         MessageBoxButton.OK, MessageBoxImage.Error
                     );
                     break;

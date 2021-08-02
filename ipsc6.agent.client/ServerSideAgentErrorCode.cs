@@ -68,6 +68,8 @@ namespace ipsc6.agent.client
         ERR_AGENT_CALLAGENTTELEPHONE = -339, // 呼叫座席电话中
 
         ERR_AGENT_SIGNONOFF_FAIL = -340, // 签入签出组失败
+
+        ERR_AGENT_NOT_UNHOLD_AT_CONS = -341, // 咨询转移中不允许找回
     }
 
 
@@ -114,6 +116,7 @@ namespace ipsc6.agent.client
             { Code.ERR_AGENT_OFFHOOK, "座席已摘机" },
             { Code.ERR_AGENT_CALLAGENTTELEPHONE, "呼叫座席电话中" },
             { Code.ERR_AGENT_SIGNONOFF_FAIL, "签入签出组失败" },
+            {Code.ERR_AGENT_NOT_UNHOLD_AT_CONS, "咨询转移中不允许找回" },
         };
     }
 
