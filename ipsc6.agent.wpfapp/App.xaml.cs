@@ -122,7 +122,7 @@ namespace ipsc6.agent.wpfapp
                 case client.ErrorResponse:
                     logger.ErrorFormat("Application Dispatcher Unhandled Exception - CTI ErrorResponse: {0}", e.Exception);
                     MessageBox.Show(
-                        $"发送到 CTI 服务器的请求返回了错误结果。\r\n\r\n{e.Exception.Message}",
+                        $"发送到 CTI 服务器的请求返回了错误结果 ({(e.Exception as client.ErrorResponse).Code})。\r\n\r\n{e.Exception.Message}",
                         VersionInfo.ProductName,
                         MessageBoxButton.OK, MessageBoxImage.Warning
                     );

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace ipsc6.agent.client
 {
@@ -76,17 +77,19 @@ namespace ipsc6.agent.client
     {
         public readonly ServerSentMessage Arg;
 
-        public readonly ServerSideAgentErrorCode Code;
-        
+        public readonly int Code;
+
         public override string Message
         {
             get
             {
-                string result = ServerSideAgentErrorCodeDict.Value[Code];
-                if (string.IsNullOrWhiteSpace(result))
+                string result = "";
+                try
                 {
-                    result = Code.ToString();
+                    var k = (ServerSideAgentErrorCode)Code;
+                    result = ServerSideAgentErrorCodeDict.Value[k];
                 }
+                catch (KeyNotFoundException) { }
                 return result;
             }
         }
@@ -94,7 +97,7 @@ namespace ipsc6.agent.client
         public ErrorResponse(ServerSentMessage arg) : base()
         {
             Arg = arg;
-            Code = (ServerSideAgentErrorCode)arg.N1;
+            Code = arg.N1;
         }
 
     }

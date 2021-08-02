@@ -201,7 +201,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 statePopupCommand, setStateCommand,
                 groupPopupCommand, signGroupCommand,
                 holdPopupCommand, holdCommand, unHoldCommand,
-                dialCommand, xferPopupCommand, xferConsultPopupCommand,
+                xferPopupCommand, xferConsultPopupCommand,
+                dialCommand, xferExtCommand, xferExtConsultCommand,
             };
         }
 
