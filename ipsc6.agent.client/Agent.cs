@@ -1590,7 +1590,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        public async Task UnHoldAsync(CtiServer connectionInfo, int channel)
+        public async Task UnHoldAsync(CtiServer connectionInfo, int channel = -1)
         {
             using (requestGuard.TryEnter())
             {
@@ -1600,7 +1600,7 @@ namespace ipsc6.agent.client
             }
         }
 
-        public async Task UnHoldAsync(int connectionIndex, int channel)
+        public async Task UnHoldAsync(int connectionIndex, int channel = -1)
         {
             var connectionInfo = ctiServers[connectionIndex];
             await UnHoldAsync(connectionInfo, channel);
@@ -1611,14 +1611,15 @@ namespace ipsc6.agent.client
             await UnHoldAsync(callInfo.CtiServer, callInfo.Channel);
         }
 
-        public async Task UnHoldAsync()
+        public async Task UnHoldAsync(int channel = -1)
         {
-            var callInfo = HeldCalls.SingleOrDefault();
-            if (callInfo == null)
-            {
-                throw new InvalidOperationException("没有任何被保持的呼叫，无法执行取消保持操作");
-            }
-            await UnHoldAsync(callInfo);
+            await UnHoldAsync(WorkingChannelInfo.CtiServer, channel);
+            //var callInfo = HeldCalls.SingleOrDefault();
+            //if (callInfo == null)
+            //{
+            //    throw new InvalidOperationException("没有任何被保持的呼叫，无法执行取消保持操作");
+            //}
+            //await UnHoldAsync(callInfo);
         }
 
         public async Task BreakAsync(int channel = -1, string customString = "")
