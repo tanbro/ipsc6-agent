@@ -195,20 +195,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
             logger.Debug("Release - Completed");
         }
 
-        private static IRelayCommand[] GetStateRelativeCommands()
-        {
-            return new IRelayCommand[] {
-                statePopupCommand, setStateCommand,
-                groupPopupCommand, signGroupCommand,
-                holdPopupCommand, holdCommand, unHoldCommand,
-                xferPopupCommand, xferConsultPopupCommand,
-                dialCommand, xferExtCommand, xferExtConsultCommand,
-            };
-        }
+        private static IRelayCommand[] StateRelativeCommands => new IRelayCommand[] {
+            statePopupCommand, setStateCommand,
+            groupPopupCommand, signGroupCommand,
+            holdPopupCommand, holdCommand, unHoldCommand,
+            xferPopupCommand, xferConsultPopupCommand,
+            dialCommand, xferExtCommand, xferExtConsultCommand,
+        };
 
         private static void NotifyStateRelativeCommandsExecutable()
         {
-            foreach (var command in GetStateRelativeCommands())
+            foreach (var command in StateRelativeCommands)
             {
                 if (command != null)
                 {
@@ -716,7 +713,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 throw new ArgumentNullException(nameof(parameter));
             string groupId = parameter as string;
 
-            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
                 var group = groups.First(x => x.Id == groupId);
                 bool isSignIn = !group.IsSigned;
@@ -783,7 +780,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
             var st = parameter as AgentStateWorkType;
             var svc = Instance.MainService;
-            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
                 if (st.Item1 == client.AgentState.Idle)
                 {
@@ -966,7 +963,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async void DoHold()
         {
             var svc = Instance.MainService;
-            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
                 await svc.Hold();
             }
@@ -986,7 +983,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async void DoUnHold(object parameter)
         {
             var svc = Instance.MainService;
-            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
                 if (parameter == null)
                 {
@@ -1227,7 +1224,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (data == null) throw new InvalidOperationException();
             var groupId = (string)data;
             var svc = Instance.MainService;
-            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
                 if (Instance.IsXferPopuped)
                 {
@@ -1267,7 +1264,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async void DoDial()
         {
             var svc = Instance.MainService;
-            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
                 await svc.Dial(inputTelNum.Trim());
             }
@@ -1288,7 +1285,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async void DoXferExt()
         {
             var svc = Instance.MainService;
-            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
                 await svc.XferExt(inputTelNum.Trim());
             }
@@ -1309,7 +1306,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async void DoXferExtConsult()
         {
             var svc = Instance.MainService;
-            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
                 await svc.XferExtConsult(inputTelNum.Trim());
             }
