@@ -94,21 +94,26 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     window.DialogResult = true;
                     window.Close();
                 }
-                catch (Exception err)
+                catch (client.ConnectionException err)
                 {
-                    if (err is client.ConnectionException)
+                    logger.ErrorFormat("DoLogin - 登录失败: {0}", err);
+                    string errMsg = err switch
                     {
-                        logger.ErrorFormat("DoLogin - 登录失败: {0}", err);
-                        MessageBox.Show(
-                            $"登录失败\r\n\r\n{err}",
-                            Application.Current.MainWindow.Title,
-                            MessageBoxButton.OK, MessageBoxImage.Error
-                        );
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                        client.ConnectionFailedException =>
+                            "无法连接到 CTI 服务器。\r\n请检查网络设置。",
+                        client.ConnectionTimeoutException =>
+                            "网络连接超时。\r\n请检查网络设置。",
+                        client.ConnecttionLostException =>
+                            "网络连接中断。\r\n请检查网络设置。",
+                        client.ConnectionClosedException =>
+                            "CTI 服务器主动关闭了连接请求。这通常是因为登录工号或密码错误。\r\n请输入正确的登录工号和密码。",
+                        _ => err.ToString(),
+                    };
+                    MessageBox.Show(
+                        $"登录失败\r\n\r\n{errMsg}",
+                        $"{Application.Current.MainWindow.Title} - {window.Title}",
+                        MessageBoxButton.OK, MessageBoxImage.Warning
+                    );
                 }
             }
         }

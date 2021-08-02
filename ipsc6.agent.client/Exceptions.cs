@@ -72,31 +72,31 @@ namespace ipsc6.agent.client
         public RequestTimeoutError(string message, Exception inner) : base(message, inner) { }
     }
 
-    public class ServerSentError : BaseException
-    {
-        public ServerSentError() { }
-        public ServerSentError(string message) : base(message) { }
-        public ServerSentError(string message, Exception inner) : base(message, inner) { }
-    }
-
     public class ErrorResponse : BaseRequestError
     {
         public readonly ServerSentMessage Arg;
 
-        static string MakeMessage(ServerSentMessage arg)
+        public readonly ServerSideAgentErrorCode Code;
+        
+        public override string Message
         {
-            return $"ErrorResponse: {arg}";
+            get
+            {
+                string result = ServerSideAgentErrorCodeDict.Value[Code];
+                if (string.IsNullOrWhiteSpace(result))
+                {
+                    result = Code.ToString();
+                }
+                return result;
+            }
         }
 
-        public ErrorResponse(ServerSentMessage arg) : base(MakeMessage(arg))
+        public ErrorResponse(ServerSentMessage arg) : base()
         {
             Arg = arg;
+            Code = (ServerSideAgentErrorCode)arg.N1;
         }
 
-        public ErrorResponse(ServerSentMessage arg, Exception inner) : base(MakeMessage(arg), inner)
-        {
-            Arg = arg;
-        }
     }
 
 }
