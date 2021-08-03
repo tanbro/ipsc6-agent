@@ -14,16 +14,20 @@ namespace ipsc6.agent.wpfapp.Converters
             if (value == null) return "<null>";
 
             var sipAccounts = value as IEnumerable<services.Models.SipAccount>;
-
-            // 有任何一个注册了，就算正常
-            if (sipAccounts.Any(x => x.IsRegisterActive && x.LastRegisterError == 0))
+            try
             {
-                return "已注册";
+                // 有任何一个注册了，就算正常
+                if (sipAccounts.Any(x => x.IsRegisterActive && x.LastRegisterError == 0))
+                {
+                    return "已注册";
+                }
+                else
+                {
+                    return "未注册";
+                }
             }
-            else
-            {
-                return "未注册";
-            }
+            catch (ArgumentNullException) { }
+            return "<null>";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
