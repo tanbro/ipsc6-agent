@@ -196,7 +196,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
 
         private static IRelayCommand[] StateRelativeCommands => new IRelayCommand[] {
-            loginCommand, logoutCommand,
+            loginCommand, logoutCommand, exitCommand,
             statePopupCommand, setStateCommand,
             groupPopupCommand, signGroupCommand,
             holdPopupCommand, holdCommand, unHoldCommand,
@@ -240,6 +240,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         internal void CloseMainWindow()
         {
+            var svc = Instance.MainService;
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped)
+            {
+                MessageBox.Show(
+                    "座席尚未注销，不允许退出。\r\n\r\n请在注销后再退出程序。",
+                    Application.Current.MainWindow.Title,
+                    MessageBoxButton.OK, MessageBoxImage.Information
+                );
+                return;
+            }
+
             Application.Current.Dispatcher.Invoke(() =>
             {
                 foreach (var window in Application.Current.Windows.OfType<Window>())
@@ -1532,6 +1543,16 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static async void DoLogout()
         {
+            var r = MessageBox.Show(
+                "是否确定要注销？",
+                Application.Current.MainWindow.Title,
+                MessageBoxButton.YesNo, MessageBoxImage.Question
+            );
+            if (r != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
             logger.Debug("注销");
 
             var svc = Instance.MainService;
@@ -1552,6 +1573,31 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (svc.GetAgentRunningState() != client.AgentRunningState.Started) return false;
             if (status.Item1 == client.AgentState.Work) return false;
 
+            return true;
+        }
+
+
+        private static readonly IRelayCommand exitCommand = new RelayCommand(DoExit, CanExit);
+        public IRelayCommand ExitCommand => exitCommand;
+
+        private static void DoExit()
+        {
+            logger.Debug("退出");
+
+            var svc = Instance.MainService;
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped)
+            {
+                throw new InvalidOperationException();
+            }
+
+            Instance.CloseMainWindow();
+        }
+
+        private static bool CanExit()
+        {
+            var svc = Instance.MainService;
+            if (svc == null) return false;
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped) return false;
             return true;
         }
         #endregion
