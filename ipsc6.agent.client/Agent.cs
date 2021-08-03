@@ -452,7 +452,7 @@ namespace ipsc6.agent.client
             ResetPrivilegeList(jo.Power);
             ResetPrivilegeExternList(jo.PowerExt);
             ResetGroupIdList(jo.GroupIdIdList);
-            ResetGroupNameList(jo.GroupIdIdList);
+            ResetGroupNameList(jo.GroupNameList);
             AppendAllGroupList(jo.AppendedGroupIdList, jo.AppendedGroupNameList);
         }
 
