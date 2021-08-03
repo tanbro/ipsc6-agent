@@ -196,6 +196,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
 
         private static IRelayCommand[] StateRelativeCommands => new IRelayCommand[] {
+            loginCommand, logoutCommand,
             statePopupCommand, setStateCommand,
             groupPopupCommand, signGroupCommand,
             holdPopupCommand, holdCommand, unHoldCommand,
@@ -1227,15 +1228,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var svc = Instance.MainService;
             using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
-                if (heldCalls.Count > 0)
-                {
-                    MessageBox.Show(
-                       "保持通话列表非空，不允许转接或咨询",
-                       Application.Current.MainWindow.Title,
-                       MessageBoxButton.OK, MessageBoxImage.Information
-                   );
-                    return;
-                }
                 if (Instance.IsXferPopuped)
                 {
                     logger.DebugFormat("释放转到座席组 {0}", groupId);
@@ -1506,13 +1498,61 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
-        #region Configure
+        #region 设置
         private static readonly IRelayCommand showConfigWindowCmmand = new RelayCommand(DoShowConfigWindow);
         public IRelayCommand ShowConfigWindowCmmand => showConfigWindowCmmand;
 
         private static void DoShowConfigWindow()
         {
             new Views.ConfigWindow().ShowDialog();
+        }
+
+        private static readonly IRelayCommand loginCommand = new RelayCommand(DoLogin, CanLogin);
+        public IRelayCommand LoginCommand => loginCommand;
+
+        private static void DoLogin()
+        {
+            logger.Debug("登录");
+            if (!new Views.LoginWindow().ShowDialog().Value)
+            {
+                logger.Warn("已关闭登录对话窗，放弃登录");
+            }
+        }
+
+        private static bool CanLogin()
+        {
+            var svc = Instance.MainService;
+            if (svc == null) return false;
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped) return false;
+            return true;
+        }
+
+        private static readonly IRelayCommand logoutCommand = new RelayCommand(DoLogout, CanLogout);
+        public IRelayCommand LogoutCommand => logoutCommand;
+
+        private static async void DoLogout()
+        {
+            logger.Debug("注销");
+
+            var svc = Instance.MainService;
+            await svc.LogOut();
+
+            Instance.SipAccounts = Array.Empty<services.Models.SipAccount>();
+            Instance.Groups = Array.Empty<services.Models.Group>();
+            Instance.AllGroups = Array.Empty<services.Models.Group>();
+            Instance.Calls = Array.Empty<services.Models.CallInfo>();
+        }
+
+        private static bool CanLogout()
+        {
+            var svc = Instance.MainService;
+
+            if (svc == null) return false;
+
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Started) return false;
+            if (status.Item1 == client.AgentState.Work) return false;
+
+            return true;
         }
         #endregion
     }

@@ -1281,10 +1281,13 @@ namespace ipsc6.agent.client
                         logger.DebugFormat("关闭主节点连接 {0} graceful={1} 完毕.", MainConnection, graceful);
                     }
 
+                    var savedMainConnectionIndex = MainConnectionIndex;
+                    MainConnectionIndex = -1;
+
                     // 然后其他节点
                     var itConnObj =
                         from x in connections.Select((value, index) => (value, index))
-                        where x.index != MainConnectionIndex
+                        where x.index != savedMainConnectionIndex
                         select x.value;
                     await Task.WhenAll(
                         from conn in itConnObj

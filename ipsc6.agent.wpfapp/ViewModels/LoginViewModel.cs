@@ -50,8 +50,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static readonly IRelayCommand loginCommand = new RelayCommand(DoLogin, CanLogin);
         public IRelayCommand LoginCommand => loginCommand;
 
-        private static bool isLoginCompleted;
-
         private static Window GetOrCreateWindow()
         {
             var window = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x is Views.LoginWindow);
@@ -67,14 +65,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public static async void DoLogin()
         {
             var dispatcher = Application.Current.Dispatcher;
+            var svc = MainViewModel.Instance.MainService;
 
             using (await Utils.CommandGuard.EnterAsync(loginCommand))
             {
-                if (isLoginCompleted)
-                {
-                    throw new InvalidOperationException();
-                }
-
                 var window = GetOrCreateWindow() as Views.LoginWindow;
 #pragma warning disable CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
                 dispatcher.InvokeAsync(() =>
@@ -90,7 +84,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 try
                 {
                     await ExecuteLoginAsync();
-                    isLoginCompleted = true;
                     window.DialogResult = true;
                     window.Close();
                 }
@@ -145,11 +138,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
             using (await Utils.CommandGuard.EnterAsync(loginCommand))
             {
-                if (isLoginCompleted)
-                {
-                    throw new InvalidOperationException();
-                }
-
                 Window window = null;
                 dispatcher.Invoke(() =>
                 {
@@ -173,7 +161,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 try
                 {
                     await ExecuteLoginAsync(serverList);
-                    isLoginCompleted = true;
                     dispatcher.Invoke(() =>
                     {
                         window.DialogResult = true;
@@ -215,6 +202,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 return false;
             if (Utils.CommandGuard.IsGuarding)
                 return false;
+            var svc = MainViewModel.Instance.MainService;
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped)
+                return false;
             return true;
         }
 
@@ -222,6 +212,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             var svc = MainViewModel.Instance.MainService;
             var mainViewModel = MainViewModel.Instance;
+
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped)
+            {
+                throw new InvalidOperationException($"座席状态为 {svc.GetAgentRunningState()} 时不允许进行登录");
+            }
 
             serverList ??= (new string[] { });
             if (serverList.Count() == 0)
@@ -239,6 +234,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
             finally
             {
+                password = "";
                 Instance.IsAllowInput = true;
             }
 

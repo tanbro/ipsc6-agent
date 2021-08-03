@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -23,6 +24,12 @@ namespace ipsc6.agent.wpfapp.UserControls
         public PreferencePanel()
         {
             InitializeComponent();
+        }
+
+        private void Preference_Button_Click(object sender, RoutedEventArgs e)
+        {
+            var popup = FindName("Preference_Popup") as Popup;
+            popup.IsOpen = !popup.IsOpen;
         }
     }
 }

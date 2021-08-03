@@ -73,7 +73,7 @@ namespace ipsc6.agent.services
         #region Ctor/Dtor
 
         private readonly client.Agent agent;
-        private readonly Models.Model model;
+        private Models.Model model;
 
         private readonly config.Ipsc _cfgIpsc;
 
@@ -196,6 +196,12 @@ namespace ipsc6.agent.services
             await agent.StartUpAsync(serverList, workerNum, password);
         }
 
+        public async Task LogOut()
+        {
+            await agent.ShutDownAsync();
+            model = new();
+        }
+
         public IReadOnlyList<string> GetWorkerNum()
         {
             return new List<string> { model.WorkerNum, model.DisplayName };
@@ -209,6 +215,11 @@ namespace ipsc6.agent.services
         public async Task SetBusy(client.WorkType workType = client.WorkType.PauseBusy)
         {
             await agent.SetBusyAsync(workType);
+        }
+
+        public client.AgentRunningState GetAgentRunningState()
+        {
+            return agent.RunningState;
         }
 
         public async Task SetIdle()
