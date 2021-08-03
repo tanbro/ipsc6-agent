@@ -12,11 +12,12 @@
              Height="64" Width="80">
 
     <UserControl.Resources>
+        <conv:CtiServersConnectionStateToStringConverter x:Key="CtiServersConnectionStateToStringConverter"/>
+        <conv:CtiServersConnectionStateToSolidColorBrushConverter x:Key="CtiServersConnectionStateToSolidColorBrushConverter"/>
         <conv:AgentTeleStateToMaterialIconConverter x:Key="AgentTeleStateToMaterialIconConverter"/>
-        <conv:AgentTeleStateToBrushConverters x:Key="AgentTeleStateToBrushConverters"/>
-        <conv:AgentSipAccountsToStringConverters x:Key="AgentSipAccountsToStringConverters"/>
-        <conv:CtiServersConnectionStateToStringConverters x:Key="CtiServersConnectionStateToStringConverters"/>
-        <conv:CtiServersConnectionStateToSolidColorBrushConverters x:Key="CtiServersConnectionStateToSolidColorBrushConverters"/>
+        <conv:AgentTeleStateToBrushConverter x:Key="AgentTeleStateToBrushConverter"/>
+        <conv:AgentSipAccountsToStringConverter x:Key="AgentSipAccountsToStringConverter"/>
+        <conv:AgentSipAccountsToSolidColorBrushConverter x:Key="AgentSipAccountsToSolidColorBrushConverter"/>
     </UserControl.Resources>
 
     <Border Width="80" Height="64"
@@ -34,12 +35,12 @@
                     <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0"
-                            CornerRadius="12"
-                            Width="24" Height="24"
-                            Background="{Binding CtiServices, Mode=OneWay, Converter={StaticResource CtiServersConnectionStateToSolidColorBrushConverters}}"/>
+                <Border Grid.Column="0" CornerRadius="12"
+                        Width="24" Height="24"
+                        Background="{Binding CtiServices, Mode=OneWay, Converter={StaticResource CtiServersConnectionStateToSolidColorBrushConverter}}"/>
                 <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Text="{Binding CtiServices, Mode=OneWay, Converter={StaticResource CtiServersConnectionStateToStringConverters}}"/>
+                           Text="{Binding CtiServices, Mode=OneWay, Converter={StaticResource CtiServersConnectionStateToStringConverter}}"
+                           Foreground="{Binding CtiServices, Mode=OneWay, Converter={StaticResource CtiServersConnectionStateToSolidColorBrushConverter}}"/>
             </Grid>
 
             <Grid Grid.Row="1">
@@ -48,12 +49,13 @@
                     <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
                 <ContentControl Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Foreground="{Binding TeleState, Mode=OneWay, Converter={StaticResource AgentTeleStateToBrushConverters}}">
+                                Foreground="{Binding TeleState, Mode=OneWay, Converter={StaticResource AgentTeleStateToBrushConverter}}">
                     <iconPacks:PackIconMaterial Height="24" Width="24"
                         Kind="{Binding TeleState, Mode=OneWay, Converter={StaticResource AgentTeleStateToMaterialIconConverter}}"/>
                 </ContentControl>
                 <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Text="{Binding SipAccounts, Mode=OneWay, Converter={StaticResource AgentSipAccountsToStringConverters}}"/>
+                           Text="{Binding SipAccounts, Mode=OneWay, Converter={StaticResource AgentSipAccountsToStringConverter}}"
+                           Foreground="{Binding SipAccounts, Mode=OneWay, Converter={StaticResource AgentSipAccountsToSolidColorBrushConverter}}"/>
             </Grid>
 
         </Grid>

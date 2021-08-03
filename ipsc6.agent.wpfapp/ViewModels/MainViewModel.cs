@@ -202,6 +202,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             holdPopupCommand, holdCommand, unHoldCommand,
             xferPopupCommand, xferConsultPopupCommand,
             dialCommand, xferExtCommand, xferExtConsultCommand,
+            callIvrCommand, advCommand
         };
 
         private static void NotifyStateRelativeCommandsExecutable()
@@ -1343,8 +1344,19 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region 转 IVR
-        private static readonly IRelayCommand callIvrCommand = new RelayCommand(DoCallIvr);
+        private static readonly IRelayCommand callIvrCommand = new RelayCommand(DoCallIvr, CanCallIvr);
         public IRelayCommand CallIvrCommand => callIvrCommand;
+
+        private static bool CanCallIvr()
+        {
+            if (!IsMainConnectionOk) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if (!(new client.AgentState[]
+            {
+                client.AgentState.Idle, client.AgentState.Work
+            }).Contains(status.Item1)) return false;
+            return true;
+        }
 
         private static async void DoCallIvr()
         {
@@ -1396,10 +1408,21 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region btnAdv
-        private static readonly IRelayCommand advCommand = new RelayCommand(DoAdvCommand);
+        private static readonly IRelayCommand advCommand = new RelayCommand(DoAdv, CanAdv);
         public IRelayCommand AdvCommand => advCommand;
 
-        private static async void DoAdvCommand()
+        private static bool CanAdv()
+        {
+            if (!IsMainConnectionOk) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if ((new client.AgentState[]
+            {
+                client.AgentState.OffLine, client.AgentState.NotExist
+            }).Contains(status.Item1)) return false;
+            return true;
+        }
+
+        private static async void DoAdv()
         {
             var svc = Instance.MainService;
 
@@ -1558,10 +1581,16 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var svc = Instance.MainService;
             await svc.LogOut();
 
+            Instance.WorkerNumber = "";
+            Instance.DisplayName = "";
+            Instance.CurrentCallInfo = null;
             Instance.SipAccounts = Array.Empty<services.Models.SipAccount>();
             Instance.Groups = Array.Empty<services.Models.Group>();
             Instance.AllGroups = Array.Empty<services.Models.Group>();
+            Instance.QueueInfos = Array.Empty<services.Models.QueueInfo>();
             Instance.Calls = Array.Empty<services.Models.CallInfo>();
+
+            Instance.StopTimer();
         }
 
         private static bool CanLogout()

@@ -10,7 +10,7 @@ using System.Windows.Media;
 namespace ipsc6.agent.wpfapp.Converters
 {
     [ValueConversion(typeof(IEnumerable<services.Models.CtiServer>), typeof(string))]
-    internal class CtiServersConnectionStateToStringConverters : IValueConverter
+    internal class CtiServersConnectionStateToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -43,7 +43,7 @@ namespace ipsc6.agent.wpfapp.Converters
     }
 
     [ValueConversion(typeof(IEnumerable<services.Models.CtiServer>), typeof(SolidColorBrush))]
-    internal class CtiServersConnectionStateToSolidColorBrushConverters : IValueConverter
+    internal class CtiServersConnectionStateToSolidColorBrushConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -52,9 +52,10 @@ namespace ipsc6.agent.wpfapp.Converters
             {
                 if (value == null) break;
                 var servers = value as IEnumerable<services.Models.CtiServer>;
-                // 全部连接上
+                
                 try
                 {
+                    // 全部连接上
                     if (servers.All(x => x.State == client.ConnectionState.Ok))
                     {
                         color = Colors.Green;

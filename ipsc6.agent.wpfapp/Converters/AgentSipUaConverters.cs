@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Data;
+using System.Windows.Media;
+
 
 namespace ipsc6.agent.wpfapp.Converters
 {
     [ValueConversion(typeof(IEnumerable<services.Models.SipAccount>), typeof(string))]
-    internal class AgentSipAccountsToStringConverters : IValueConverter
+    internal class AgentSipAccountsToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -35,4 +37,44 @@ namespace ipsc6.agent.wpfapp.Converters
             throw new NotImplementedException();
         }
     }
+
+    [ValueConversion(typeof(IEnumerable<services.Models.SipAccount>), typeof(SolidColorBrush))]
+    internal class AgentSipAccountsToSolidColorBrushConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            Color color = Colors.Gray;
+            do
+            {
+                if (value == null) break;
+                var sipAccounts = value as IEnumerable<services.Models.SipAccount>;
+                try
+                {
+                    // 全部一个注册了，算正常
+                    if (sipAccounts.All(x => x.IsRegisterActive && x.LastRegisterError == 0))
+                    {
+                        color = Colors.Green;
+                    }
+                    // 有任何一个注册了，也算正常
+                    else if (sipAccounts.Any(x => x.IsRegisterActive && x.LastRegisterError == 0))
+                    {
+                        color = Colors.Yellow;
+                    }
+                    else if (sipAccounts.Count() > 0)
+                    {
+                        color = Colors.Red;
+                    }
+                }
+                catch (ArgumentNullException) { }
+            } while (false);
+
+            return new SolidColorBrush(color);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 }
