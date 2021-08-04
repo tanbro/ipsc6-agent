@@ -310,6 +310,11 @@
     <Content Include="Icons\svg\telephone-offhook.svg" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="GitVersion.MsBuild">
+      <Version>5.6.11</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="log4net">
       <Version>2.0.12</Version>
     </PackageReference>
@@ -355,8 +360,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*" "$(TargetDir)" /D /Y
-xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*" "$(TargetDir)" /D /Y
-copy "$(ProjectDir)Config\log4net.$(ConfigurationName).config" "$(TargetDir)Config\log4net.config" /Y</PostBuildEvent>
+    <PostBuildEvent>
+            xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*" "$(TargetDir)" /D /Y
+            xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*" "$(TargetDir)" /D /Y
+            copy "$(ProjectDir)Config\log4net.$(ConfigurationName).config" "$(TargetDir)Config\log4net.config" /Y
+        </PostBuildEvent>
   </PropertyGroup>
 </Project>
