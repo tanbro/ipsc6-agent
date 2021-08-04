@@ -360,10 +360,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-            xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*" "$(TargetDir)" /D /Y
-            xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*" "$(TargetDir)" /D /Y
-            copy "$(ProjectDir)Config\log4net.$(ConfigurationName).config" "$(TargetDir)Config\log4net.config" /Y
-        </PostBuildEvent>
+    <PostBuildEvent>xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*" "$(TargetDir)" /D /Y
+xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*" "$(TargetDir)" /D /Y
+copy "$(ProjectDir)Config\log4net.$(ConfigurationName).config" "$(TargetDir)Config\log4net.config" /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>
