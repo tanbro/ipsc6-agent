@@ -9,10 +9,8 @@
              xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
              d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              x:Name="SelectGroupPanelUserControl"
-             d:DesignHeight="240" d:DesignWidth="320"
-             FontSize="16"
-             >
-             <!--Background="{StaticResource MyBackgroud}"-->
+             d:DesignHeight="240" d:DesignWidth="320">
+
 
     <Grid>
 
@@ -26,15 +24,14 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Style="{StaticResource MyCommonText}"
+                        <TextBlock Grid.Column="0" Style="{StaticResource MyHeadText}" VerticalAlignment="Center"
                                    Margin="4" HorizontalAlignment="Left"
                                    Text="{Binding Path=Name, Mode=OneWay}"/>
-                        <Button Grid.Column="1" Style="{StaticResource MyCommonButton}" Margin="4" HorizontalAlignment="Right"
-                                Height="Auto" Width="Auto"
+                        <Button Grid.Column="1" Style="{StaticResource MyTinyButton}" Margin="4"
+                                Height="Auto" Width="Auto" HorizontalAlignment="Right"
                                 Command="{Binding ElementName=SelectGroupPanelUserControl, Path=DataContext.SelectGroupOkCommand}"
-                                CommandParameter="{Binding Id}">
-                            选择
-                        </Button>
+                                CommandParameter="{Binding Id}"
+                                Content="选择"/>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
