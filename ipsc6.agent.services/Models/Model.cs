@@ -1,8 +1,7 @@
-using System;
-using System.Collections.Generic;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System;
+using System.Collections.Generic;
 
 namespace ipsc6.agent.services.Models
 {
