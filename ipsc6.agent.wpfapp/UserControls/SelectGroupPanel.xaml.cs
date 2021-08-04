@@ -1,11 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -17,19 +16,13 @@ using System.Windows.Shapes;
 namespace ipsc6.agent.wpfapp.UserControls
 {
     /// <summary>
-    /// PreferencePanel.xaml 的交互逻辑
+    /// SelectGroupPanel.xaml 的交互逻辑
     /// </summary>
-    public partial class PreferencePanel : UserControl
+    public partial class SelectGroupPanel : UserControl
     {
-        public PreferencePanel()
+        public SelectGroupPanel()
         {
             InitializeComponent();
-        }
-
-        private void Preference_Button_Click(object sender, RoutedEventArgs e)
-        {
-            var popup = FindName("Preference_Popup") as Popup;
-            popup.IsOpen = !popup.IsOpen;
         }
     }
 }

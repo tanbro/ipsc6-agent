@@ -4,6 +4,8 @@ copyright: 广州市和声信息技术有限公司 © 2021
 
 docs_dir: src
 
+use_directory_urls: false
+
 nav:
   - index.md
 
@@ -51,7 +53,8 @@ nav:
 
 plugins:
   - search
-  # Not available on Windows
+  - localsearch
+  # # Not available on Windows
   # - with-pdf:
   #     enabled_if_env: ENABLE_PDF_EXPORT
   #     toc_title: 目录
@@ -61,6 +64,7 @@ plugins:
 
 theme:
   name: material
+  custom_dir: theme
   language: zh
   font: false
 
@@ -115,5 +119,6 @@ markdown_extensions:
       slugify: !!python/name:pymdownx.slugs.uslugify
   # 3rd extensions
   - plantuml_markdown:
+      # 如在 Windows 中无法使用 plantuml，可启用这个配置
       server: http://www.plantuml.com/plantuml
       format: svg

@@ -8,20 +8,7 @@
 
 ## 使用 Swig 生成源代码
 
-临时新建一个目录，使用它作为工作目录，设置环境变量`PJPROJECT_DIR` 为  `pjproject` 的工程代码所在目录，然后执行：
-
-```sh
-PJPROJECT_DIR=dir/of/pjproject && swig -c++ -I${PJPROJECT_DIR}/pjlib/include -I${PJPROJECT_DIR}/pjlib-util/include -I${PJPROJECT_DIR}/pjmedia/include -I${PJPROJECT_DIR}/pjsip/include -I${PJPROJECT_DIR}/pjnath/include -csharp -outcurrentdir -outdir . -namespace org.pjsip.pjsua2 ${PJPROJECT_DIR}/pjsip-apps/src/swig/pjsua2.i
-```
-
-- 将生成的 `C++` 源文件:
-
-  - `pjsua2_wrap.h`
-  - `pjsua2_wrap.cxx`
-
-  用于 C++ Wrapper 项目
-
-- 将生成的 `C#` 源文件用于包装上述 `Wrapper` 项目的 `dotnet` 类型库项目。
+这个项目所需的 C/C++ 源代码由 [swig][] 生成，具体的命令参考 `scripts/pjproject-csharp` 目录下的 [`README.md`](../scripts/pjproject-csharp/README.md)
 
 ## 新建 Visual Studio 项目与解决方案
 
@@ -33,8 +20,8 @@ PJPROJECT_DIR=dir/of/pjproject && swig -c++ -I${PJPROJECT_DIR}/pjlib/include -I$
 
 在项目管理器中：
 
-- 将 `pjsua2_wrap.h` 添加到头文件
-- 将 `pjsua2_wrap.cxx` 添加到源文件
+-   将 `pjsua2_wrap.h` 添加到头文件
+-   将 `pjsua2_wrap.cxx` 添加到源文件
 
 ## 项目配置
 
@@ -60,11 +47,11 @@ PJPROJECT_DIR=dir/of/pjproject && swig -c++ -I${PJPROJECT_DIR}/pjlib/include -I$
 
 通用属性 -> C/C++ -> 常规 的附加包含目录添加:
 
-- `$(PJPROJECT_ROOT)\pjlib\include`
-- `$(PJPROJECT_ROOT)\pjlib-util\include`
-- `$(PJPROJECT_ROOT)\pjmedia\include`
-- `$(PJPROJECT_ROOT)\pjnath\include`
-- `$(PJPROJECT_ROOT)\pjsip\include`
+-   `$(PJPROJECT_ROOT)\pjlib\include`
+-   `$(PJPROJECT_ROOT)\pjlib-util\include`
+-   `$(PJPROJECT_ROOT)\pjmedia\include`
+-   `$(PJPROJECT_ROOT)\pjnath\include`
+-   `$(PJPROJECT_ROOT)\pjsip\include`
 
 通用属性 -> 链接器 -> 常规 的附加库目录 添加:
 
@@ -72,26 +59,26 @@ PJPROJECT_DIR=dir/of/pjproject && swig -c++ -I${PJPROJECT_DIR}/pjlib/include -I$
 
 通用属性 -> 链接器 -> 输入 的附加依赖项 添加:
 
-- `libpjproject-$(TargetCPU)-$(PlatformName)-vc14-$(ConfigurationName).lib`
-- `ws2_32.lib`
+-   `libpjproject-$(TargetCPU)-$(PlatformName)-vc14-$(ConfigurationName).lib`
+-   `ws2_32.lib`
 
 然后用文本编辑器打开这个属性文件 `PropertySheet.props`
 
 在编译和链接配置项之前加上：
 
 ```xml
-  <Choose>
-    <When Condition="'$(Platform)'=='Win32' ">
-      <PropertyGroup Label="UserMacros">
-        <TargetCPU>i386</TargetCPU>
-      </PropertyGroup>
-    </When>
-    <When Condition="'$(Platform)'=='x64'">
-      <PropertyGroup Label="UserMacros">
-        <TargetCPU>x86_64</TargetCPU>
-      </PropertyGroup>
-    </When>
-  </Choose>
+<Choose>
+  <When Condition="'$(Platform)'=='Win32' ">
+    <PropertyGroup Label="UserMacros">
+      <TargetCPU>i386</TargetCPU>
+    </PropertyGroup>
+  </When>
+  <When Condition="'$(Platform)'=='x64'">
+    <PropertyGroup Label="UserMacros">
+      <TargetCPU>x86_64</TargetCPU>
+    </PropertyGroup>
+  </When>
+</Choose>
 ```
 
 再次在 `IDE` 中打开该属性文件，找到 通用属性 -> 常规 -> 目标文件名
@@ -106,3 +93,4 @@ Debug 配置: 改为 `/MTd`
 
 Release 配置：改为 `/MT`
 
+[swig]: http://swig.org/ "SWIG is an interface compiler that connects programs written in C and C++ with scripting languages such as Perl, Python, Ruby, and Tcl."

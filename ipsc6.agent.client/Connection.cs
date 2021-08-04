@@ -37,7 +37,7 @@ namespace ipsc6.agent.client
 
         #region IDisposable
 
-        private bool disposedValue = false;
+        private bool disposedValue;
 
         public void Dispose()
         {
@@ -520,7 +520,7 @@ namespace ipsc6.agent.client
 
         public override string ToString()
         {
-            return $"<{GetType().Name} Local={connector.BoundAddress}, Remote={RemoteHost}|{RemotePort}, State={State}, PhysicalConnected={connector.Connected}>";
+            return $"<{GetType().Name}@{GetHashCode():x8} Local={connector.BoundAddress}, Remote={RemoteHost}|{RemotePort}, State={State}, PhysicalConnected={connector.Connected}>";
         }
 
     }

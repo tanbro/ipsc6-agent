@@ -71,7 +71,16 @@ namespace ipsc6.agent.wpfapp
             {
                 log4net.GlobalContext.Properties["ProcessId"] = Process.GetCurrentProcess().Id;
                 log4net.GlobalContext.Properties["ProductName"] = VersionInfo.ProductName;
-                log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(Path.Combine("Config", "log4net.config")));
+                var userLoggingConfigFile = Path.Combine(Path.GetDirectoryName(ConfigManager.UserSettingsPath), "log4net.config");
+                var appLoggingConfigFile = Path.Combine("Config", "log4net.config");
+                if (File.Exists(userLoggingConfigFile))
+                {
+                    log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(userLoggingConfigFile));
+                }
+                else
+                {
+                    log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(appLoggingConfigFile));
+                }
                 logger.WarnFormat("\r\n!!!!!!!!!!!!!!!!!!!! Startup (AssemblyVersion {0}, FileVersion {1}) !!!!!!!!!!!!!!!!!!!!\r\n", Assembly.GetName().Version, VersionInfo.FileVersion);
             }
             catch (Exception err)
@@ -108,13 +117,46 @@ namespace ipsc6.agent.wpfapp
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             e.Handled = true;
-            logger.ErrorFormat("Application_DispatcherUnhandledException: {0}", e.Exception);
-            MessageBox.Show(
-                $"程序运行过程中出现了未捕获的异常。\r\n\r\n{e.Exception}",
-                VersionInfo.ProductName,
-                MessageBoxButton.OK, MessageBoxImage.Error
-            );
+            switch (e.Exception)
+            {
+                case client.ErrorResponse:
+                    logger.ErrorFormat("Application Dispatcher Unhandled Exception - CTI ErrorResponse: {0}", e.Exception);
+                    MessageBox.Show(
+                        $"发送到 CTI 服务器的请求返回了错误结果 ({(e.Exception as client.ErrorResponse).Code})。\r\n\r\n{e.Exception.Message}",
+                        Current.MainWindow.Title,
+                        MessageBoxButton.OK, MessageBoxImage.Warning
+                    );
+                    break;
+                case client.RequestTimeoutError:
+                    logger.ErrorFormat("Application Dispatcher Unhandled Exception - CTI RequestTimeoutError: {0}", e.Exception);
+                    MessageBox.Show(
+                        "发送到 CTI 服务器的请求超时。",
+                        Current.MainWindow.Title,
+                        MessageBoxButton.OK, MessageBoxImage.Error
+                    );
+                    break;
+                case client.RequestNotCompleteError:
+                    logger.ErrorFormat("Application Dispatcher Unhandled Exception - CTI RequestNotCompleteError: {0}", e.Exception);
+                    MessageBox.Show(
+                        "由于已经有 CTI 服务请求正在执行，现在无法进行新的请求。",
+                        Current.MainWindow.Title,
+                        MessageBoxButton.OK, MessageBoxImage.Information
+                    );
+                    break;
+                default:
+                    logger.ErrorFormat("Application Dispatcher Unhandled Exception - {0}", e.Exception);
+                    MessageBox.Show(
+                        $"程序运行过程中出现了未捕获的异常。\r\n\r\n{e.Exception}",
+                        Current.MainWindow.Title,
+                        MessageBoxButton.OK, MessageBoxImage.Error
+                    );
+                    break;
+            }
         }
 
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            logger.Warn("\r\n^^^^^^^^^^^^^^^^^^^^ Exit ^^^^^^^^^^^^^^^^^^^^\r\n");
+        }
     }
 }

@@ -8,20 +8,24 @@
 Unicode True
 
 !define PUBLISHER "广州市和声信息技术有限公司"
-!define PRODUCT_NAME "IPSC6 座席工具条 (x64 System)"
+!define PRODUCT_NAME "IPSC6 座席工具条 (x86 User)"
 
 Name "${PRODUCT_NAME}"
+
 !ifdef VERSION
-  OutFile "out\ipsc6_agent_wpfapp-win64-system.${VERSION}.exe"
+  OutFile "out\ipsc6_agent_wpfapp-win32-user.${VERSION}.exe"
 !else
-  OutFile "out\ipsc6_agent_wpfapp-win64-system.exe"
+  OutFile "out\ipsc6_agent_wpfapp-win32-user.exe"
 !endif
 
 ;Default installation folder
-InstallDir "$PROGRAMFILES64\ipsc6-agent-wpfapp"
+InstallDir "$LOCALAPPDATA\Programs\ipsc6-agent-wpfapp"
 
 ;Get installation folder from registry if available
-InstallDirRegKey HKLM "Software\ipsc6_agent_wpfapp-win64" ""
+InstallDirRegKey HKCU "Software\ipsc6_agent_wpfapp-win32" ""
+
+;Request application privileges
+RequestExecutionLevel highest
 
 ShowInstDetails show
 ShowUnInstDetails show
@@ -56,20 +60,19 @@ Var DisplayName
 !insertmacro MUI_LANGUAGE "SimpChinese"
 
 ;--------------------------------
-!include vcredist_x64.nsh
+!include vcredist_x86.nsh
 !include netfx.nsh
 
 ;--------------------------------
 
 Section "!座席工具条" SEC_0
-  SetShellVarContext all
   SetOutPath $INSTDIR
 
   ;Program FILES HERE...
-  File /r /x "*.exp" /x "*.lib" /x "*.pdb" "..\ipsc6.agent.wpfapp\bin\x64\Release\*.*"
+  File /r /x "*.exp" /x "*.lib" /x "*.pdb" "..\ipsc6.agent.wpfapp\bin\x86\Release\*.*"
 
   ;Store installation folder
-  WriteRegStr HKLM "Software\ipsc6_agent_wpfapp-win64" "" $INSTDIR
+  WriteRegStr HKCU "Software\ipsc6_agent_wpfapp-win32" "" $INSTDIR
 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -82,23 +85,21 @@ Section "!座席工具条" SEC_0
   !insertmacro MUI_STARTMENU_WRITE_END
 
   ; Add/Remove list
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win64" \
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win32" \
                   "DisplayName" "$DisplayName"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win64" \
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win32" \
                   "Publisher" "${PUBLISHER}"
   !ifdef VERSION
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win64" \
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win32" \
                   "DisplayVersion" "${VERSION}"
   !endif
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win64" \
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win32" \
                   "UninstallString" "$\"$INSTDIR\Uninstall.exe$\" /S"
 SectionEnd
 
 ;--------------------------------
 ;Uninstaller Section
 Section "!un.座席工具条" UNSEC_0
-  SetShellVarContext all
-
   Delete "$INSTDIR\Uninstall.exe"
 
   ;Remove whole install dir
@@ -109,10 +110,10 @@ Section "!un.座席工具条" UNSEC_0
   RMDir /r "$SMPROGRAMS\$DisplayName"
 
   ;Remove from Add/Remove list
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win64"
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win32"
 
   ;Remove InstalledRegKey only when it is empty
-  DeleteRegKey /ifempty HKLM "Software\ipsc6_agent_wpfapp-win64"
+  DeleteRegKey /ifempty HKCU "Software\ipsc6_agent_wpfapp-win32"
 SectionEnd
 
 ;------------------------------------------
@@ -155,12 +156,6 @@ Function .onInit
 FunctionEnd
 
 Function un.onInit
-  ${IfNot} ${RunningX64}
-    StrCpy $0 "无法安装：该程序无法在 Win32 环境下运行。"
-    MessageBox MB_OK|MB_ICONSTOP "messagebox_text" 
-    Abort "$0"
-  ${EndIf}
-
   ; https://nsis.sourceforge.io/Graying_out_Section_(define_mandatory_sections)
   # set the section as selected and read-only
   IntOp $0 ${SF_SELECTED} | ${SF_RO}

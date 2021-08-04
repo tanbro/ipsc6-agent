@@ -69,6 +69,9 @@
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -119,6 +122,9 @@
     <Compile Include="StateMachines\SnapTopState.cs" />
     <Compile Include="StateMachines\SnapTopStateMachine.cs" />
     <Compile Include="StateMachines\SnapTopTrigger.cs" />
+    <Compile Include="UserControls\SelectGroupPanel.xaml.cs">
+      <DependentUpon>SelectGroupPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\CommandGuard.cs" />
     <Compile Include="ViewModels\ConfigViewModel.cs" />
     <Compile Include="Views\ConfigWindow.xaml.cs">
@@ -163,6 +169,10 @@
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Page Include="Dialogs\PromptDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\SelectGroupPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -253,6 +263,7 @@
     <Resource Include="Fonts\LCD14.otf" />
     <Resource Include="Fonts\LCD14Condensed.otf" />
     <Resource Include="Fonts\PathwayGothicOne-Regular.ttf" />
+    <None Include="app.manifest" />
     <None Include="Config\log4net.Debug.config" />
     <None Include="Config\log4net.Release.config" />
     <None Include="Config\settings.json">
@@ -299,6 +310,11 @@
     <Content Include="Icons\svg\telephone-offhook.svg" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="GitVersion.MsBuild">
+      <Version>5.6.11</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="log4net">
       <Version>2.0.12</Version>
     </PackageReference>
@@ -344,8 +360,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*" "$(TargetDir)" /D /Y
-xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*" "$(TargetDir)" /D /Y
-copy "$(ProjectDir)Config\log4net.$(ConfigurationName).config" "$(TargetDir)Config\log4net.config" /Y</PostBuildEvent>
+    <PostBuildEvent>
+            xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\pjsua2.*" "$(TargetDir)" /D /Y
+            xcopy "$(SolutionDir)$(PlatformName)\$(ConfigurationName)\RakNetDLL.*" "$(TargetDir)" /D /Y
+            copy "$(ProjectDir)Config\log4net.$(ConfigurationName).config" "$(TargetDir)Config\log4net.config" /Y
+        </PostBuildEvent>
   </PropertyGroup>
 </Project>

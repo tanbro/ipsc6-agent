@@ -36,5 +36,10 @@ namespace ipsc6.agent.wpfapp.Views
         {
             BindingOperations.GetBindingExpression(sender as DependencyObject, TextBox.TextProperty).UpdateSource();
         }
+
+        private void Cancel_Button_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 }

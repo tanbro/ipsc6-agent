@@ -50,8 +50,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static readonly IRelayCommand loginCommand = new RelayCommand(DoLogin, CanLogin);
         public IRelayCommand LoginCommand => loginCommand;
 
-        private static bool isLoginCompleted;
-
         private static Window GetOrCreateWindow()
         {
             var window = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x is Views.LoginWindow);
@@ -67,14 +65,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public static async void DoLogin()
         {
             var dispatcher = Application.Current.Dispatcher;
+            var svc = MainViewModel.Instance.MainService;
 
             using (await Utils.CommandGuard.EnterAsync(loginCommand))
             {
-                if (isLoginCompleted)
-                {
-                    throw new InvalidOperationException();
-                }
-
                 var window = GetOrCreateWindow() as Views.LoginWindow;
 #pragma warning disable CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
                 dispatcher.InvokeAsync(() =>
@@ -90,25 +84,48 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 try
                 {
                     await ExecuteLoginAsync();
-                    isLoginCompleted = true;
                     window.DialogResult = true;
                     window.Close();
                 }
-                catch (Exception err)
+                catch (client.ConnectionException err)
                 {
-                    if (err is client.ConnectionException)
+                    logger.ErrorFormat("DoLogin - CTI服务器连接失败: {0}", err);
+                    string errMsg = err switch
                     {
-                        logger.ErrorFormat("DoLogin - 登录失败: {0}", err);
-                        MessageBox.Show(
-                            $"登录失败\r\n\r\n{err}",
-                            Application.Current.MainWindow.Title,
-                            MessageBoxButton.OK, MessageBoxImage.Error
-                        );
-                    }
-                    else
+                        client.ConnectionFailedException =>
+                            "无法连接到 CTI 服务器。\r\n请检查网络设置。",
+                        client.ConnectionTimeoutException =>
+                            "网络连接超时。\r\n请检查网络设置。",
+                        client.ConnecttionLostException =>
+                            "网络连接中断。\r\n请检查网络设置。",
+                        client.ConnectionClosedException =>
+                            "CTI 服务器主动关闭了连接请求。这通常是因为登录工号或密码错误。\r\n请输入正确的登录工号和密码。",
+                        _ => err.ToString(),
+                    };
+                    MessageBox.Show(
+                        $"CTI 服务器连接失败\r\n\r\n{errMsg}",
+                        $"{Application.Current.MainWindow.Title} - {window.Title}",
+                        MessageBoxButton.OK, MessageBoxImage.Warning
+                    );
+                }
+                catch (client.BaseRequestError err)
+                {
+                    logger.ErrorFormat("DoLogin - 登录失败: {0}", err);
+                    string errMsg = err switch
                     {
-                        throw;
-                    }
+                        client.ErrorResponse =>
+                            $"CTI 服务器返回的登录失败原因: {err.Message}",
+                        client.RequestTimeoutError =>
+                            "CTI 服务器登录请求超时",
+                        client.RequestNotCompleteError =>
+                            "无法进行重复的登录请求",
+                        _ => err.ToString(),
+                    };
+                    MessageBox.Show(
+                        $"登录失败\r\n\r\n{errMsg}",
+                        $"{Application.Current.MainWindow.Title} - {window.Title}",
+                        MessageBoxButton.OK, MessageBoxImage.Warning
+                    );
                 }
             }
         }
@@ -121,11 +138,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
             using (await Utils.CommandGuard.EnterAsync(loginCommand))
             {
-                if (isLoginCompleted)
-                {
-                    throw new InvalidOperationException();
-                }
-
                 Window window = null;
                 dispatcher.Invoke(() =>
                 {
@@ -149,7 +161,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 try
                 {
                     await ExecuteLoginAsync(serverList);
-                    isLoginCompleted = true;
                     dispatcher.Invoke(() =>
                     {
                         window.DialogResult = true;
@@ -191,6 +202,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 return false;
             if (Utils.CommandGuard.IsGuarding)
                 return false;
+            var svc = MainViewModel.Instance.MainService;
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped)
+                return false;
             return true;
         }
 
@@ -198,6 +212,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             var svc = MainViewModel.Instance.MainService;
             var mainViewModel = MainViewModel.Instance;
+
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped)
+            {
+                throw new InvalidOperationException($"座席状态为 {svc.GetAgentRunningState()} 时不允许进行登录");
+            }
 
             serverList ??= (new string[] { });
             if (serverList.Count() == 0)
@@ -215,6 +234,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
             finally
             {
+                password = "";
                 Instance.IsAllowInput = true;
             }
 

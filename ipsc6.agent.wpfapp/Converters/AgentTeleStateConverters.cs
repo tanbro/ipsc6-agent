@@ -12,7 +12,7 @@ using MahApps.Metro.IconPacks;
 namespace ipsc6.agent.wpfapp.Converters
 {
     [ValueConversion(typeof(client.TeleState), typeof(SolidColorBrush))]
-    internal class AgentTeleStateToBrushConverters : IValueConverter
+    internal class AgentTeleStateToBrushConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

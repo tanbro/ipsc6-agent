@@ -3,23 +3,23 @@ using System.Threading.Tasks;
 
 namespace ipsc6.agent.client.Sip
 {
-    public class Call : org.pjsip.pjsua2.Call
+    public class MyPjCall : org.pjsip.pjsua2.Call
     {
-        static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Call));
+        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MyPjCall));
 
-        public Call(org.pjsip.pjsua2.Account acc) : base(acc)
+        public MyPjCall(org.pjsip.pjsua2.Account acc) : base(acc)
         {
             MakeString();
         }
 
-        public Call(org.pjsip.pjsua2.Account acc, int call_id) : base(acc, call_id)
+        public MyPjCall(org.pjsip.pjsua2.Account acc, int callId) : base(acc, callId)
         {
             MakeString();
         }
 
-        string _string;
+        private string _string;
 
-        string MakeString()
+        private string MakeString()
         {
             var info = getInfo();
             _string = $"<{GetType().Name}@{GetHashCode():x8} Id={info.id}, RemoteUri={info.remoteUri}, State={info.state}>";

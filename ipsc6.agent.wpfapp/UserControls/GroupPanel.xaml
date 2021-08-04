@@ -52,10 +52,10 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <ToggleButton Grid.Column="0" Margin="2"
-                                                              Style="{StaticResource MyToggleButton}"
-                                                              IsChecked="{Binding IsSigned, Mode=OneWay}"
-                                                              Command="{Binding ElementName=GroupPanelUserControl, Path=DataContext.SignGroupCommand}"
-                                                              CommandParameter="{Binding Id}"/>
+                                                          Style="{StaticResource MyToggleButton}"
+                                                          IsChecked="{Binding IsSigned, Mode=OneWay}"
+                                                          Command="{Binding ElementName=GroupPanelUserControl, Path=DataContext.SignGroupCommand}"
+                                                          CommandParameter="{Binding Id}"/>
                                             <TextBlock Grid.Column="1" Text="{Binding Name, Mode=OneWay}" Margin="2"/>
                                         </Grid>
                                     </DataTemplate>

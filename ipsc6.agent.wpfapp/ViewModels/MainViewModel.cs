@@ -46,10 +46,32 @@ namespace ipsc6.agent.wpfapp.ViewModels
             Exception iniErr = null;
             var mainWindow = Application.Current.MainWindow;
 
+            mainWindow.Hide();
+
             try
             {
                 /// 非 GUI 的初始化
                 ReloadConfigure();
+
+                // 如果没有设置服务器地址，就必须要设置
+                cfgIpsc.ServerList ??= new string[] { };
+                while (cfgIpsc.ServerList.Count < 1)
+                {
+                    var r = MessageBox.Show(
+                        "由于没有设置 CTI 服务器地址，该程序无法工作。\r\n是否要进行设置？\r\n\r\n按“是”打开设置窗口，按“否”退出程序。",
+                        mainWindow.Title,
+                        MessageBoxButton.YesNo, MessageBoxImage.Question
+                    );
+                    if (r == MessageBoxResult.No)
+                    {
+                        logger.Warn("未配置 CTI 服务器地址，且选择不进行配置。");
+                        return false;
+                    }
+                    DoShowConfigWindow();
+
+                    ReloadConfigure();
+                    cfgIpsc.ServerList ??= new string[] { };
+                }
 
                 MainService = services.Service.Create(cfgIpsc, cfgPhone);
                 MainService.OnCtiConnectionStateChanged += MainService_OnCtiConnectionStateChanged;
@@ -79,19 +101,14 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 {
                     // 默认的方式：直接显示登录对话窗
                     // 登录失败否则就退出函数返回假
-                    try
+                    if (!new Views.LoginWindow().ShowDialog().Value)
                     {
-                        mainWindow.Hide();
-                        if (!new Views.LoginWindow().ShowDialog().Value)
-                        {
-                            return false;
-                        }
-                    }
-                    finally
-                    {
-                        mainWindow.Show();
+                        logger.Warn("已关闭登录对话窗，放弃登录");
+                        return false;
                     }
                 }
+
+                mainWindow.Show();
 
                 /// GUI 的一些初始化
                 IsShowToolbar = true;
@@ -156,8 +173,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         internal void Release()
         {
+            logger.Info("Release");
             StopTimer();
 
+            logger.Debug("Release - Stop RPC server");
             rpcServerRunningCanceller?.Cancel();
             try
             {
@@ -167,22 +186,28 @@ namespace ipsc6.agent.wpfapp.ViewModels
             }
             catch (TaskCanceledException) { }
 
+            logger.Debug("Release - Dispose Main Service");
             MainService?.Dispose();
+
+            logger.Debug("Release - Dispose GUI Service");
             GuiService?.Dispose();
+
+            logger.Debug("Release - Completed");
         }
 
-        private static IRelayCommand[] GetStateRelativeCommands()
-        {
-            return new IRelayCommand[] {
-                statePopupCommand, setStateCommand,
-                groupPopupCommand, signGroupCommand,
-                holdPopupCommand, holdCommand, unHoldCommand
-            };
-        }
+        private static IRelayCommand[] StateRelativeCommands => new IRelayCommand[] {
+            loginCommand, logoutCommand, exitCommand,
+            statePopupCommand, setStateCommand,
+            groupPopupCommand, signGroupCommand,
+            holdPopupCommand, holdCommand, unHoldCommand,
+            xferPopupCommand, xferConsultPopupCommand,
+            dialCommand, xferExtCommand, xferExtConsultCommand,
+            callIvrCommand, advCommand
+        };
 
         private static void NotifyStateRelativeCommandsExecutable()
         {
-            foreach (var command in GetStateRelativeCommands())
+            foreach (var command in StateRelativeCommands)
             {
                 if (command != null)
                 {
@@ -216,6 +241,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         internal void CloseMainWindow()
         {
+            var svc = Instance.MainService;
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped)
+            {
+                MessageBox.Show(
+                    "座席尚未注销，不允许退出。\r\n\r\n请在注销后再退出程序。",
+                    Application.Current.MainWindow.Title,
+                    MessageBoxButton.OK, MessageBoxImage.Information
+                );
+                return;
+            }
+
             Application.Current.Dispatcher.Invoke(() =>
             {
                 foreach (var window in Application.Current.Windows.OfType<Window>())
@@ -538,8 +574,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => ctiServices;
             set
             {
-                if (SetProperty(ref ctiServices, value))
-                    NotifyStateRelativeCommandsExecutable();
+                if (!SetProperty(ref ctiServices, value)) return;
+                NotifyStateRelativeCommandsExecutable();
             }
         }
 
@@ -569,8 +605,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => workerNum;
             set
             {
-                if (SetProperty(ref workerNum, value))
-                    NotifyStateRelativeCommandsExecutable();
+                if (!SetProperty(ref workerNum, value)) return;
+                NotifyStateRelativeCommandsExecutable();
             }
         }
         private static string displayName;
@@ -586,8 +622,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => status;
             set
             {
-                if (SetProperty(ref status, value))
-                    NotifyStateRelativeCommandsExecutable();
+                if (!SetProperty(ref status, value)) return;
+                NotifyStateRelativeCommandsExecutable();
             }
         }
 
@@ -614,11 +650,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => currentCallInfo;
             set
             {
-                if (SetProperty(ref currentCallInfo, value))
-                {
-                    IsCurrentCallActive = value != null;
-                    IsNotCurrentCallActive = !IsCurrentCallActive;
-                }
+                if (!SetProperty(ref currentCallInfo, value)) return;
+                IsCurrentCallActive = value != null;
+                IsNotCurrentCallActive = !IsCurrentCallActive;
             }
         }
         private static bool isCurrentCallActive = false;
@@ -676,8 +710,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => groups;
             set
             {
-                if (SetProperty(ref groups, value))
-                    NotifyStateRelativeCommandsExecutable();
+                if (!SetProperty(ref groups, value)) return;
+                NotifyStateRelativeCommandsExecutable();
             }
         }
 
@@ -692,7 +726,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 throw new ArgumentNullException(nameof(parameter));
             string groupId = parameter as string;
 
-            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
                 var group = groups.First(x => x.Id == groupId);
                 bool isSignIn = !group.IsSigned;
@@ -759,7 +793,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
             var st = parameter as AgentStateWorkType;
             var svc = Instance.MainService;
-            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
                 if (st.Item1 == client.AgentState.Idle)
                 {
@@ -781,14 +815,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (!IsMainConnectionOk) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
             client.AgentState[] allowedAgentStates = { client.AgentState.Idle, client.AgentState.Pause, client.AgentState.Leave };
-            if (!allowedAgentStates.Any(x => x == status.Item1)) return false;
-
+            if (!allowedAgentStates.Contains(status.Item1)) return false;
             if (parameter != null)
             {
                 var t = parameter as AgentStateWorkType;
                 if (t.Item1 == status.Item1 && t.Item2 == status.Item2) return false;
             }
-
             return true;
         }
         #endregion
@@ -810,8 +842,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => teleState;
             set
             {
-                if (SetProperty(ref teleState, value))
-                    NotifyStateRelativeCommandsExecutable();
+                if (!SetProperty(ref teleState, value)) return;
+                NotifyStateRelativeCommandsExecutable();
             }
         }
 
@@ -852,8 +884,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
             get => sipAccounts;
             set
             {
-                if (SetProperty(ref sipAccounts, value))
-                    NotifyStateRelativeCommandsExecutable();
+                if (!SetProperty(ref sipAccounts, value)) return;
+                NotifyStateRelativeCommandsExecutable();
             }
         }
         private static readonly IRelayCommand answerCommand = new RelayCommand(DoAnswer, CanAnswer);
@@ -926,11 +958,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public IReadOnlyCollection<services.Models.CallInfo> Calls
         {
             get => calls;
-            set
-            {
-                if (SetProperty(ref calls, value))
-                    NotifyStateRelativeCommandsExecutable();
-            }
+            set => SetProperty(ref calls, value);
         }
 
         private static IReadOnlyCollection<services.Models.CallInfo> heldCalls = new services.Models.CallInfo[] { };
@@ -946,7 +974,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async void DoHold()
         {
             var svc = Instance.MainService;
-            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
                 await svc.Hold();
             }
@@ -966,7 +994,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async void DoUnHold(object parameter)
         {
             var svc = Instance.MainService;
-            using (await Utils.CommandGuard.EnterAsync(GetStateRelativeCommands()))
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
                 if (parameter == null)
                 {
@@ -982,13 +1010,23 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static bool CanUnHold(object parameter)
         {
+
             if (!IsMainConnectionOk) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
-            var svc = Instance.MainService;
             if (status.Item1 != client.AgentState.Work) return false;
             if (parameter == null)
             {
-                if (!calls.Any(x => x.IsHeld)) return false;
+                /// NOTE: 不看是否真的有保持的通话，一律以工作类型为准！
+                /// 如果不是，可以用下面的注释代码顶替。
+                /// if (!calls.Any(x => x.IsHeld)) return false;
+                client.WorkType[] workTypes =
+                {
+                    client.WorkType.Hold,
+                    client.WorkType.Consult,
+                };
+                if (!workTypes.Contains(status.Item2)) return false;
+                // 如果有多个保持的，就得选中具体的call，不能用这个按钮
+                if (heldCalls.Count > 1) return false;
             }
             else
             {
@@ -1076,8 +1114,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
-        #region 座席咨询
-        static readonly IRelayCommand xferConsultCommand = new RelayCommand(DoXferConsult);
+        #region 座席咨询,转移
+        private static readonly IRelayCommand xferConsultCommand = new RelayCommand(DoXferConsult);
         public IRelayCommand XferConsultCommand => xferConsultCommand;
 
         private static async void DoXferConsult()
@@ -1087,9 +1125,9 @@ namespace ipsc6.agent.wpfapp.ViewModels
             Dialogs.PromptDialog dialog = new()
             {
                 DataContext = new Dictionary<string, object> {
-                            { "Title", "转接" },
-                            { "Label", "输入要转接的目标。格式： 技能组ID:座席工号" }
-                        }
+                    { "Title", "转接" },
+                    { "Label", "输入要转接的目标。格式： 技能组ID:座席工号" }
+                }
             };
             if (dialog.ShowDialog() != true) return;
             var inputText = dialog.InputText;
@@ -1105,9 +1143,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
             await svc.XferConsult(groupId.Trim(), workerNum.Trim());
         }
-        #endregion
 
-        #region 座席转移
         private static readonly IRelayCommand xferCommand = new RelayCommand(DoXfer);
         public IRelayCommand XferCommand => xferCommand;
 
@@ -1136,71 +1172,191 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
             await svc.Xfer(groupId.Trim(), workerNum.Trim());
         }
+
+        private static IReadOnlyCollection<services.Models.Group> allGroups;
+        public IReadOnlyCollection<services.Models.Group> AllGroups
+        {
+            get => allGroups;
+            set => SetProperty(ref allGroups, value);
+        }
+
+        #region Xfer Popup
+        private static bool isXferPopuped;
+        public bool IsXferPopuped
+        {
+            get => isXferPopuped;
+            set
+            {
+                if (!SetProperty(ref isXferPopuped, value)) return;
+                if (value)  // 如果打开，就加载数据！
+                    AllGroups = MainService.GetAllGroups();
+            }
+        }
+        private static readonly IRelayCommand xferPopupCommand = new RelayCommand(DoXferPopup, CanXferPopup);
+        public IRelayCommand XferPopupCommand => xferPopupCommand;
+        private static void DoXferPopup()
+        {
+            Instance.IsXferPopuped = !isXferPopuped;
+        }
         #endregion
 
-        #region 外呼
-        private static readonly IRelayCommand dialCommand = new RelayCommand(DoDial);
+
+        #region XferConsult Popup
+        private static bool isXferConsultPopuped;
+        public bool IsXferConsultPopuped
+        {
+            get => isXferConsultPopuped;
+            set
+            {
+                if (!SetProperty(ref isXferConsultPopuped, value)) return;
+                if (value)  // 如果打开，就加载数据！
+                    AllGroups = MainService.GetAllGroups();
+            }
+        }
+        private static readonly IRelayCommand xferConsultPopupCommand = new RelayCommand(DoXferConsultPopup, CanXferPopup);
+        public IRelayCommand XferConsultPopupCommand => xferConsultPopupCommand;
+        private static void DoXferConsultPopup()
+        {
+            Instance.IsXferConsultPopuped = !isXferConsultPopuped;
+        }
+        #endregion
+
+        private static bool CanXferPopup()
+        {
+            if (!IsMainConnectionOk) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if (status.Item1 != client.AgentState.Work) return false;
+            if (heldCalls.Count > 0) return false;
+            return true;
+        }
+
+        private static readonly IRelayCommand selectGroupOkCommand = new RelayCommand<object>(DoSelectGroupOk);
+        public IRelayCommand SelectGroupOkCommand => selectGroupOkCommand;
+
+        private static async void DoSelectGroupOk(object data)
+        {
+            if (data == null) throw new InvalidOperationException();
+            var groupId = (string)data;
+            var svc = Instance.MainService;
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
+            {
+                if (Instance.IsXferPopuped)
+                {
+                    logger.DebugFormat("释放转到座席组 {0}", groupId);
+                    await svc.Xfer(groupId);
+                    Instance.IsXferPopuped = false;
+                }
+                else if (Instance.IsXferConsultPopuped)
+                {
+                    logger.DebugFormat("保持转到座席组 {0}", groupId);
+                    await svc.XferConsult(groupId);
+                    Instance.IsXferConsultPopuped = false;
+                }
+            }
+        }
+        #endregion
+
+        #region 外呼, 外转, 外咨
+
+        private static string inputTelNum;
+        public string InputTelNum
+        {
+            get => inputTelNum;
+            set
+            {
+                if (SetProperty(ref inputTelNum, value))
+                {
+                    foreach (var cmd in new IRelayCommand[]
+                    {
+                        dialCommand, xferExtCommand, xferExtConsultCommand
+                    })
+                    {
+                        cmd.NotifyCanExecuteChanged();
+                    }
+                }
+            }
+        }
+
+        private static readonly IRelayCommand dialCommand = new RelayCommand(DoDial, CanDial);
         public IRelayCommand DialCommand => dialCommand;
 
         private static async void DoDial()
         {
             var svc = Instance.MainService;
-            Dialogs.PromptDialog dialog = new()
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
-                DataContext = new Dictionary<string, object> {
-                    { "Title", "拨号" },
-                    { "Label", "输入拨打的号码" }
-                }
-            };
-            if (dialog.ShowDialog() != true) return;
-            var inputText = dialog.InputText;
-            await svc.Dial(inputText);
+                await svc.Dial(inputTelNum.Trim());
+            }
         }
-        #endregion
 
-        #region 外转
-        private static readonly IRelayCommand xferExtCommand = new RelayCommand(DoXferExt);
+        public static bool CanDial()
+        {
+            if (!IsMainConnectionOk) return false;
+            if (string.IsNullOrWhiteSpace(inputTelNum)) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if (status.Item1 != client.AgentState.Idle) return false;
+            return true;
+        }
+
+        private static readonly IRelayCommand xferExtCommand = new RelayCommand(DoXferExt, CanXferExt);
         public IRelayCommand XferExtCommand => xferExtCommand;
 
         private static async void DoXferExt()
         {
             var svc = Instance.MainService;
-            Dialogs.PromptDialog dialog = new()
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
-                DataContext = new Dictionary<string, object> {
-                    { "Title", "向外转移" },
-                    { "Label", "输入拨打的号码" }
-                }
-            };
-            if (dialog.ShowDialog() != true) return;
-            var inputText = dialog.InputText;
-            await svc.XferExt(inputText);
+                await svc.XferExt(inputTelNum.Trim());
+            }
         }
-        #endregion
 
-        #region 外咨
-        private static readonly IRelayCommand xferExtConsultCommand = new RelayCommand(DoXferExtConsult);
+        public static bool CanXferExt()
+        {
+            if (!IsMainConnectionOk) return false;
+            if (string.IsNullOrWhiteSpace(inputTelNum)) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if (status.Item1 != client.AgentState.Work) return false;
+            if (heldCalls.Count > 0) return false;
+            return true;
+        }
+
+        private static readonly IRelayCommand xferExtConsultCommand = new RelayCommand(DoXferExtConsult, CanXferExtConsult);
         public IRelayCommand XferExtConsultCommand => xferExtConsultCommand;
 
         private static async void DoXferExtConsult()
         {
             var svc = Instance.MainService;
-            Dialogs.PromptDialog dialog = new()
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
-                DataContext = new Dictionary<string, object> {
-                    { "Title", "向外咨询" },
-                    { "Label", "输入拨打的号码" }
-                }
-            };
-            if (dialog.ShowDialog() != true) return;
-            var inputText = dialog.InputText;
-            await svc.XferExtConsult(inputText);
+                await svc.XferExtConsult(inputTelNum.Trim());
+            }
+        }
+
+        public static bool CanXferExtConsult()
+        {
+            if (!IsMainConnectionOk) return false;
+            if (string.IsNullOrWhiteSpace(inputTelNum)) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if (status.Item1 != client.AgentState.Work) return false;
+            if (heldCalls.Count > 0) return false;
+            return true;
         }
         #endregion
 
         #region 转 IVR
-        private static readonly IRelayCommand callIvrCommand = new RelayCommand(DoCallIvr);
+        private static readonly IRelayCommand callIvrCommand = new RelayCommand(DoCallIvr, CanCallIvr);
         public IRelayCommand CallIvrCommand => callIvrCommand;
+
+        private static bool CanCallIvr()
+        {
+            if (!IsMainConnectionOk) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if (!(new client.AgentState[]
+            {
+                client.AgentState.Idle, client.AgentState.Work
+            }).Contains(status.Item1)) return false;
+            return true;
+        }
 
         private static async void DoCallIvr()
         {
@@ -1252,10 +1408,21 @@ namespace ipsc6.agent.wpfapp.ViewModels
         #endregion
 
         #region btnAdv
-        private static readonly IRelayCommand advCommand = new RelayCommand(DoAdvCommand);
+        private static readonly IRelayCommand advCommand = new RelayCommand(DoAdv, CanAdv);
         public IRelayCommand AdvCommand => advCommand;
 
-        private static async void DoAdvCommand()
+        private static bool CanAdv()
+        {
+            if (!IsMainConnectionOk) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if ((new client.AgentState[]
+            {
+                client.AgentState.OffLine, client.AgentState.NotExist
+            }).Contains(status.Item1)) return false;
+            return true;
+        }
+
+        private static async void DoAdv()
         {
             var svc = Instance.MainService;
 
@@ -1365,13 +1532,102 @@ namespace ipsc6.agent.wpfapp.ViewModels
         }
         #endregion
 
-        #region Configure
+        #region 设置
         private static readonly IRelayCommand showConfigWindowCmmand = new RelayCommand(DoShowConfigWindow);
         public IRelayCommand ShowConfigWindowCmmand => showConfigWindowCmmand;
 
         private static void DoShowConfigWindow()
         {
             new Views.ConfigWindow().ShowDialog();
+        }
+
+        private static readonly IRelayCommand loginCommand = new RelayCommand(DoLogin, CanLogin);
+        public IRelayCommand LoginCommand => loginCommand;
+
+        private static void DoLogin()
+        {
+            logger.Debug("登录");
+            if (!new Views.LoginWindow().ShowDialog().Value)
+            {
+                logger.Warn("已关闭登录对话窗，放弃登录");
+            }
+        }
+
+        private static bool CanLogin()
+        {
+            var svc = Instance.MainService;
+            if (svc == null) return false;
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped) return false;
+            return true;
+        }
+
+        private static readonly IRelayCommand logoutCommand = new RelayCommand(DoLogout, CanLogout);
+        public IRelayCommand LogoutCommand => logoutCommand;
+
+        private static async void DoLogout()
+        {
+            var r = MessageBox.Show(
+                "是否确定要注销？",
+                Application.Current.MainWindow.Title,
+                MessageBoxButton.YesNo, MessageBoxImage.Question
+            );
+            if (r != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            logger.Debug("注销");
+
+            var svc = Instance.MainService;
+            await svc.LogOut();
+
+            Instance.WorkerNumber = "";
+            Instance.DisplayName = "";
+            Instance.CurrentCallInfo = null;
+            Instance.SipAccounts = Array.Empty<services.Models.SipAccount>();
+            Instance.Groups = Array.Empty<services.Models.Group>();
+            Instance.AllGroups = Array.Empty<services.Models.Group>();
+            Instance.QueueInfos = Array.Empty<services.Models.QueueInfo>();
+            Instance.Calls = Array.Empty<services.Models.CallInfo>();
+
+            Instance.StopTimer();
+        }
+
+        private static bool CanLogout()
+        {
+            var svc = Instance.MainService;
+
+            if (svc == null) return false;
+
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Started) return false;
+            if (status.Item1 == client.AgentState.Work) return false;
+
+            return true;
+        }
+
+
+        private static readonly IRelayCommand exitCommand = new RelayCommand(DoExit, CanExit);
+        public IRelayCommand ExitCommand => exitCommand;
+
+        private static void DoExit()
+        {
+            logger.Debug("退出");
+
+            var svc = Instance.MainService;
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped)
+            {
+                throw new InvalidOperationException();
+            }
+
+            Instance.CloseMainWindow();
+        }
+
+        private static bool CanExit()
+        {
+            var svc = Instance.MainService;
+            if (svc == null) return false;
+            if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped) return false;
+            return true;
         }
         #endregion
     }

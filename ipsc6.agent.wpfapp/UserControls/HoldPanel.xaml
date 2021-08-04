@@ -73,7 +73,7 @@
                                                         Margin="4" Height="48" Width="48"
                                                         ToolTip="取消该通话的保持状态(恢复通话)"
                                                         Command="{Binding ElementName=HoldPanelUserControl, Path=DataContext.UnHoldCommand}"
-                                                        CommandParameter="{Binding}">
+                                                        CommandParameter="{Binding Id}">
                                                 <iconPacks:PackIconMaterial Kind="PhoneReturn" Height="36" Width="36"/>
                                             </Button>
                                         </Grid>

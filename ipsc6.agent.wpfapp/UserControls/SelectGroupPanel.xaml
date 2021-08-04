@@ -1,0 +1,41 @@
+<UserControl x:Class="ipsc6.agent.wpfapp.UserControls.SelectGroupPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
+             mc:Ignorable="d"
+             xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
+             xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
+             d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+             x:Name="SelectGroupPanelUserControl"
+             d:DesignHeight="240" d:DesignWidth="320"
+             FontSize="16" Background="{StaticResource MyBackgroud}"
+             >
+
+    <Grid>
+
+        <ListBox Grid.Row="0" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 ItemsSource="{Binding Path=AllGroups, Mode=OneWay}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Style="{StaticResource MyCommonText}"
+                                   Margin="4" HorizontalAlignment="Left"
+                                   Text="{Binding Path=Name, Mode=OneWay}"/>
+                        <Button Grid.Column="1" Style="{StaticResource MyCommonButton}" Margin="4" HorizontalAlignment="Right"
+                                Command="{Binding ElementName=SelectGroupPanelUserControl, Path=DataContext.SelectGroupOkCommand}"
+                                CommandParameter="{Binding Id}">
+                            选择
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+    </Grid>
+</UserControl>

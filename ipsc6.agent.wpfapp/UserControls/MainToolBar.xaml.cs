@@ -23,7 +23,6 @@ namespace ipsc6.agent.wpfapp.UserControls
         public MainToolBar()
         {
             InitializeComponent();
-            DataContext = ViewModels.MainViewModel.Instance;
         }
     }
 }

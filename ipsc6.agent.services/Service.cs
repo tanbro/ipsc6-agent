@@ -22,12 +22,14 @@ namespace ipsc6.agent.services
         {
             if (!disposedValue)
             {
+                logger.Info("disposing ...");
                 if (disposing)
                 {
                     agent.Dispose();
                     client.Agent.Release();
                 }
                 disposedValue = true;
+                logger.Info("disposing completed.");
             }
         }
 
@@ -71,7 +73,7 @@ namespace ipsc6.agent.services
         #region Ctor/Dtor
 
         private readonly client.Agent agent;
-        private readonly Models.Model model;
+        private Models.Model model;
 
         private readonly config.Ipsc _cfgIpsc;
 
@@ -125,6 +127,7 @@ namespace ipsc6.agent.services
 
             agent.OnGroupReceived += Agent_OnGroupReceived;
             agent.OnSignedGroupsChanged += Agent_OnSignedGroupsChanged;
+            agent.OnAllGroupListChanged += Agent_OnAllGroupListChanged;
 
             agent.OnSipRegistrarListReceived += Agent_OnSipRegistrarListReceived;
             agent.OnSipRegisterStateChanged += Agent_OnSipRegisterStateChanged;
@@ -141,6 +144,7 @@ namespace ipsc6.agent.services
 
             ReloadCtiServers();
         }
+
         #endregion
 
         #region status
@@ -192,6 +196,12 @@ namespace ipsc6.agent.services
             await agent.StartUpAsync(serverList, workerNum, password);
         }
 
+        public async Task LogOut()
+        {
+            await agent.ShutDownAsync();
+            model = new();
+        }
+
         public IReadOnlyList<string> GetWorkerNum()
         {
             return new List<string> { model.WorkerNum, model.DisplayName };
@@ -205,6 +215,11 @@ namespace ipsc6.agent.services
         public async Task SetBusy(client.WorkType workType = client.WorkType.PauseBusy)
         {
             await agent.SetBusyAsync(workType);
+        }
+
+        public client.AgentRunningState GetAgentRunningState()
+        {
+            return agent.RunningState;
         }
 
         public async Task SetIdle()
@@ -337,6 +352,22 @@ namespace ipsc6.agent.services
         public IReadOnlyCollection<Models.Group> GetGroups()
         {
             return GetModel().Groups;
+        }
+
+        private void Agent_OnAllGroupListChanged(object sender, EventArgs e)
+        {
+            lock (model)
+            {
+                model.AllGroups = (
+                    from x in agent.AllGroups
+                    select new Models.Group { Id = x.Id, Name = x.Name }
+                ).ToList();
+            }
+        }
+
+        public IReadOnlyCollection<Models.Group> GetAllGroups()
+        {
+            return GetModel().AllGroups;
         }
 
         #endregion

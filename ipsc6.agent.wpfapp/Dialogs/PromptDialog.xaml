@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ipsc6.agent.wpfapp.Dialogs"
         mc:Ignorable="d"
-        Height="150" Width="300" WindowStyle="ToolWindow" ResizeMode="NoResize"
+        Height="150" Width="300"
+        WindowStyle="ToolWindow" ResizeMode="NoResize" Topmost="True"
         Title="{Binding [Title], Mode=OneWay, FallbackValue='Prompt'}"
         FocusManager.FocusedElement="{Binding ElementName=txtInput}"
         >

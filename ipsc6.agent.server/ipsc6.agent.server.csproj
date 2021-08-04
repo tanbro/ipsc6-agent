@@ -8,6 +8,10 @@
 
     <!-- NuGet Package References -->
     <ItemGroup>
+        <PackageReference Include="GitVersion.MsBuild" Version="5.6.11">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.VisualStudio.Threading" Version="16.10.56" />
         <PackageReference Include="EmbedIO" Version="3.4.3" />
         <PackageReference Include="StreamJsonRpc" Version="2.8.21" />

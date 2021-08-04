@@ -37,7 +37,7 @@
                                              x:Name="textBoxIpscServerAddress"
                                              Text="{Binding Content}" />
                                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                        <Button Height="32" Width="32" FontSize="24"
+                                        <Button Height="32" Width="32" FontSize="24" ToolTip="删除"
                                                 Command="{Binding ElementName=configWindow, Path=DataContext.DelIpscServerCommand}"
                                                 CommandParameter="{Binding Path=.}">
                                             <iconPacks:MaterialDesign Height="24" Width="24" Kind="Delete" />
@@ -48,7 +48,8 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                     <StackPanel Orientation="Vertical">
-                        <Button Command="{Binding ElementName=configWindow, Path=DataContext.NewIpscServerCommand}">
+                        <Button Command="{Binding ElementName=configWindow, Path=DataContext.NewIpscServerCommand}"
+                                Style="{StaticResource MyTinyButton}" Width="Auto" Margin="16 2 16 2" ToolTip="新建一条 CTI 服务器地址数据">
                             <iconPacks:MaterialDesign Kind="Add" />
                         </Button>
                     </StackPanel>
@@ -57,9 +58,24 @@
             </GroupBox>
 
             <Frame Grid.Row="1"/>
-            <StackPanel Grid.Row="1">
-                <Button Command="{Binding SaveCommand}">保存</Button>
-            </StackPanel>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="2" Style="{StaticResource MySamllButton}"
+                        Margin="4" Width="Auto" Height="Auto" IsDefault="True"
+                        Command="{Binding SaveCommand}">
+                    <AccessText>确定(_O)</AccessText>
+                </Button>
+                <Button Grid.Column="3" Style="{StaticResource MySamllButton}"
+                        Margin="4" Width="Auto" Height="Auto" IsCancel="True"
+                        Click="Cancel_Button_Click">
+                    <AccessText>取消(_C)</AccessText>
+                </Button>
+            </Grid>
 
         </Grid>
     </ScrollViewer>
