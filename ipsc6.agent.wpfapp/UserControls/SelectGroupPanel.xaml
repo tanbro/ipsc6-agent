@@ -10,12 +10,14 @@
              d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              x:Name="SelectGroupPanelUserControl"
              d:DesignHeight="240" d:DesignWidth="320"
-             FontSize="16" Background="{StaticResource MyBackgroud}"
+             FontSize="16"
              >
+             <!--Background="{StaticResource MyBackgroud}"-->
 
     <Grid>
 
         <ListBox Grid.Row="0" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 BorderThickness="0" Background="Transparent"
                  ItemsSource="{Binding Path=AllGroups, Mode=OneWay}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -28,6 +30,7 @@
                                    Margin="4" HorizontalAlignment="Left"
                                    Text="{Binding Path=Name, Mode=OneWay}"/>
                         <Button Grid.Column="1" Style="{StaticResource MyCommonButton}" Margin="4" HorizontalAlignment="Right"
+                                Height="Auto" Width="Auto"
                                 Command="{Binding ElementName=SelectGroupPanelUserControl, Path=DataContext.SelectGroupOkCommand}"
                                 CommandParameter="{Binding Id}">
                             选择

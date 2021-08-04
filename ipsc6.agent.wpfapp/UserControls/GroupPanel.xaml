@@ -43,24 +43,26 @@
                     <Popup x:Name="SkillPopup" StaysOpen="False"
                                IsOpen="{Binding IsGroupPopupOpened}">
                         <ContentControl>
-                            <ListBox ItemsSource="{Binding Groups, Mode=OneWay}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Background="{StaticResource MyBackgroud}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="48"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <ToggleButton Grid.Column="0" Margin="2"
+                            <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">
+                                <ListBox ItemsSource="{Binding Groups, Mode=OneWay}" BorderThickness="0" Background="Transparent" Margin="2">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Background="{StaticResource MyBackgroud}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="48"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <ToggleButton Grid.Column="0" Margin="2"
                                                           Style="{StaticResource MyToggleButton}"
                                                           IsChecked="{Binding IsSigned, Mode=OneWay}"
                                                           Command="{Binding ElementName=GroupPanelUserControl, Path=DataContext.SignGroupCommand}"
                                                           CommandParameter="{Binding Id}"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding Name, Mode=OneWay}" Margin="2"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
+                                                <TextBlock Grid.Column="1" Text="{Binding Name, Mode=OneWay}" Margin="2"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Border>
                         </ContentControl>
                     </Popup>
                 </StackPanel>

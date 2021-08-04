@@ -33,25 +33,26 @@
         <Border Grid.Row="1"
                 CornerRadius="0 0 5 5" BorderThickness="1 0 1 1" BorderBrush="{StaticResource MyBorderBrush}"
                 Background="{StaticResource MyBackgroud}">
-            <Button Style="{StaticResource ScoreButtonStyle}"
-                    Command="{Binding QueuePopupCommand}">
+            <Button Style="{StaticResource ScoreButtonStyle}" Command="{Binding QueuePopupCommand}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
                                Text="{Binding QueueInfos, Mode=OneWay, Converter={StaticResource QueueListToTitleConverter}}"/>
                     <Popup x:Name="QueuePopup" StaysOpen="False" IsOpen="{Binding IsQueuePopupOpened}">
                         <ContentControl>
-                            <ListBox ItemsSource="{Binding QueueInfos, Mode=OneWay}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource QueueToStringConverter}}"/>
-                                            <Button Content="拦截"
+                            <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">
+                                <ListBox ItemsSource="{Binding QueueInfos, Mode=OneWay}" BorderThickness="0" Background="Transparent" Margin="2">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource QueueToStringConverter}}" Margin="0 0 2 0"/>
+                                                <Button Content="拦截" Style="{StaticResource MyTinyButton}" Height="Auto" Width="Auto" Margin="2 0 0 0"
                                                     Command="{Binding ElementName=QueuePanelUserControl, Path=DataContext.DequeueCommand}"
                                                     CommandParameter="{Binding}"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Border>
                         </ContentControl>
                     </Popup>
                 </StackPanel>
