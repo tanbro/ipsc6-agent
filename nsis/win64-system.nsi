@@ -6,8 +6,16 @@
 ;--------------------------------
 ;General
 Unicode True
-Name "IPSC6 座席工具条 (x64 System)"
-OutFile "out\ipsc6_agent_wpfapp-win64-system.exe"
+
+!define PUBLISHER "广州市和声信息技术有限公司"
+!define PRODUCT_NAME "IPSC6 座席工具条 (x64 System)"
+
+Name "${PRODUCT_NAME}"
+!ifdef VERSION
+  OutFile "out\ipsc6_agent_wpfapp-win64-system.${VERSION}.exe"
+!else
+  OutFile "out\ipsc6_agent_wpfapp-win64-system.exe"
+!endif
 
 ;Default installation folder
 InstallDir "$PROGRAMFILES64\ipsc6-agent-wpfapp"
@@ -76,6 +84,12 @@ Section "!座席工具条" SEC_0
   ; Add/Remove list
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win64" \
                   "DisplayName" "$DisplayName"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win64" \
+                  "Publisher" "${PUBLISHER}"
+  !ifdef VERSION
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win64" \
+                  "DisplayVersion" "${VERSION}"
+  !endif
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-win64" \
                   "UninstallString" "$\"$INSTDIR\Uninstall.exe$\" /S"
 SectionEnd
