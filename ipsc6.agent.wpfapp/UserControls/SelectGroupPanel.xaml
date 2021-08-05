@@ -7,6 +7,7 @@
              mc:Ignorable="d"
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
+             xmlns:iconpacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              x:Name="SelectGroupPanelUserControl">
     <Grid>
@@ -26,8 +27,12 @@
                         <Button Grid.Column="1" Style="{StaticResource MyTinyButton}" Margin="4"
                                 Height="Auto" Width="Auto" HorizontalAlignment="Right"
                                 Command="{Binding ElementName=SelectGroupPanelUserControl, Path=DataContext.SelectGroupOkCommand}"
-                                CommandParameter="{Binding Id}"
-                                Content="选择"/>
+                                CommandParameter="{Binding Id}">
+                            <StackPanel Orientation="Horizontal">
+                                <iconpacks:PackIconMaterialDesign HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2" Kind="Check" Height="24" Width="24"/>
+                                <TextBlock>选择</TextBlock>
+                            </StackPanel>
+                        </Button>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>

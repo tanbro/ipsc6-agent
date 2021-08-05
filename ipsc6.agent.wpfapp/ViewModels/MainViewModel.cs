@@ -204,7 +204,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             holdPopupCommand, holdCommand, unHoldCommand,
             xferPopupCommand, xferConsultPopupCommand,
             dialCommand, xferExtCommand, xferExtConsultCommand,
-            callIvrCommand, advCommand
+            callIvrCommand, advCommand, selectGroupOkCommand
         };
 
         private static void NotifyStateRelativeCommandsExecutable()
@@ -1238,7 +1238,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             return true;
         }
 
-        private static readonly IRelayCommand selectGroupOkCommand = new RelayCommand<object>(DoSelectGroupOk);
+        private static readonly IRelayCommand selectGroupOkCommand = new RelayCommand<object>(DoSelectGroupOk, CanSelectGroupOk);
         public IRelayCommand SelectGroupOkCommand => selectGroupOkCommand;
 
         private static async void DoSelectGroupOk(object data)
@@ -1262,6 +1262,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 }
             }
         }
+
+        private static bool CanSelectGroupOk(object data)
+        {
+            if (!IsMainConnectionOk) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if (status.Item1 != client.AgentState.Work) return false;
+            if (currentCallInfo == null) return false;
+            if (heldCalls.Count > 0) return false;
+            return true;
+        }
+
         #endregion
 
         #region 外呼, 外转, 外咨
@@ -1637,6 +1648,27 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (svc == null) return false;
             if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped) return false;
             return true;
+        }
+
+        private static readonly IRelayCommand forceExitCommand = new RelayCommand(DoForceExit);
+        public IRelayCommand ForceExitCommand => forceExitCommand;
+
+        private static void DoForceExit()
+        {
+
+            var r = MessageBox.Show(
+                Application.Current.MainWindow,
+                "是否确定要强行强行退出？",
+                Application.Current.MainWindow.Title,
+                MessageBoxButton.YesNo, MessageBoxImage.Question
+            );
+            if (r != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            logger.Warn("强行退出");
+            Application.Current.Shutdown();
         }
         #endregion
     }

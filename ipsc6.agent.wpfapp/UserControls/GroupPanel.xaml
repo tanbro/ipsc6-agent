@@ -6,7 +6,6 @@
              xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              xmlns:conv="clr-namespace:ipsc6.agent.wpfapp.Converters"
-             xmlns:iconpacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance vm:MainViewModel}"
              x:Name="GroupPanelUserControl"
@@ -40,9 +39,8 @@
                         Command="{Binding GroupPopupCommand}">
                 <StackPanel>
                     <TextBlock Text="{Binding Groups, Mode=OneWay, Converter={StaticResource AgentGroupsToNumberTitleConverter}}"/>
-                    <Popup x:Name="SkillPopup" StaysOpen="False"
-                               IsOpen="{Binding IsGroupPopupOpened}">
-                        <ContentControl Background="Transparent">
+                    <Popup x:Name="SkillPopup" IsOpen="{Binding IsGroupPopupOpened}" StaysOpen="False" AllowsTransparency="True">
+                        <ContentControl>
                             <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">
                                 <ListBox ItemsSource="{Binding Groups, Mode=OneWay}" BorderThickness="0" Background="Transparent" Margin="2">
                                     <ListBox.ItemTemplate>

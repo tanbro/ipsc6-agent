@@ -44,7 +44,7 @@
                 <StackPanel>
                     <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
                                    Text="{Binding HeldCalls.Count, Mode=OneWay}"/>
-                    <Popup StaysOpen="False" IsOpen="{Binding IsHoldPopupOpened}">
+                    <Popup IsOpen="{Binding IsHoldPopupOpened}" StaysOpen="False" AllowsTransparency="True">
                         <ContentControl>
                             <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">
                                 <ListBox ItemsSource="{Binding HeldCalls, Mode=OneWay}" BorderThickness="0" Background="Transparent" Margin="2">
@@ -62,20 +62,20 @@
                                                     </Grid.ColumnDefinitions>
                                                     <ContentControl Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                         <iconPacks:PackIconMaterial
-                                                            Foreground="DarkBlue"
+                                                            Foreground="DeepSkyBlue"
                                                             ToolTip="{Binding Direction, Mode=OneWay, Converter={StaticResource AgentCallDirectionToStringConverter}}"
                                                             Kind="{Binding Direction, Mode=OneWay, Converter={StaticResource AgentCallDirectionToMaterialIconConverter}}"/>
                                                     </ContentControl>
                                                     <TextBlock Grid.Column="1" VerticalAlignment="Center"
-                                                               Foreground="DarkBlue"
+                                                               Style="{StaticResource MyHeadText}"
                                                                Text="{Binding RemoteTelNum}"/>
                                                 </Grid>
-                                                <Button Grid.Column="1" Style="{StaticResource MyCommonButton}"
-                                                        Margin="4" Height="48" Width="48"
+                                                <Button Grid.Column="1" Style="{StaticResource MyTinyButton}"
+                                                        Height="Auto" Width="Auto"
                                                         ToolTip="取消该通话的保持状态(恢复通话)"
                                                         Command="{Binding ElementName=HoldPanelUserControl, Path=DataContext.UnHoldCommand}"
                                                         CommandParameter="{Binding Id}">
-                                                    <iconPacks:PackIconMaterial Kind="PhoneReturn" Height="36" Width="36"/>
+                                                    <iconPacks:PackIconMaterial Kind="PhoneReturn" Height="24" Width="24" VerticalAlignment="Center" Margin="2"/>
                                                 </Button>
                                             </Grid>
                                         </DataTemplate>

@@ -42,6 +42,14 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="MenuButtonStyle" TargetType="Button"  BasedOn="{StaticResource MyTinyButton}">
+            <Setter Property="Height" Value="Auto"/>
+            <Setter Property="Width" Value="Auto"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="2"/>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -58,21 +66,25 @@
                 <Popup x:Name="Preference_Popup" StaysOpen="False" AllowsTransparency="True">
                     <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">
                         <StackPanel Orientation="Vertical">
-                            <Button Style="{StaticResource MyTinyButton}" Margin="2" Width="128" Height="Auto"
+                            <Button Style="{StaticResource MenuButtonStyle}"
                                     Command="{Binding LoginCommand}">
                                 <AccessText>登录(_I)...</AccessText>
                             </Button>
-                            <Button Style="{StaticResource MyTinyButton}" Margin="2" Width="128" Height="Auto"
+                            <Button Style="{StaticResource MenuButtonStyle}"
                                     Command="{Binding LogoutCommand}">
                                 <AccessText>注销(_O)...</AccessText>
                             </Button>
-                            <Button Style="{StaticResource MyTinyButton}" Margin="2" Width="128" Height="Auto"
+                            <Button Style="{StaticResource MenuButtonStyle}"
                                     Command="{Binding ShowConfigWindowCmmand}">
                                 <AccessText>设置(_P)...</AccessText>
                             </Button>
-                            <Button Style="{StaticResource MyTinyButton}" Margin="2" Width="128" Height="Auto"
+                            <Button Style="{StaticResource MenuButtonStyle}"
                                     Command="{Binding ExitCommand}">
                                 <AccessText>退出(_E)...</AccessText>
+                            </Button>
+                            <Button Style="{StaticResource MenuButtonStyle}" Background="SlateGray"
+                                    Command="{Binding ForceExitCommand}">
+                                <AccessText>强行退出(_F)...</AccessText>
                             </Button>
                         </StackPanel>
                     </Border>
