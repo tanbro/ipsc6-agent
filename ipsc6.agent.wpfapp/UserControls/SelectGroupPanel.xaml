@@ -8,12 +8,8 @@
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
              d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
-             x:Name="SelectGroupPanelUserControl"
-             d:DesignHeight="240" d:DesignWidth="320">
-
-
+             x:Name="SelectGroupPanelUserControl">
     <Grid>
-
         <ListBox Grid.Row="0" ScrollViewer.VerticalScrollBarVisibility="Auto"
                  BorderThickness="0" Background="Transparent"
                  ItemsSource="{Binding Path=AllGroups, Mode=OneWay}">

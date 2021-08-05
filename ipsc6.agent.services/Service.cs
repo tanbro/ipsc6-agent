@@ -193,7 +193,21 @@ namespace ipsc6.agent.services
 
         internal async Task LogInAsync(string workerNum, string password, IEnumerable<string> serverList)
         {
-            await agent.StartUpAsync(serverList, workerNum, password);
+            logger.Debug("LogInAsync - >>>");
+            try
+            {
+                await agent.StartUpAsync(serverList, workerNum, password);
+            }
+            catch (Exception exception)
+            {
+                logger.DebugFormat("LogInAsync {0}", exception.GetType());
+                throw;
+            }
+            finally
+            {
+                logger.Debug("LogInAsync - <<<");
+            }
+
         }
 
         public async Task LogOut()
@@ -660,7 +674,6 @@ namespace ipsc6.agent.services
         #endregion
 
         #region Stats - 通话统计信息
-
         private void Agent_OnStatsChanged(object sender, EventArgs e)
         {
             var agent = sender as client.Agent;
