@@ -90,6 +90,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (cfgIpsc.ServerList.Count == 0)
             {
                 MessageBox.Show(
+                    Application.Current.MainWindow,
                     @"未设置 CTI 服务器地址",
                     Application.Current.MainWindow.Title,
                     MessageBoxButton.OK, MessageBoxImage.Error
@@ -101,6 +102,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 if (cfgIpsc.ServerList.Count(s1 => s0 == s1) > 1)
                 {
                     MessageBox.Show(
+                        Application.Current.MainWindow,
                         @"设置了重复的 CTI 服务器地址",
                         Application.Current.MainWindow.Title,
                         MessageBoxButton.OK, MessageBoxImage.Error

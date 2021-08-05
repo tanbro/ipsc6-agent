@@ -42,7 +42,7 @@
                     <TextBlock Text="{Binding Groups, Mode=OneWay, Converter={StaticResource AgentGroupsToNumberTitleConverter}}"/>
                     <Popup x:Name="SkillPopup" StaysOpen="False"
                                IsOpen="{Binding IsGroupPopupOpened}">
-                        <ContentControl>
+                        <ContentControl Background="Transparent">
                             <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">
                                 <ListBox ItemsSource="{Binding Groups, Mode=OneWay}" BorderThickness="0" Background="Transparent" Margin="2">
                                     <ListBox.ItemTemplate>

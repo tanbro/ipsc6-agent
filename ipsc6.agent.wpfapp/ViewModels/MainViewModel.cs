@@ -58,6 +58,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 while (cfgIpsc.ServerList.Count < 1)
                 {
                     var r = MessageBox.Show(
+                        Application.Current.MainWindow,
                         "由于没有设置 CTI 服务器地址，该程序无法工作。\r\n是否要进行设置？\r\n\r\n按“是”打开设置窗口，按“否”退出程序。",
                         mainWindow.Title,
                         MessageBoxButton.YesNo, MessageBoxImage.Question
@@ -141,6 +142,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (iniErr != null)
             {
                 MessageBox.Show(
+                    Application.Current.MainWindow,
                     $"主窗口视图模型初始化过程中出现了无法处理的异常，程序即将退出。\r\n\r\n{iniErr}",
                     mainWindow.Title,
                     MessageBoxButton.OK, MessageBoxImage.Error
@@ -245,6 +247,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped)
             {
                 MessageBox.Show(
+                    Application.Current.MainWindow,
                     "座席尚未注销，不允许退出。\r\n\r\n请在注销后再退出程序。",
                     Application.Current.MainWindow.Title,
                     MessageBoxButton.OK, MessageBoxImage.Information
@@ -530,10 +533,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private void StopTimer()
         {
-
+            bool isToDispose = false;
             try
             {
                 timerCanceller?.Cancel();
+                isToDispose = true;
+            }
+            catch (ObjectDisposedException) { }
+            if (isToDispose)
+            {
                 try
                 {
 #pragma warning disable VSTHRD002
@@ -541,10 +549,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
 #pragma warning restore VSTHRD002
                 }
                 catch (TaskCanceledException) { }
-            }
-            finally
-            {
-                timerCanceller?.Dispose();
+                finally
+                {
+                    timerCanceller?.Dispose();
+                }
             }
         }
 
@@ -1526,7 +1534,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     await svc.KickOut(s);
                     break;
                 default:
-                    MessageBox.Show($"还没有实现 {msgTyp}");
+                    MessageBox.Show(Application.Current.MainWindow, $"还没有实现 {msgTyp}");
                     break;
             }
         }
@@ -1567,6 +1575,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async void DoLogout()
         {
             var r = MessageBox.Show(
+                Application.Current.MainWindow,
                 "是否确定要注销？",
                 Application.Current.MainWindow.Title,
                 MessageBoxButton.YesNo, MessageBoxImage.Question

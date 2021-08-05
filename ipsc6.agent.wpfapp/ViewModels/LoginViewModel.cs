@@ -112,6 +112,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         _ => err.ToString(),
                     };
                     MessageBox.Show(
+                        Application.Current.MainWindow,
                         $"CTI 服务器连接失败\r\n\r\n{errMsg}",
                         $"{Application.Current.MainWindow.Title} - {window.Title}",
                         MessageBoxButton.OK, MessageBoxImage.Warning
@@ -131,6 +132,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                         _ => err.ToString(),
                     };
                     MessageBox.Show(
+                        Application.Current.MainWindow,
                         $"登录失败\r\n\r\n{errMsg}",
                         $"{Application.Current.MainWindow.Title} - {window.Title}",
                         MessageBoxButton.OK, MessageBoxImage.Warning
