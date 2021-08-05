@@ -1511,12 +1511,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     await svc.UnMonitor(connIndex, s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCEIDLE:
-                    await svc.SetIdle(s);
+                    await svc.SetIdleByWorkerNum(s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCEPAUSE:
                     {
                         var parts = s.Split(new char[] { '|' });
-                        await svc.SetBusy(
+                        await svc.SetBusyByWorkerNum(
                             parts[0],
                             (client.WorkType)Enum.Parse(typeof(client.WorkType), parts[1])
                         );
@@ -1529,16 +1529,16 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     await svc.Interrupt(connIndex, s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCEHANGUP:
-                    await svc.Hangup(connIndex, s);
+                    await svc.HangupByWorkerNum(connIndex, s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCESIGNOFF:
                     {
                         var parts = s.Split(new char[] { '|' });
-                        await svc.SetBusy(
+                        await svc.SetBusyByWorkerNum(
                             parts[0],
                             (client.WorkType)Enum.Parse(typeof(client.WorkType), parts[1])
                         );
-                        await svc.SignOut(parts[0], parts[1]);
+                        await svc.SignOutByWorkerNum(parts[0], parts[1]);
                     }
                     break;
                 case client.MessageType.REMOTE_MSG_KICKOUT:

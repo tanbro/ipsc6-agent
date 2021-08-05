@@ -198,6 +198,7 @@ namespace ipsc6.agent.services
 
         public async Task LogOut()
         {
+            logger.Debug("LogOut");
             await agent.ShutDownAsync();
             model = new();
         }
@@ -214,6 +215,7 @@ namespace ipsc6.agent.services
 
         public async Task SetBusy(client.WorkType workType = client.WorkType.PauseBusy)
         {
+            logger.DebugFormat("SetBusy {0}", workType);
             await agent.SetBusyAsync(workType);
         }
 
@@ -224,6 +226,7 @@ namespace ipsc6.agent.services
 
         public async Task SetIdle()
         {
+            logger.Debug("SetIdle");
             await agent.SetIdleAsync();
         }
 
@@ -433,11 +436,13 @@ namespace ipsc6.agent.services
 
         public async Task Answer()
         {
+            logger.Debug("Answer");
             await agent.AnswerAsync();
         }
 
         public async Task Hangup()
         {
+            logger.Debug("Hangup");
             await agent.HangupAsync();
         }
 
@@ -575,86 +580,103 @@ namespace ipsc6.agent.services
         #region 拨号、转接、咨询
         public async Task Dial(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
+            logger.DebugFormat("Dial: {0}, {1}, {2}, {3}", calledTelNum, callingTelNum, channelGroup, option);
             await agent.DialAsync(calledTelNum, callingTelNum, channelGroup, option);
         }
 
         public async Task Xfer(int ctiIndex, int channel, string groupId, string workerNum = "", string customString = "")
         {
+            logger.DebugFormat("Xfer: {0}, {1}, {2}, {3}, {4}", ctiIndex, channel, groupId, workerNum, customString);
             await agent.XferAsync(ctiIndex, channel, groupId, workerNum, customString);
         }
 
         public async Task Xfer(string groupId, string workerNum = "", string customString = "")
         {
+            logger.DebugFormat("Xfer: {0}, {1}, {2}", groupId, workerNum, customString);
             await agent.XferAsync(groupId, workerNum, customString);
         }
 
         public async Task XferConsult(string groupId, string workerNum = "", string customString = "")
         {
+            logger.DebugFormat("XferConsult: {0}, {1}, {2}", groupId, workerNum, customString);
             await agent.XferConsultAsync(groupId, workerNum, customString);
         }
 
         public async Task XferExt(int ctiIndex, int channel, string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
+            logger.DebugFormat("XferExt: {0}, {1}, {2}, {3}, {4}, {5}", ctiIndex, channel, calledTelNum, callingTelNum, channelGroup, option);
             await agent.XferExtAsync(ctiIndex, channel, calledTelNum, callingTelNum, channelGroup, option);
         }
 
         public async Task XferExt(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
+            logger.DebugFormat("XferExt: {0}, {1}, {2}, {3}", calledTelNum, callingTelNum, channelGroup, option);
             await agent.XferExtAsync(calledTelNum, callingTelNum, channelGroup, option);
         }
 
         public async Task XferExtConsult(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
+            logger.DebugFormat("XferExt: {0}, {1}, {2}, {3}", calledTelNum, callingTelNum, channelGroup, option);
             await agent.XferExtConsultAsync(calledTelNum, callingTelNum, channelGroup, option);
         }
 
         public async Task CallIvr(string ivrId, client.IvrInvokeType invokeType = client.IvrInvokeType.Keep, string customString = "")
         {
+            logger.DebugFormat("CallIvr: {0}, {1}, {2}", ivrId, invokeType, customString);
             await agent.CallIvrAsync(ivrId, invokeType, customString);
         }
 
         public async Task Monitor(int ctiIndex, string workerNum)
         {
+            logger.DebugFormat("Monitor: {0}, {1}", ctiIndex, workerNum);
             await agent.MonitorAsync(ctiIndex, workerNum);
         }
 
         public async Task UnMonitor(int ctiIndex, string workerNum)
         {
+            logger.DebugFormat("UnMonitor: {0}, {1}", ctiIndex, workerNum);
             await agent.UnMonitorAsync(ctiIndex, workerNum);
         }
 
         public async Task Intercept(int ctiIndex, string workerNum)
         {
+            logger.DebugFormat("Intercept: {0}, {1}", ctiIndex, workerNum);
             await agent.InterceptAsync(ctiIndex, workerNum);
         }
 
         public async Task Interrupt(int ctiIndex, string workerNum)
         {
+            logger.DebugFormat("Interrupt: {0}, {1}", ctiIndex, workerNum);
             await agent.InterruptAsync(ctiIndex, workerNum);
         }
 
-        public async Task Hangup(int ctiIndex, string workerNum)
+        public async Task HangupByWorkerNum(int ctiIndex, string workerNum)
         {
+            logger.DebugFormat("HangupByWorkerNum: {0}, {1}", ctiIndex, workerNum);
             await agent.HangupAsync(ctiIndex, workerNum);
         }
 
-        public async Task SetBusy(string workerNum, client.WorkType workType = client.WorkType.PauseBusy)
+        public async Task SetBusyByWorkerNum(string workerNum, client.WorkType workType = client.WorkType.PauseBusy)
         {
+            logger.DebugFormat("SetBusyByWorkerNum: {0}, {1}", workerNum, workType);
             await agent.SetBusyAsync(workerNum, workType);
         }
 
-        public async Task SetIdle(string workerNum)
+        public async Task SetIdleByWorkerNum(string workerNum)
         {
+            logger.DebugFormat("SetIdleByWorkerNum: {0}", workerNum);
             await agent.SetIdleAsync(workerNum);
         }
 
-        public async Task SignOut(string workerNum, string groupId)
+        public async Task SignOutByWorkerNum(string workerNum, string groupId)
         {
+            logger.DebugFormat("SignOutByWorkerNum: {0}, {1}", workerNum, groupId);
             await agent.SignOutAsync(workerNum, groupId);
         }
 
         public async Task KickOut(string workerNum)
         {
+            logger.DebugFormat("KickOut {0}", workerNum);
             await agent.KickOutAsync(workerNum);
         }
         #endregion
