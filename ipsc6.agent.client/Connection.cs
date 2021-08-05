@@ -276,7 +276,7 @@ namespace ipsc6.agent.client
                                     if (msg_.N1 < 1)
                                     {
                                         ErrorResponse err = new(msg_);
-                                        logger.ErrorFormat("{0}", err);
+                                        logger.ErrorFormat("ErrorResponse: [{0}]({1})", err.Code, err.Message);
                                         reqTcs.SetException(new ErrorResponse(msg_));
                                     }
                                     else

@@ -1660,7 +1660,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 Application.Current.MainWindow,
                 "是否确定要强行强行退出？",
                 Application.Current.MainWindow.Title,
-                MessageBoxButton.YesNo, MessageBoxImage.Question
+                MessageBoxButton.YesNo, MessageBoxImage.Question,
+                MessageBoxResult.No
             );
             if (r != MessageBoxResult.Yes)
             {
