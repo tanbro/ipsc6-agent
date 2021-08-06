@@ -27,26 +27,22 @@
                 </Grid.ColumnDefinitions>
 
                 <Button Grid.Column="0"
-                        ToolTip="拨号"
+                        ToolTip="外呼拨号"
                         Style="{StaticResource MyTinyButton}"
-                        Command="{Binding DialCommand}"
-                    >
-                    <!--<iconPacks:BootstrapIcons Kind="TelephoneFill"/>-->
-                    <Image Source="pack://application:,,,/Icons/24/telehpone-outgoing-star.png"/>
+                        Command="{Binding DialCommand}">
+                    <Image Source="pack://application:,,,/Icons/24/telephone-star.png"/>
                 </Button>
                 <Button Grid.Column="1"
-                        ToolTip="转移到外线"
+                        ToolTip="外呼转移"
                         Style="{StaticResource MyTinyButton}"
-                        Command="{Binding XferExtCommand}"
-                    >
+                        Command="{Binding XferExtCommand}">
                     <Image Source="pack://application:,,,/Icons/24/telehpone-outgoing-star.png"/>
                 </Button>
 
                 <Button Grid.Column="2"
-                        ToolTip="咨询到外线"
+                        ToolTip="外呼咨询"
                         Style="{StaticResource MyTinyButton}"
-                        Command="{Binding XferExtConsultCommand}"
-                    >
+                        Command="{Binding XferExtConsultCommand}">
                     <Image Source="pack://application:,,,/Icons/24/people-plus-star.png"/>
                 </Button>
             </Grid>
@@ -59,6 +55,9 @@
                      TextAlignment="Right"
                      InputScope="TelephoneNumber" InputMethod.IsInputMethodEnabled="False"
                      Text="{Binding InputTelNum, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.InputBindings>
+                    <KeyBinding Key="Return" Command="{Binding DialCommand}"/>
+                </TextBox.InputBindings>
             </TextBox>
 
         </Grid>

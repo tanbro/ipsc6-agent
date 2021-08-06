@@ -1370,10 +1370,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             if (!IsMainConnectionOk) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
-            if (!(new client.AgentState[]
-            {
-                client.AgentState.Idle, client.AgentState.Work
-            }).Contains(status.Item1)) return false;
+            if (currentCallInfo == null) return false;
             return true;
         }
 

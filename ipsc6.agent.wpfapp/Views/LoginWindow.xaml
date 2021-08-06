@@ -10,7 +10,7 @@
         Title="登录"
         Height="325" Width="350"
         Background="Transparent" AllowsTransparency="True"
-        ResizeMode="NoResize" WindowStyle="None" WindowStartupLocation="CenterScreen"        
+        ResizeMode="NoResize" WindowStyle="None" WindowStartupLocation="CenterScreen"
         d:DataContext="{d:DesignData Type=vm:LoginViewModel}"
         MouseDown="Window_MouseDown"
     >
@@ -91,11 +91,12 @@
                             登录工号(_N)
                         </Label>
 
-                        <TextBox x:Name="textboxName" Grid.Column="1" Margin="16 8 16 8" FontSize="14"
+                        <TextBox x:Name="textboxName" Grid.Column="1" Margin="16 8 16 8" FontSize="24"
                                  InputScope="LogOnName" InputMethod.IsInputMethodEnabled="False"
                                  Text="{Binding WorkerNum}">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
                                     <Style.Resources>
                                         <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
                                             <VisualBrush.Visual>
@@ -131,9 +132,10 @@
                         </Label>
 
                         <PasswordBox  x:Name="textboxPassword"
-                                  Grid.Column="1" Margin="16 8 16 8" FontSize="14" PasswordChanged="PasswordChanged">
+                                  Grid.Column="1" Margin="16 8 16 8" FontSize="24" PasswordChanged="PasswordChanged">
                             <PasswordBox.Style>
                                 <Style xmlns:sys="clr-namespace:System;assembly=mscorlib" TargetType="{x:Type PasswordBox}">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
                                     <Style.Resources>
                                         <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
                                             <VisualBrush.Visual>
