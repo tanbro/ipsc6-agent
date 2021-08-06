@@ -260,9 +260,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Resource Include="Fonts\LCD14.otf" />
-    <Resource Include="Fonts\LCD14Condensed.otf" />
-    <Resource Include="Fonts\PathwayGothicOne-Regular.ttf" />
     <None Include="app.manifest" />
     <None Include="Config\log4net.Debug.config" />
     <None Include="Config\log4net.Release.config" />
