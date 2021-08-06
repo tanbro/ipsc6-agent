@@ -10,8 +10,8 @@
 ;--------------------------------
 ;General
 Unicode True
-Name "IPSC6 座席工具条 URI Scheme Handler 启动程序"
-OutFile "out\ipsc6_agent_launch.exe"
+Name "IPSC6 座席话务条 URI Scheme Handler 启动程序"
+OutFile "out\ipsc6-agent-launch.exe"
 
 ;UI miscs
 ShowInstDetails show
@@ -105,5 +105,5 @@ SectionEnd
 
 ;----------------------------------------------------------------
 Function .onInit
-  StrCpy $DisplayName "IPSC6 座席工具条 URI Scheme Handler 启动程序"
+  StrCpy $DisplayName "IPSC6 座席话务条 URI Scheme Handler 启动程序"
 FunctionEnd

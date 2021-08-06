@@ -4,11 +4,11 @@
 
 ;产品名，版本……
 !define PUBLISHER "广州市和声信息技术有限公司"
-!define PRODUCT_NAME "IPSC6 座席话务条 (${PLATFORM} ${USER_TYPE})"
+!define PRODUCT_NAME "IPSC6 座席话务条"
 
-Name "${PRODUCT_NAME}"
-BrandingText "${PUBLISHER} ${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "out\ipsc6-agent\ipsc6-agent-${PLATFORM}-${USER_TYPE}-${PRODUCT_VERSION}.exe"
+Name "${PRODUCT_NAME}(${PLATFORM} ${USER_TYPE})"
+BrandingText "${PUBLISHER} ${PRODUCT_NAME} ${PRODUCT_VERSION}(${PLATFORM} ${USER_TYPE})"
+OutFile "out\ipsc6-agent-installers\ipsc6-agent-${PLATFORM}-${USER_TYPE}-${PRODUCT_VERSION}.exe"
 
 !if ${USER_TYPE} == "system"
     ;Default installation folder
@@ -40,7 +40,78 @@ OutFile "out\ipsc6-agent\ipsc6-agent-${PLATFORM}-${USER_TYPE}-${PRODUCT_VERSION}
 ShowInstDetails show
 ShowUnInstDetails show
 
-Section "!座席工具条" SEC_0
+;VARS
+Var InstalledDisplayName
+Var InstalledVersion
+Var UninstallString
+
+Section "!${PRODUCT_NAME}" SEC_0
+
+;检查之前安装的版本
+DetailPrint "检查之前安装的版本 (${PLATFORM} ${USER_TYPE}) ..."
+!if ${USER_TYPE} == "system"
+  ReadRegStr $InstalledDisplayName \
+             HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
+             "DisplayName"
+  ReadRegStr $InstalledVersion \
+             HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
+             "DisplayVersion"
+  ReadRegStr $UninstallString \
+              HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
+              "UninstallString"
+!else if ${USER_TYPE} == "user"
+  ReadRegStr $InstalledDisplayName \
+             HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
+             "DisplayName"
+  ReadRegStr $InstalledVersion \
+             HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
+             "DisplayVersion"
+  ReadRegStr $UninstallString \
+              HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
+              "UninstallString"
+!else
+    !error "invalide USER_TYPE: ${USER_TYPE}"
+!endif
+
+  ${If} $InstalledVersion != ""
+    DetailPrint "发现已安装的版本: $InstalledDisplayName($InstalledVersion). Uninstall='$UninstallString'"
+
+    ${If} $InstalledVersion S> ${PRODUCT_VERSION}
+      MessageBox MB_OK|MB_ICONINFORMATION \
+          "安装程序检测到 $InstalledDisplayName($InstalledVersion) 已经安装。$\r$\n由于已经安装的版本高于将要安装的版本，此次安装将不会继续！$\r$\n$\r$\n按 “确定” 退出。"
+      Quit
+
+    ${ElseIf} $InstalledVersion S<= ${PRODUCT_VERSION}
+      MessageBox MB_YESNO|MB_ICONQUESTION \
+          "安装程序检测到 $InstalledDisplayName($InstalledVersion) 已经安装。$\r$\n只有在删除之前的版本之后方可继续安装。$\r$\n$\r$\n是否要删除之前的程序？$\r$\n$\r$\n按 “是” 删除，按 “否” 退出。" \
+          IDYES _INSTALLED_UN_TRUE IDNO _INSTALLED_UN_FALSE
+
+      _INSTALLED_UN_TRUE:
+        Push $0
+        ExecWait "$UninstallString" $0
+        BringToFront
+        ${If} $0 != "0"
+          DetailPrint "$InstalledDisplayName($InstalledVersion) 删除失败: $0"
+          MessageBox MB_OK|MB_ICONSTOP "错误:$\r$\n$\r$\n无法删除 $InstalledDisplayName($InstalledVersion) ($0)。"
+          Quit
+        ${Else}
+          DetailPrint "$InstalledDisplayName($InstalledVersion) 删除成功，延时等待操作完成 ..."
+          Sleep 5000
+          ; MessageBox MB_OK|MB_ICONINFORMATION \
+          ;   "$InstalledDisplayName($InstalledVersion) 删除成功！$\r$\n$\r$\n按 “确定” 继续。"
+          Goto _INSTALLED_UN_NEXT
+        ${EndIf}      
+      _INSTALLED_UN_FALSE:
+          Quit
+      _INSTALLED_UN_NEXT:
+      Pop $0
+    ${EndIf}
+
+  ${Else}
+    DetailPrint "未发现已安装的版本"
+  ${EndIf}
+
+  ;设置安装路径
   SetOutPath $INSTDIR
 
   ;Program FILES HERE...
@@ -61,8 +132,8 @@ Section "!座席工具条" SEC_0
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application    
     ;Create shortcuts
     CreateDirectory "$SMPROGRAMS\$DisplayName"
-    CreateShortcut "$SMPROGRAMS\$DisplayName\启动 座席工具条.lnk" "$INSTDIR\ipsc6.agent.wpfapp.exe"  
-    CreateShortcut "$SMPROGRAMS\$DisplayName\卸载 座席工具条.lnk" "$INSTDIR\Uninstall.exe"  
+    CreateShortcut "$SMPROGRAMS\$DisplayName\启动 座席话务条.lnk" "$INSTDIR\ipsc6.agent.wpfapp.exe"  
+    CreateShortcut "$SMPROGRAMS\$DisplayName\卸载 座席话务条.lnk" "$INSTDIR\Uninstall.exe"  
   !insertmacro MUI_STARTMENU_WRITE_END
 
   ; Add/Remove list
@@ -92,7 +163,7 @@ SectionEnd
 
 ;--------------------------------
 ;Uninstaller Section
-Section "!un.座席工具条" UNSEC_0
+Section "!un.座席话务条" UNSEC_0
   Delete "$INSTDIR\Uninstall.exe"
 
   ;Remove whole install dir
@@ -123,11 +194,11 @@ SectionEnd
 Section "URI 启动程序" SEC_LAUNCH
   SetOutPath "$PLUGINSDIR\launch"
   SetCompress off
-  File "out\ipsc6_agent_launch.exe"
+  File "out\ipsc6-agent-launch.exe"
   SetCompress auto
   DetailPrint "安装 URI Scheme Handler 启动程序 ..."
   Push $0
-  ExecWait '"$OUTDIR\ipsc6_agent_launch.exe" /S' $0
+  ExecWait '"$OUTDIR\ipsc6-agent-launch.exe" /S' $0
   BringToFront
   ${If} $0 == "0"
     DetailPrint "URI Scheme Handler 启动程序 安装完毕"
@@ -142,14 +213,14 @@ SectionEnd
 ;--------------------------------------------
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC_0} \
-    "运行座席工具条所必须的文件。"
+    "运行座席话务条所必须的文件。"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC_LAUNCH} \
-    "这是一个系统级的 URI Scheme Handler 启动程序。当访问 ipsc6-agent: 开头的 URL 时，操作系统调用该程序启动座席工具条。"
+    "这是一个系统级的 URI Scheme Handler 启动程序。当访问 ipsc6-agent: 开头的 URL 时，操作系统调用该程序启动座席话务条。"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 !insertmacro MUI_UNFUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${UNSEC_0} \
-    "删除座席工具条。"
+    "删除座席话务条。"
 !insertmacro MUI_UNFUNCTION_DESCRIPTION_END
 
 Function .onInit

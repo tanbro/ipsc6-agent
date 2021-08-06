@@ -130,7 +130,7 @@
                                    Style="{StaticResource MyNumberTextStyle}"
                                    HorizontalAlignment="Right" VerticalAlignment="Center"
                                    Margin="0 0 2 0"
-                                   Text="{Binding Stats.DailyCallCount, Mode=OneWay, FallbackValue='0', StringFormat='{}{0:0,000}'}"/>
+                                   Text="{Binding Stats.DailyCallCount, Mode=OneWay, FallbackValue='0', StringFormat='{}{0:000}'}"/>
                         <!--StringFormat='{}{0:0,0}'-->
                     </Grid>
 
