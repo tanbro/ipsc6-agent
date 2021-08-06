@@ -5,7 +5,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{19C929A9-98FF-4357-B41B-B161441D2E14}</ProjectGuid>
+    <ProjectGuid>{F9270C12-3863-4793-A37A-49CE4FE45011}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>ipsc6.agent.launch</RootNamespace>
     <AssemblyName>ipsc6.agent.launch</AssemblyName>
@@ -52,8 +52,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
-  <!-- NuGet Package References -->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <!-- NuGet -->
   <ItemGroup>
     <PackageReference Include="GitVersion.MsBuild" Version="5.6.11">
       <PrivateAssets>all</PrivateAssets>

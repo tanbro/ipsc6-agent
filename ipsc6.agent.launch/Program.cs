@@ -103,7 +103,7 @@ namespace ipsc6.agent.launch
                     workingDir = Path.GetDirectoryName(assembly.Location);
                     if (!string.IsNullOrWhiteSpace(workingDir))
                     {
-                       Console.WriteLine("\nLookup in {0} ...", workingDir);
+                        Console.WriteLine("\nLookup in {0} ...", workingDir);
                         if (File.Exists(Path.Combine(workingDir, executableFileName)))
                         {
                             Console.WriteLine("Found!");
