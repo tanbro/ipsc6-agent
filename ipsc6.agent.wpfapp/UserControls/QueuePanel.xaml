@@ -7,6 +7,7 @@
              mc:Ignorable="d"
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              Width="60" Height="64"
              d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              x:Name="QueuePanelUserControl">
@@ -33,25 +34,33 @@
         <Border Grid.Row="1"
                 CornerRadius="0 0 5 5" BorderThickness="1 0 1 1" BorderBrush="{StaticResource MyBorderBrush}"
                 Background="{StaticResource MyBackgroud}">
-            <Button Style="{StaticResource ScoreButtonStyle}"
-                    Command="{Binding QueuePopupCommand}">
+            <Button Style="{StaticResource ScoreButtonStyle}" Command="{Binding QueuePopupCommand}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
                                Text="{Binding QueueInfos, Mode=OneWay, Converter={StaticResource QueueListToTitleConverter}}"/>
-                    <Popup x:Name="QueuePopup" StaysOpen="False" IsOpen="{Binding IsQueuePopupOpened}">
+                    <Popup x:Name="QueuePopup" IsOpen="{Binding IsQueuePopupOpened}" StaysOpen="False" AllowsTransparency="True">
                         <ContentControl>
-                            <ListBox ItemsSource="{Binding QueueInfos, Mode=OneWay}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource QueueToStringConverter}}"/>
-                                            <Button Content="拦截"
+                            <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">
+                                <ListBox ItemsSource="{Binding QueueInfos, Mode=OneWay}" BorderThickness="0" Background="Transparent" Margin="2">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource QueueToStringConverter}}"
+                                                           Style="{StaticResource MyHeadText}"
+                                                           VerticalAlignment="Center" Margin="0 0 2 0"/>
+                                                <Button Style="{StaticResource MyTinyButton}" Height="Auto" Width="Auto" Margin="2 0 0 0"
                                                     Command="{Binding ElementName=QueuePanelUserControl, Path=DataContext.DequeueCommand}"
-                                                    CommandParameter="{Binding}"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
+                                                    CommandParameter="{Binding}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <iconPacks:PackIconMaterial Kind="Hand" Height="24" Width="24" Margin="2"/>
+                                                        <TextBlock>拦截</TextBlock>
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Border>
                         </ContentControl>
                     </Popup>
                 </StackPanel>

@@ -58,7 +58,7 @@
 
 ## 强行挂断
 
--   **Method**: `hangup`
+-   **Method**: `hangupByWorkerNum`
 
 -   **Params**:
 
@@ -71,7 +71,7 @@
 
 ## 强行示忙
 
--   **Method**: `setBusy`
+-   **Method**: `setBusyByWorkerNum`
 
 -   **Params**:
 
@@ -84,7 +84,7 @@
 
 ## 强行示闲
 
--   **Method**: `setIdle`
+-   **Method**: `setIdleByWorkerNum`
 
 -   **Params**:
 
@@ -144,7 +144,7 @@
 
 ## 强行签出
 
--   **Method**: `signOut`
+-   **Method**: `signOutByWorkerNum`
 
 -   **Params**:
 

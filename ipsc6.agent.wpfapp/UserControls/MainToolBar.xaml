@@ -117,8 +117,10 @@
                     Command="{Binding XferConsultPopupCommand}">
             <StackPanel>
                 <Image Source="pack://application:,,,/Icons/64/people-plus.png"/>
-                <Popup StaysOpen="False" IsOpen="{Binding IsXferConsultPopuped}">
-                    <local:SelectGroupPanel/>
+                <Popup StaysOpen="False" IsOpen="{Binding IsXferConsultPopuped}" AllowsTransparency="True">
+                    <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">
+                        <local:SelectGroupPanel/>
+                    </Border>
                 </Popup>
             </StackPanel>
         </Button>
@@ -129,8 +131,10 @@
                     Command="{Binding XferPopupCommand}">
             <StackPanel>
                 <Image Source="pack://application:,,,/Icons/64/telehpone-outgoing.png"/>
-                <Popup StaysOpen="False" IsOpen="{Binding IsXferPopuped}">
-                    <local:SelectGroupPanel/>
+                <Popup StaysOpen="False" IsOpen="{Binding IsXferPopuped}" AllowsTransparency="True">
+                    <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">
+                        <local:SelectGroupPanel/>
+                    </Border>
                 </Popup>
             </StackPanel>
         </Button>

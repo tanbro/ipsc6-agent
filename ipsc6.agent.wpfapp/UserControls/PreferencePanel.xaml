@@ -42,6 +42,15 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="MenuButtonStyle" TargetType="Button" BasedOn="{StaticResource MyTinyButton}">
+            <Setter Property="Height" Value="Auto"/>
+            <Setter Property="Width" Value="Auto"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="2"/>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -53,26 +62,30 @@
         <Button Grid.Row="0" Style="{StaticResource PreferenceButtonStyle}" Click="Preference_Button_Click">
             <StackPanel>
                 <ContentControl>
-                    <iconPacks:MaterialDesign Height="30" Width="30" Kind="Settings"/>
+                    <iconPacks:MaterialDesign Height="16" Width="16" Kind="Settings"/>
                 </ContentControl>
                 <Popup x:Name="Preference_Popup" StaysOpen="False" AllowsTransparency="True">
                     <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">
                         <StackPanel Orientation="Vertical">
-                            <Button Style="{StaticResource MyTinyButton}" Margin="2" Width="128" Height="Auto"
+                            <Button Style="{StaticResource MenuButtonStyle}"
                                     Command="{Binding LoginCommand}">
                                 <AccessText>登录(_I)...</AccessText>
                             </Button>
-                            <Button Style="{StaticResource MyTinyButton}" Margin="2" Width="128" Height="Auto"
+                            <Button Style="{StaticResource MenuButtonStyle}"
                                     Command="{Binding LogoutCommand}">
                                 <AccessText>注销(_O)...</AccessText>
                             </Button>
-                            <Button Style="{StaticResource MyTinyButton}" Margin="2" Width="128" Height="Auto"
+                            <Button Style="{StaticResource MenuButtonStyle}"
                                     Command="{Binding ShowConfigWindowCmmand}">
                                 <AccessText>设置(_P)...</AccessText>
                             </Button>
-                            <Button Style="{StaticResource MyTinyButton}" Margin="2" Width="128" Height="Auto"
+                            <Button Style="{StaticResource MenuButtonStyle}"
                                     Command="{Binding ExitCommand}">
                                 <AccessText>退出(_E)...</AccessText>
+                            </Button>
+                            <Button Style="{StaticResource MenuButtonStyle}" Background="SlateGray"
+                                    Command="{Binding ForceExitCommand}">
+                                <AccessText>强行退出(_F)...</AccessText>
                             </Button>
                         </StackPanel>
                     </Border>
@@ -81,7 +94,7 @@
         </Button>
 
         <Button Grid.Row="1" Style="{StaticResource PreferenceButtonStyle}" Command="{Binding PinCommand}">
-            <iconPacks:PackIconRemixIcon Height="30" Width="30" Kind="{Binding Pinned, Mode=OneWay, Converter={StaticResource BooleanToRemixPinIconConverter}}" />
+            <iconPacks:PackIconRemixIcon Height="16" Width="16" Kind="{Binding Pinned, Mode=OneWay, Converter={StaticResource BooleanToRemixPinIconConverter}}" />
         </Button>
 
     </Grid>

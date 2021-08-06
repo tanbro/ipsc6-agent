@@ -7,26 +7,31 @@
         mc:Ignorable="d"
         Height="150" Width="300"
         WindowStyle="ToolWindow" ResizeMode="NoResize" Topmost="True"
+        WindowStartupLocation="CenterScreen"
         Title="{Binding [Title], Mode=OneWay, FallbackValue='Prompt'}"
         FocusManager.FocusedElement="{Binding ElementName=txtInput}"
         >
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="2*"/>
+            <RowDefinition Height="3*"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="2">
             <Label Grid.Row="0" Margin="2" Target="{Binding ElementName=txtInput}"
-                   Content="{Binding [Label], Mode=OneWay, FallbackValue='Input:'}" 
-                   />
-            <TextBox x:Name="txtInput" Margin="2" Text="{Binding [InputText]}"/>
+                   Content="{Binding [Label], Mode=OneWay, FallbackValue='Input:'}"/>
+            <TextBox x:Name="txtInput" Margin="2" Padding="2" Text="{Binding [InputText]}"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="2" HorizontalAlignment="Right" >
-            <Button x:Name="btnOk" Content="_Ok" IsDefault="True" Width="64" Margin="2" Click="btnOk_Click"/>
-            <Button x:Name="btnCancel"  Content="_Cancel" IsCancel="True" Width="64" Margin="2" Click="btnCancel_Click"/>
-        </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="1" x:Name="btnOk" Content="_Ok" IsDefault="True" Padding="4" Margin="2" HorizontalAlignment="Stretch" Click="btnOk_Click"/>
+            <Button Grid.Column="2" x:Name="btnCancel"  Content="_Cancel" IsCancel="True" Padding="4" Margin="2" HorizontalAlignment="Stretch" Click="btnCancel_Click"/>
+        </Grid>
 
     </Grid>
 </Window>

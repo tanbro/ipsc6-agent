@@ -59,6 +59,7 @@ namespace ipsc6.agent.wpfapp
             catch (Exception err)
             {
                 MessageBox.Show(
+                    Current.MainWindow,
                     $"程序集加载失败，即将退出。\r\n\r\n{err}",
                     "错误",
                     MessageBoxButton.OK, MessageBoxImage.Error
@@ -87,6 +88,7 @@ namespace ipsc6.agent.wpfapp
             {
                 logger.ErrorFormat("日志配置加载失败: {0}\r\n^^^^^^^^^^^^^^^^^^^^ Shutdown ^^^^^^^^^^^^^^^^^^^^\r\n", err);
                 MessageBox.Show(
+                    Current.MainWindow,
                     $"日志配置加载失败，程序无法运行，即将退出。\r\n\r\n{err}",
                     VersionInfo.FileDescription,
                     MessageBoxButton.OK, MessageBoxImage.Error
@@ -103,6 +105,7 @@ namespace ipsc6.agent.wpfapp
             {
                 logger.ErrorFormat("配置信息加载失败: {0}\r\n^^^^^^^^^^^^^^^^^^^^ Shutdown ^^^^^^^^^^^^^^^^^^^^\r\n", err);
                 MessageBox.Show(
+                    Current.MainWindow,
                     $"配置信息加载失败，程序无法运行，即将退出。\r\n\r\n{err}",
                     VersionInfo.FileDescription,
                     MessageBoxButton.OK, MessageBoxImage.Error
@@ -114,6 +117,11 @@ namespace ipsc6.agent.wpfapp
             IsStartupOk = true;
         }
 
+        private static Application GetCurrent()
+        {
+            return Application.Current;
+        }
+
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             e.Handled = true;
@@ -122,6 +130,7 @@ namespace ipsc6.agent.wpfapp
                 case client.ErrorResponse:
                     logger.ErrorFormat("Application Dispatcher Unhandled Exception - CTI ErrorResponse: {0}", e.Exception);
                     MessageBox.Show(
+                        Current.MainWindow,
                         $"发送到 CTI 服务器的请求返回了错误结果 ({(e.Exception as client.ErrorResponse).Code})。\r\n\r\n{e.Exception.Message}",
                         Current.MainWindow.Title,
                         MessageBoxButton.OK, MessageBoxImage.Warning
@@ -130,6 +139,7 @@ namespace ipsc6.agent.wpfapp
                 case client.RequestTimeoutError:
                     logger.ErrorFormat("Application Dispatcher Unhandled Exception - CTI RequestTimeoutError: {0}", e.Exception);
                     MessageBox.Show(
+                        Current.MainWindow,
                         "发送到 CTI 服务器的请求超时。",
                         Current.MainWindow.Title,
                         MessageBoxButton.OK, MessageBoxImage.Error
@@ -138,6 +148,7 @@ namespace ipsc6.agent.wpfapp
                 case client.RequestNotCompleteError:
                     logger.ErrorFormat("Application Dispatcher Unhandled Exception - CTI RequestNotCompleteError: {0}", e.Exception);
                     MessageBox.Show(
+                        Current.MainWindow,
                         "由于已经有 CTI 服务请求正在执行，现在无法进行新的请求。",
                         Current.MainWindow.Title,
                         MessageBoxButton.OK, MessageBoxImage.Information
@@ -146,6 +157,7 @@ namespace ipsc6.agent.wpfapp
                 default:
                     logger.ErrorFormat("Application Dispatcher Unhandled Exception - {0}", e.Exception);
                     MessageBox.Show(
+                        Current.MainWindow,
                         $"程序运行过程中出现了未捕获的异常。\r\n\r\n{e.Exception}",
                         Current.MainWindow.Title,
                         MessageBoxButton.OK, MessageBoxImage.Error

@@ -17,7 +17,7 @@
     </Style>
 
     <Style x:Key="MyNumberTextStyle" TargetType="TextBlock" BasedOn="{StaticResource MyCommonText}">
-        <Setter Property="FontFamily" Value="/Fonts/#Pathway Gothic One"/>
+        <Setter Property="FontFamily" Value="/Fonts/#Bebas Neue Hesong"/>
     </Style>
 
     <Style x:Key="MyScoreBoardTitleTextStyle" TargetType="TextBlock">
@@ -28,18 +28,16 @@
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
 
-    <Style x:Key="MyScoreBoardNumberTextStyle" TargetType="TextBlock">
+    <Style x:Key="MyScoreBoardNumberTextStyle" TargetType="TextBlock" BasedOn="{StaticResource MyNumberTextStyle}">
         <Setter Property="Foreground" Value="{StaticResource MyInfoTextForeground}"/>
         <Setter Property="FontSize" Value="24"/>
-        <Setter Property="FontFamily" Value="/Fonts/#Pathway Gothic One"/>
         <Setter Property="HorizontalAlignment" Value="Center"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
 
-    <Style x:Key="MyScoreBoardNumberTextRightThinStyle" TargetType="TextBlock">
+    <Style x:Key="MyScoreBoardNumberTextRightThinStyle" TargetType="TextBlock" BasedOn="{StaticResource MyScoreBoardNumberTextStyle}">
         <Setter Property="Foreground" Value="{StaticResource MyInfoTextForeground}"/>
         <Setter Property="FontSize" Value="24"/>
-        <Setter Property="FontFamily" Value="/Fonts/#Pathway Gothic One"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>

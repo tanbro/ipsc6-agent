@@ -1175,7 +1175,7 @@ namespace ipsc6.agent.client
                 // 首先，随机选择一个主节点
                 // 然后尝试连接主节点。如果主节点无法连接，换别的主节点。如果循环一次之后全部无法连接，就认为连接失败。
                 // 连接主节点成功后尝试连接其它节点，无论是否成功。
-                Exception lastestException = null;
+                Exception connectException = null;
                 var unusedIndices = Enumerable.Range(0, ctiServers.Count).ToList();
                 try
                 {
@@ -1185,7 +1185,7 @@ namespace ipsc6.agent.client
                         var index = rand.Next(0, unusedIndices.Count);
                         MainConnectionIndex = unusedIndices[index];
                         unusedIndices.RemoveAt(index);
-                        logger.InfoFormat("StartUpAsync - {0}. 连接主服务节点 [{1}]({2}|{3}) ... ", i, MainConnectionIndex, MainConnectionInfo.Host, MainConnectionInfo.Port);
+                        logger.DebugFormat("StartUpAsync - {0}. 连接主服务节点 [{1}]({2}) ... ", i, MainConnectionIndex, MainConnectionInfo);
                         try
                         {
                             await MainConnection.OpenAsync(
@@ -1193,14 +1193,26 @@ namespace ipsc6.agent.client
                                 workerNum, password,
                                 flag: 1
                             );
+                            logger.DebugFormat("StartUpAsync - {0}. 连接主服务节点 [{1}]({2}) 成功!", i, MainConnectionIndex, MainConnectionInfo);
                         }
                         catch (Exception exception)
                         {
-                            MainConnectionIndex = -1;
-                            lastestException = exception;
-                            if (exception is not ConnectionException)
+                            connectException = exception;
+                            try
                             {
-                                throw;
+                                if (exception is ConnectionException)
+                                {
+                                    logger.DebugFormat("StartUpAsync - {0}. 连接主服务节点 [{1}]({2}) 连接失败异常: {3}", i, MainConnectionIndex, MainConnectionInfo, exception.GetType().Name);
+                                }
+                                else
+                                {
+                                    logger.DebugFormat("StartUpAsync - {0}. 连接主服务节点 [{1}]({2}) 意料之外的异常:\r\n{3}", i, MainConnectionIndex, MainConnectionInfo, exception);
+                                    throw;
+                                }
+                            }
+                            finally
+                            {
+                                MainConnectionIndex = -1;
                             }
                         }
                     }
@@ -1209,24 +1221,29 @@ namespace ipsc6.agent.client
                         lock (this)
                         {
                             RunningState = AgentRunningState.Started;
+                            logger.Info("StartUpAsync - 启动成功");
                         }
                     }
-                    else if (lastestException != null)
+                    else if (connectException != null)
                     {
-                        throw lastestException;
+                        logger.ErrorFormat("StartUpAsync - 启动的连接过程出现异常: {0}", connectException.GetType().Name);
+                        throw connectException;
                     }
                     else
                     {
-                        throw new InvalidOperationException();
+                        var errMsg = "启动过程时未抛出异常但是未获取主连接编号，无法继续。";
+                        logger.ErrorFormat("StartUpAsync - {0}", errMsg);
+                        throw new InvalidOperationException(errMsg);
                     }
                 }
-                catch
+                catch (Exception exception)
                 {
                     lock (this)
                     {
                         DisposeConnections();
                         RunningState = savedRunningState;
                     }
+                    logger.ErrorFormat("StartUpAsync - 启动失败，连接已关闭，即将结束该方法的执行并抛出异常 {0}", exception.GetType());
                     throw;
                 }
                 // 然后其他节点

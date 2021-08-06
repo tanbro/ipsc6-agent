@@ -1,3 +1,5 @@
+*.tmp.nsh
+
 out/*
 !out/.gitkeep
 

@@ -39,10 +39,16 @@ namespace ipsc6.agent.wpfapp
         public async Task LogIn(string workerNum, string password, IEnumerable<string> serverList = null)
         {
             /// 改 UI 的输入框
-            ViewModels.LoginViewModel.Instance.WorkerNum = workerNum;
+            serverList ??= (new string[] { });
+            Tuple<string, string, IEnumerable<string>> param = new(workerNum, password, serverList);
+            await Application.Current.Dispatcher.Invoke(async () =>
+            {
 #pragma warning disable VSTHRD111
-            await ViewModels.LoginViewModel.DoLoginAsync(workerNum, password, serverList);
+                //await Task.CompletedTask;
+                await ViewModels.LoginViewModel.DoLoginAsync(param);
 #pragma warning restore VSTHRD111
+            });
+
         }
 
         public void ExitApp(int code = 0)

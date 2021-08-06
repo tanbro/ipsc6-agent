@@ -11,7 +11,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         FontSize="16"
-        Title="IPSC6 座席工具条"
+        Title="IPSC6 座席话务条"
         Topmost="True"
         WindowStyle="None"
         ResizeMode="NoResize"

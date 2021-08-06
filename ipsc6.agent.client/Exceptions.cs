@@ -75,29 +75,24 @@ namespace ipsc6.agent.client
 
     public class ErrorResponse : BaseRequestError
     {
-        public readonly ServerSentMessage Arg;
-
-        public readonly int Code;
-
-        public override string Message
+        private static string LookupMessage(int code)
         {
-            get
+            var s = "";
+            try
             {
-                string result = "";
-                try
-                {
-                    var k = (ServerSideAgentErrorCode)Code;
-                    result = ServerSideAgentErrorCodeDict.Value[k];
-                }
-                catch (KeyNotFoundException) { }
-                return result;
+                var k = (ServerSideAgentErrorCode)code;
+                s = ServerSideAgentErrorCodeDict.Value[k];
             }
+            catch (KeyNotFoundException) { }
+            return s;
         }
 
-        public ErrorResponse(ServerSentMessage arg) : base()
+        public int Code { get; }
+
+        public ErrorResponse(ServerSentMessage arg) : base(LookupMessage(arg.N1))
         {
-            Arg = arg;
             Code = arg.N1;
+            HResult = arg.N1;
         }
 
     }

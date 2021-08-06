@@ -58,6 +58,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 while (cfgIpsc.ServerList.Count < 1)
                 {
                     var r = MessageBox.Show(
+                        Application.Current.MainWindow,
                         "由于没有设置 CTI 服务器地址，该程序无法工作。\r\n是否要进行设置？\r\n\r\n按“是”打开设置窗口，按“否”退出程序。",
                         mainWindow.Title,
                         MessageBoxButton.YesNo, MessageBoxImage.Question
@@ -141,6 +142,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (iniErr != null)
             {
                 MessageBox.Show(
+                    Application.Current.MainWindow,
                     $"主窗口视图模型初始化过程中出现了无法处理的异常，程序即将退出。\r\n\r\n{iniErr}",
                     mainWindow.Title,
                     MessageBoxButton.OK, MessageBoxImage.Error
@@ -202,7 +204,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             holdPopupCommand, holdCommand, unHoldCommand,
             xferPopupCommand, xferConsultPopupCommand,
             dialCommand, xferExtCommand, xferExtConsultCommand,
-            callIvrCommand, advCommand
+            callIvrCommand, advCommand, selectGroupOkCommand
         };
 
         private static void NotifyStateRelativeCommandsExecutable()
@@ -245,6 +247,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped)
             {
                 MessageBox.Show(
+                    Application.Current.MainWindow,
                     "座席尚未注销，不允许退出。\r\n\r\n请在注销后再退出程序。",
                     Application.Current.MainWindow.Title,
                     MessageBoxButton.OK, MessageBoxImage.Information
@@ -530,10 +533,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private void StopTimer()
         {
-
+            bool isToDispose = false;
             try
             {
                 timerCanceller?.Cancel();
+                isToDispose = true;
+            }
+            catch (ObjectDisposedException) { }
+            if (isToDispose)
+            {
                 try
                 {
 #pragma warning disable VSTHRD002
@@ -541,10 +549,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
 #pragma warning restore VSTHRD002
                 }
                 catch (TaskCanceledException) { }
-            }
-            finally
-            {
-                timerCanceller?.Dispose();
+                finally
+                {
+                    timerCanceller?.Dispose();
+                }
             }
         }
 
@@ -1230,7 +1238,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             return true;
         }
 
-        private static readonly IRelayCommand selectGroupOkCommand = new RelayCommand<object>(DoSelectGroupOk);
+        private static readonly IRelayCommand selectGroupOkCommand = new RelayCommand<object>(DoSelectGroupOk, CanSelectGroupOk);
         public IRelayCommand SelectGroupOkCommand => selectGroupOkCommand;
 
         private static async void DoSelectGroupOk(object data)
@@ -1254,6 +1262,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 }
             }
         }
+
+        private static bool CanSelectGroupOk(object data)
+        {
+            if (!IsMainConnectionOk) return false;
+            if (Utils.CommandGuard.IsGuarding) return false;
+            if (status.Item1 != client.AgentState.Work) return false;
+            if (currentCallInfo == null) return false;
+            if (heldCalls.Count > 0) return false;
+            return true;
+        }
+
         #endregion
 
         #region 外呼, 外转, 外咨
@@ -1351,10 +1370,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             if (!IsMainConnectionOk) return false;
             if (Utils.CommandGuard.IsGuarding) return false;
-            if (!(new client.AgentState[]
-            {
-                client.AgentState.Idle, client.AgentState.Work
-            }).Contains(status.Item1)) return false;
+            if (currentCallInfo == null) return false;
             return true;
         }
 
@@ -1492,12 +1508,12 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     await svc.UnMonitor(connIndex, s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCEIDLE:
-                    await svc.SetIdle(s);
+                    await svc.SetIdleByWorkerNum(s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCEPAUSE:
                     {
                         var parts = s.Split(new char[] { '|' });
-                        await svc.SetBusy(
+                        await svc.SetBusyByWorkerNum(
                             parts[0],
                             (client.WorkType)Enum.Parse(typeof(client.WorkType), parts[1])
                         );
@@ -1510,23 +1526,23 @@ namespace ipsc6.agent.wpfapp.ViewModels
                     await svc.Interrupt(connIndex, s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCEHANGUP:
-                    await svc.Hangup(connIndex, s);
+                    await svc.HangupByWorkerNum(connIndex, s);
                     break;
                 case client.MessageType.REMOTE_MSG_FORCESIGNOFF:
                     {
                         var parts = s.Split(new char[] { '|' });
-                        await svc.SetBusy(
+                        await svc.SetBusyByWorkerNum(
                             parts[0],
                             (client.WorkType)Enum.Parse(typeof(client.WorkType), parts[1])
                         );
-                        await svc.SignOut(parts[0], parts[1]);
+                        await svc.SignOutByWorkerNum(parts[0], parts[1]);
                     }
                     break;
                 case client.MessageType.REMOTE_MSG_KICKOUT:
                     await svc.KickOut(s);
                     break;
                 default:
-                    MessageBox.Show($"还没有实现 {msgTyp}");
+                    MessageBox.Show(Application.Current.MainWindow, $"还没有实现 {msgTyp}");
                     break;
             }
         }
@@ -1567,6 +1583,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
         private static async void DoLogout()
         {
             var r = MessageBox.Show(
+                Application.Current.MainWindow,
                 "是否确定要注销？",
                 Application.Current.MainWindow.Title,
                 MessageBoxButton.YesNo, MessageBoxImage.Question
@@ -1628,6 +1645,28 @@ namespace ipsc6.agent.wpfapp.ViewModels
             if (svc == null) return false;
             if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped) return false;
             return true;
+        }
+
+        private static readonly IRelayCommand forceExitCommand = new RelayCommand(DoForceExit);
+        public IRelayCommand ForceExitCommand => forceExitCommand;
+
+        private static void DoForceExit()
+        {
+
+            var r = MessageBox.Show(
+                Application.Current.MainWindow,
+                "是否确定要强行强行退出？",
+                Application.Current.MainWindow.Title,
+                MessageBoxButton.YesNo, MessageBoxImage.Question,
+                MessageBoxResult.No
+            );
+            if (r != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            logger.Warn("强行退出");
+            Application.Current.Shutdown();
         }
         #endregion
     }

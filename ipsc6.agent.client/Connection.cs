@@ -98,7 +98,7 @@ namespace ipsc6.agent.client
         {
             ConnectionStateChangedEventArgs e = new(State, newState);
             State = newState;
-            Task.Run(() => OnConnectionStateChanged?.Invoke(this, e));
+            OnConnectionStateChanged?.Invoke(this, e);
         }
 
         private TaskCompletionSource<object> connectTcs;
@@ -148,143 +148,154 @@ namespace ipsc6.agent.client
         private void ProcessEventMessage(object msg)
         {
             bool isResponse;  // 是否 Response ?
-            if (msg is ConnectorConnectedEventArgs)
+            switch (msg)
             {
-                connectTcs.SetResult(msg);
-            }
-            else if (msg is ConnectorConnectAttemptFailedEventArgs)
-            {
-                lock (connectLock)
-                {
-                    SetState(ConnectionState.Failed);
-                }
-                connectTcs.SetException(new ConnectionFailedException());
-            }
-            else if (msg is ConnectorDisconnectedEventArgs or ConnectorConnectionLostEventArgs)
-            {
-                ConnectionState prevState;
-                lock (connectLock)
-                {
-                    prevState = State;
-                    if (msg is ConnectorDisconnectedEventArgs)
+                case ConnectorConnectedEventArgs:
+                    connectTcs.SetResult(msg);
+                    break;
+
+                case ConnectorConnectAttemptFailedEventArgs:
+                    lock (connectLock)
                     {
-                        SetState(ConnectionState.Closed);
+                        SetState(ConnectionState.Failed);
                     }
-                    else
+                    connectTcs.SetException(new ConnectionFailedException());
+                    break;
+
+                case ConnectorDisconnectedEventArgs or ConnectorConnectionLostEventArgs:
                     {
-                        SetState(ConnectionState.Lost);
-                    }
-                }
-                if (msg is ConnectorDisconnectedEventArgs)
-                {
-                    OnClosed?.Invoke(this, EventArgs.Empty);
-                }
-                else
-                {
-                    OnLost?.Invoke(this, EventArgs.Empty);
-                }
-                if (prevState == ConnectionState.Closing)
-                {
-                    disconnectTcs.SetResult(null);
-                }
-                else if (prevState == ConnectionState.Opening)
-                {
-                    if (msg is ConnectorDisconnectedEventArgs)
-                    {
-                        try
-                        {
-                            connectTcs.SetException(new ConnectionClosedException());
-                        }
-                        catch (InvalidOperationException)
-                        {
-                            logInTcs.SetException(new ConnectionClosedException());
-                        }
-                    }
-                    else if (msg is ConnectorConnectionLostEventArgs)
-                    {
-                        try
-                        {
-                            connectTcs.SetException(new ConnecttionLostException());
-                        }
-                        catch (InvalidOperationException)
-                        {
-                            logInTcs.SetException(new ConnecttionLostException());
-                        }
-                    }
-                }
-            }
-            else if (msg is ServerSentMessage)
-            {
-                var msg_ = msg as ServerSentMessage;
-                if (msg_.Type == MessageType.REMOTE_MSG_LOGIN)
-                {
-                    if (msg_.N1 < 1)
-                    {
-                        // 登录失败算一种连接失败
-                        ErrorResponse err = new(msg_);
-                        logger.ErrorFormat("Login failed: {0}. Connector will be closed.", err);
-                        logInTcs.SetException(new ErrorResponse(msg_));
-                        connector.Disconnect();
-                        lock (connectLock)
-                        {
-                            SetState(ConnectionState.Failed);
-                        }
-                    }
-                    else
-                    {
-                        // 登录成功
-                        lock (connectLock)
-                        {
-                            AgentId = msg_.N2;
-                            SetState(ConnectionState.Ok);
-                        }
-                        logInTcs.SetResult(msg_.N2);
-                    }
-                }
-                else if (msg_.Type == MessageType.REMOTE_MSG_RELEASE)
-                {
-                    if (msg_.N1 < 1)
-                    {
-                        // 注销失败
                         ConnectionState prevState;
                         lock (connectLock)
                         {
                             prevState = State;
-                            SetState(ConnectionState.Ok);
+                            if (msg is ConnectorDisconnectedEventArgs)
+                            {
+                                SetState(ConnectionState.Closed);
+                            }
+                            else
+                            {
+                                SetState(ConnectionState.Lost);
+                            }
                         }
-                        logOutTcs.SetException(new ErrorResponse(msg_));
-                    }
-                    else
-                    {
-                        // 注销成功实际上并不会发生，因为服务器会直接断开
-                        logOutTcs.SetResult(null);
-                    }
-                }
-                else
-                {
-                    lock (requestLock)
-                    {
-                        isResponse = pendingReqType == msg_.Type;
-                    }
-                    if (isResponse)
-                    {
-                        if (msg_.N1 < 1)
+                        if (msg is ConnectorDisconnectedEventArgs)
                         {
-                            ErrorResponse err = new(msg_);
-                            logger.ErrorFormat("{0}", err);
-                            reqTcs.SetException(new ErrorResponse(msg_));
+                            OnClosed?.Invoke(this, EventArgs.Empty);
                         }
                         else
                         {
-                            reqTcs.SetResult(msg_);
+                            OnLost?.Invoke(this, EventArgs.Empty);
+                        }
+                        if (prevState == ConnectionState.Closing)
+                        {
+                            disconnectTcs.SetResult(null);
+                        }
+                        else if (prevState == ConnectionState.Opening)
+                        {
+                            if (msg is ConnectorDisconnectedEventArgs)
+                            {
+                                try
+                                {
+                                    connectTcs.SetException(new ConnectionClosedException());
+                                }
+                                catch (InvalidOperationException)
+                                {
+                                    logInTcs.SetException(new ConnectionClosedException());
+                                }
+                            }
+                            else if (msg is ConnectorConnectionLostEventArgs)
+                            {
+                                try
+                                {
+                                    connectTcs.SetException(new ConnecttionLostException());
+                                }
+                                catch (InvalidOperationException)
+                                {
+                                    logInTcs.SetException(new ConnecttionLostException());
+                                }
+                            }
                         }
                     }
-                    else
+                    break;
+
+                case ServerSentMessage:
                     {
-                        /// server->client event
-                        OnServerSentEvent?.Invoke(this, new(msg_));
+                        var msg_ = msg as ServerSentMessage;
+                        switch (msg_.Type)
+                        {
+                            case MessageType.REMOTE_MSG_LOGIN:
+                                if (msg_.N1 < 1)
+                                {
+                                    // 登录失败算一种连接失败
+                                    ErrorResponse err = new(msg_);
+                                    logger.ErrorFormat("Login failed: {0}. Connector will be closed.", err);
+                                    logInTcs.SetException(new ErrorResponse(msg_));
+                                    connector.Disconnect();
+                                    lock (connectLock)
+                                    {
+                                        SetState(ConnectionState.Failed);
+                                    }
+                                }
+                                else
+                                {
+                                    // 登录成功
+                                    lock (connectLock)
+                                    {
+                                        AgentId = msg_.N2;
+                                        SetState(ConnectionState.Ok);
+                                    }
+                                    logInTcs.SetResult(msg_.N2);
+                                }
+                                break;
+
+                            case MessageType.REMOTE_MSG_RELEASE:
+                                if (msg_.N1 < 1)
+                                {
+                                    // 注销失败
+                                    ConnectionState prevState;
+                                    lock (connectLock)
+                                    {
+                                        prevState = State;
+                                        SetState(ConnectionState.Ok);
+                                    }
+                                    logOutTcs.SetException(new ErrorResponse(msg_));
+                                }
+                                else
+                                {
+                                    // 注销成功实际上并不会发生，因为服务器会直接断开
+                                    logOutTcs.SetResult(null);
+                                }
+                                break;
+
+                            default:
+                                lock (requestLock)
+                                {
+                                    isResponse = pendingReqType == msg_.Type;
+                                }
+                                if (isResponse)
+                                {
+                                    if (msg_.N1 < 1)
+                                    {
+                                        ErrorResponse err = new(msg_);
+                                        logger.ErrorFormat("ErrorResponse: [{0}]({1})", err.Code, err.Message);
+                                        reqTcs.SetException(new ErrorResponse(msg_));
+                                    }
+                                    else
+                                    {
+                                        reqTcs.SetResult(msg_);
+                                    }
+                                }
+                                else
+                                {
+                                    /// server->client event
+                                    OnServerSentEvent?.Invoke(this, new(msg_));
+                                }
+                                break;
+                        }
                     }
-                }
+                    break;
+
+                default:
+                    break;
             }
         }
 

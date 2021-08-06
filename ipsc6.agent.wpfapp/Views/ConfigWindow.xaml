@@ -10,37 +10,39 @@
         d:DataContext="{d:DesignData Type=vm:ConfigViewModel}"
         Loaded="Window_Loaded"
         x:Name="configWindow"
-        Topmost="True" WindowStartupLocation="CenterScreen"
-        Height="450" Width="800"
         Title="设置"
+        Height="240" Width="480"
+        ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterScreen"
         >
-    <ScrollViewer>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <GroupBox Grid.Row="0" Header="CTI 服务器列表" VerticalAlignment="Top">
+            <GroupBox Grid.Row="0" Header="CTI 服务器列表" VerticalAlignment="Top" Margin="4">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock>修改后，需要退出程序，直到下一次启动程序，修改后的配置才会生效。</TextBlock>
-                    <ListBox ItemsSource="{Binding IpscServerList}">
+                    <TextBlock Style="{StaticResource MyCommonText}" Margin="8" TextWrapping="Wrap">
+                        修改后，需要退出程序，直到下一次启动程序，修改后的配置才会生效。
+                    </TextBlock>
+                    <ListBox ItemsSource="{Binding IpscServerList}" Margin="2">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="380"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0" MinWidth="320" MaxWidth="640"
-                                             FontSize="24" InputScope="Url"
+                                    <TextBox Grid.Column="0" Width="380"
+                                             InputScope="Url"
                                              x:Name="textBoxIpscServerAddress"
                                              Text="{Binding Content}" />
                                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                        <Button Height="32" Width="32" FontSize="24" ToolTip="删除"
+                                        <Button ToolTip="删除这一条记录"
                                                 Command="{Binding ElementName=configWindow, Path=DataContext.DelIpscServerCommand}"
                                                 CommandParameter="{Binding Path=.}">
-                                            <iconPacks:MaterialDesign Height="24" Width="24" Kind="Delete" />
+                                            <iconPacks:MaterialDesign Kind="DeleteForever" />
                                         </Button>
                                     </StackPanel>
                                 </Grid>
@@ -48,9 +50,10 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                     <StackPanel Orientation="Vertical">
+                        <!--Style="{StaticResource MyTinyButton}"-->
                         <Button Command="{Binding ElementName=configWindow, Path=DataContext.NewIpscServerCommand}"
-                                Style="{StaticResource MyTinyButton}" Width="Auto" Margin="16 2 16 2" ToolTip="新建一条 CTI 服务器地址数据">
-                            <iconPacks:MaterialDesign Kind="Add" />
+                                Width="Auto" Margin="2" ToolTip="新建一条 CTI 服务器地址数据">
+                            <iconPacks:MaterialDesign Kind="AddCircle"/>
                         </Button>
                     </StackPanel>
                 </StackPanel>
@@ -60,17 +63,16 @@
             <Frame Grid.Row="1"/>
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="4*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="2" Style="{StaticResource MySamllButton}"
+                <Button Grid.Column="1" HorizontalAlignment="Center" Padding="4"
                         Margin="4" Width="Auto" Height="Auto" IsDefault="True"
                         Command="{Binding SaveCommand}">
                     <AccessText>确定(_O)</AccessText>
                 </Button>
-                <Button Grid.Column="3" Style="{StaticResource MySamllButton}"
+                <Button Grid.Column="2" HorizontalAlignment="Center" Padding="4"
                         Margin="4" Width="Auto" Height="Auto" IsCancel="True"
                         Click="Cancel_Button_Click">
                     <AccessText>取消(_C)</AccessText>
