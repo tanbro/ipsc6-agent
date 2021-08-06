@@ -36,4 +36,10 @@
 > [!TIP]
 > 座席程序的安装包还依赖于 `launch` 安装包二进制文件，所以需要首先构建 `launch` 安装包。
 
+## 版本计算
+
+在 [NSIS][] 脚本 `version.nsh` 中，使用了 [GitVersion][] (只需命令行工具 [`GitVersion.Tool`](https://www.nuget.org/packages/GitVersion.Tool)) 和 [Python][] 进行计算，请首先安装这两个软件。
+
 [NSIS]: https://sourceforge.net/projects/nsis/ "NSIS (Nullsoft Scriptable Install System) is a professional open source system to create Windows installers"
+[GitVersion]: https://gitversion.net/ "From git log to SemVer in no time"
+[Python]: https://www.python.org/ "Python is a programming language that lets you work quickly and integrate systems more effectively."

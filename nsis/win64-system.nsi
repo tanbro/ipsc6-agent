@@ -17,7 +17,7 @@ Var DisplayName
 
 ;--------------------------------
 ;版本定义的宏
-!include ver.nsh
+!include version.nsh
 
 ;--------------------------------
 ;Interface Settings
@@ -25,7 +25,7 @@ Var DisplayName
 
 ;--------------------------------
 ;依赖软件
-!include vcredist_${ARCH}.nsh
+!include vcredist.nsh
 !include netfx.nsh
 
 ;--------------------------------

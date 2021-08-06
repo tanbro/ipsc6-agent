@@ -4,16 +4,11 @@
 
 ;产品名，版本……
 !define PUBLISHER "广州市和声信息技术有限公司"
-!define PRODUCT_NAME "IPSC6 座席工具条 (${PLATFORM} ${USER_TYPE})"
-
-!ifdef INCLUDE_VERSION_STRING_IN_OUTFILE
-  OutFile "out\ipsc6_agent_wpfapp-${PLATFORM}-${USER_TYPE}.${VERSION}.exe"
-!else
-  OutFile "out\ipsc6_agent_wpfapp-${PLATFORM}-${USER_TYPE}.exe"
-!endif
+!define PRODUCT_NAME "IPSC6 座席话务条 (${PLATFORM} ${USER_TYPE})"
 
 Name "${PRODUCT_NAME}"
-BrandingText "${PUBLISHER} ${PRODUCT_NAME} ${VERSION}"
+BrandingText "${PUBLISHER} ${PRODUCT_NAME} ${PRODUCT_VERSION}"
+OutFile "out\ipsc6-agent\ipsc6-agent-${PLATFORM}-${USER_TYPE}-${PRODUCT_VERSION}.exe"
 
 !if ${USER_TYPE} == "system"
     ;Default installation folder
@@ -77,7 +72,7 @@ Section "!座席工具条" SEC_0
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
                   "Publisher" "${PUBLISHER}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
-                  "DisplayVersion" "${VERSION}"
+                  "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
                   "UninstallString" "$\"$INSTDIR\Uninstall.exe$\" /S"
 !else if ${USER_TYPE} == "user"
@@ -86,7 +81,7 @@ Section "!座席工具条" SEC_0
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
                   "Publisher" "${PUBLISHER}"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
-                  "DisplayVersion" "${VERSION}"
+                  "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
                   "UninstallString" "$\"$INSTDIR\Uninstall.exe$\" /S"
 !else
@@ -131,14 +126,16 @@ Section "URI 启动程序" SEC_LAUNCH
   File "out\ipsc6_agent_launch.exe"
   SetCompress auto
   DetailPrint "安装 URI Scheme Handler 启动程序 ..."
+  Push $0
   ExecWait '"$OUTDIR\ipsc6_agent_launch.exe" /S' $0
-    BringToFront
-    ${If} $0 == "0"
-        DetailPrint "URI Scheme Handler 启动程序 安装完毕"
-    ${Else}
-        DetailPrint "URI Scheme Handler 启动程序 安装失败: $0"
-        MessageBox MB_ICONEXCLAMATION "错误:$\r$\nURI Scheme Handler 启动程序 安装失败: $0"
-    ${EndIf}
+  BringToFront
+  ${If} $0 == "0"
+    DetailPrint "URI Scheme Handler 启动程序 安装完毕"
+  ${Else}
+    DetailPrint "URI Scheme Handler 启动程序 安装失败: $0"
+    MessageBox MB_ICONEXCLAMATION "错误:$\r$\nURI Scheme Handler 启动程序 安装失败: $0"
+  ${EndIf}
+  Pop $0
 SectionEnd
 
 ; components/sections
@@ -158,21 +155,27 @@ SectionEnd
 Function .onInit
 !if ${PLATFORM} == "win64"
   ${IfNot} ${RunningX64}
+	Push $0
     StrCpy $0 "无法安装：该程序只能在 Win64 环境下运行。"
     MessageBox MB_OK|MB_ICONSTOP "messagebox_text" 
     Abort $0
+	Pop $0
   ${EndIf}
 !endif
 
   ; https://nsis.sourceforge.io/Graying_out_Section_(define_mandatory_sections)
   # set the section as selected and read-only
+  Push $0
   IntOp $0 ${SF_SELECTED} | ${SF_RO}
   SectionSetFlags ${SEC_0} $0
+  Pop $0
 FunctionEnd
 
 Function un.onInit
   ; https://nsis.sourceforge.io/Graying_out_Section_(define_mandatory_sections)
   # set the section as selected and read-only
+  Push $0
   IntOp $0 ${SF_SELECTED} | ${SF_RO}
   SectionSetFlags ${UNSEC_0} $0
+  Pop $0
 FunctionEnd

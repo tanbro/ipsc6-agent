@@ -24,9 +24,9 @@ Section "-SEC_NETFX"
 
     ${If} $NETFX_OK == ""
         MessageBox MB_YESNO|MB_ICONQUESTION \
-            "在计算机上找不到运行本程序所需的 .NET Framework v4.6.1 或以上版本。$\r$\n$\r$\n现在是否要安装？$\r$\n$\r$\n按 “是” 立即执行，按 “否” 退出安装程序。" \
-            IDYES true IDNO false
-        true:
+            "在计算机上找不到运行本程序所需的 .NET Framework v4.6.1 或以上版本。$\r$\n$\r$\n现在是否要安装这个软件？$\r$\n$\r$\n按 “是” 立即执行，按 “否” 退出安装程序。" \
+            IDYES _NETFX_TRUE IDNO _NETFX_FALSE
+        _NETFX_TRUE:
             SetOutPath "$PLUGINSDIR\netfx"
             SetCompress off
             File "deps\NDP461-KB3102436-x86-x64-AllOS-ENU.exe"
@@ -40,12 +40,12 @@ Section "-SEC_NETFX"
                 MessageBox MB_OK|MB_ICONSTOP "错误:$\r$\n$\r$\n.NET Framework v4.6.1 安装失败 ($0)。"
                 Quit
             ${Else}
-                DetailPrint ".NET Framework 安装完成"
+                DetailPrint ".NET Framework v4.6.1 安装完成"
             ${EndIf}
-            Goto next
-        false:
+            Goto _NETFX_NEXT
+        _NETFX_FALSE:
             Quit
-        next:
+        _NETFX_NEXT:
     ${EndIf}
 SectionEnd
 

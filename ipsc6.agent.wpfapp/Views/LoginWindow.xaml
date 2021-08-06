@@ -60,7 +60,7 @@
                 </StackPanel>
                 <TextBlock VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0 0 0 4"
                        Foreground="White" FontStyle="Oblique" FontSize="26">
-                欢迎使用坐席客户端
+                IPSC6 座席话务条
                 </TextBlock>
             </Grid>
         </Border>
