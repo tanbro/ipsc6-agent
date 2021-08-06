@@ -8,11 +8,16 @@
 
 Var VCREDIST_OK
 Section "-SEC_VCREDIST"
-    MessageBox MB_OK|MB_ICONINFORMATION \
-        "即将执行 “适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++ (${ARCH})” 的 检测程序。期间可能会出现错误提示，但这并不表示安装失败。$\r$\n$\r$\n按 “确定” 开始检测。"
-    StrCpy $VCREDIST_OK ""
     SetOutPath "$PLUGINSDIR\vcredist"
     File "..\${ARCH}\Release\DummyCppConsoleApp.exe"
+    SetCompress off
+    File "deps\VC_redist.${ARCH}.exe"
+    SetCompress auto
+
+    StrCpy $VCREDIST_OK ""
+
+    MessageBox MB_OK|MB_ICONINFORMATION \
+        "即将执行 “适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++ (${ARCH})” 的 检测程序。期间可能会出现错误提示，但这并不表示安装失败。$\r$\n$\r$\n按 “确定” 开始检测。"
 
     DetailPrint "Visual C++ Runtime (${ARCH}) 检测 ..."
     Push $0
@@ -33,10 +38,6 @@ Section "-SEC_VCREDIST"
             "“适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++ (${ARCH})” 检测失败。计算机上可能没有安装这个软件。$\r$\n$\r$\n现在是否要安装？$\r$\n$\r$\n按 “是” 立即执行，按 “否” 退出安装程序。" \
             IDYES _VCREDIST_TRUE IDNO _VCREDIST_FALSE
         _VCREDIST_TRUE:
-            SetCompress off
-            File "deps\VC_redist.${ARCH}.exe"
-            SetCompress auto
-
             DetailPrint "Visual C++ Redistributable ${ARCH} 正在安装 ..."
             Push $0
             ExecWait '"$OUTDIR\VC_redist.${ARCH}.exe" /norestart /passive' $0

@@ -10,6 +10,11 @@ Var NETFX_RELEASE
 Var NETFX_OK
 
 Section "-SEC_NETFX"
+    SetOutPath "$PLUGINSDIR\netfx"
+    SetCompress off
+    File "deps\NDP461-KB3102436-x86-x64-AllOS-ENU.exe"
+    SetCompress auto
+
     StrCpy $NETFX_OK ""
 
     ReadRegDWORD $NETFX_RELEASE HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" "Release"
@@ -27,11 +32,6 @@ Section "-SEC_NETFX"
             "在计算机上找不到运行本程序所需的 .NET Framework v4.6.1 或以上版本。$\r$\n$\r$\n现在是否要安装这个软件？$\r$\n$\r$\n按 “是” 立即执行，按 “否” 退出安装程序。" \
             IDYES _NETFX_TRUE IDNO _NETFX_FALSE
         _NETFX_TRUE:
-            SetOutPath "$PLUGINSDIR\netfx"
-            SetCompress off
-            File "deps\NDP461-KB3102436-x86-x64-AllOS-ENU.exe"
-            SetCompress auto
-
             DetailPrint ".NET Framework 正在安装 ..."
             ExecWait '"$OUTDIR\NDP461-KB3102436-x86-x64-AllOS-ENU.exe" /norestart /passive /showrmui /showfinalerror' $0
             BringToFront
