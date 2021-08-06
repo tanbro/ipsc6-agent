@@ -36,9 +36,10 @@
                 BorderBrush="{StaticResource MyBorderBrush}"
                 Background="{StaticResource MyBackgroud}">
             <Button Style="{StaticResource ScoreButtonStyle}"
-                        Command="{Binding GroupPopupCommand}">
+                    Command="{Binding GroupPopupCommand}">
                 <StackPanel>
-                    <TextBlock Text="{Binding Groups, Mode=OneWay, Converter={StaticResource AgentGroupsToNumberTitleConverter}}"/>
+                    <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
+                               Text="{Binding Groups, Mode=OneWay, Converter={StaticResource AgentGroupsToNumberTitleConverter}}"/>
                     <Popup x:Name="SkillPopup" IsOpen="{Binding IsGroupPopupOpened}" StaysOpen="False" AllowsTransparency="True">
                         <ContentControl>
                             <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">
@@ -55,7 +56,9 @@
                                                           IsChecked="{Binding IsSigned, Mode=OneWay}"
                                                           Command="{Binding ElementName=GroupPanelUserControl, Path=DataContext.SignGroupCommand}"
                                                           CommandParameter="{Binding Id}"/>
-                                                <TextBlock Grid.Column="1" Style="{StaticResource MyHeadText}" Text="{Binding Name, Mode=OneWay}" VerticalAlignment="Center" Margin="2"/>
+                                                <TextBlock Grid.Column="1" Style="{StaticResource MyHeadText}"
+                                                           Text="{Binding Name, Mode=OneWay}"
+                                                           VerticalAlignment="Center" Margin="2"/>
                                             </Grid>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>

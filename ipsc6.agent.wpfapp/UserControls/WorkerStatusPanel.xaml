@@ -108,25 +108,28 @@
                                     Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"/>
                         </Grid>
                         <Popup x:Name="StatePopup" StaysOpen="False"
-                                   IsOpen="{Binding IsStatePopupOpened}">
-                            <ListBox ItemsSource="{Binding StateOperationItems, Mode=OneWay}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Button Style="{StaticResource MyCommonButton}"
+                               IsOpen="{Binding IsStatePopupOpened}"
+                               AllowsTransparency="True">
+                            <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">
+                                <ListBox ItemsSource="{Binding StateOperationItems, Mode=OneWay}" BorderThickness="0" Background="Transparent" Margin="2">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Style="{StaticResource MyCommonButton}"
                                                 Cursor="Hand"
                                                 Command="{Binding ElementName=WorkerStatusPannelUserControl, Path=DataContext.SetStateCommand}"
                                                 CommandParameter="{Binding}">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"
                                                            Margin="2 0 2 0"/>
-                                                <Border Style="{StaticResource MyStateLightStyle}"
+                                                    <Border Style="{StaticResource MyStateLightStyle}"
                                                         Background="{Binding Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"
                                                         Margin="2 0 2 0"/>
-                                            </StackPanel>
-                                        </Button>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
+                                                </StackPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Border>
                         </Popup>
                     </StackPanel>
                 </Button>

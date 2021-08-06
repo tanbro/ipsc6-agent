@@ -49,8 +49,8 @@
 
             <TextBox Grid.Row="1" Margin="2 0 2 0"
                      BorderThickness="0"
-                     Background="LightBlue"
-                     FontFamily="/Fonts/#Pathway Gothic One" FontSize="20"
+                     Background="LightBlue" Foreground="Black"
+                     FontFamily="/Fonts/#Bebas Neue Hesong" FontSize="20"
                      VerticalAlignment="Center" MaxLength="11"
                      TextAlignment="Right"
                      InputScope="TelephoneNumber" InputMethod.IsInputMethodEnabled="False"

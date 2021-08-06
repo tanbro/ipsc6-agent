@@ -43,7 +43,7 @@
             <Button Style="{StaticResource ScoreButtonStyle}" Command="{Binding HoldPopupCommand}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
-                                   Text="{Binding HeldCalls.Count, Mode=OneWay}"/>
+                               Text="{Binding HeldCalls.Count, Mode=OneWay}"/>
                     <Popup IsOpen="{Binding IsHoldPopupOpened}" StaysOpen="False" AllowsTransparency="True">
                         <ContentControl>
                             <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">

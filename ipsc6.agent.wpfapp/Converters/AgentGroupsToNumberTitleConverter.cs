@@ -11,9 +11,18 @@ namespace ipsc6.agent.wpfapp.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return "0/0";
-            var v = value as IReadOnlyCollection<services.Models.Group>;
-            return $"{v.Count(x => x.IsSigned)}/{v.Count}";
+            string result = "0/0";
+            do
+            {
+                if (value == null) break;
+                try
+                {
+                    var v = value as IReadOnlyCollection<services.Models.Group>;
+                    result = $"{v.Count(x => x.IsSigned)}/{v.Count}";
+                }
+                catch (ArgumentNullException) { }
+            } while (false);
+            return result;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

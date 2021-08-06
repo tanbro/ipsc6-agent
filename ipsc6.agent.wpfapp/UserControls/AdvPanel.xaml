@@ -30,7 +30,9 @@
                 BorderBrush="{StaticResource MyBorderBrush}"
                 Background="{StaticResource MyBackgroud}">
             <Button Style="{StaticResource ScoreButtonStyle}" Command="{Binding AdvCommand}">
-                ADV
+                <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}">
+                    ADV
+                </TextBlock>
             </Button>
         </Border>
 

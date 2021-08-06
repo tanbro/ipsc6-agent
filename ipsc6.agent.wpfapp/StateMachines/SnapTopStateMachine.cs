@@ -12,7 +12,7 @@ namespace ipsc6.agent.wpfapp.StateMachines
 
             Configure(SnapTopState.Snapped)
                 .Permit(SnapTopTrigger.MouseEnter, SnapTopState.SnappedWithMouseEnter)
-                .Permit(SnapTopTrigger.MoveOut, SnapTopState.Final); ;
+                .Permit(SnapTopTrigger.MoveOut, SnapTopState.Final);
 
             Configure(SnapTopState.SnappedWithMouseEnter)
                 .Permit(SnapTopTrigger.MouseLeave, SnapTopState.Snapped)

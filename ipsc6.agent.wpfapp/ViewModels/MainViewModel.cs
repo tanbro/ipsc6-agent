@@ -953,6 +953,16 @@ namespace ipsc6.agent.wpfapp.ViewModels
         {
             ReloadCalls();
             Instance.CurrentCallInfo = e.Call;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (Instance.snapFsm != null)
+                {
+                    if (Instance.snapFsm.State == StateMachines.SnapTopState.Snapped)
+                    {
+                        Application.Current.MainWindow.Top = 1;
+                    }
+                }
+            });
         }
 
         private static void ReloadCalls()

@@ -151,9 +151,11 @@
         <Setter Property="Foreground" Value="{StaticResource MyInfoTextForeground}"/>
         <Setter Property="FontSize" Value="24"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="FontFamily" Value="/Fonts/#Pathway Gothic One"/>
+        <Setter Property="FontFamily" Value="/Fonts/#Bebas Neue Hesong"/>
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
