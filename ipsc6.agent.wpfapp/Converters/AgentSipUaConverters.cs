@@ -13,7 +13,7 @@ namespace ipsc6.agent.wpfapp.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return "<null>";
+            if (value == null) return "N/A";
 
             var sipAccounts = value as IEnumerable<services.Models.SipAccount>;
             try
@@ -29,7 +29,7 @@ namespace ipsc6.agent.wpfapp.Converters
                 }
             }
             catch (ArgumentNullException) { }
-            return "<null>";
+            return "N/A";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -50,8 +50,8 @@ namespace ipsc6.agent.wpfapp.Converters
                 var sipAccounts = value as IEnumerable<services.Models.SipAccount>;
                 try
                 {
-                    // 全部一个注册了，算正常
-                    if (sipAccounts.All(x => x.IsRegisterActive && x.LastRegisterError == 0))
+                    // 全部注册了，算正常
+                    if (sipAccounts.All(x => x.IsRegisterActive && x.LastRegisterError == 0) && sipAccounts.Count() > 0)
                     {
                         color = Colors.Green;
                     }
@@ -60,7 +60,7 @@ namespace ipsc6.agent.wpfapp.Converters
                     {
                         color = Colors.Yellow;
                     }
-                    else if (sipAccounts.Count() > 0)
+                    else
                     {
                         color = Colors.Red;
                     }

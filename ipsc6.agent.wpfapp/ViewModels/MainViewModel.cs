@@ -568,6 +568,11 @@ namespace ipsc6.agent.wpfapp.ViewModels
             var svc = Instance.MainService;
             Instance.CtiServices = svc.GetCtiServers();
             ResetStatusTimeSpan();
+            // 强行刷新座席状态的显示。它在离线的时候，不显示在线期间的状态
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Instance.OnPropertyChanged("Status");
+            });
         }
 
         private static void ResetStatusTimeSpan()
@@ -595,7 +600,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             Instance.DisplayName = ss[1];
         }
 
-        private static bool IsMainConnectionOk => ctiServices.Any(x => x.State == client.ConnectionState.Ok && x.IsMain);
+        internal static bool IsMainConnectionOk => ctiServices.Any(x => x.State == client.ConnectionState.Ok && x.IsMain);
 
         private static void MainService_OnStatusChanged(object sender, services.Events.StatusChangedEventArgs e)
         {

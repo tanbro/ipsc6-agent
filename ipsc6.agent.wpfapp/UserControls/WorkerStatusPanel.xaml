@@ -6,24 +6,25 @@
              xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"             
+             xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              x:Name="WorkerStatusPannelUserControl"
              Width="128" Height="64">
 
     <UserControl.Resources>
         <Style x:Key="WorkerStatusButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Margin" Value="2"/>
-            <Setter Property="FontSize" Value="16" />
+            <!--<Setter Property="Background" Value="Transparent"/>-->
+            <!--<Setter Property="Margin" Value="2"/>-->
+            <!--<Setter Property="FontSize" Value="18" />-->
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="TextElement.Foreground" Value="Blue"/>
+            <Setter Property="TextElement.Foreground" Value="{StaticResource MyInfoTextForeground}"/>
             <Setter Property="TextElement.FontSize" Value="18"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
                         <Grid>
-                            <ContentPresenter x:Name="MyContentPresenter" Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0" />
+                            <ContentPresenter x:Name="MyContentPresenter" Content="{TemplateBinding Content}" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -43,7 +44,9 @@
 
 
         <converters:AgentStateToTextConverter x:Key="AgentStateToTextConverter"/>
+        <converters:AgentStateToTextConverter2 x:Key="AgentStateToTextConverter2"/>
         <converters:AgentStateToBrushConverter x:Key="AgentStateToBrushConverter"/>
+        <converters:AgentStateToBrushConverter2 x:Key="AgentStateToBrushConverter2"/>
 
         <Style x:Key="MyStateLightStyle" TargetType="Border">
             <Setter Property="CornerRadius" Value="6"/>
@@ -52,6 +55,11 @@
             <Setter Property="Height" Value="12"/>
             <Setter Property="Width" Value="12"/>
         </Style>
+
+        <sys:Int32 x:Key="IntZero">0</sys:Int32>
+        <sys:Int32 x:Key="IntOne">1</sys:Int32>
+        <sys:Boolean x:Key="BoolTrue">true</sys:Boolean>
+        <sys:Boolean x:Key="BoolFalse">false</sys:Boolean>
 
     </UserControl.Resources>
 
@@ -100,12 +108,11 @@
                                 <ColumnDefinition Width="3*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" HorizontalAlignment="Center"
-                                       Margin="0 0 2 0"
-                                       Text="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter}}"/>
-                            <Border Grid.Column="1" HorizontalAlignment="Center"
+                            <TextBlock Grid.Column="0" Margin="0 0 2 0" TextAlignment="Center"
+                                       Text="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter2}}"/>
+                            <Border Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
                                     Style="{StaticResource MyStateLightStyle}"
-                                    Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter}}"/>
+                                    Background="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToBrushConverter2}}"/>
                         </Grid>
                         <Popup x:Name="StatePopup" StaysOpen="False"
                                IsOpen="{Binding IsStatePopupOpened}"

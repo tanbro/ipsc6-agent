@@ -16,7 +16,8 @@ namespace ipsc6.agent.wpfapp.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return "";
+            if (value == null) return "null";
+
             var tuple = value as AgentStateWorkType;
             switch (tuple?.Item1)
             {
@@ -64,4 +65,24 @@ namespace ipsc6.agent.wpfapp.Converters
             throw new NotImplementedException();
         }
     }
+
+    [ValueConversion(typeof(AgentStateWorkType), typeof(string))]
+    public class AgentStateToTextConverter2 : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (!ViewModels.MainViewModel.IsMainConnectionOk)
+            {
+                return "N/A";
+            }
+            AgentStateToTextConverter _conv = new();
+            return _conv.Convert(value, targetType, parameter, culture);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 }

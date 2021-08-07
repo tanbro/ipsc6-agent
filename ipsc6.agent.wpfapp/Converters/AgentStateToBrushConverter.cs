@@ -17,8 +17,11 @@ namespace ipsc6.agent.wpfapp.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             Color color = (Color)ColorConverter.ConvertFromString("#808080"); //"不存在";
-            if (value != null)
+
+            do
             {
+                if (value == null) break;
+
                 var tuple = value as AgentStateWorkType;
                 switch (tuple?.Item1)
                 {
@@ -84,8 +87,29 @@ namespace ipsc6.agent.wpfapp.Converters
                     default:
                         break;
                 }
-            }
+
+            } while (false);
+
             return new SolidColorBrush(color);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    [ValueConversion(typeof(AgentStateWorkType), typeof(SolidColorBrush))]
+    public class AgentStateToBrushConverter2 : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (!ViewModels.MainViewModel.IsMainConnectionOk)
+            {
+                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#808080"));
+            }
+            AgentStateToBrushConverter _conv = new();
+            return _conv.Convert(value, targetType, parameter, culture);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
