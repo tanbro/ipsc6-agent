@@ -7,12 +7,12 @@
 !include LogicLib.nsh
 
 Var VCREDIST_OK
+
 Section "-SEC_VCREDIST"
     StrCpy $VCREDIST_OK ""
 
-    MessageBox MB_OK|MB_ICONINFORMATION \
-        "即将执行 “适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++ (${ARCH})” 的 检测程序。期间可能会出现错误提示，但这并不表示安装失败。$\r$\n$\r$\n按 “确定” 开始检测。"
-
+    ; MessageBox MB_OK|MB_ICONINFORMATION \
+    ;     "即将执行 “适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++ (${ARCH})” 的 检测程序。期间可能会出现错误提示，但这并不表示安装失败。$\r$\n$\r$\n按 “确定” 开始检测。"
 
     SetOutPath "$PLUGINSDIR\vcredist"
     File "..\${ARCH}\Release\DummyCppConsoleApp.exe"
@@ -24,8 +24,8 @@ Section "-SEC_VCREDIST"
     ${If} $0 == "0"
         DetailPrint "Visual C++ Runtime 检测通过"
         StrCpy $VCREDIST_OK "1"
-        MessageBox MB_OK|MB_ICONINFORMATION \
-            "“适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++ (${ARCH})” 检测成功。$\r$\n$\r$\n按 “确定” 继续安装。"
+        ; MessageBox MB_OK|MB_ICONINFORMATION \
+        ;     "“适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++ (${ARCH})” 检测成功。$\r$\n$\r$\n按 “确定” 继续安装。"
     ${Else}
         DetailPrint "Visual C++ Runtime 检测失败: $0"
     ${EndIf}
@@ -33,7 +33,7 @@ Section "-SEC_VCREDIST"
 
     ${If} $VCREDIST_OK == ""
         MessageBox MB_YESNO|MB_ICONQUESTION \
-            "“适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++ (${ARCH})” 检测失败。计算机上可能没有安装这个软件。$\r$\n$\r$\n现在是否要安装？$\r$\n$\r$\n按 “是” 立即执行，按 “否” 退出安装程序。" \
+            "计算机上可能没有安装“适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++ 可再发行软件包(${ARCH})”。$\r$\n$\r$\n现在是否要安装？$\r$\n$\r$\n按 “是” 立即执行，按 “否” 退出安装程序。" \
             IDYES _VCREDIST_TRUE IDNO _VCREDIST_FALSE
 
         _VCREDIST_TRUE:
@@ -42,22 +42,25 @@ Section "-SEC_VCREDIST"
             File "deps\VC_redist.${ARCH}.exe"
             SetCompress auto
 
-            DetailPrint "Visual C++ Redistributable ${ARCH} 正在安装 ..."
+            DetailPrint "安装“适用于 Visual Studio 2015、2017 和 2019 Microsoft Visual C++ 可再发行软件包(${ARCH})”..."
             Push $0
             ExecWait '"$OUTDIR\VC_redist.${ARCH}.exe" /norestart /passive' $0
             BringToFront
             ${If} $0 != "0"
-                DetailPrint "Visual C++ Redistributable 安装失败: $0"
-                MessageBox MB_OK|MB_ICONSTOP "错误:$\r$\n$\r$\n适用于 Visual Studio 2015、2017 和 2019 Microsoft Visual C++ 可再发行软件包(${ARCH})安装失败 ($0)。"
-                Quit
+                Push $1
+                StrCpy $1 "“适用于 Visual Studio 2015、2017 和 2019 Microsoft Visual C++ 可再发行软件包(${ARCH})”安装失败 ($0)"
+                DetailPrint $1
+                MessageBox MB_OK|MB_ICONSTOP "错误:$\r$\n$\r$\n$1"
+                Abort "$1"
+                Pop $1
             ${Else}
-                DetailPrint "Visual C++ Redistributable(${ARCH}) 安装完成"
+                DetailPrint "“适用于 Visual Studio 2015、2017 和 2019 Microsoft Visual C++ 可再发行软件包(${ARCH})”安装完成"
             ${EndIf}
             Pop $0
             Goto _VCREDIST_NEXT
 
         _VCREDIST_FALSE:
-            Quit
+            Abort "取消安装"
 
         _VCREDIST_NEXT:
     ${EndIf}

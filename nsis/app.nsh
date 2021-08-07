@@ -1,6 +1,7 @@
 ;Including MSIS Macros
 !include LogicLib.nsh
 !include x64.nsh
+!include WordFunc.nsh
 
 ;产品名，版本……
 !define PUBLISHER "广州市和声信息技术有限公司"
@@ -76,36 +77,39 @@ DetailPrint "检查之前安装的版本 (${PLATFORM} ${USER_TYPE}) ..."
   ${If} $InstalledVersion != ""
     DetailPrint "发现已安装的版本: $InstalledDisplayName($InstalledVersion). Uninstall='$UninstallString'"
 
-    ${If} $InstalledVersion S> ${PRODUCT_VERSION}
+    Push $0
+    ${VersionCompare} $InstalledVersion ${PRODUCT_VERSION} $0    
+
+    ${If} $0 == "1"
       MessageBox MB_OK|MB_ICONINFORMATION \
           "安装程序检测到 $InstalledDisplayName($InstalledVersion) 已经安装。$\r$\n由于已经安装的版本高于将要安装的版本，此次安装将不会继续！$\r$\n$\r$\n按 “确定” 退出。"
-      Quit
+      Abort "已经安装的版本高于将要安装的版本，此次安装将不会继续！"
 
-    ${ElseIf} $InstalledVersion S<= ${PRODUCT_VERSION}
+    ${Else}
       MessageBox MB_YESNO|MB_ICONQUESTION \
-          "安装程序检测到 $InstalledDisplayName($InstalledVersion) 已经安装。$\r$\n只有在删除之前的版本之后方可继续安装。$\r$\n$\r$\n是否要删除之前的程序？$\r$\n$\r$\n按 “是” 删除，按 “否” 退出。" \
+          "安装程序检测到 $InstalledDisplayName($InstalledVersion) 已经安装。$\r$\n只有在删除之前已经安装的程序之后方可继续安装。$\r$\n$\r$\n是否要删除之前安装的程序？$\r$\n$\r$\n按 “是” 删除，按 “否” 退出。" \
           IDYES _INSTALLED_UN_TRUE IDNO _INSTALLED_UN_FALSE
 
+      Push $1
       _INSTALLED_UN_TRUE:
-        Push $0
-        ExecWait "$UninstallString" $0
+        ExecWait "$UninstallString" $1
         BringToFront
-        ${If} $0 != "0"
-          DetailPrint "$InstalledDisplayName($InstalledVersion) 删除失败: $0"
-          MessageBox MB_OK|MB_ICONSTOP "错误:$\r$\n$\r$\n无法删除 $InstalledDisplayName($InstalledVersion) ($0)。"
-          Quit
+        ${If} $1 != "0"
+          DetailPrint "$InstalledDisplayName($InstalledVersion) 删除失败: $1"
+          MessageBox MB_OK|MB_ICONSTOP "错误:$\r$\n$\r$\n无法删除 $InstalledDisplayName($InstalledVersion) ($1)。"
+          Abort "无法删除 $InstalledDisplayName($InstalledVersion) ($1)。"
         ${Else}
           DetailPrint "$InstalledDisplayName($InstalledVersion) 删除成功，延时等待操作完成 ..."
-          Sleep 5000
-          ; MessageBox MB_OK|MB_ICONINFORMATION \
-          ;   "$InstalledDisplayName($InstalledVersion) 删除成功！$\r$\n$\r$\n按 “确定” 继续。"
+          Sleep 10000
           Goto _INSTALLED_UN_NEXT
         ${EndIf}      
       _INSTALLED_UN_FALSE:
-          Quit
+        Abort "取消安装"
       _INSTALLED_UN_NEXT:
-      Pop $0
+      Pop $1
     ${EndIf}
+
+    Pop $0
 
   ${Else}
     DetailPrint "未发现已安装的版本"

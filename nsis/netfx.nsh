@@ -23,6 +23,8 @@ Section "-SEC_NETFX"
         StrCpy $NETFX_OK "1"
     ${EndIf}
 
+    Push $0
+
     ${If} $NETFX_OK == ""
         MessageBox MB_YESNO|MB_ICONQUESTION \
             "在计算机上找不到运行本程序所需的 .NET Framework v4.6.1 或以上版本。$\r$\n$\r$\n现在是否要安装这个软件？$\r$\n$\r$\n按 “是” 立即执行，按 “否” 退出安装程序。" \
@@ -39,18 +41,23 @@ Section "-SEC_NETFX"
             ExecWait '"$OUTDIR\NDP461-KB3102436-x86-x64-AllOS-ENU.exe" /norestart /passive /showrmui /showfinalerror' $0
             BringToFront
             ${If} $0 != "0"
-                DetailPrint ".NET Framework 安装失败: $0"
-                MessageBox MB_OK|MB_ICONSTOP "错误:$\r$\n$\r$\n.NET Framework v4.6.1 安装失败 ($0)。"
-                Quit
+                Push $1
+                StrCpy $1 ".NET Framework v4.6.1 安装失败 ($0)"
+                DetailPrint $1 
+                MessageBox MB_OK|MB_ICONSTOP "错误:$\r$\n$\r$\n.$1"
+                Abort "$1"
+                Pop $1
             ${Else}
                 DetailPrint ".NET Framework v4.6.1 安装完成"
             ${EndIf}
             Goto _NETFX_NEXT
 
         _NETFX_FALSE:
-            Quit
+            Abort "取消安装"
 
         _NETFX_NEXT:
     ${EndIf}
+
+    Pop $0
 SectionEnd
 
