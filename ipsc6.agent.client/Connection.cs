@@ -187,7 +187,7 @@ namespace ipsc6.agent.client
                         }
                         if (prevState == ConnectionState.Closing)
                         {
-                            disconnectTcs.SetResult(null);
+                            disconnectTcs.TrySetResult(null);
                         }
                         else if (prevState == ConnectionState.Opening)
                         {
@@ -345,6 +345,10 @@ namespace ipsc6.agent.client
 
         public int Flag { get; private set; }
 
+        private bool isLocalClose = false;
+        public bool IsLocalClose => isLocalClose;
+        public bool IsRemoteClose => !isLocalClose;
+
         public async Task<int> OpenAsync(string remoteHost, ushort remotePort, string workerNumber, string password,
                                          uint keepAliveTimeout = DefaultKeepAliveTimeoutMilliseconds, int flag = 0)
         {
@@ -400,6 +404,7 @@ namespace ipsc6.agent.client
                 lock (connectLock)
                 {
                     disconnectTcs = new();
+                    isLocalClose = true;
                     SetState(ConnectionState.Closing);
                     connector.Disconnect(true);
                 }
@@ -409,7 +414,7 @@ namespace ipsc6.agent.client
                     var task2 = Task.WhenAny(disconnectTcs.Task, timeoutTask2);
                     if (task2 != timeoutTask2)
                     {
-                        disconnectTcs.SetCanceled();
+                        disconnectTcs.TrySetCanceled();
                         logger.WarnFormat("{0} Log-in timeout : ForceClose Timeout", this);
                     }
                     else
@@ -449,6 +454,7 @@ namespace ipsc6.agent.client
                 {
                     throw new InvalidOperationException($"Invalid state: {State}");
                 }
+                isLocalClose = true;
                 SetState(ConnectionState.Closing);
                 disconnectTcs = new();
             }
@@ -466,7 +472,7 @@ namespace ipsc6.agent.client
                     if (task == timeoutTask)
                     {
                         logOutTcs.SetCanceled();
-                        disconnectTcs.SetCanceled();
+                        disconnectTcs.TrySetCanceled();
                         throw new DisconnectionTimeoutException();
                     }
                     cst.Cancel();
@@ -486,7 +492,7 @@ namespace ipsc6.agent.client
                     task = await Task.WhenAny(disconnectTcs.Task, timeoutTask);
                     if (task == timeoutTask)
                     {
-                        disconnectTcs.SetCanceled();
+                        disconnectTcs.TrySetCanceled();
                         throw new ConnectionTimeoutException();
                     }
                     cst.Cancel();

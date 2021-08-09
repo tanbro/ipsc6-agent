@@ -47,6 +47,10 @@ namespace ipsc6.agent.client
                     DisposePjSipAccounts();
                     logger.Debug("Dispose - dispose Connections...");
                     DisposeConnections();
+                    //
+                    offHookSemaphore.Dispose();
+                    pjSemaphore.Dispose();
+                    connStateSemaphor.Dispose();
                 }
                 // 释放未托管的资源(未托管的对象)并重写终结器
                 // 将大型字段设置为 null
@@ -278,7 +282,7 @@ namespace ipsc6.agent.client
                     oldMainConnObj = MainConnection;
                     // 先修改 index
                     MainConnectionIndex = currIndex;
-                    logger.InfoFormat("切换主服务节点到 {0}", MainConnection);
+                    logger.WarnFormat("切换主服务节点到 [[0]] {1}", MainConnectionIndex, MainConnectionInfo);
                 }
             }
 
@@ -930,197 +934,189 @@ namespace ipsc6.agent.client
 
         public event EventHandler<ConnectionInfoStateChangedEventArgs> OnConnectionStateChanged;
 
-        private static readonly ConnectionState[] disconntedStates = { ConnectionState.Lost, ConnectionState.Failed, ConnectionState.Closed };
+        // 断线的状态
+        private static readonly ConnectionState[] disconntedConnectionStates = { ConnectionState.Lost, ConnectionState.Failed, ConnectionState.Closed };
+
         private static readonly AgentState[] workingStates = { AgentState.Ring, AgentState.Work };
 
         private bool isEverLostAllConnections;
+
+        private readonly SemaphoreSlim connStateSemaphor = new(1);
+
+        private int lastestReconnectIndex = -1;
+
+        private static bool CanExecuteReconnect(Connection connection)
+        {
+            switch (connection.State)
+            {
+                case ConnectionState.Failed:
+                case ConnectionState.Lost:
+                    return true;
+                case ConnectionState.Closed:
+                    if (connection.IsLocalClose)
+                        return true;
+                    break;
+                default:
+                    break;
+            }
+            return false;
+        }
+
+        private async Task ExecuteReconnectAsync()
+        {
+            await connStateSemaphor.WaitAsync();
+            try
+            {
+                Random rand = new();
+
+                // 还没有连接上去过，不要重连！
+                AgentRunningState runningState;
+                lock (this)
+                {
+                    runningState = RunningState;
+                }
+                if (runningState != AgentRunningState.Started)
+                {
+                    return;
+                }
+
+                // 判断：目前已经丢失了所有的连接？
+                bool isNoOkConnections = !connections.Any(x => x.State == ConnectionState.Ok);
+                if (isNoOkConnections)
+                {
+                    lock (this)
+                    {
+                        if (!isEverLostAllConnections)
+                        {
+                            isEverLostAllConnections = isNoOkConnections;
+                            logger.Debug("ExecuteReconnectAsync - 已丢失所有的 CTI 服务节点的连接!");
+                        }
+                    }
+                }
+
+                bool isWorking = workingStates.Contains(AgentState);
+
+                // 目前连接上了的 minors
+                var okMinorIndexList = (
+                        from pair
+                        in connections.Select((obj, index) => (obj, index))
+                        where pair.index != MainConnectionIndex && pair.obj.State == ConnectionState.Ok
+                        select pair.index
+                    ).ToList();
+
+                // 如果 main 断线，失败，或者被主动关闭
+
+                if (disconntedConnectionStates.Contains(MainConnection.State))
+                {
+                    // 如果正在工作状态，不能切换 main
+                    if (isWorking)
+                    {
+                        logger.Debug("ExecuteReconnectAsync - 处于工作状态，不得切换主连接");
+                    }
+                    // 否则如果有可用的 minor，直接 切换 main!
+                    else if (okMinorIndexList.Count > 0)
+                    {
+                        // 算一个随机的可用从连接，切换！
+                        var newMainIndex = okMinorIndexList[rand.Next(okMinorIndexList.Count)];
+                        await TakenAwayAsync(newMainIndex);
+                    }
+                }
+
+                // 递增的选中一个断开的连接发起重连
+                // 如果存在正在连接的或者正在关闭的，就不要发起新的重连!
+                (Connection, int) reconnPair = default;
+                int connFlag = 0;
+                if (connections.Any(x => (new ConnectionState[] { ConnectionState.Opening, ConnectionState.Closing }).Contains(x.State)))
+                {
+                    logger.Debug("ExecuteReconnectAsync - 存在正在连接或关闭的连接，不进行新的重连");
+                }
+                // 工作中，只能重连当前的主连接
+                else if (isWorking)
+                {
+                    if (CanExecuteReconnect(MainConnection))
+                    {
+                        connFlag = 1;
+                        reconnPair = (MainConnection, MainConnectionIndex);
+                    }
+                }
+                // 选一个掉线的连接，进行重连
+                else
+                {
+                    reconnPair = (
+                        from pair
+                        in connections.Select((obj, index) => (obj, index))
+                        where CanExecuteReconnect(pair.obj) && pair.index > lastestReconnectIndex
+                        select pair
+                    ).FirstOrDefault();
+                    if (reconnPair.Equals(default))
+                    {
+                        // index 大于它的没找到，从 0 开始找
+                        reconnPair = (
+                            from pair
+                            in connections.Select((obj, index) => (obj, index))
+                            where CanExecuteReconnect(pair.obj)
+                            select pair
+                        ).FirstOrDefault();
+                    }
+                    // 重连的时候，如果没有任何一个可用的连接，就把当前重连的设置 FLAG=1(作为主连接连接)
+                    connFlag = isNoOkConnections ? 1 : 0;
+                }
+                //
+                // 实际执行重连
+                if (reconnPair.Equals(default))
+                {
+                    logger.Debug("ExecuteReconnectAsync - 没有需要重连的连接");
+                }
+                else
+                {
+                    var reconn = reconnPair.Item1;
+                    lastestReconnectIndex = reconnPair.Item2;
+                    var ctiServer = ctiServers[lastestReconnectIndex];
+                    try
+                    {
+                        logger.InfoFormat("ExecuteReconnectAsync - 作为{0}连接重连 [{1}] {2} ...",
+                            connFlag == 1 ? "主" : "从",
+                            lastestReconnectIndex, ctiServer);
+                        await reconn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: connFlag);
+                        logger.InfoFormat("ExecuteReconnectAsync - 作为{0}连接重连 [{1}] {2} 成功",
+                            connFlag == 1 ? "主" : "从",
+                            lastestReconnectIndex, ctiServer);
+                    }
+                    catch (ConnectionException exception)
+                    {
+                        logger.WarnFormat("ExecuteReconnectAsync - 作为{0}连接重连 [{1}] {2} 失败: {3}",
+                            connFlag == 1 ? "主" : "从",
+                            lastestReconnectIndex, ctiServer,
+                            exception.GetType());
+                    }
+                    catch (Exception exception)
+                    {
+                        logger.ErrorFormat("ExecuteReconnectAsync - 作为{0}连接重连 [{1}] {2} 出现意料之外的异常: {3}",
+                            connFlag == 1 ? "主" : "从",
+                            lastestReconnectIndex, ctiServer,
+                            exception);
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("ExecuteReconnectAsync - {1}", exception);
+            }
+            finally
+            {
+                connStateSemaphor.Release();
+            }
+        }
+
         private void Conn_OnConnectionStateChanged(object sender, ConnectionStateChangedEventArgs e)
         {
             var conn = sender as Connection;
             var connIdx = connections.IndexOf(conn);
             var ctiServer = ctiServers[connIdx];
-            Random rand = new();
+            logger.DebugFormat("{0}: {1} --> {2}", ctiServer, e.OldState, e.NewState);
             ConnectionInfoStateChangedEventArgs evtStateChanged = new(ctiServer, e.OldState, e.NewState);
-            EventArgs evtMainConnChanged = null;
-            Action action = null;
-            bool isAllLost = false;
-            logger.DebugFormat("{0}: {1} --> {2}", conn, e.OldState, e.NewState);
-            lock (this)
-            {
-                if (RunningState == AgentRunningState.Started)
-                {
-                    isAllLost = !connections.Any(x => x.State == ConnectionState.Ok);
-                    if (!isEverLostAllConnections && isAllLost)
-                    {
-                        isEverLostAllConnections = true;
-                        logger.Warn("已丢失所有的 CTI 服务节点的连接!");
-                    }
-                }
-                //////////
-                // 断线处理
-                if (disconntedStates.Contains(e.NewState))
-                {
-                    bool isCancelled = false;
-                    var isMain = connIdx == MainConnectionIndex;
-                    if (isMain)
-                    {
-                        if (RunningState != AgentRunningState.Started)
-                        {
-                            // 处于启动过程中！
-                            logger.WarnFormat(
-                                "主服务节点 [{0}]({1}) 连接断开 (NewState={2} RunningState={3}) 放弃重连.",
-                                connIdx, ctiServers[connIdx], e.NewState, RunningState
-                            );
-                        }
-                        else
-                        {
-                            // 其它连接还有连接上了的吗?
-                            var indices = (
-                                from vi in connections.Select((value, index) => (value, index))
-                                where vi.index != MainConnectionIndex && vi.value.State == ConnectionState.Ok
-                                select vi.index
-                            ).ToList();
-                            if (indices.Count > 0)
-                            {
-                                // 有的选,但是如果在工作状态,不能变!
-                                if (workingStates.Contains(AgentState))
-                                {
-                                    logger.WarnFormat("主服务节点 [{0}]({1}) 连接断开. 但是由于处于工作状态, 将继续使用该主节点并发起重连", connIdx, ctiServer);
-                                }
-                                else
-                                {
-                                    MainConnectionIndex = indices[rand.Next(indices.Count)];
-                                    logger.WarnFormat(
-                                        "主服务节点 [{0}]({1}) 连接断开. 切换主节点到 [{2}]({3})",
-                                        connIdx, ctiServer, MainConnectionIndex, MainConnectionInfo
-                                    );
-                                }
-                            }
-                            else
-                            {
-                                // 没得选
-                                switch (e.NewState)
-                                {
-                                    case ConnectionState.Closed:
-                                        {
-                                            // 被主动关闭
-                                            ConnectionState[] exceptStats = { ConnectionState.Closed, ConnectionState.Closing };
-                                            var indices2 = (
-                                                from vi in connections.Select((value, index) => (value, index))
-                                                where vi.index != MainConnectionIndex && !exceptStats.Contains(vi.value.State)
-                                                select vi.index
-                                            ).ToList();
-                                            if (indices2.Count > 0)
-                                            {
-                                                MainConnectionIndex = indices2[rand.Next(indices2.Count)];
-                                                logger.WarnFormat(
-                                                    "主服务节点 [{0}]({1}) 连接被关闭. 且找不到其它活动连接, 但仍切换主节点到 [{2}]({3})",
-                                                    connIdx, ctiServer, MainConnectionIndex, MainConnectionInfo
-                                                );
-                                            }
-                                            else
-                                            {
-                                                logger.WarnFormat(
-                                                    "主服务节点 [{0}]({1}) 连接被关闭. 且找不到其它未被主动关闭的连接, 将放弃重连",
-                                                    connIdx, ctiServer
-                                                );
-                                                isCancelled = true;
-                                            }
-                                        }
-                                        break;
-                                    default:
-                                        logger.WarnFormat(
-                                            "主服务节点 [{0}]({1}) 连接断开. 但是由于找不到其它可用服务节点连接, 将继续使用该主节点并发起重连",
-                                            connIdx, ctiServer
-                                        );
-                                        break;
-                                }
-                            }
-                            ///
-                            if (!isCancelled)
-                            {
-                                if (MainConnectionIndex != connIdx)
-                                {
-                                    action = new Action(async () =>
-                                    {
-                                        logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
-                                        try
-                                        {
-                                            await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 0);
-                                            logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
-                                        }
-                                        catch (ConnectionException ex)
-                                        {
-                                            logger.ErrorFormat("从服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
-                                        };
-                                    });
-                                    // 需要抛出切换新的主服务节事件
-                                    evtMainConnChanged = EventArgs.Empty;
-                                }
-                                else
-                                {
-                                    action = new Action(async () =>
-                                    {
-                                        logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
-                                        try
-                                        {
-                                            await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 1);
-                                            logger.InfoFormat("主服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
-                                        }
-                                        catch (ConnectionException ex)
-                                        {
-                                            logger.ErrorFormat("主服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
-                                        };
-                                    });
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (RunningState != AgentRunningState.Started)
-                        {
-                            logger.WarnFormat(
-                                "从服务节点 [{0}]({1}) 连接断开 ({2} {3}). 放弃重连.",
-                                connIdx, ctiServer, e.NewState, RunningState
-                            );
-                        }
-                        else if (e.NewState == ConnectionState.Closed)
-                        {
-                            logger.WarnFormat("从服务节点 [{0}]({1}) 连接被关闭. 将放弃重连", connIdx, ctiServer);
-                        }
-                        else
-                        {
-                            logger.WarnFormat("从服务节点 [{0}]({1}) 连接丢失. 将发起重连", connIdx, ctiServer);
-                            action = new Action(async () =>
-                            {
-                                logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接 ... ", connIdx, ctiServer);
-                                try
-                                {
-                                    await conn.OpenAsync(ctiServer.Host, ctiServer.Port, WorkerNum, password, flag: 0);
-                                    logger.InfoFormat("从服务节点 [{0}]({1}) 重新连接成功", connIdx, ctiServer);
-                                }
-                                catch (ConnectionException ex)
-                                {
-                                    logger.ErrorFormat("从服务节点 [{0}]({1}) 重新连接异常: {2}", connIdx, ctiServer, $"{ex.GetType()} {ex.Message}");
-                                }
-                            });
-                        }
-                    }
-                }
-            }
-            // 抛出连接状态变化事件
             OnConnectionStateChanged?.Invoke(this, evtStateChanged);
-            // 抛出切换新的主服务节事件
-            if (evtMainConnChanged != null)
-            {
-                OnMainConnectionChanged?.Invoke(this, evtMainConnChanged);
-            }
-            // 执行重连
-            if (action != null)
-            {
-                Task.Run(action);
-            }
+            Task.Run(() => ExecuteReconnectAsync());
         }
 
         public async Task StartUpAsync(IEnumerable<string> addresses, string workerNum, string password)
@@ -1940,12 +1936,15 @@ namespace ipsc6.agent.client
                     }
                     connObj = MainConnection;
                     MainConnectionIndex = index;
-                    logger.InfoFormat("切换主服务节点到 {0}", MainConnection);
+                    logger.WarnFormat("切换主服务节点到 [{0}] {1}", MainConnectionIndex, MainConnectionInfo);
                 }
                 OnMainConnectionChanged?.Invoke(this, EventArgs.Empty);
                 // 再通知原来的主，无论能否通知成功
-                AgentRequestMessage req = new(MessageType.REMOTE_MSG_TAKENAWAY);
-                await connObj.RequestAsync(req);
+                if (connObj.State == ConnectionState.Ok)
+                {
+                    AgentRequestMessage req = new(MessageType.REMOTE_MSG_TAKENAWAY);
+                    await connObj.RequestAsync(req);
+                }
             }
         }
 
