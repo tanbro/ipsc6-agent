@@ -1608,29 +1608,32 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 return;
             }
 
-            logger.Debug("注销");
+            using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
+            {
 
-            var svc = Instance.MainService;
-            await svc.LogOut();
+                logger.Debug("注销");
 
-            Instance.WorkerNumber = "";
-            Instance.DisplayName = "";
-            Instance.CurrentCallInfo = null;
-            Instance.SipAccounts = Array.Empty<services.Models.SipAccount>();
-            Instance.Groups = Array.Empty<services.Models.Group>();
-            Instance.AllGroups = Array.Empty<services.Models.Group>();
-            Instance.QueueInfos = Array.Empty<services.Models.QueueInfo>();
-            Instance.Calls = Array.Empty<services.Models.CallInfo>();
+                var svc = Instance.MainService;
+                await svc.LogOut();
+
+                Instance.WorkerNumber = "";
+                Instance.DisplayName = "";
+                Instance.CurrentCallInfo = null;
+                Instance.SipAccounts = Array.Empty<services.Models.SipAccount>();
+                Instance.Groups = Array.Empty<services.Models.Group>();
+                Instance.AllGroups = Array.Empty<services.Models.Group>();
+                Instance.QueueInfos = Array.Empty<services.Models.QueueInfo>();
+                Instance.Calls = Array.Empty<services.Models.CallInfo>();
+            }
 
             Instance.StopTimer();
         }
 
         private static bool CanLogout()
         {
+            if (Utils.CommandGuard.IsGuarding) return false;
             var svc = Instance.MainService;
-
             if (svc == null) return false;
-
             if (svc.GetAgentRunningState() != client.AgentRunningState.Started) return false;
             if (status.Item1 == client.AgentState.Work) return false;
 

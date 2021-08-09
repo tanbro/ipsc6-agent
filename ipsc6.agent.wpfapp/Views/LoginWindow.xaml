@@ -82,17 +82,19 @@
 
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
 
                         <Label Target="{Binding ElementName=textboxName}"
-                           VerticalAlignment="Center" Margin="8">
+                               VerticalAlignment="Center" Margin="8"
+                               Foreground="#FF5E91E4" FontSize="16" FontWeight="Bold">
                             登录工号(_N)
                         </Label>
 
                         <TextBox x:Name="textboxName" Grid.Column="1" Margin="16 8 16 8" FontSize="24"
                                  InputScope="LogOnName" InputMethod.IsInputMethodEnabled="False"
+                                 Foreground="#FF0060AB"
                                  Text="{Binding WorkerNum}">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
@@ -123,16 +125,18 @@
 
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <Label Target="{Binding ElementName=textboxPassword}"
-                           VerticalAlignment="Center" Margin="8">
+                               VerticalAlignment="Center" Margin="8"
+                               Foreground="#FF5E91E4" FontSize="16" FontWeight="Bold">
                             登录密码(_P)
                         </Label>
 
                         <PasswordBox  x:Name="textboxPassword"
-                                  Grid.Column="1" Margin="16 8 16 8" FontSize="24" PasswordChanged="PasswordChanged">
+                                      Grid.Column="1" Margin="16 8 16 8" FontSize="24" PasswordChanged="PasswordChanged"
+                                      Foreground="#FF0060AB">
                             <PasswordBox.Style>
                                 <Style xmlns:sys="clr-namespace:System;assembly=mscorlib" TargetType="{x:Type PasswordBox}">
                                     <Setter Property="VerticalAlignment" Value="Center"/>
@@ -155,7 +159,7 @@
                             </PasswordBox.Style>
                         </PasswordBox>
                     </Grid>
-<!--
+                    <!--
                     <CheckBox x:Name="checkboxSavePassword" Grid.Row="2"
                           Margin="16 8 16 8"
                           VerticalAlignment="Center" FontSize="14" Foreground="DarkGray"

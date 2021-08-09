@@ -44,7 +44,17 @@ namespace ipsc6.agent.wpfapp.ViewModels
         public bool IsAllowInput
         {
             get => isAllowInput;
-            set => SetProperty(ref isAllowInput, value);
+            set
+            {
+                if (!SetProperty(ref isAllowInput, value)) return;
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    foreach (var cmd in new IRelayCommand[] { loginCommand, showConfigWindowCommand, closeCommand })
+                    {
+                        cmd.NotifyCanExecuteChanged();
+                    }
+                });
+            }
         }
 
         private static readonly IRelayCommand loginCommand = new AsyncRelayCommand<object>(DoLoginAsync, CanLogin);
@@ -186,7 +196,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             mainViewModel.StartTimer();
         }
 
-        private static readonly IRelayCommand closeCommand = new RelayCommand(DoClose);
+        private static readonly IRelayCommand closeCommand = new RelayCommand(DoClose, CanClose);
         public IRelayCommand CloseCommand => closeCommand;
 
         private static void DoClose()
@@ -196,12 +206,22 @@ namespace ipsc6.agent.wpfapp.ViewModels
             window.Close();
         }
 
-        private static readonly IRelayCommand showConfigWindowCommand = new RelayCommand(DoShowConfigWindow);
+        private static bool CanClose()
+        {
+            return isAllowInput;
+        }
+
+        private static readonly IRelayCommand showConfigWindowCommand = new RelayCommand(DoShowConfigWindow, CanShowConfigWindow);
         public IRelayCommand ShowConfigWindowCommand => showConfigWindowCommand;
 
         private static void DoShowConfigWindow()
         {
             new Views.ConfigWindow().ShowDialog();
+        }
+
+        private static bool CanShowConfigWindow()
+        {
+            return isAllowInput;
         }
 
     }

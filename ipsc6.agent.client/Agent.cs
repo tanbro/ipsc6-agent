@@ -968,6 +968,7 @@ namespace ipsc6.agent.client
             try
             {
                 Random rand = new();
+                int newMainIndex = -1;
 
                 // 还没有连接上去过，不要重连！
                 AgentRunningState runningState;
@@ -1011,14 +1012,23 @@ namespace ipsc6.agent.client
                     // 如果正在工作状态，不能切换 main
                     if (isWorking)
                     {
-                        logger.Debug("ExecuteReconnectAsync - 处于工作状态，不得切换主连接");
+                        logger.DebugFormat("ExecuteReconnectAsync - 主连接 [{0}] 断开，但时处于工作状态，不得切换主连接", MainConnectionIndex);
                     }
                     // 否则如果有可用的 minor，直接 切换 main!
                     else if (okMinorIndexList.Count > 0)
                     {
                         // 算一个随机的可用从连接，切换！
-                        var newMainIndex = okMinorIndexList[rand.Next(okMinorIndexList.Count)];
-                        await TakenAwayAsync(newMainIndex);
+                        newMainIndex = okMinorIndexList[rand.Next(okMinorIndexList.Count)];
+                        if (newMainIndex == MainConnectionIndex)
+                        {
+                            throw new InvalidOperationException("执行重连时, 新的主连接 Index 与原来的值相同，无法切换！");
+                        }
+                        try
+                        {
+                            logger.DebugFormat("ExecuteReconnectAsync - 原来的主连接 [{0}] 断开，切换主连接到 [{0}] ...", MainConnectionIndex, newMainIndex);
+                            await TakenAwayAsync(newMainIndex);
+                        }
+                        catch (BaseException) { }
                     }
                 }
 
@@ -1059,7 +1069,18 @@ namespace ipsc6.agent.client
                         ).FirstOrDefault();
                     }
                     // 重连的时候，如果没有任何一个可用的连接，就把当前重连的设置 FLAG=1(作为主连接连接)
-                    connFlag = isNoOkConnections ? 1 : 0;
+                    if (isNoOkConnections)
+                    {
+                        connFlag = 1;
+                        if (reconnPair.Item2 != MainConnectionIndex)
+                        {
+                            lock (this)
+                            {
+                                logger.DebugFormat("ExecuteReconnectAsync - 所有连接均已断开，即将执行重连，重新设置主连接为 [{0}] ...", reconnPair.Item2);
+                                MainConnectionIndex = reconnPair.Item2;
+                            }
+                        }
+                    }
                 }
                 //
                 // 实际执行重连
@@ -1072,6 +1093,17 @@ namespace ipsc6.agent.client
                     var reconn = reconnPair.Item1;
                     lastestReconnectIndex = reconnPair.Item2;
                     var ctiServer = ctiServers[lastestReconnectIndex];
+                    if (connFlag == 1)
+                    {
+                        if (lastestReconnectIndex != MainConnectionIndex)
+                        {
+                            throw new InvalidOperationException("执行主连接重连时，主连接标记与对象的主连接索引属性不一致");
+                        }
+                        if (newMainIndex >= 0)
+                        {
+                            throw new InvalidOperationException("执行主连接重连时，已经切换了主连接标志，无法再次切换");
+                        }
+                    }
                     try
                     {
                         logger.InfoFormat("ExecuteReconnectAsync - 作为{0}连接重连 [{1}] {2} ...",
@@ -1100,7 +1132,8 @@ namespace ipsc6.agent.client
             }
             catch (Exception exception)
             {
-                logger.ErrorFormat("ExecuteReconnectAsync - {1}", exception);
+                logger.ErrorFormat("ExecuteReconnectAsync - {0}", exception);
+                throw;
             }
             finally
             {
@@ -1113,7 +1146,16 @@ namespace ipsc6.agent.client
             var conn = sender as Connection;
             var connIdx = connections.IndexOf(conn);
             var ctiServer = ctiServers[connIdx];
-            logger.DebugFormat("{0}: {1} --> {2}", ctiServer, e.OldState, e.NewState);
+            logger.DebugFormat("[{0}] {1}: {2} --> {3}", connIdx, ctiServer, e.OldState, e.NewState);
+            AgentRunningState runningState;
+            lock (this)
+            {
+                runningState = RunningState;
+            }
+            if (runningState == AgentRunningState.Started && e.NewState == ConnectionState.Closed && conn.IsRemoteClose)
+            {
+                logger.WarnFormat("[{0}] {1} 远端关闭，这个连接不会恢复！", connIdx, ctiServer);
+            }
             ConnectionInfoStateChangedEventArgs evtStateChanged = new(ctiServer, e.OldState, e.NewState);
             OnConnectionStateChanged?.Invoke(this, evtStateChanged);
             Task.Run(() => ExecuteReconnectAsync());
@@ -1279,6 +1321,7 @@ namespace ipsc6.agent.client
                     RunningState = AgentRunningState.Stopping;
                     isMainNotConnected = !MainConnection.Connected;
                 }
+                await connStateSemaphor.WaitAsync();
                 try
                 {
                     // 首先，主节点
@@ -1347,6 +1390,10 @@ namespace ipsc6.agent.client
                     }
                     throw;
                 }
+                finally
+                {
+                    connStateSemaphor.Release();
+                }
 
                 lock (this)
                 {
@@ -1365,6 +1412,7 @@ namespace ipsc6.agent.client
             }
             connections.Clear();
             ctiServers.Clear();
+            lastestReconnectIndex = -1;
         }
 
         private void DisposePjSipAccounts()
@@ -1932,7 +1980,7 @@ namespace ipsc6.agent.client
                     }
                     if (connections[index].State != ConnectionState.Ok)
                     {
-                        throw new InvalidOperationException($"Invalid state: {connections[index].State}");
+                        throw new InvalidOperationException($"无法切换主连接到状态为 {connections[index].State} 的连接 [{index}]");
                     }
                     connObj = MainConnection;
                     MainConnectionIndex = index;

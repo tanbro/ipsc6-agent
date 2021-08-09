@@ -68,7 +68,7 @@
                                                     </ContentControl>
                                                     <TextBlock Grid.Column="1" VerticalAlignment="Center"
                                                                Style="{StaticResource MyHeadText}"
-                                                               Text="{Binding RemoteTelNum}"/>
+                                                               Text="{Binding RemoteTelNum, Mode=OneWay}"/>
                                                 </Grid>
                                                 <Button Grid.Column="1" Style="{StaticResource MyTinyButton}"
                                                         Height="Auto" Width="Auto"
