@@ -343,8 +343,18 @@ namespace ipsc6.agent.client
         public const int DefaultRequestTimeoutMilliseconds = 5000;
         public const int DefaultKeepAliveTimeoutMilliseconds = 5000;
 
-        public async Task<int> OpenAsync(string remoteHost, ushort remotePort, string workerNumber, string password, uint keepAliveTimeout = DefaultKeepAliveTimeoutMilliseconds, int flag = 0)
+        public int Flag { get; private set; }
+
+        public async Task<int> OpenAsync(string remoteHost, ushort remotePort, string workerNumber, string password,
+                                         uint keepAliveTimeout = DefaultKeepAliveTimeoutMilliseconds, int flag = 0)
         {
+            if (string.IsNullOrWhiteSpace(remoteHost))
+                throw new ArgumentException($"“{nameof(remoteHost)}”不能为 null 或空白。", nameof(password));
+            if (string.IsNullOrWhiteSpace(workerNumber))
+                throw new ArgumentException($"“{nameof(password)}”不能为 null 或空白。", nameof(workerNumber));
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException($"“{nameof(password)}”不能为 null 或空白。", nameof(password));
+
             ConnectionState[] allowStates = { ConnectionState.Init, ConnectionState.Closed, ConnectionState.Failed, ConnectionState.Lost };
             lock (connectLock)
             {
@@ -357,6 +367,7 @@ namespace ipsc6.agent.client
                     throw new InvalidOperationException($"Invalid state: {State}");
                 }
             }
+            Flag = flag;
             logger.InfoFormat("{0} connect \"{1}|{2}\", flag={3} ...", this, remoteHost, remotePort, flag);
             connectTcs = new();
             if (remotePort > 0)

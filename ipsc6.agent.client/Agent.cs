@@ -943,18 +943,17 @@ namespace ipsc6.agent.client
             ConnectionInfoStateChangedEventArgs evtStateChanged = new(ctiServer, e.OldState, e.NewState);
             EventArgs evtMainConnChanged = null;
             Action action = null;
+            bool isAllLost = false;
             logger.DebugFormat("{0}: {1} --> {2}", conn, e.OldState, e.NewState);
             lock (this)
             {
                 if (RunningState == AgentRunningState.Started)
                 {
-                    if (!isEverLostAllConnections)
+                    isAllLost = !connections.Any(x => x.State == ConnectionState.Ok);
+                    if (!isEverLostAllConnections && isAllLost)
                     {
-                        if (!connections.Any(x => x.State == ConnectionState.Ok))
-                        {
-                            isEverLostAllConnections = true;
-                            logger.Warn("丢失了所有 CTI 服务节点的连接!");
-                        }
+                        isEverLostAllConnections = true;
+                        logger.Warn("已丢失所有的 CTI 服务节点的连接!");
                     }
                 }
                 //////////
