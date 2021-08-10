@@ -495,15 +495,11 @@ namespace ipsc6.agent.client
                 using (CancellationTokenSource cst = new())
                 {
                     var timeoutTask = Task.Delay(requestTimeout, cst.Token);
-                    logger.InfoFormat("{0} Close(force) >>> Disconnect()", this);
+                    logger.InfoFormat("{0} Close(force) ...", this);
                     connector.Disconnect();
-                    logger.InfoFormat("{0} Close(force) <<< Disconnect()", this);
-                    logger.InfoFormat("{0} Close(force) >>> Wait disconnected. timeouyt={1}", this, requestTimeout);
                     task = await Task.WhenAny(disconnectTcs.Task, timeoutTask);
-                    logger.InfoFormat("{0} Close(force) <<< Wait disconnected", this);
                     if (task == timeoutTask)
                     {
-                        logger.InfoFormat("{0} Close(force) - Wait disconnected timeout!", this);
                         disconnectTcs.TrySetCanceled();
                         throw new ConnectionTimeoutException();
                     }

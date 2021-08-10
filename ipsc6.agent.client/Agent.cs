@@ -69,6 +69,8 @@ namespace ipsc6.agent.client
 
         public static bool IsInitialized { get; private set; }
 
+        private static Thread initialThread;
+
         public static void Initial(SipConfigArgs sipConfigArgs = null)
         {
             if (IsInitialized)
@@ -77,6 +79,7 @@ namespace ipsc6.agent.client
 
             /// Get a Synchronized TaskFactory
             SyncFactory = new TaskFactory(TaskScheduler.FromCurrentSynchronizationContext());
+            initialThread = Thread.CurrentThread;
 
             /// Init PJ SIP UA
             logger.Info("Initial - create pjsua2 endpoint.");
@@ -133,6 +136,7 @@ namespace ipsc6.agent.client
             SipEndpoint.libDestroy();
             SipEndpoint.Dispose();
             IsInitialized = false;
+            initialThread = null;
             logger.Debug("Release - completed");
         }
 
@@ -1419,15 +1423,29 @@ namespace ipsc6.agent.client
 
         private void DisposePjSipAccounts()
         {
-            foreach (var acc in sipAccountCollection)
+
+            Action action = new(() =>
             {
-                logger.DebugFormat("dispose PjSip {0} ...", acc);
-                acc.OnIncomingCall2 -= Acc_OnIncomingCall;
-                acc.OnRegisterStateChanged -= Acc_OnRegisterStateChanged;
-                acc.OnCallDisconnected -= Acc_OnCallStateChanged;
-                acc.OnCallStateChanged -= Acc_OnCallStateChanged;
-                acc.shutdown();
-                acc.Dispose();
+                foreach (var acc in sipAccountCollection)
+                {
+                    logger.DebugFormat("dispose PjSip {0}", acc);
+                    acc.OnIncomingCall2 -= Acc_OnIncomingCall;
+                    acc.OnRegisterStateChanged -= Acc_OnRegisterStateChanged;
+                    acc.OnCallDisconnected -= Acc_OnCallStateChanged;
+                    acc.OnCallStateChanged -= Acc_OnCallStateChanged;
+                    acc.shutdown();
+                    acc.Dispose();
+                }
+            });
+            if (Thread.CurrentThread == initialThread)
+            {
+                logger.Debug("dispose PjSip accounts from initial thread...");
+                action.Invoke();
+            }
+            else
+            {
+                logger.Debug("dispose PjSip accounts from non-initial thread...");
+                SyncFactory.StartNew(action).Wait();
             }
             sipAccountCollection.Clear();
             sipAccounts.Clear();
