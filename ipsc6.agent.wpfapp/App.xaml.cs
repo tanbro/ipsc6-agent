@@ -82,7 +82,10 @@ namespace ipsc6.agent.wpfapp
                 {
                     log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(appLoggingConfigFile));
                 }
-                logger.WarnFormat("\r\n!!!!!!!!!!!!!!!!!!!! Startup (AssemblyVersion {0}, FileVersion {1}) !!!!!!!!!!!!!!!!!!!!\r\n", Assembly.GetName().Version, VersionInfo.FileVersion);
+                logger.WarnFormat(
+                    "\r\n!!!!!!!!!!!!!!!!!!!! Startup (version {0}) !!!!!!!!!!!!!!!!!!!!\r\n",
+                    VersionInfo.ProductVersion
+                );
             }
             catch (Exception err)
             {
