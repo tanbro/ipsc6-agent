@@ -153,28 +153,44 @@ namespace ipsc6.agent.services
 
         private void Agent_OnAgentDisplayNameReceived(object sender, client.AgentDisplayNameReceivedEventArgs e)
         {
-            model.DisplayName = agent.DisplayName;
-            model.WorkerNum = agent.WorkerNum;
-            OnLoginCompleted?.Invoke(this, EventArgs.Empty);
+            try
+            {
+                model.DisplayName = agent.DisplayName;
+                model.WorkerNum = agent.WorkerNum;
+                OnLoginCompleted?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("OnAgentDisplayNameReceived - {0}", exception);
+                throw;
+            }
         }
 
         public event EventHandler<Events.StatusChangedEventArgs> OnStatusChanged;
 
         private void Agent_OnAgentStateChanged(object sender, client.AgentStateChangedEventArgs e)
         {
-            lock (model)
+            try
             {
-                model.State = e.NewState.AgentState;
-                model.WorkType = e.NewState.WorkType;
-                ReloadCalls();
+                lock (model)
+                {
+                    model.State = e.NewState.AgentState;
+                    model.WorkType = e.NewState.WorkType;
+                    ReloadCalls();
+                }
+                OnStatusChanged?.Invoke(this, new Events.StatusChangedEventArgs
+                {
+                    OldState = e.OldState.AgentState,
+                    OldWorkType = e.OldState.WorkType,
+                    NewState = e.NewState.AgentState,
+                    NewWorkType = e.NewState.WorkType,
+                });
             }
-            OnStatusChanged?.Invoke(this, new Events.StatusChangedEventArgs
+            catch (Exception exception)
             {
-                OldState = e.OldState.AgentState,
-                OldWorkType = e.OldState.WorkType,
-                NewState = e.NewState.AgentState,
-                NewWorkType = e.NewState.WorkType,
-            });
+                logger.ErrorFormat("OnAgentStateChanged - {0}", exception);
+                throw;
+            }
         }
 
 
@@ -182,13 +198,21 @@ namespace ipsc6.agent.services
 
         private void Agent_OnTeleStateChanged(object sender, client.TeleStateChangedEventArgs e)
         {
-            model.TeleState = e.NewState;
-            ReloadCalls();
-            OnTeleStateChanged?.Invoke(this, new Events.TeleStateChangedEventArgs
+            try
             {
-                OldState = e.OldState,
-                NewState = e.NewState,
-            });
+                model.TeleState = e.NewState;
+                ReloadCalls();
+                OnTeleStateChanged?.Invoke(this, new Events.TeleStateChangedEventArgs
+                {
+                    OldState = e.OldState,
+                    NewState = e.NewState,
+                });
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("OnTeleStateChanged - {0}", exception);
+                throw;
+            }
         }
 
         internal async Task LogInAsync(string workerNum, string password, IEnumerable<string> serverList)
@@ -199,8 +223,16 @@ namespace ipsc6.agent.services
         public async Task LogOut()
         {
             logger.Debug("LogOut");
-            await agent.ShutDownAsync();
-            model = new();
+            try
+            {
+                await agent.ShutDownAsync();
+                model = new();
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("LogOut - {0}", exception);
+                throw;
+            }
         }
 
         public IReadOnlyList<string> GetWorkerNum()
@@ -216,7 +248,15 @@ namespace ipsc6.agent.services
         public async Task SetBusy(client.WorkType workType = client.WorkType.PauseBusy)
         {
             logger.DebugFormat("SetBusy {0}", workType);
-            await agent.SetBusyAsync(workType);
+            try
+            {
+                await agent.SetBusyAsync(workType);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("SetBusy - {0}", exception);
+                throw;
+            }
         }
 
         public client.AgentRunningState GetAgentRunningState()
@@ -227,7 +267,15 @@ namespace ipsc6.agent.services
         public async Task SetIdle()
         {
             logger.Debug("SetIdle");
-            await agent.SetIdleAsync();
+            try
+            {
+                await agent.SetIdleAsync();
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("SetIdle - {0}", exception);
+                throw;
+            }
         }
 
         public Models.Model GetModel()
@@ -248,19 +296,35 @@ namespace ipsc6.agent.services
         #region Connection
         private void Agent_OnConnectionStateChanged(object sender, client.ConnectionInfoStateChangedEventArgs e)
         {
-            ReloadCtiServers();
-            OnCtiConnectionStateChanged?.Invoke(this, new Events.CtiConnectionStateChangedEventArgs
+            try
             {
-                CtiIndex = agent.GetConnetionIndex(e.ConnectionInfo),
-                OldState = e.OldState,
-                NewState = e.NewState,
-            });
+                ReloadCtiServers();
+                OnCtiConnectionStateChanged?.Invoke(this, new Events.CtiConnectionStateChangedEventArgs
+                {
+                    CtiIndex = agent.GetConnetionIndex(e.ConnectionInfo),
+                    OldState = e.OldState,
+                    NewState = e.NewState,
+                });
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("OnConnectionStateChanged - {0}", exception);
+                throw;
+            }
         }
 
         private void Agent_OnMainConnectionChanged(object sender, EventArgs e)
         {
-            ReloadCtiServers();
-            OnMainCtiConnectionChanged?.Invoke(this, EventArgs.Empty);
+            try
+            {
+                ReloadCtiServers();
+                OnMainCtiConnectionChanged?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("OnMainConnectionChanged - {0}", exception);
+                throw;
+            }
         }
 
         public event EventHandler OnMainCtiConnectionChanged;
@@ -285,7 +349,17 @@ namespace ipsc6.agent.services
 
         public IReadOnlyCollection<Models.CtiServer> GetCtiServers()
         {
-            return GetModel().CtiServers;
+            IReadOnlyCollection<Models.CtiServer> result;
+            try
+            {
+                result = GetModel().CtiServers;
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("GetCtiServers - {0}", exception);
+                throw;
+            }
+            return result;
         }
 
         #endregion
@@ -296,7 +370,15 @@ namespace ipsc6.agent.services
 
         private void Agent_OnSignedGroupsChanged(object sender, EventArgs e)
         {
-            ReloadGroups();
+            try
+            {
+                ReloadGroups();
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("OnSignedGroupsChanged - {0}", exception);
+                throw;
+            }
         }
 
         private void ReloadGroups()
@@ -313,42 +395,74 @@ namespace ipsc6.agent.services
 
         private void Agent_OnGroupReceived(object sender, EventArgs e)
         {
-            ReloadGroups();
+            try
+            {
+                ReloadGroups();
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("OnGroupReceived - {0}", exception);
+                throw;
+            }
         }
 
         public async Task SignGroups(bool isSignIn = true)
         {
-            if (isSignIn)
+            try
             {
-                await agent.SignInAsync();
+                if (isSignIn)
+                {
+                    await agent.SignInAsync();
+                }
+                else
+                {
+                    await agent.SignOutAsync();
+                }
             }
-            else
+            catch (Exception exception)
             {
-                await agent.SignOutAsync();
+                logger.ErrorFormat("SignGroups - {0}", exception);
+                throw;
             }
         }
 
         public async Task SignGroup(string id, bool isSignIn = true)
         {
-            if (isSignIn)
+            try
             {
-                await agent.SignInAsync(id);
+                if (isSignIn)
+                {
+                    await agent.SignInAsync(id);
+                }
+                else
+                {
+                    await agent.SignOutAsync(id);
+                }
             }
-            else
+            catch (Exception exception)
             {
-                await agent.SignOutAsync(id);
+                logger.ErrorFormat("SignGroup - {0}", exception);
+                throw;
             }
         }
 
         public async Task SignGroups(IEnumerable<string> ids, bool isSignIn = true)
         {
-            if (isSignIn)
+            try
             {
-                await agent.SignInAsync(ids);
+                if (isSignIn)
+                {
+                    await agent.SignInAsync(ids);
+                }
+                else
+                {
+                    await agent.SignOutAsync(ids);
+                }
             }
-            else
+            catch (Exception exception)
             {
-                await agent.SignOutAsync(ids);
+                logger.ErrorFormat("SignGroups - {0}", exception);
+                throw;
             }
         }
 
@@ -359,12 +473,20 @@ namespace ipsc6.agent.services
 
         private void Agent_OnAllGroupListChanged(object sender, EventArgs e)
         {
-            lock (model)
+            try
             {
-                model.AllGroups = (
-                    from x in agent.AllGroups
-                    select new Models.Group { Id = x.Id, Name = x.Name }
-                ).ToList();
+                lock (model)
+                {
+                    model.AllGroups = (
+                        from x in agent.AllGroups
+                        select new Models.Group { Id = x.Id, Name = x.Name }
+                    ).ToList();
+                }
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("OnAllGroupListChanged - {0}", exception);
+                throw;
             }
         }
 
@@ -379,20 +501,44 @@ namespace ipsc6.agent.services
 
         private void Agent_OnSipRegistrarListReceived(object sender, client.SipRegistrarListReceivedEventArgs e)
         {
-            ReloadSipAccounts();
-            OnSipRegisterStateChanged?.Invoke(this, EventArgs.Empty);
+            try
+            {
+                ReloadSipAccounts();
+                OnSipRegisterStateChanged?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("OnSipRegistrarListReceived - {0}", exception);
+                throw;
+            }
         }
         private void Agent_OnSipCallStateChanged(object sender, EventArgs e)
         {
-            ReloadSipAccounts();
-            ReloadCalls();
-            OnSipCallStateChanged?.Invoke(this, EventArgs.Empty);
+            try
+            {
+                ReloadSipAccounts();
+                ReloadCalls();
+                OnSipCallStateChanged?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("OnSipCallStateChanged - {0}", exception);
+                throw;
+            }
         }
 
         private void Agent_OnSipRegisterStateChanged(object sender, EventArgs e)
         {
-            ReloadSipAccounts();
-            OnSipRegisterStateChanged?.Invoke(this, EventArgs.Empty);
+            try
+            {
+                ReloadSipAccounts();
+                OnSipRegisterStateChanged?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("OnSipRegisterStateChanged - {0}", exception);
+                throw;
+            }
         }
 
         public event EventHandler OnSipRegisterStateChanged;
@@ -437,13 +583,29 @@ namespace ipsc6.agent.services
         public async Task Answer()
         {
             logger.Debug("Answer");
-            await agent.AnswerAsync();
+            try
+            {
+                await agent.AnswerAsync();
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("Answer - {0}", exception);
+                throw;
+            }
         }
 
         public async Task Hangup()
         {
             logger.Debug("Hangup");
-            await agent.HangupAsync();
+            try
+            {
+                await agent.HangupAsync();
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("Hangup - {0}", exception);
+                throw;
+            }
         }
 
         #endregion
@@ -581,103 +743,239 @@ namespace ipsc6.agent.services
         public async Task Dial(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
             logger.DebugFormat("Dial: {0}, {1}, {2}, {3}", calledTelNum, callingTelNum, channelGroup, option);
-            await agent.DialAsync(calledTelNum, callingTelNum, channelGroup, option);
+            try
+            {
+                await agent.DialAsync(calledTelNum, callingTelNum, channelGroup, option);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("Dial - {0}", exception);
+                throw;
+            }
         }
 
         public async Task Xfer(int ctiIndex, int channel, string groupId, string workerNum = "", string customString = "")
         {
             logger.DebugFormat("Xfer: {0}, {1}, {2}, {3}, {4}", ctiIndex, channel, groupId, workerNum, customString);
-            await agent.XferAsync(ctiIndex, channel, groupId, workerNum, customString);
+            try
+            {
+                await agent.XferAsync(ctiIndex, channel, groupId, workerNum, customString);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("Xfer - {0}", exception);
+                throw;
+            }
         }
 
         public async Task Xfer(string groupId, string workerNum = "", string customString = "")
         {
             logger.DebugFormat("Xfer: {0}, {1}, {2}", groupId, workerNum, customString);
-            await agent.XferAsync(groupId, workerNum, customString);
+            try
+            {
+                await agent.XferAsync(groupId, workerNum, customString);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("XferAsync - {0}", exception);
+                throw;
+            }
         }
 
         public async Task XferConsult(string groupId, string workerNum = "", string customString = "")
         {
             logger.DebugFormat("XferConsult: {0}, {1}, {2}", groupId, workerNum, customString);
-            await agent.XferConsultAsync(groupId, workerNum, customString);
+            try
+            {
+                await agent.XferConsultAsync(groupId, workerNum, customString);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("XferConsult - {0}", exception);
+                throw;
+            }
         }
 
         public async Task XferExt(int ctiIndex, int channel, string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
             logger.DebugFormat("XferExt: {0}, {1}, {2}, {3}, {4}, {5}", ctiIndex, channel, calledTelNum, callingTelNum, channelGroup, option);
-            await agent.XferExtAsync(ctiIndex, channel, calledTelNum, callingTelNum, channelGroup, option);
+            try
+            {
+                await agent.XferExtAsync(ctiIndex, channel, calledTelNum, callingTelNum, channelGroup, option);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("XferExt - {0}", exception);
+                throw;
+            }
         }
 
         public async Task XferExt(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
             logger.DebugFormat("XferExt: {0}, {1}, {2}, {3}", calledTelNum, callingTelNum, channelGroup, option);
-            await agent.XferExtAsync(calledTelNum, callingTelNum, channelGroup, option);
+            try
+            {
+                await agent.XferExtAsync(calledTelNum, callingTelNum, channelGroup, option);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("XferExt - {0}", exception);
+                throw;
+            }
         }
 
         public async Task XferExtConsult(string calledTelNum, string callingTelNum = "", string channelGroup = "", string option = "")
         {
             logger.DebugFormat("XferExt: {0}, {1}, {2}, {3}", calledTelNum, callingTelNum, channelGroup, option);
-            await agent.XferExtConsultAsync(calledTelNum, callingTelNum, channelGroup, option);
+            try
+            {
+                await agent.XferExtConsultAsync(calledTelNum, callingTelNum, channelGroup, option);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("XferExtConsult - {0}", exception);
+                throw;
+            }
         }
 
         public async Task CallIvr(string ivrId, client.IvrInvokeType invokeType = client.IvrInvokeType.Keep, string customString = "")
         {
             logger.DebugFormat("CallIvr: {0}, {1}, {2}", ivrId, invokeType, customString);
-            await agent.CallIvrAsync(ivrId, invokeType, customString);
+            try
+            {
+                await agent.CallIvrAsync(ivrId, invokeType, customString);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("CallIvr - {0}", exception);
+                throw;
+            }
         }
 
         public async Task Monitor(int ctiIndex, string workerNum)
         {
             logger.DebugFormat("Monitor: {0}, {1}", ctiIndex, workerNum);
-            await agent.MonitorAsync(ctiIndex, workerNum);
+            try
+            {
+                await agent.MonitorAsync(ctiIndex, workerNum);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("Monitor - {0}", exception);
+                throw;
+            }
         }
 
         public async Task UnMonitor(int ctiIndex, string workerNum)
         {
             logger.DebugFormat("UnMonitor: {0}, {1}", ctiIndex, workerNum);
-            await agent.UnMonitorAsync(ctiIndex, workerNum);
+            try
+            {
+                await agent.UnMonitorAsync(ctiIndex, workerNum);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("UnMonitor - {0}", exception);
+                throw;
+            }
         }
 
         public async Task Intercept(int ctiIndex, string workerNum)
         {
             logger.DebugFormat("Intercept: {0}, {1}", ctiIndex, workerNum);
-            await agent.InterceptAsync(ctiIndex, workerNum);
+            try
+            {
+                await agent.InterceptAsync(ctiIndex, workerNum);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("Intercept - {0}", exception);
+                throw;
+            }
         }
 
         public async Task Interrupt(int ctiIndex, string workerNum)
         {
             logger.DebugFormat("Interrupt: {0}, {1}", ctiIndex, workerNum);
-            await agent.InterruptAsync(ctiIndex, workerNum);
+            try
+            {
+                await agent.InterruptAsync(ctiIndex, workerNum);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("Interrupt - {0}", exception);
+                throw;
+            }
         }
 
         public async Task HangupByWorkerNum(int ctiIndex, string workerNum)
         {
             logger.DebugFormat("HangupByWorkerNum: {0}, {1}", ctiIndex, workerNum);
-            await agent.HangupAsync(ctiIndex, workerNum);
+            try
+            {
+                await agent.HangupAsync(ctiIndex, workerNum);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("HangupByWorkerNum - {0}", exception);
+                throw;
+            }
         }
 
         public async Task SetBusyByWorkerNum(string workerNum, client.WorkType workType = client.WorkType.PauseBusy)
         {
             logger.DebugFormat("SetBusyByWorkerNum: {0}, {1}", workerNum, workType);
-            await agent.SetBusyAsync(workerNum, workType);
+            try
+            {
+                await agent.SetBusyAsync(workerNum, workType);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("SetBusyByWorkerNum - {0}", exception);
+                throw;
+            }
         }
 
         public async Task SetIdleByWorkerNum(string workerNum)
         {
             logger.DebugFormat("SetIdleByWorkerNum: {0}", workerNum);
-            await agent.SetIdleAsync(workerNum);
+            try
+            {
+                await agent.SetIdleAsync(workerNum);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("SetIdleByWorkerNum - {0}", exception);
+                throw;
+            }
         }
 
         public async Task SignOutByWorkerNum(string workerNum, string groupId)
         {
             logger.DebugFormat("SignOutByWorkerNum: {0}, {1}", workerNum, groupId);
-            await agent.SignOutAsync(workerNum, groupId);
+            try
+            {
+                await agent.SignOutAsync(workerNum, groupId);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("SignOutByWorkerNum - {0}", exception);
+                throw;
+            }
         }
 
         public async Task KickOut(string workerNum)
         {
             logger.DebugFormat("KickOut {0}", workerNum);
-            await agent.KickOutAsync(workerNum);
+            try
+            {
+                await agent.KickOutAsync(workerNum);
+            }
+            catch (Exception exception)
+            {
+                logger.ErrorFormat("KickOut - {0}", exception);
+                throw;
+            }
         }
         #endregion
 

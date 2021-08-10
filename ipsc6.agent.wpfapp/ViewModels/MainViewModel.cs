@@ -573,7 +573,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             {
                 NotifyStateRelativeCommandsExecutable();
 
-                Instance.OnPropertyChanged("Status");                
+                Instance.OnPropertyChanged("Status");
                 Instance.OnPropertyChanged("WorkerNum");
                 Instance.OnPropertyChanged("DisplayName");
                 Instance.OnPropertyChanged("Groups");
@@ -1683,7 +1683,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static void DoForceExit()
         {
-
             var r = MessageBox.Show(
                 Application.Current.MainWindow,
                 "是否确定要强行强行退出？",

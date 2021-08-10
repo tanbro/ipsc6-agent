@@ -132,9 +132,21 @@ namespace ipsc6.agent.client
             logger.Debug("Release - network.Connector.Release()");
             network.Connector.Release();
 
-            logger.Debug("Release - destory pjsua2 Endpoint");
-            SipEndpoint.libDestroy();
-            SipEndpoint.Dispose();
+            Action actDisposeSip = new(() =>
+            {
+                SipEndpoint.libDestroy();
+                SipEndpoint.Dispose();
+            });
+            if (Thread.CurrentThread == initialThread)
+            {
+                logger.Debug("Release - destory pjsua2 Endpoint from initial thread");
+                actDisposeSip();
+            }
+            else
+            {
+                logger.Debug("Release - destory pjsua2 Endpoint from non-initial thread");
+                SyncFactory.StartNew(actDisposeSip).Wait();
+            }
             IsInitialized = false;
             initialThread = null;
             logger.Debug("Release - completed");
@@ -1440,7 +1452,7 @@ namespace ipsc6.agent.client
             if (Thread.CurrentThread == initialThread)
             {
                 logger.Debug("dispose PjSip accounts from initial thread...");
-                action.Invoke();
+                action();
             }
             else
             {

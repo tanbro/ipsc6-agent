@@ -35,6 +35,8 @@ namespace ipsc6.agent.wpfapp
         }
         #endregion
 
+        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(GuiService));
+
 #pragma warning disable VSTHRD200
         public async Task LogIn(string workerNum, string password, IEnumerable<string> serverList = null)
         {
@@ -53,6 +55,7 @@ namespace ipsc6.agent.wpfapp
 
         public void ExitApp(int code = 0)
         {
+            logger.Warn("强行退出");
             Application.Current.Dispatcher.Invoke(() =>
             {
                 Application.Current.Shutdown(code);

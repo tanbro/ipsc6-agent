@@ -52,6 +52,11 @@ namespace ipsc6.agent.client
                 if (disposing)
                 {
                     // 释放托管状态(托管对象)
+                    if (eventThread == Thread.CurrentThread)
+                    {
+                        logger.Error("Dispose can not be invoked from itself\'s event thread");
+                        throw new InvalidOperationException($"Can not dispose a {GetType().Name} object from itself\'s event thread");
+                    }
                     if (Interlocked.Add(ref _ref, -1) == 0)
                     {
                         logger.Debug("Stop event thread");
@@ -62,12 +67,12 @@ namespace ipsc6.agent.client
                                 eventThread.Join();
                         }
                     }
+                    // 释放未托管的资源(未托管的对象)并重写终结器
+                    // 将大型字段设置为 null
+                    logger.DebugFormat("{0} Dispose - Deallocate connector", this);
+                    network.Connector.DeallocateInstance(connector);
+                    disposedValue = true;
                 }
-                // 释放未托管的资源(未托管的对象)并重写终结器
-                // 将大型字段设置为 null
-                logger.DebugFormat("{0} Dispose - Deallocate connector", this);
-                network.Connector.DeallocateInstance(connector);
-                disposedValue = true;
             }
         }
         #endregion
