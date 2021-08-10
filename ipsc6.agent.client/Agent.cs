@@ -43,7 +43,7 @@ namespace ipsc6.agent.client
                 {
                     logger.Info("Dispose - disposing...");
                     // 释放托管状态(托管对象)
-                    logger.Debug("Dispose - dispose PJSip Accounts...");
+                    logger.Debug("Dispose - dispose PjSip Accounts...");
                     DisposePjSipAccounts();
                     logger.Debug("Dispose - dispose Connections...");
                     DisposeConnections();
@@ -1421,7 +1421,7 @@ namespace ipsc6.agent.client
         {
             foreach (var acc in sipAccountCollection)
             {
-                logger.DebugFormat("Dispose {0}", acc);
+                logger.DebugFormat("dispose PjSip {0} ...", acc);
                 acc.OnIncomingCall2 -= Acc_OnIncomingCall;
                 acc.OnRegisterStateChanged -= Acc_OnRegisterStateChanged;
                 acc.OnCallDisconnected -= Acc_OnCallStateChanged;

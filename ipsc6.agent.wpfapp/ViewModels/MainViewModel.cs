@@ -255,7 +255,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 return;
             }
 
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current?.Dispatcher.Invoke(() =>
             {
                 foreach (var window in Application.Current.Windows.OfType<Window>())
                 {
@@ -571,7 +571,15 @@ namespace ipsc6.agent.wpfapp.ViewModels
             // 强行刷新座席状态的显示。它在离线的时候，不显示在线期间的状态
             Application.Current.Dispatcher.Invoke(() =>
             {
-                Instance.OnPropertyChanged("Status");
+                NotifyStateRelativeCommandsExecutable();
+
+                Instance.OnPropertyChanged("Status");                
+                Instance.OnPropertyChanged("WorkerNum");
+                Instance.OnPropertyChanged("DisplayName");
+                Instance.OnPropertyChanged("Groups");
+                Instance.OnPropertyChanged("AllGroups");
+                Instance.OnPropertyChanged("QueueInfos");
+                Instance.OnPropertyChanged("Calls");
             });
         }
 

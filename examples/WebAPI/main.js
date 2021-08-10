@@ -291,6 +291,16 @@ const getStats = () => {
   _ws.send(JSON.stringify(req));
 };
 
+const logOut = () => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "logOut",
+    params: [],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
 const exitApp = () => {
   const req = {
     jsonrpc: "2.0",
