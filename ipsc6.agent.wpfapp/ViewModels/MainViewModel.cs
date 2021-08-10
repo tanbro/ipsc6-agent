@@ -612,7 +612,6 @@ namespace ipsc6.agent.wpfapp.ViewModels
             ResetStatusTimeSpan();
         }
 
-
         private const string DEFAULT_WORKERNUM = "N/A";
 
         private static string workerNum = DEFAULT_WORKERNUM;

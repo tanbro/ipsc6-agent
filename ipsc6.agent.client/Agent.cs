@@ -1137,8 +1137,7 @@ namespace ipsc6.agent.client
             }
             finally
             {
-                var c = connStateSemaphor.Release();
-                logger.DebugFormat("ExecuteReconnectAsync - connStateSemaphor Released. PreviousCount={0}", c);
+                connStateSemaphor.Release();
             }
         }
 

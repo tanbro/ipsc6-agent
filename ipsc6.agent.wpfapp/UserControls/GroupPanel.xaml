@@ -24,10 +24,9 @@
         <Border Grid.Row="0"
                 CornerRadius="5 5 0 0" BorderThickness="1 1 1 0"
                 BorderBrush="{StaticResource MyBorderBrush}"
-                Background="{StaticResource MyGroupTitleBackground}" 
-            >
+                Background="{StaticResource MyGroupTitleBackground}">
             <TextBlock Style="{StaticResource MyScoreBoardTitleTextStyle}">
-                    技能组
+            技能组
             </TextBlock>
         </Border>
 
@@ -36,14 +35,16 @@
                 BorderBrush="{StaticResource MyBorderBrush}"
                 Background="{StaticResource MyBackgroud}">
             <Button Style="{StaticResource ScoreButtonStyle}"
-                    Command="{Binding GroupPopupCommand}">
+                    Command="{Binding GroupPopupCommand}"
+                    ToolTip="{Binding Groups, Mode=OneWay, Converter={StaticResource AgentGroupsToNumberTitleConverter}}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource MyScoreBoardNumberTextStyle}"
                                Text="{Binding Groups, Mode=OneWay, Converter={StaticResource AgentGroupsToNumberTitleConverter}}"/>
                     <Popup x:Name="SkillPopup" IsOpen="{Binding IsGroupPopupOpened}" StaysOpen="False" AllowsTransparency="True">
                         <ContentControl>
                             <Border BorderThickness="1" BorderBrush="{StaticResource MyBorderBrush}" CornerRadius="5" Background="{StaticResource MyBackgroud}">
-                                <ListBox ItemsSource="{Binding Groups, Mode=OneWay}" BorderThickness="0" Background="Transparent" Margin="2">
+                                <ListBox ItemsSource="{Binding Groups, Mode=OneWay}"
+                                         BorderThickness="0" Background="Transparent" Margin="2">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Background="{StaticResource MyBackgroud}">
