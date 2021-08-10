@@ -109,6 +109,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Margin="0 0 2 0" TextAlignment="Center"
+                                       ToolTip="点击以示闲或示忙"
                                        Text="{Binding Status, Mode=OneWay, Converter={StaticResource AgentStateToTextConverter2}}"/>
                             <Border Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
                                     Style="{StaticResource MyStateLightStyle}"
@@ -142,6 +143,7 @@
                 </Button>
 
                 <TextBlock Grid.Column="2" Style="{StaticResource MyScoreBoardNumberTextRightThinStyle}"
+                           ToolTip="状态持续时间"
                            Text="{Binding StatusDuration, Mode=OneWay, StringFormat='{}{0:h\\:mm\\:ss}', FallbackValue='-:--:--'}"/>
             </Grid>
 
