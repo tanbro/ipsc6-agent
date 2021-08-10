@@ -987,12 +987,7 @@ namespace ipsc6.agent.client
                 int newMainIndex = -1;
 
                 // 还没有连接上去过，不要重连！
-                AgentRunningState runningState;
-                lock (this)
-                {
-                    runningState = RunningState;
-                }
-                if (runningState != AgentRunningState.Started)
+                if (RunningState != AgentRunningState.Started)
                 {
                     return;
                 }
@@ -1021,8 +1016,8 @@ namespace ipsc6.agent.client
                         select pair.index
                     ).ToList();
 
-                // 如果 main 断线，失败，或者被主动关闭
 
+                // 如果 main 断线，失败，或者被主动关闭
                 if (disconntedConnectionStates.Contains(MainConnection.State))
                 {
                     // 如果正在工作状态，不能切换 main
@@ -1162,7 +1157,7 @@ namespace ipsc6.agent.client
             var conn = sender as Connection;
             var connIdx = connections.IndexOf(conn);
             var ctiServer = ctiServers[connIdx];
-            logger.DebugFormat("[{0}] {1}: {2} --> {3}", connIdx, ctiServer, e.OldState, e.NewState);
+            logger.DebugFormat("ConnectionStateChanged - [{0}] {1}: {2} --> {3}", connIdx, ctiServer, e.OldState, e.NewState);
             AgentRunningState runningState;
             lock (this)
             {
@@ -1170,7 +1165,7 @@ namespace ipsc6.agent.client
             }
             if (runningState == AgentRunningState.Started && e.NewState == ConnectionState.Closed && conn.IsRemoteClose)
             {
-                logger.WarnFormat("[{0}] {1} 远端关闭，这个连接不会恢复！", connIdx, ctiServer);
+                logger.WarnFormat("ConnectionStateChanged - [{0}] {1} 远端关闭，这个连接不会恢复！", connIdx, ctiServer);
             }
             ConnectionInfoStateChangedEventArgs evtStateChanged = new(ctiServer, e.OldState, e.NewState);
             OnConnectionStateChanged?.Invoke(this, evtStateChanged);
@@ -1423,14 +1418,23 @@ namespace ipsc6.agent.client
 
         private void DisposeConnections()
         {
-            foreach (var conn in connections)
+            connStateSemaphor.Wait();
+            try
             {
-                logger.DebugFormat("Dispose {0}", conn);
-                conn.Dispose();
+                foreach (var conn in connections)
+                {
+                    logger.DebugFormat("Dispose {0} ...", conn);
+                    conn.Dispose();
+                }
+
+                connections.Clear();
+                ctiServers.Clear();
+                lastestReconnectIndex = -1;
             }
-            connections.Clear();
-            ctiServers.Clear();
-            lastestReconnectIndex = -1;
+            finally
+            {
+                connStateSemaphor.Release();
+            }
         }
 
         private void DisposePjSipAccounts()

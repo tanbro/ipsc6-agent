@@ -217,22 +217,15 @@ namespace ipsc6.agent.services
 
         internal async Task LogInAsync(string workerNum, string password, IEnumerable<string> serverList)
         {
+            logger.Debug("LogInAsync");
             await agent.StartUpAsync(serverList, workerNum, password);
         }
 
-        public async Task LogOut()
+        internal async Task LogOutAsync()
         {
-            logger.Debug("LogOut");
-            try
-            {
-                await agent.ShutDownAsync();
-                model = new();
-            }
-            catch (Exception exception)
-            {
-                logger.ErrorFormat("LogOut - {0}", exception);
-                throw;
-            }
+            logger.Debug("LogOutAsync");
+            await agent.ShutDownAsync();
+            model = new();
         }
 
         public IReadOnlyList<string> GetWorkerNum()

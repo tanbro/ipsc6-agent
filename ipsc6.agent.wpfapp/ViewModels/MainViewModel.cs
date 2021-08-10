@@ -1605,20 +1605,24 @@ namespace ipsc6.agent.wpfapp.ViewModels
             return true;
         }
 
-        private static readonly IRelayCommand logoutCommand = new RelayCommand(DoLogout, CanLogout);
+        private static readonly IRelayCommand logoutCommand = new AsyncRelayCommand<object>(DoLogoutAsync, CanLogout);
         public IRelayCommand LogoutCommand => logoutCommand;
 
-        private static async void DoLogout()
+        internal static async Task DoLogoutAsync(object parameter)
         {
-            var r = MessageBox.Show(
-                Application.Current.MainWindow,
-                "是否确定要注销？",
-                Application.Current.MainWindow.Title,
-                MessageBoxButton.YesNo, MessageBoxImage.Question
-            );
-            if (r != MessageBoxResult.Yes)
+            bool isShowMessageBox = parameter != null && (bool)parameter;
+            if (isShowMessageBox)
             {
-                return;
+                var r = MessageBox.Show(
+                    Application.Current.MainWindow,
+                    "是否确定要注销？",
+                    Application.Current.MainWindow.Title,
+                    MessageBoxButton.YesNo, MessageBoxImage.Question
+                );
+                if (r != MessageBoxResult.Yes)
+                {
+                    return;
+                }
             }
 
             using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
@@ -1627,7 +1631,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 logger.Debug("注销");
 
                 var svc = Instance.MainService;
-                await svc.LogOut();
+                await svc.LogOutAsync();
 
                 Instance.WorkerNumber = DEFAULT_WORKERNUM;
                 Instance.DisplayName = DEFAULT_DISPLAY_NAME;
@@ -1642,7 +1646,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             Instance.StopTimer();
         }
 
-        private static bool CanLogout()
+        private static bool CanLogout(object parameter)
         {
             if (Utils.CommandGuard.IsGuarding) return false;
             var svc = Instance.MainService;
@@ -1678,23 +1682,26 @@ namespace ipsc6.agent.wpfapp.ViewModels
             return true;
         }
 
-        private static readonly IRelayCommand forceExitCommand = new RelayCommand(DoForceExit);
+        private static readonly IRelayCommand forceExitCommand = new RelayCommand<object>(DoForceExit);
         public IRelayCommand ForceExitCommand => forceExitCommand;
 
-        private static void DoForceExit()
+        private static void DoForceExit(object parameter)
         {
-            var r = MessageBox.Show(
-                Application.Current.MainWindow,
-                "是否确定要强行强行退出？",
-                Application.Current.MainWindow.Title,
-                MessageBoxButton.YesNo, MessageBoxImage.Question,
-                MessageBoxResult.No
-            );
-            if (r != MessageBoxResult.Yes)
+            bool isShowMessageBox = parameter != null && (bool)parameter;
+            if (isShowMessageBox)
             {
-                return;
+                var r = MessageBox.Show(
+                    Application.Current.MainWindow,
+                    "是否确定要强行强行退出？",
+                    Application.Current.MainWindow.Title,
+                    MessageBoxButton.YesNo, MessageBoxImage.Question,
+                    MessageBoxResult.No
+                );
+                if (r != MessageBoxResult.Yes)
+                {
+                    return;
+                }
             }
-
             logger.Warn("强行退出");
             Application.Current.Shutdown();
         }

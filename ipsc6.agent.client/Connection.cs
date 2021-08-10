@@ -59,10 +59,11 @@ namespace ipsc6.agent.client
                     }
                     if (Interlocked.Add(ref _ref, -1) == 0)
                     {
-                        logger.Debug("Stop event thread");
                         using (eventThreadCancelSource)
                         {
+                            logger.Debug("Cancel EventThread");
                             eventThreadCancelSource.Cancel();
+                            logger.Debug("Join EventThread ...");
                             if (eventThread.IsAlive)
                                 eventThread.Join();
                         }

@@ -45,12 +45,16 @@ namespace ipsc6.agent.wpfapp
             Tuple<string, string, IEnumerable<string>> param = new(workerNum, password, serverList);
             await Application.Current.Dispatcher.Invoke(async () =>
             {
-#pragma warning disable VSTHRD111
-                //await Task.CompletedTask;
                 await ViewModels.LoginViewModel.DoLoginAsync(param);
-#pragma warning restore VSTHRD111
             });
+        }
 
+        public async Task LogOut()
+        {
+            await Application.Current.Dispatcher.Invoke(async () =>
+            {
+                await ViewModels.MainViewModel.DoLogoutAsync(false);
+            });
         }
 
         public void ExitApp(int code = 0)

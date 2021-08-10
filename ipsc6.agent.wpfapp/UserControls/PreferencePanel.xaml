@@ -1,16 +1,17 @@
 <UserControl
-        x:Class="ipsc6.agent.wpfapp.UserControls.PreferencePanel"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-        xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
-        mc:Ignorable="d"
-        xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
-        xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
-        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
-        Height="64" Width="42">
+    x:Class="ipsc6.agent.wpfapp.UserControls.PreferencePanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    xmlns:local="clr-namespace:ipsc6.agent.wpfapp.UserControls"
+    mc:Ignorable="d"
+    xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
+    xmlns:converters="clr-namespace:ipsc6.agent.wpfapp.Converters"
+    d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    Height="64" Width="42">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -51,6 +52,9 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="2"/>
         </Style>
+
+        <sys:Boolean x:Key="True">True</sys:Boolean>
+        <sys:Boolean x:Key="False">False</sys:Boolean>
     </UserControl.Resources>
 
     <Grid>
@@ -72,7 +76,7 @@
                                 <AccessText>登录(_I)...</AccessText>
                             </Button>
                             <Button Style="{StaticResource MenuButtonStyle}"
-                                    Command="{Binding LogoutCommand}">
+                                    Command="{Binding LogoutCommand}" CommandParameter="{StaticResource True}">
                                 <AccessText>注销(_O)...</AccessText>
                             </Button>
                             <Button Style="{StaticResource MenuButtonStyle}"
@@ -84,7 +88,7 @@
                                 <AccessText>退出(_E)...</AccessText>
                             </Button>
                             <Button Style="{StaticResource MenuButtonStyle}" Background="SlateGray"
-                                    Command="{Binding ForceExitCommand}">
+                                    Command="{Binding ForceExitCommand}" CommandParameter="{StaticResource True}">
                                 <AccessText>强行退出(_F)...</AccessText>
                             </Button>
                         </StackPanel>
