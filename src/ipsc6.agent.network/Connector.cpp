@@ -130,8 +130,45 @@ void Connector::Disconnect() {
 
 void Connector::Disconnect(bool force) {
     auto sysAddr = _peer->GetSystemAddressFromIndex(_remoteAddrIndex);
-    _peer->CloseConnection(sysAddr, force);
-    _remoteAddrIndex = -1;
+    auto connectState = _peer->GetConnectionState(sysAddr);
+
+    switch (connectState) {
+        /// Connect() was called, but the process hasn't started yet
+        case RakNet::IS_PENDING:
+            throw gcnew InvalidOperationException(
+                "Can not disconnect a pending connection");
+            break;
+        /// Processing the connection attempt
+        case RakNet::IS_CONNECTING:
+            _peer->CancelConnectionAttempt(sysAddr);
+            _remoteAddrIndex = -1;
+            OnConnectAttemptFailed(this, EventArgs::Empty);
+            break;
+        /// Is connected and able to communicate
+        case RakNet::IS_CONNECTED:
+            _peer->CloseConnection(sysAddr, force);
+            break;
+        /// Was connected, but will disconnect as soon as the remaining messages
+        /// are delivered
+        case RakNet::IS_DISCONNECTING:
+            throw gcnew InvalidOperationException(
+                "Can not disconnect a disconnecting connection");
+            break;
+        /// A connection attempt failed and will be aborted
+        case RakNet::IS_SILENTLY_DISCONNECTING:
+            throw gcnew InvalidOperationException(
+                "Can not disconnect a silently disconnecting connection");
+            break;
+        /// No longer connected
+        case RakNet::IS_DISCONNECTED:
+            break;
+        /// Was never connected, or else was disconnected long enough ago that
+        /// the entry has been discarded
+        case RakNet::IS_NOT_CONNECTED:
+            break;
+        default:
+            break;
+    }
 }
 
 void Connector::ReceiveThreadStarter() {

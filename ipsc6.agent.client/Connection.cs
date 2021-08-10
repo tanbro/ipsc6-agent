@@ -155,11 +155,19 @@ namespace ipsc6.agent.client
                     break;
 
                 case ConnectorConnectAttemptFailedEventArgs:
-                    lock (connectLock)
                     {
-                        SetState(ConnectionState.Failed);
+                        ConnectionState prevState;
+                        lock (connectLock)
+                        {
+                            prevState = State;
+                            SetState(ConnectionState.Failed);
+                        }
+                        if (prevState == ConnectionState.Closing)
+                        {
+                            disconnectTcs.TrySetResult(null);
+                        }
+                        connectTcs.SetException(new ConnectionFailedException());
                     }
-                    connectTcs.SetException(new ConnectionFailedException());
                     break;
 
                 case ConnectorDisconnectedEventArgs or ConnectorConnectionLostEventArgs:
@@ -459,7 +467,7 @@ namespace ipsc6.agent.client
                 disconnectTcs = new();
             }
 
-            if (graceful)
+            if (graceful && State == ConnectionState.Ok)
             {
                 logger.InfoFormat("{0} Close(graceful) ...", this);
                 Task task;
@@ -487,11 +495,15 @@ namespace ipsc6.agent.client
                 using (CancellationTokenSource cst = new())
                 {
                     var timeoutTask = Task.Delay(requestTimeout, cst.Token);
-                    logger.InfoFormat("{0} Close(force) ...", this);
+                    logger.InfoFormat("{0} Close(force) >>> Disconnect()", this);
                     connector.Disconnect();
+                    logger.InfoFormat("{0} Close(force) <<< Disconnect()", this);
+                    logger.InfoFormat("{0} Close(force) >>> Wait disconnected. timeouyt={1}", this, requestTimeout);
                     task = await Task.WhenAny(disconnectTcs.Task, timeoutTask);
+                    logger.InfoFormat("{0} Close(force) <<< Wait disconnected", this);
                     if (task == timeoutTask)
                     {
+                        logger.InfoFormat("{0} Close(force) - Wait disconnected timeout!", this);
                         disconnectTcs.TrySetCanceled();
                         throw new ConnectionTimeoutException();
                     }

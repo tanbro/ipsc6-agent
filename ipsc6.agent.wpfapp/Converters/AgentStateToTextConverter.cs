@@ -16,7 +16,7 @@ namespace ipsc6.agent.wpfapp.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return "null";
+            if (value == null) return "???";
 
             var tuple = value as AgentStateWorkType;
             switch (tuple?.Item1)

@@ -1137,7 +1137,8 @@ namespace ipsc6.agent.client
             }
             finally
             {
-                connStateSemaphor.Release();
+                var c = connStateSemaphor.Release();
+                logger.DebugFormat("ExecuteReconnectAsync - connStateSemaphor Released. PreviousCount={0}", c);
             }
         }
 
@@ -1158,7 +1159,7 @@ namespace ipsc6.agent.client
             }
             ConnectionInfoStateChangedEventArgs evtStateChanged = new(ctiServer, e.OldState, e.NewState);
             OnConnectionStateChanged?.Invoke(this, evtStateChanged);
-            Task.Run(() => ExecuteReconnectAsync());
+            Task.Run(() => ExecuteReconnectAsync().ConfigureAwait(false));
         }
 
         public async Task StartUpAsync(IEnumerable<string> addresses, string workerNum, string password)
@@ -1315,7 +1316,7 @@ namespace ipsc6.agent.client
                 {
                     if (RunningState != AgentRunningState.Started)
                     {
-                        throw new InvalidOperationException($"Invalid state: {RunningState}");
+                        throw new InvalidOperationException($"`ShutDownAsync()` 方法无法在 `RunningState` 属性值为 {RunningState} 的情况下执行");
                     }
                     savedRunningState = RunningState;
                     RunningState = AgentRunningState.Stopping;
@@ -1327,60 +1328,62 @@ namespace ipsc6.agent.client
                     // 首先，主节点
                     if (isMainNotConnected)
                     {
-                        logger.WarnFormat("主节点连接 {0} 已经关闭！", MainConnection, graceful);
+                        logger.WarnFormat("ShutDownAsync - 主节点连接 {0} 已经关闭！", MainConnection, graceful);
                     }
                     else
                     {
-                        logger.DebugFormat("关闭主节点连接 {0} graceful={1}...", MainConnection, graceful);
+                        logger.DebugFormat("ShutDownAsync - 关闭主节点连接 {0} graceful={1}...", MainConnection, graceful);
                         await MainConnection.CloseAsync(graceful, flag: 1);
-                        logger.DebugFormat("关闭主节点连接 {0} graceful={1} 完毕.", MainConnection, graceful);
+                        logger.DebugFormat("ShutDownAsync - 关闭主节点连接 {0} graceful={1} 完毕.", MainConnection, graceful);
                     }
 
                     var savedMainConnectionIndex = MainConnectionIndex;
                     MainConnectionIndex = -1;
 
                     // 然后其他节点
-                    var itConnObj =
-                        from x in connections.Select((value, index) => (value, index))
+                    var itConnIndexPairs =
+                        from x in connections.Select((conn, index) => (conn, index))
                         where x.index != savedMainConnectionIndex
-                        select x.value;
-                    await Task.WhenAll(
-                        from conn in itConnObj
-                        select Task.Run(async () =>
+                        select x;
+                    foreach (var (conn, index) in itConnIndexPairs)
+                    {
+                        if (graceful)
                         {
-                            if (graceful)
+                            try
                             {
-                                try
+                                logger.DebugFormat("ShutDownAsync - 关闭从节点连接 [{0}] {1} graceful={2}...", index, conn, graceful);
+                                await conn.CloseAsync(graceful, flag: 0);
+                                logger.DebugFormat("ShutDownAsync - 关闭从节点连接 [{0}] {1} graceful={2} 完毕.", index, conn, graceful);
+                            }
+                            catch (Exception exce)
+                            {
+                                switch (exce)
                                 {
-                                    logger.DebugFormat("关闭从节点连接 {0} graceful={1}...", conn, graceful);
-                                    await conn.CloseAsync(graceful, flag: 0);
-                                    logger.DebugFormat("关闭从节点连接 {0} graceful={1} 完毕.", conn, graceful);
-                                }
-                                catch (Exception exce)
-                                {
-                                    switch (exce)
-                                    {
-                                        case DisconnectionTimeoutException:
-                                        case ErrorResponse:
-                                        case InvalidOperationException:
-                                            logger.DebugFormat("关闭从节点连接 {0} 失败, 将强行关闭: {1}", conn, exce);
-                                            await conn.CloseAsync(graceful: false, flag: 0);
-                                            break;
-                                        default:
-                                            throw;
-                                    }
+                                    case DisconnectionTimeoutException:
+                                    case ErrorResponse:
+                                    case InvalidOperationException:
+                                        logger.DebugFormat("ShutDownAsync - 关闭从节点连接 [{0}] {1} 失败: \n{2}\n强行关闭 ...", index, conn, exce);
+                                        await conn.CloseAsync(graceful: false, flag: 0);
+                                        logger.DebugFormat("ShutDownAsync - 强行关闭从节点连接 [{0}] {1} 完毕.", index, conn);
+                                        break;
+                                    default:
+                                        throw;
                                 }
                             }
-                            else
-                            {
-                                await conn.CloseAsync(graceful: false, flag: 0);
-                            }
-                        })
-                    );
+                        }
+                        else
+                        {
+                            logger.DebugFormat("ShutDownAsync - 强行关闭从节点连接 [{0}] {1} ...", index, conn);
+                            await conn.CloseAsync(graceful: false, flag: 0);
+                            logger.DebugFormat("ShutDownAsync - 强行关闭从节点连接 [{0}] {1} 完毕.", index, conn);
+                        }
+                    }
+
                     lock (this)
                     {
                         RunningState = AgentRunningState.Stopped;
                     }
+
                 }
                 catch
                 {

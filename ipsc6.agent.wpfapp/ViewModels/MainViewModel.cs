@@ -612,7 +612,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
             ResetStatusTimeSpan();
         }
 
-        private static string workerNum;
+
+        private const string DEFAULT_WORKERNUM = "N/A";
+
+        private static string workerNum = DEFAULT_WORKERNUM;
         public string WorkerNumber
         {
             get => workerNum;
@@ -622,7 +625,10 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 NotifyStateRelativeCommandsExecutable();
             }
         }
-        private static string displayName;
+
+        private const string DEFAULT_DISPLAY_NAME = "N/A";
+
+        private static string displayName = DEFAULT_DISPLAY_NAME;
         public string DisplayName
         {
             get => displayName;
@@ -1616,8 +1622,8 @@ namespace ipsc6.agent.wpfapp.ViewModels
                 var svc = Instance.MainService;
                 await svc.LogOut();
 
-                Instance.WorkerNumber = "";
-                Instance.DisplayName = "";
+                Instance.WorkerNumber = DEFAULT_WORKERNUM;
+                Instance.DisplayName = DEFAULT_DISPLAY_NAME;
                 Instance.CurrentCallInfo = null;
                 Instance.SipAccounts = Array.Empty<services.Models.SipAccount>();
                 Instance.Groups = Array.Empty<services.Models.Group>();
