@@ -7,13 +7,12 @@
         xmlns:vm="clr-namespace:ipsc6.agent.wpfapp.ViewModels"
         mc:Ignorable="d"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-        Title="登录"
+        Title="登录 - IPSC6 座席话务条"
         Height="325" Width="350"
         Background="Transparent" AllowsTransparency="True"
         ResizeMode="NoResize" WindowStyle="None" WindowStartupLocation="CenterScreen"
         d:DataContext="{d:DesignData Type=vm:LoginViewModel}"
-        MouseDown="Window_MouseDown"
-    >
+        MouseDown="Window_MouseDown">
 
     <Window.Resources>
         <Storyboard x:Key="OnMouseLeftButtonUp1">

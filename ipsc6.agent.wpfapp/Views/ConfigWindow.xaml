@@ -10,7 +10,7 @@
         d:DataContext="{d:DesignData Type=vm:ConfigViewModel}"
         Loaded="Window_Loaded"
         x:Name="configWindow"
-        Title="设置"
+        Title="设置 - IPSC6 座席话务条"
         Height="240" Width="480"
         ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterScreen"
         >
