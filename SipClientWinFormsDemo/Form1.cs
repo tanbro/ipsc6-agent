@@ -17,16 +17,14 @@ namespace SipClientWinFormsDemo
         public Form1()
         {
             InitializeComponent();
-
-
-
         }
 
-        Endpoint SipEndpoint;
+        internal static Endpoint SipEndpoint = new();
+
+        static List<MySipAccount> Accounts = new();
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            SipEndpoint = new();
             SipEndpoint.libCreate();
             using var epCfg = new EpConfig();
             SipEndpoint.libInit(epCfg);
@@ -38,6 +36,14 @@ namespace SipClientWinFormsDemo
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
+            SipEndpoint.hangupAllCalls();
+
+            foreach (var acc in Accounts)
+            {
+                acc.shutdown();
+                acc.Dispose();
+            }
+            Accounts.Clear();
             SipEndpoint.libDestroy();
             SipEndpoint.Dispose();
         }
@@ -59,22 +65,86 @@ namespace SipClientWinFormsDemo
             cfg.sipConfig.authCreds.Add(sipAuthCred);
 
             var acc = new MySipAccount();
+            acc.OnIncomingCall2 += Acc_OnIncomingCall2;
             acc.OnRegisterStateChanged += Acc_OnRegisterStateChanged;
             acc.create(cfg);
 
-            var msg = $"[注册]: {idUri} Registering ...";
+            Accounts.Add(acc);
+            var index = Accounts.IndexOf(acc);
+
+            var msg = $"[注册]: 账户 [{index}] {idUri} Registering ...";
             textBox_Log.AppendText(msg + "\r\n");
+        }
+
+        private void Acc_OnIncomingCall2(object sender, MySipCallEventArgs e)
+        {
+            var acc = sender as MySipAccount;
+            var accInfo = acc.getInfo();
+            var accIndex = Accounts.IndexOf(acc);
+            var call = e.MySipCall;
+            var callInfo = call.getInfo();
+            var msg =
+                $"[注册]: 账户 [{accIndex}] {accInfo.uri} 新呼叫来自 {callInfo.remoteUri}";
+
+            Invoke((Action)delegate
+            {
+                textBox_Log.AppendText(msg + "\r\n");
+            });
         }
 
         private void Acc_OnRegisterStateChanged(object sender, EventArgs e)
         {
             var acc = sender as MySipAccount;
             var info = acc.getInfo();
-            var msg = $"[注册]: {info.uri} {info.onlineStatus} {info.onlineStatusText}";
+            var index = Accounts.IndexOf(acc);
+            var msg =
+                $"[注册]: 账户 [{index}] {info.uri}: {info.regStatusText}";
             Invoke((Action)delegate
             {
                 textBox_Log.AppendText(msg + "\r\n");
             });
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var destUri = textBox_calleeUri.Text;
+            var acc = Accounts[(int)numericUpDown_callerIndex.Value];
+            var call = new MySipCall(acc);
+
+            call.OnStateChanged += Call_OnStateChanged;
+            call.OnDisconnected += Call_OnDisconnected;
+
+            var callOpParam = new CallOpParam();
+            call.makeCall(destUri, callOpParam);
+        }
+
+        private void Call_OnDisconnected(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Call_OnStateChanged(object sender, EventArgs e)
+        {
+            var call = sender as MySipCall;
+            var callInfo = call.getInfo();
+            var accId = call.getInfo().accId;
+            var acc = Accounts.Find(x => x.getId() == accId);
+            var accInfo = acc.getInfo();
+            var accIndex = Accounts.IndexOf(acc);
+            var callDirStr = call.IsIncoming ? "呼入" : "呼出";
+
+            var msg =
+                $"[注册]: 账户 [{accIndex}] {accInfo.uri} {callDirStr} {callInfo.remoteUri} 状态={callInfo.stateText}";
+
+            Invoke((Action)delegate
+            {
+                textBox_Log.AppendText(msg + "\r\n");
+            });
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            SipEndpoint.hangupAllCalls();
         }
     }
 }
