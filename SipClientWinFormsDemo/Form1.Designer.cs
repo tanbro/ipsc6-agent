@@ -43,6 +43,7 @@ namespace SipClientWinFormsDemo
             this.textBox_calleeUri = new System.Windows.Forms.TextBox();
             this.button_invite = new System.Windows.Forms.Button();
             this.button_HangupAll = new System.Windows.Forms.Button();
+            this.button_answer = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_callerIndex)).BeginInit();
             this.SuspendLayout();
             // 
@@ -171,11 +172,22 @@ namespace SipClientWinFormsDemo
             this.button_HangupAll.UseVisualStyleBackColor = true;
             this.button_HangupAll.Click += new System.EventHandler(this.button1_Click_1);
             // 
+            // button_answer
+            // 
+            this.button_answer.Location = new System.Drawing.Point(1140, 208);
+            this.button_answer.Name = "button_answer";
+            this.button_answer.Size = new System.Drawing.Size(154, 34);
+            this.button_answer.TabIndex = 11;
+            this.button_answer.Text = "接听当前来电";
+            this.button_answer.UseVisualStyleBackColor = true;
+            this.button_answer.Click += new System.EventHandler(this.button_answer_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1324, 565);
+            this.Controls.Add(this.button_answer);
             this.Controls.Add(this.button_HangupAll);
             this.Controls.Add(this.button_invite);
             this.Controls.Add(this.textBox_calleeUri);
@@ -216,6 +228,7 @@ namespace SipClientWinFormsDemo
         private System.Windows.Forms.TextBox textBox_calleeUri;
         private System.Windows.Forms.Button button_invite;
         private System.Windows.Forms.Button button_HangupAll;
+        private System.Windows.Forms.Button button_answer;
     }
 }
 

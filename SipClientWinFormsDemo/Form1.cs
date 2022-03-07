@@ -85,6 +85,8 @@ namespace SipClientWinFormsDemo
             var msg =
                 $"[呼叫]: 账户 [{accIndex}] {accInfo.uri} 新呼叫 --  {callInfo.remoteUri}";
 
+            currentCall = call;
+
             Invoke((Action)delegate
             {
                 textBox_Log.AppendText(msg + "\r\n");
@@ -113,9 +115,10 @@ namespace SipClientWinFormsDemo
             call.OnStateChanged += Call_OnStateChanged;
             call.OnDisconnected += Call_OnDisconnected;
 
-            var callOpParam = new CallOpParam();
+            using CallOpParam callOpParam = new();
             call.makeCall(destUri, callOpParam);
         }
+
 
         private void Call_OnDisconnected(object sender, EventArgs e)
         {
@@ -144,6 +147,19 @@ namespace SipClientWinFormsDemo
         private void button1_Click_1(object sender, EventArgs e)
         {
             SipEndpoint.hangupAllCalls();
+        }
+
+        private void button_answer_Click(object sender, EventArgs e)
+        {
+            using CallOpParam cop = new() { statusCode = pjsip_status_code.PJSIP_SC_OK };
+            currentCall.answer(cop);
+            foreach(var acc in Accounts)
+            {
+                foreach(var call in acc.Calls)
+                {
+
+                }
+            }
         }
     }
 }
