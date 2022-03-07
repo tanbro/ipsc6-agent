@@ -31,7 +31,6 @@ namespace SipClientWinFormsDemo
             using TransportConfig tansCfg = new() { port = 0 };
             SipEndpoint.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, tansCfg);
             SipEndpoint.libStart();
-
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -84,7 +83,7 @@ namespace SipClientWinFormsDemo
             var call = e.MySipCall;
             var callInfo = call.getInfo();
             var msg =
-                $"[注册]: 账户 [{accIndex}] {accInfo.uri} 新呼叫来自 {callInfo.remoteUri}";
+                $"[呼叫]: 账户 [{accIndex}] {accInfo.uri} 新呼叫 --  {callInfo.remoteUri}";
 
             Invoke((Action)delegate
             {
@@ -131,10 +130,10 @@ namespace SipClientWinFormsDemo
             var acc = Accounts.Find(x => x.getId() == accId);
             var accInfo = acc.getInfo();
             var accIndex = Accounts.IndexOf(acc);
-            var callDirStr = call.IsIncoming ? "呼入" : "呼出";
+            var callDirStr = call.IsIncoming ? "<--" : "-->";
 
             var msg =
-                $"[注册]: 账户 [{accIndex}] {accInfo.uri} {callDirStr} {callInfo.remoteUri} 状态={callInfo.stateText}";
+                $"[呼叫]: 账户 [{accIndex}] {accInfo.uri} {callDirStr} {callInfo.remoteUri} 状态={callInfo.stateText}";
 
             Invoke((Action)delegate
             {
