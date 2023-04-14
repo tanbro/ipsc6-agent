@@ -1,6 +1,5 @@
 mkdocs
-mkdocs-material
-mkdocs-localsearch
+mkdocs-material>=9.0
 pygments
 pymdown-extensions
 plantuml-markdown

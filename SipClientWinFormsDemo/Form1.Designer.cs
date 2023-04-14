@@ -80,7 +80,7 @@ namespace SipClientWinFormsDemo
             this.textBox_SIpUser.Name = "textBox_SIpUser";
             this.textBox_SIpUser.Size = new System.Drawing.Size(150, 30);
             this.textBox_SIpUser.TabIndex = 2;
-            this.textBox_SIpUser.Text = "2022";
+            this.textBox_SIpUser.Text = "8003";
             // 
             // textBox_SipPassword
             // 
@@ -150,7 +150,7 @@ namespace SipClientWinFormsDemo
             this.textBox_calleeUri.Name = "textBox_calleeUri";
             this.textBox_calleeUri.Size = new System.Drawing.Size(285, 30);
             this.textBox_calleeUri.TabIndex = 8;
-            this.textBox_calleeUri.Text = "sip:___@192.168.2.202";
+            this.textBox_calleeUri.Text = "sip:8001@192.168.2.202";
             // 
             // button_invite
             // 

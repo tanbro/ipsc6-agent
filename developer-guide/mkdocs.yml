@@ -53,7 +53,7 @@ nav:
 
 plugins:
   - search
-  - localsearch
+  - offline
   # # Not available on Windows
   # - with-pdf:
   #     enabled_if_env: ENABLE_PDF_EXPORT
@@ -116,7 +116,6 @@ markdown_extensions:
   # - smarty:
   - toc:
       permalink: true
-      slugify: !!python/name:pymdownx.slugs.uslugify
   # 3rd extensions
   - plantuml_markdown:
       # 如在 Windows 中无法使用 plantuml，可启用这个配置

@@ -85,8 +85,6 @@ namespace SipClientWinFormsDemo
             var msg =
                 $"[呼叫]: 账户 [{accIndex}] {accInfo.uri} 新呼叫 --  {callInfo.remoteUri}";
 
-            currentCall = call;
-
             Invoke((Action)delegate
             {
                 textBox_Log.AppendText(msg + "\r\n");
@@ -151,12 +149,15 @@ namespace SipClientWinFormsDemo
 
         private void button_answer_Click(object sender, EventArgs e)
         {
-            using CallOpParam cop = new() { statusCode = pjsip_status_code.PJSIP_SC_OK };
-            currentCall.answer(cop);
             foreach(var acc in Accounts)
             {
                 foreach(var call in acc.Calls)
                 {
+                    if (call.getInfo().state == pjsip_inv_state.PJSIP_INV_STATE_INCOMING)
+                    {
+                        using CallOpParam cop = new() { statusCode = pjsip_status_code.PJSIP_SC_OK };
+                        call.answer(cop);
+                    }
 
                 }
             }
