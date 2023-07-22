@@ -17,8 +17,17 @@
 - 手动编写 VisualStudio C/C++ 以及 C# 项目模板，以及使用 MSBuild 同时针对多个目标进行构建
 - 如何在桌面程序嵌入轻量级 Web 服务器，以及在此基础上实现一个 JSON-RPC over Websocket 服务程序，并最终打通 Web 服务与 GUI 程序
 - 按照 MVVM 设计原则编写桌面应用
+- 如何管理一个有十余个项目的 VisualStudio 解决方案，以及如何在这个解决方案上运用 git 进行版本控制
 
-版权和许可信息详见 [LICENSE](LICENSE.txt) 文件
+> **Note:**
+>
+> 版权和许可信息详见 [LICENSE](LICENSE.txt) 文件
+
+---
+
+> **Note:**
+>
+> 访问 <https://tanbro.github.io/ipsc6-agent/> 查看开发文档
 
 ## pjproject
 
