@@ -4,7 +4,7 @@ copyright: 广州市和声信息技术有限公司 © 2021
 
 docs_dir: src
 
-use_directory_urls: false
+# use_directory_urls: false
 
 nav:
   - index.md

@@ -18,6 +18,8 @@
 - 如何在桌面程序嵌入轻量级 Web 服务器，以及在此基础上实现一个 JSON-RPC over Websocket 服务程序，并最终打通 Web 服务与 GUI 程序
 - 按照 MVVM 设计原则编写桌面应用
 
+版权和许可信息详见 [LICENSE](LICENSE.txt) 文件
+
 ## pjproject
 
 这个依赖项目作为 `git submodule` 存放在 `submodules/pjproject`，如果尚未初始化这个 `git` 子模块，应执行：
