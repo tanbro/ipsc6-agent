@@ -6,19 +6,19 @@
 
 1. 安装 Python 3.6 或以上
 
-1. [_可选_] 在子目录 `venv` 建立该项目的 Python 虚拟环境，并激活:
+1. [_可选_] 在子目录 `.venv` 建立该项目的 Python 虚拟环境，并激活:
 
     - Posix:
 
         ```sh
-        python -m venv venv
+        python -m venv .venv
         source venv/bin/activate
         ```
 
     - Windows 命令提示符:
 
         ```bat
-        py -m venv venv
+        python -m venv .venv
         venv\Scripts\Activate.bat
         ```
 

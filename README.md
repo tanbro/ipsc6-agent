@@ -1,5 +1,23 @@
 # IPSC 6 呼叫中心系统 的 Agent Windows 桌面客户端程序
 
+## 简介
+
+这个项目是 IPSC 6.0 呼叫中心的 Windows 客户端，它的主要特性有：
+
+1. 现代化的 Metro 风格 GUI；自动隐藏的横幅式主窗口；
+
+   ![LoginWindow](developer-guide/src/images/LoginWindow.png)
+   ![MainWindow](developer-guide/src/images/MainWindow.png)
+
+1. 嵌入了一个桌面级别的轻量级 Web 服务器，提供编程接口，可以从浏览器直接调用
+
+作为一个实际投入使用的桌面程序，学习者可以通过这个项目看到许多有一定深入性的内容：
+
+- 在 C# GUI程序中使用 C++ 库的复杂技术，包括 CMake, swig, c++/cli, dotnet GUI 线程和 Native 线程协同使用等
+- 手动编写 VisualStudio C/C++ 以及 C# 项目模板，以及使用 MSBuild 同时针对多个目标进行构建
+- 如何在桌面程序嵌入轻量级 Web 服务器，以及在此基础上实现一个 JSON-RPC over Websocket 服务程序，并最终打通 Web 服务与 GUI 程序
+- 按照 MVVM 设计原则编写桌面应用
+
 ## pjproject
 
 这个依赖项目作为 `git submodule` 存放在 `submodules/pjproject`，如果尚未初始化这个 `git` 子模块，应执行：
