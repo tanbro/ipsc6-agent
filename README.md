@@ -29,6 +29,12 @@
 >
 > 访问 <https://tanbro.github.io/ipsc6-agent/> 查看开发文档
 
+---
+
+> **Note:**
+>
+> 经测试， VisualStudio 2019, 2022 可以成功的构建这个项目。
+
 ## pjproject
 
 这个依赖项目作为 `git submodule` 存放在 `submodules/pjproject`，如果尚未初始化这个 `git` 子模块，应执行：
@@ -49,29 +55,33 @@ git submodule update --init
 
 如果使用 `MSBuild` 进行构建，命令是:
 
--   Win32 Debug 静态库:
+- Win32 Debug 静态库:
 
-    ```powershell
-    msbuild pjproject-vs14.sln -target:pjsua -m -property:Configuration=Debug -property:Platform=Win32
-    ```
+  ```powershell
+  msbuild pjproject-vs14.sln -target:pjsua -m -property:Configuration=Debug -property:Platform=Win32
+  ```
 
--   Win32 Release 静态库:
+- Win32 Release 静态库:
 
-    ```powershell
-    msbuild pjproject-vs14.sln -target:pjsua -m -property:Configuration=Release -property:Platform=Win32
-    ```
+  ```powershell
+  msbuild pjproject-vs14.sln -target:pjsua -m -property:Configuration=Release -property:Platform=Win32
+  ```
 
--   x64 Debug 静态库:
+- x64 Debug 静态库:
 
-    ```powershell
-    msbuild pjproject-vs14.sln -target:pjsua -m -property:Configuration=Debug -property:Platform=x64
-    ```
+  ```powershell
+  msbuild pjproject-vs14.sln -target:pjsua -m -property:Configuration=Debug -property:Platform=x64
+  ```
 
--   x64 Release 静态库:
+- x64 Release 静态库:
 
-    ```powershell
-    msbuild pjproject-vs14.sln -target:pjsua -m -property:Configuration=Release -property:Platform=x64
-    ```
+  ```powershell
+  msbuild pjproject-vs14.sln -target:pjsua -m -property:Configuration=Release -property:Platform=x64
+  ```
+
+> **Note:**
+>
+> 如果当前开发环境的平台工具集版本与项目指定的版本不一致，建议使用 VisualStudio 打开解决方案，并按照提示自动更新项目配置，然后再构建。
 
 ## RakNet
 
@@ -90,13 +100,25 @@ RakNet
 
 对于 `x86`，我们打开 `x86 Native Tools Command Prompt for VS`，在 `Win32` 目录执行:
 
-```sh
+```bat
+cd submodules/RakNet
+mkdir build/win32
+cd build/win32
 cmake -A Win32 ../..
+```
+
+对于 `x86_64`，我们打开 `x64 Native Tools Command Prompt for VS`，在 `Win32` 目录执行:
+
+```bat
+cd submodules/RakNet
+mkdir build/x64
+cd build/x64
+cmake -A x64 ../..
 ```
 
 从而产生 VisualStudio 项目文件。
 
-但是，生成的 `.vcxproj` 项目文件有一下问题：
+但是，生成的 `.vcxproj` 项目文件有以下问题：
 
 1. `Win32` 项目的 “首选的生成工具体系结构” 设置错误:
 
@@ -142,23 +164,30 @@ cmake -A Win32 ../..
 
 然后进行构建，方法是：
 
--   使用 `VisualStudio` 打开解决方案，构建项目 `RakNetDLL`
+- 使用 `VisualStudio` 分别打开解决方案文件:
 
--   或者使用 `CMake` 命令:
+  - `x86`: `submodules/RanNet/build/Win32/RakNet.sln`
+  - `x64`: `submodules/RanNet/build/x64/RakNet.sln`
 
-    -   构建 `Debug` 目标:
+  然后构建项目 `RakNetDLL`
 
-        ```sh
-        cmake --build . --target RakNetDLL --config Debug
-        ```
+- 或者使用 `CMake` 命令
 
-    -   构建 `Release` 目标:
+  对于 `x86`，我们打开 `x86 Native Tools Command Prompt for VS`，在 `submodules/RanNet/build/Win32` 目录执行构建命令；
+  
+  对于 `x86_64`，我们打开 `x64 Native Tools Command Prompt for VS`，在 `submodules/RanNet/build/64` 目录构建命令。
 
-        ```sh
-        cmake --build . --target RakNetDLL --config Release
-        ```
+  - 构建 `Debug` 目标:
 
-`x86_64` 的构建与之类似，在 `x64` 目录，使用 `x64 Native Tools Command Prompt for VS` 重复上述过程即可（注意替换目标架构参数为`x64`）。
+    ```bat
+    cmake --build . --target RakNetDLL --config Debug
+    ```
+
+  - 构建 `Release` 目标:
+
+    ```bat
+    cmake --build . --target RakNetDLL --config Release
+    ```
 
 最后，为了确保将所需头文件复制到 `include` 目录，执行:
 

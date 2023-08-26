@@ -2,7 +2,7 @@
 	path = submodules/pjproject
 	url = https://github.com/pjsip/pjproject.git
 	ignore = dirty
-	branch = 2.11
+	branch = 2.13.1
 [submodule "submodules/RakNet"]
 	path = submodules/RakNet
 	url = https://github.com/facebookarchive/RakNet.git

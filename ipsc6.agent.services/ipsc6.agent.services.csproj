@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>net461;net48;net5.0</TargetFrameworks>
+        <TargetFrameworks>net48</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <Platforms>x86;x64</Platforms>
         <NoWarn>IDE0008,IDE0010,IDE0011,IDE0058</NoWarn>
@@ -20,7 +20,7 @@
 
     <!-- NuGet Packages References -->
     <ItemGroup>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 
     <!-- Local Project References -->
@@ -32,15 +32,12 @@
 
     <!-- NuGet -->
     <ItemGroup>
-        <PackageReference Include="log4net" Version="2.0.12" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="GitVersion.MsBuild" Version="5.6.11">
+        <PackageReference Include="GitVersion.MsBuild" Version="5.12.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="log4net" Version="2.0.12" />
-        <PackageReference Include="System.Text.Json" Version="5.0.2" />
+        <PackageReference Include="log4net" Version="2.0.15" />
+        <PackageReference Include="System.Text.Json" Version="7.0.3" />
     </ItemGroup>
 
 </Project>

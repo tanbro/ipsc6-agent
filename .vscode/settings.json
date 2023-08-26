@@ -1,4 +1,5 @@
 {
     "xml.format.closingBracketNewLine": true,
-    "xml.format.splitAttributes": true
+    "xml.format.splitAttributes": true,
+    "esbonio.server.enabled": false
 }

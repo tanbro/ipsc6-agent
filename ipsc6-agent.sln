@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ipsc6.agent.client", "ipsc6
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ipsc6.agent.wpfapp", "ipsc6.agent.wpfapp\ipsc6.agent.wpfapp.csproj", "{132CDCA4-E2E0-4D4F-A131-3C8AF8E17A95}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ipsc6.agent.network-net461", "ipsc6.agent.network-net461\ipsc6.agent.network-net461.vcxproj", "{F3A6CEAA-81EA-4F7E-978E-10639C21186B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ipsc6.agent.network-nfx4", "ipsc6.agent.network-nfx4\ipsc6.agent.network-nfx4.vcxproj", "{F3A6CEAA-81EA-4F7E-978E-10639C21186B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ipsc6.agent.network-net5.0", "ipsc6.agent.network-net5.0\ipsc6.agent.network-net5.0.vcxproj", "{8EA7C273-4AEE-4F5B-9134-63256ADFADC1}"
 EndProject
