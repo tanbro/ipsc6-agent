@@ -120,11 +120,6 @@ namespace ipsc6.agent.wpfapp
             IsStartupOk = true;
         }
 
-        private static Application GetCurrent()
-        {
-            return Application.Current;
-        }
-
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             e.Handled = true;
