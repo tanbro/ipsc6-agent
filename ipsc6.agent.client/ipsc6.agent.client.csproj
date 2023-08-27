@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>net48</TargetFrameworks>
+        <TargetFrameworks>net48;net6.0</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <Platforms>x86;x64</Platforms>
         <NoWarn>IDE0008,IDE0010,IDE0011,IDE0058</NoWarn>
@@ -29,12 +29,12 @@
     </ItemGroup>
 
     <!-- local projects -->
-    <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
-        <ProjectReference Include="..\ipsc6.agent.network-net5.0\ipsc6.agent.network-net5.0.vcxproj" />
+    <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+        <ProjectReference Include="..\ipsc6.agent.network-net6.0\ipsc6.agent.network-net6.0.vcxproj" />
         <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
     </ItemGroup>
-    <ItemGroup Condition=" '$(TargetFramework)' == 'net461' Or '$(TargetFramework)' == 'net462' Or '$(TargetFramework)' == 'net47' Or '$(TargetFramework)' == 'net471' Or '$(TargetFramework)' == 'net472' Or '$(TargetFramework)' == 'net48' Or '$(TargetFramework)' == 'net481' ">
-      <ProjectReference Include="..\ipsc6.agent.network-nfx4\ipsc6.agent.network-nfx4.vcxproj" />
+    <ItemGroup Condition=" '$(TargetFramework)' == 'net48' Or '$(TargetFramework)' == 'net481' ">
+      <ProjectReference Include="..\ipsc6.agent.network-net4.x\ipsc6.agent.network-net4.x.vcxproj" />
       <ProjectReference Include="..\org.pjsip.pjsua2\org.pjsip.pjsua2.csproj" />
     </ItemGroup>
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
