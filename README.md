@@ -194,3 +194,19 @@ cmake -A x64 ../..
 ```sh
 cmake -DRAKNET_GENERATE_INCLUDE_ONLY_DIR=ON ../..
 ```
+
+## ZLIB
+
+在 VisualStudio 中打开这个解决方案，然后打开方案的终端（“视图” -> “终端” | 快捷键 “Ctrl+`”）
+
+```powershell
+vcpkg x-update-baseline  --add-initial-baseline
+```
+
+```powershell
+vcpkg install --x-feature=VcpkgAdditionalInstallOptions
+```
+
+> **Tips:**
+>
+> `vcpkg` 支持 `ALL_PROXY`, `HTTP_PROXY` 等环境变量

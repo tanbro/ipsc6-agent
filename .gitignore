@@ -5,6 +5,7 @@
 
 gitversion.json
 
+/vcpkg_installed
 
 ##################################
 # gitignore/Global/Linux.gitignore
