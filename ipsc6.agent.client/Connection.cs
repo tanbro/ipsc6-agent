@@ -316,7 +316,7 @@ namespace ipsc6.agent.client
         private void Connector_OnAgentMessageReceived(object sender, network.AgentMessageReceivedEventArgs e)
         {
             ServerSentMessage data = new(e, Encoding);
-            logger.DebugFormat("{0} AgentMessageReceived: {1}", this, data);
+            logger.DebugFormat("{0} OnAgentMessageReceived: {1}", this, data);
             eventQueue.Enqueue(new() { Connection = this, Data = data });
         }
 

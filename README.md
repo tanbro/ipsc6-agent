@@ -204,8 +204,14 @@ vcpkg x-update-baseline  --add-initial-baseline
 ```
 
 ```powershell
-vcpkg install --x-feature=VcpkgAdditionalInstallOptions
+vcpkg install --triplet x64-windows
 ```
+
+> **Note:**
+>
+> 如果需要同时得到 x86 和 x64 构建物，只能手动使用使用不同的`triplet`进行`vcpkg`安装，然后在重新安装后重编译相关工程。
+
+---
 
 > **Tips:**
 >

@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <RAKNET_ROOT>$(ProjectDir.TrimEnd('\'))\..\submodules\RakNet</RAKNET_ROOT>
+    <RAKNET_ROOT>$(ProjectDir)..\submodules\RakNet</RAKNET_ROOT>
     <RAKNET_LIB_SUFFIX>DLL</RAKNET_LIB_SUFFIX>
   </PropertyGroup>
   <PropertyGroup>
@@ -12,13 +12,13 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(RAKNET_ROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)vcpkg_installed\$(PlatformTarget)-windows\include;$(RAKNET_ROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8</AdditionalOptions>
       <PreprocessorDefinitions>_INCLUDE_PCH;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;RakNet$(RAKNET_LIB_SUFFIX).lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(RAKNET_ROOT)\build\$(PlatformName)\Lib\$(RAKNET_LIB_SUFFIX)\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ws2_32.lib;zlib.lib;RakNet$(RAKNET_LIB_SUFFIX).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)vcpkg_installed\$(PlatformTarget)-windows\lib;$(RAKNET_ROOT)\build\$(PlatformName)\Lib\$(RAKNET_LIB_SUFFIX)\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy "$(RAKNET_ROOT)\build\$(PlatformName)\Lib\$(RAKNET_LIB_SUFFIX)\$(ConfigurationName)\RAKNET$(RAKNET_LIB_SUFFIX).*" "$(OutDir)" /D /Y</Command>

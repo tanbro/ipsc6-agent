@@ -281,7 +281,7 @@ int Connector::Receive() {
     return 1;
 }
 
-void Connector::SendRawData(const BYTE* data, size_t length) {
+void Connector::SendRawData(const unsigned char* data, size_t length) {
     if (length > 1024) {
         throw gcnew InvalidOperationException("The data is too big.");
     }
@@ -291,7 +291,7 @@ void Connector::SendRawData(const BYTE* data, size_t length) {
         _sendStream->Write((RakNet::MessageID)ID_TIMESTAMP);
         _sendStream->Write(RakNet::GetTime());
         _sendStream->Write((RakNet::MessageID)ID_USER_PACKET_ENUM);
-        _sendStream->Write((char)0);  //压缩标志——不压缩
+        _sendStream->Write((char)0);  // 压缩标志——不压缩
         _sendStream->Write((const char*)data, (unsigned)length);  // user data
         if (0 == _peer->Send(_sendStream, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0,
                              _peer->GetSystemAddressFromIndex(_remoteAddrIndex),
@@ -301,25 +301,26 @@ void Connector::SendRawData(const BYTE* data, size_t length) {
     } while (0);
 }
 
-void Connector::SendRawData(array<Byte> ^ data) {
+void Connector::SendRawData(array<unsigned char> ^ data) {
     // see:
     // 1)
     // https://docs.microsoft.com/en-us/cpp/dotnet/how-to-marshal-arrays-using-cpp-interop
     // 2)
     // https://docs.microsoft.com/en-us/cpp/dotnet/how-to-obtain-a-pointer-to-byte-array
-    pin_ptr<Byte> p = &data[0];
-    BYTE* pby = p;
-    BYTE* result = reinterpret_cast<BYTE*>(pby);
+    pin_ptr<unsigned char> p = &data[0];
+    unsigned char* pby = p;
+    unsigned char* result = reinterpret_cast<unsigned char*>(pby);
     SendRawData(result, data->Length);
 }
 
 void Connector::SendAgentMessage(int commandType, int n, String ^ s) {
     size_t data_sz = sizeof(MsgType) + sizeof(int) + sizeof(int) + sizeof(int) +
                      s->Length + 1;
-    BYTE* data_buf = (BYTE*)calloc(data_sz, sizeof(BYTE));
+    unsigned char* data_buf =
+        (unsigned char*)calloc(data_sz, sizeof(unsigned char));
     if (data_buf) {
         try {
-            BYTE* ptr = data_buf;
+            unsigned char* ptr = data_buf;
             //
             *(MsgType*)ptr = mtAppData;
             ptr += sizeof(MsgType);
@@ -360,26 +361,26 @@ static size_t SZ_USER_PACKET_HEADER =
     sizeof(RakNet::MessageID)   /* ID_TIMESTAMP */
     + sizeof(RakNet::Time)      /* 时间戳 */
     + sizeof(RakNet::MessageID) /* ID_USER_PACKET_ENUM */
-    + sizeof(BYTE) /* 压缩标志 */;
+    + sizeof(unsigned char) /* 压缩标志 */;
 
 void Connector::DoOnUserPacketReceived(RakNet::Packet* packet) {
     if (packet->length <= SZ_USER_PACKET_HEADER) {
         throw std::overflow_error("UserPacket too small.");
     }
-    BYTE* user_data = packet->data + SZ_USER_PACKET_HEADER;
+    unsigned char* user_data = packet->data + SZ_USER_PACKET_HEADER;
     size_t user_length = packet->length - SZ_USER_PACKET_HEADER;
-    BYTE compressed =
-        *(BYTE*)(packet->data + sizeof(RakNet::MessageID) +
-                 sizeof(RakNet::Time) + sizeof(RakNet::MessageID));
+    unsigned char compressed =
+        *(unsigned char*)(packet->data + sizeof(RakNet::MessageID) +
+                          sizeof(RakNet::Time) + sizeof(RakNet::MessageID));
     if (compressed) {
         throw gcnew NotImplementedException(
             "Uncompressing is not supported yet.");
     }
     ///////////
     // 用户部分：
-    //求包类型
+    // 求包类型
     MsgType msgType = *(MsgType*)(user_data);
-    BYTE* ptr = user_data + sizeof(MsgType);
+    unsigned char* ptr = user_data + sizeof(MsgType);
     switch (msgType) {
         case mtAppData: {
             /*

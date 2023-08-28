@@ -1,10 +1,11 @@
-using org.pjsip.pjsua2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+
+using org.pjsip.pjsua2;
 
 
 namespace ipsc6.agent.client
@@ -224,7 +225,6 @@ namespace ipsc6.agent.client
 
         private void Conn_OnServerSend(object sender, ServerSentEventArgs e)
         {
-
             var conn = sender as Connection;
             var msg = e.Message;
             var index = connections.IndexOf(conn);

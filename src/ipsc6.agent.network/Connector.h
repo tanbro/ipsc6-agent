@@ -45,7 +45,7 @@ ref class Connector {
     void StartUp();
     void Shutdown();
     int Receive();
-    void SendRawData(const BYTE* data, size_t length);
+    void SendRawData(const unsigned char* data, size_t length);
 
     void DoOnConnectionRequestAccepted(RakNet::Packet* packet);
     void DoOnUserPacketReceived(RakNet::Packet* packet);
@@ -69,7 +69,7 @@ ref class Connector {
     void Connect(String ^ host);
     void Disconnect();
     void Disconnect(bool force);
-    void SendRawData(array<Byte> ^ data);
+    void SendRawData(array<unsigned char> ^ data);
     void SendAgentMessage(int commandType, int n, String ^ s);
 
     event EventHandler ^ OnConnectAttemptFailed;
