@@ -1,10 +1,10 @@
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
-using CommunityToolkit.Mvvm.Input;
 using System.Windows;
 
 namespace ipsc6.agent.wpfapp.ViewModels

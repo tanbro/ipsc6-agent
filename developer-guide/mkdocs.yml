@@ -72,11 +72,6 @@ theme:
     - navigation.sections
     - navigation.tabs
     - navigation.top
-    - navigation.instant
-    - navigation.tracking
-    # - navigation.expand
-    # - toc.integrate
-    - toc.follow
 
   palette:
     - media: "(prefers-color-scheme: light)"

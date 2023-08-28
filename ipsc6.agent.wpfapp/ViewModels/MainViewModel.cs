@@ -175,7 +175,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         internal void Release()
         {
-            logger.Info("Release");
+            logger.Debug("Release - Stop timer");
             StopTimer();
 
             logger.Debug("Release - Stop RPC server");
@@ -1628,7 +1628,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
             using (await Utils.CommandGuard.EnterAsync(StateRelativeCommands))
             {
 
-                logger.Debug("注销");
+                logger.Info("注销");
 
                 var svc = Instance.MainService;
                 await svc.LogOutAsync();
@@ -1663,7 +1663,7 @@ namespace ipsc6.agent.wpfapp.ViewModels
 
         private static void DoExit()
         {
-            logger.Debug("退出");
+            logger.Info("退出");
 
             var svc = Instance.MainService;
             if (svc.GetAgentRunningState() != client.AgentRunningState.Stopped)

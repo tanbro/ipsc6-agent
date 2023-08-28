@@ -1,6 +1,5 @@
-using System;
-
 using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 
 namespace ipsc6.agent.wpfapp.Utils
 {

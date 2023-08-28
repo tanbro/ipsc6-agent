@@ -1,12 +1,9 @@
+using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-
-using CommunityToolkit.Mvvm.Input;
-
-#pragma warning disable VSTHRD100
 
 namespace ipsc6.agent.wpfapp.ViewModels
 {
@@ -227,5 +224,3 @@ namespace ipsc6.agent.wpfapp.ViewModels
     }
 
 }
-
-#pragma warning restore VSTHRD100
