@@ -1,8 +1,8 @@
+using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using Microsoft.Win32;
 
 namespace ipsc6.agent.launch
 {

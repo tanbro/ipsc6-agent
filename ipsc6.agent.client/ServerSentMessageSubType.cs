@@ -101,5 +101,10 @@ namespace ipsc6.agent.client
         /// 流程中向座席发数据nParam = 数据1pcParam=数据2 
         /// </summary>
         IvrData = 23,
+
+        /// <summary>
+        /// CTI服务器发来的客户端配置，如IVR菜单定义（JSON格式）
+        /// </summary>
+        AppConfig = 24,
     }
 }

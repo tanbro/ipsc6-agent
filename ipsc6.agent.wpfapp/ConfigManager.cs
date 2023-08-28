@@ -1,8 +1,8 @@
-using System;
-using System.Reflection;
-using System.IO;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 
 namespace ipsc6.agent.wpfapp
 {

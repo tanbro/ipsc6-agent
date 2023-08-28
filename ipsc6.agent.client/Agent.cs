@@ -458,6 +458,14 @@ namespace ipsc6.agent.client
                 case ServerSentMessageSubType.CustomString:
                     DoOnCustomString(ctiServer, msg);
                     break;
+                case ServerSentMessageSubType.AppConfig:
+                    {
+                        // 要在GUI上显示的 IVR 菜单
+                        if (msg.N2 == 0)
+                            DoOnIvrMenu(ctiServer, msg);
+                        // 目前没有其它配置
+                    }
+                    break;
                 default:
                     break;
             }
@@ -2035,5 +2043,31 @@ namespace ipsc6.agent.client
         private readonly HashSet<SipAccount> sipAccounts = new();
         public IReadOnlyCollection<SipAccount> SipAccounts => sipAccounts;
 
+        #region IVR 菜单
+        private List<IvrMenu> ivrMenus = new();
+        public IReadOnlyList<IvrMenu> IvrMenus
+        {
+            get
+            {
+                lock (this)
+                {
+                    return ivrMenus.ToList();
+                }
+            }
+        }
+        public event EventHandler OnIvrMenuReceived;
+
+        private void DoOnIvrMenu(CtiServer _, ServerSentMessage msg)
+        {
+            /// 解析 JSON 定义的 IVR 菜单，并抛出事件
+            lock (this)
+            {
+                ivrMenus =
+                    JsonSerializer.Deserialize<IEnumerable<IvrMenu>>(msg.S)
+                    .ToList();
+            }
+            OnIvrMenuReceived?.Invoke(this, EventArgs.Empty);
+        }
+        #endregion
     }
 }

@@ -4,7 +4,7 @@ using System;
 
 namespace ipsc6.agent.client
 {
-    public struct SipCall
+    public readonly struct SipCall
     {
         public SipCall(Sip.MyPjCall call)
         {
