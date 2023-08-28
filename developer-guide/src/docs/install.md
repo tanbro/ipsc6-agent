@@ -26,9 +26,9 @@
 
 座席客户端程序依赖以下软件，只有在这些软件全部正确安装之后程序方可运行：
 
-1.  适用于 Visual Studio 2015、2017 和 2019 的 Microsoft Visual C++ 可再发行软件包
+1.  适用于 Visual Studio 2015、2017、2019 和 2022 的 Microsoft Visual C++ 可再发行软件包
 
-    下载地址: <https://support.microsoft.com/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0>
+    见: <https://learn.microsoft.com/zh-cn/cpp/windows/latest-supported-vc-redist>
 
     !!! caution
 
@@ -38,9 +38,9 @@
 
         安装 Microsoft Visual C++ 可再发行软件包时，注意选择对应的架构。
 
-1.  .NET Framework 4.6.1 及以上
+1.  .NET Framework 4.8 及以上
 
-    `.NET Framework` 版本 `4.6.1` 及以上(目前最新的 .NET Framework 是 `4.8`，它支持该程序)，如 `4.6.1`, `4.7`, `4.8` 均可兼容座席程序；低于 `4.6.1` 的，如 `4.6`, `4.5`，`3.5` 则不满足要求。
+    `.NET Framework` 版本 `4.8` 及以上，如 `4.8`, `4.8.1` 均可兼容座席程序；低于 `4.8` 的，如 `4.7.2`, `4.5`，`3.5` 则不满足要求。
 
     下载地址: <https://dotnet.microsoft.com/download/dotnet-framework>
 
