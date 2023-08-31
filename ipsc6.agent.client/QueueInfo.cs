@@ -24,7 +24,7 @@ namespace ipsc6.agent.client
         {
             Channel = msg.N1;
             EventType = (QueueEventType)msg.N2;
-            var parts = msg.S.Split(Constants.SemicolonBarDelimiter);
+            var parts = msg.S.Split(Constants.SemiColonDelimiter);
             foreach (var pair in parts.Select((s, i) => (s, i)))
             {
                 var i = pair.i;

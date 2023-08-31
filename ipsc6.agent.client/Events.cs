@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+
 
 namespace ipsc6.agent.client
 {
@@ -129,8 +131,8 @@ namespace ipsc6.agent.client
 
     public class SipRegistrarListReceivedEventArgs : EventArgs
     {
-        public string[] Value { get; }
-        public SipRegistrarListReceivedEventArgs(string[] value) : base()
+        public IEnumerable<Tuple<string, string>> Value { get; }
+        public SipRegistrarListReceivedEventArgs(IEnumerable<Tuple<string, string>> value) : base()
         {
             Value = value;
         }

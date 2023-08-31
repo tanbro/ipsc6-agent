@@ -24,7 +24,7 @@ namespace ipsc6.agent.client
         /// </summary>
         /// TODO: params 用原始字符串!
         [JsonPropertyName("params")]
-        public IEnumerable<string> Params { get; set; }
+        public string Params { get; set; }
     }
 
     public class IvrMenuItem

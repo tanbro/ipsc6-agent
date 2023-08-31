@@ -572,31 +572,51 @@ namespace ipsc6.agent.client
         public event EventHandler<SipCallEventArgs> OnSipCallStateChanged;
         private void DoOnSipRegistrarList(CtiServer connectionInfo, ServerSentMessage msg)
         {
-            var connectionIndex = GetConnetionIndex(connectionInfo);
+            // 传来的字符串用来告知客户端进行SIP注册的地址和密码,
+            // 例如: 
+            // registara1.xxx.com:5060:password|registara2.xxx.com:password|registara3.xxx.com:9080:password
+            // 端口可以省略，密码必须提供！地址与密码中不能有 “|” 或者 “:”
+
             if (string.IsNullOrWhiteSpace(msg.S)) return;
-            var val = msg.S.Split(Constants.VerticalBarDelimiter);
-            SipRegistrarListReceivedEventArgs evt = new(val);
+
+            var connectionIndex = GetConnetionIndex(connectionInfo);
+            List<Tuple<string, string>> registrarList = new();
+
+            foreach (var s in msg.S.Split(Constants.VerticalBarDelimiter))
+            {
+                Tuple<string, string> regInfo;
+                var ss = s.Split(Constants.ColonDelimiter, 3);
+                if (ss.Length == 3)
+                    regInfo = Tuple.Create(string.Join(Constants.ColonDelimiter[0].ToString(), ss.Take(2)), ss[2]);
+                else
+                    regInfo = Tuple.Create(ss[0], ss[1]);
+                registrarList.Add(regInfo);
+            }
+
+            SipRegistrarListReceivedEventArgs evt = new(registrarList);
 
             SyncFactory.StartNew(async () =>
             {
                 await pjSemaphore.WaitAsync();
                 try
                 {
-                    foreach (var addr in evt.Value)
+                    foreach (var regInfo in evt.Value)
                     {
+                        var addr = regInfo.Item1;
+                        var pass = regInfo.Item2;
                         logger.DebugFormat("处理 SipAccount 地址 {0} ...", addr);
                         var uri = $"sip:{WorkerNum}@{addr}";
                         Sip.MyPjAccount acc;
                         acc = sipAccountCollection.FirstOrDefault(x => x.getInfo().uri == uri);
-                        if (acc != null)
+                        if (acc is not null)
                         {
-                            logger.DebugFormat("SipAccount 释放已存在帐户 {0} ...", uri);
+                            logger.DebugFormat("SipAccount 帐户 {0} 已存在，即将释放 ...", uri);
                             sipAccountCollection.Remove(acc);
                             acc.shutdown();
                             acc.Dispose();
                         }
                         logger.DebugFormat("SipAccount 新建帐户 {0} ...", uri);
-                        using var sipAuthCred = new AuthCredInfo("digest", "*", WorkerNum, 0, "hesong");
+                        using var sipAuthCred = new AuthCredInfo("digest", "*", WorkerNum, 0, pass);
                         using var cfg = new AccountConfig { idUri = uri };
                         cfg.regConfig.timeoutSec = 60;
                         cfg.regConfig.retryIntervalSec = 30;

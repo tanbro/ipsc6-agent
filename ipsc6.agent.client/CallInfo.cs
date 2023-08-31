@@ -47,7 +47,7 @@ namespace ipsc6.agent.client
             Channel = channel;
             IsHeld = false;
             var parts = dataString.Split(Constants.VerticalBarDelimiter, 2);
-            var values = parts[0].Split(Constants.SemicolonBarDelimiter);
+            var values = parts[0].Split(Constants.SemiColonDelimiter);
             foreach (var pair in values.Select((s, i) => (s, i)))
             {
                 var s = pair.s;

@@ -13,9 +13,7 @@ namespace ipsc6.agent.services.Models
     {
         public string IvrId { get; set; }
         public IvrInvokeType CallType { get; set; }
-
-        /// TODO:
-        // public string Params {get; set;}
+        public string Params {get; set;}
     }
 
     [Serializable]

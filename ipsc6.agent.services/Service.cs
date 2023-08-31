@@ -999,6 +999,7 @@ namespace ipsc6.agent.services
             {
                 IvrId = obj.IvrId,
                 CallType = obj.CallType,
+                Params = obj.Params
             };
         }
 
