@@ -281,6 +281,16 @@ const callIvr = (ivrId, invokeType=0, customString="") => {
   _ws.send(JSON.stringify(req));
 };
 
+const getIvrMenu = () => {
+  const req = {
+    jsonrpc: "2.0",
+    id: randomId(),
+    method: "getIvrMenu",
+    params: [],
+  };
+  _ws.send(JSON.stringify(req));
+};
+
 const getStats = () => {
   const req = {
     jsonrpc: "2.0",

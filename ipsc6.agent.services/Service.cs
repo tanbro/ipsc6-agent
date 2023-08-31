@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 [assembly: InternalsVisibleTo("ipsc6.agent.wpfapp")]
 namespace ipsc6.agent.services
 {
-#pragma warning disable VSTHRD200
     public class Service : IDisposable
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(Service));
@@ -140,11 +139,12 @@ namespace ipsc6.agent.services
 
             agent.OnStatsChanged += Agent_OnStatsChanged;
 
+            agent.OnIvrMenuReceived += Agent_OnIvrMenuReceived;
+
             model = new();
 
             ReloadCtiServers();
         }
-
         #endregion
 
         #region status
@@ -972,6 +972,55 @@ namespace ipsc6.agent.services
         }
         #endregion
 
+        #region IVR 菜单
+
+        private void Agent_OnIvrMenuReceived(object sender, EventArgs e)
+        {
+            lock (model)
+            {
+                model.IvrMenuItems = (
+                    from obj in agent.IvrMenuItems
+                    select CreateIvrMenuItem(obj)
+                ).ToList();
+            }
+            OnIvrMenuChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler OnIvrMenuChanged;
+
+        public IReadOnlyCollection<Models.IvrMenuItem> GetIvrMenu()
+        {
+            return GetModel().IvrMenuItems;
+        }
+
+        private Models.IvrMenuItemArgs CreateIvrMenuItemArgs(client.IvrMenuItemArgs obj)
+        {
+            return new Models.IvrMenuItemArgs
+            {
+                IvrId = obj.IvrId,
+                CallType = obj.CallType,
+            };
+        }
+
+        private Models.IvrMenuItem CreateIvrMenuItem(client.IvrMenuItem obj)
+        {
+            var result = new Models.IvrMenuItem
+            {
+                Caption = obj.Caption,
+                Description = obj.Description,
+                Groups = obj.Groups,
+                Children = (
+                    from child in obj.Children
+                    select CreateIvrMenuItem(child)
+                ).ToList(),
+            };
+            if (obj.Args is not null)
+                result.Args = CreateIvrMenuItemArgs(obj.Args);
+            return result;
+        }
+
+        #endregion
+
         #region Stats - 通话统计信息
         private void Agent_OnStatsChanged(object sender, EventArgs e)
         {
@@ -993,5 +1042,5 @@ namespace ipsc6.agent.services
         #endregion
 
     }
-#pragma warning restore VSTHRD200
+
 }

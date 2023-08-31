@@ -2044,14 +2044,14 @@ namespace ipsc6.agent.client
         public IReadOnlyCollection<SipAccount> SipAccounts => sipAccounts;
 
         #region IVR 菜单
-        private List<IvrMenu> ivrMenus = new();
-        public IReadOnlyList<IvrMenu> IvrMenus
+        private List<IvrMenuItem> ivrMenuItems = new();
+        public IReadOnlyList<IvrMenuItem> IvrMenuItems
         {
             get
             {
                 lock (this)
                 {
-                    return ivrMenus.ToList();
+                    return ivrMenuItems.ToList();
                 }
             }
         }
@@ -2062,8 +2062,8 @@ namespace ipsc6.agent.client
             /// 解析 JSON 定义的 IVR 菜单，并抛出事件
             lock (this)
             {
-                ivrMenus =
-                    JsonSerializer.Deserialize<IEnumerable<IvrMenu>>(msg.S)
+                ivrMenuItems =
+                    JsonSerializer.Deserialize<IEnumerable<IvrMenuItem>>(msg.S)
                     .ToList();
             }
             OnIvrMenuReceived?.Invoke(this, EventArgs.Empty);

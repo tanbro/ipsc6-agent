@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace ipsc6.agent.client
 {
 
-    public class IvrArgs
+    public class IvrMenuItemArgs
     {
         /// <summary>
         /// 要调用的 IVR 的 ID 
@@ -22,11 +22,12 @@ namespace ipsc6.agent.client
         /// <summary>
         /// 调用 IVR 时需要客户端传入的参数常量（固定值）
         /// </summary>
+        /// TODO: params 用原始字符串!
         [JsonPropertyName("params")]
         public IEnumerable<string> Params { get; set; }
     }
 
-    public class IvrMenu
+    public class IvrMenuItem
     {
         /// <summary>
         /// 菜单标题
@@ -51,13 +52,13 @@ namespace ipsc6.agent.client
         /// 子菜单定义
         /// </summary>
         [JsonPropertyName("args")]
-        public IvrArgs Args { get; set; }
+        public IvrMenuItemArgs Args { get; set; }
 
         /// <summary>
         /// 子菜单定义
         /// </summary>
         [JsonPropertyName("children")]
-        public IEnumerable<IvrMenu> Children { get; set; }
+        public IEnumerable<IvrMenuItem> Children { get; set; } = new List<IvrMenuItem>();
     }
 
 }

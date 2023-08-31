@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace ipsc6.agent.client
 {
-    public struct SipAccount
+    public readonly struct SipAccount
     {
         public SipAccount(Sip.MyPjAccount account)
         {
