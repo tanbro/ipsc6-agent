@@ -6,23 +6,19 @@
 
 `deps` 目录用于存放依赖软件的安装包，用于离线安装。
 
-> [!NOTE]
+> **Note:**
+>
 > 在制作安装包之前，应手动将依赖软件的安装包下载到这个目录。
 
 目前，这些软件有：
 
-- .NET Framework 4.6.1
+- .NET Framework 4.8
 
-  下载地址: <https://dotnet.microsoft.com/download/dotnet-framework/net461>
+  下载参考: <https://dotnet.microsoft.com/zh-cn/download/dotnet-framework/net48>
 
-- Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019
+- Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017, 2019 和 2022
 
-  参考: <https://support.microsoft.com/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0>
-
-  下载地址:
-
-  - x86: <https://aka.ms/vs/16/release/vc_redist.x86.exe>
-  - x64: <https://aka.ms/vs/16/release/vc_redist.x64.exe>
+  下载参考: <https://learn.microsoft.com/zh-CN/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022>
 
 ## 安装包
 
@@ -33,7 +29,8 @@
 - `win32-system.nsi`: 座席程序 64bits Windows 系统级安装包
 - `win64-user.nsi`: 座席程序 64bits Windows 用户级安装包
 
-> [!TIP]
+> **Tips:**
+>
 > 座席程序的安装包还依赖于 `launch` 安装包二进制文件，所以需要首先构建 `launch` 安装包。
 
 ## 版本计算

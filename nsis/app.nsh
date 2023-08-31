@@ -68,8 +68,8 @@ DetailPrint "检查之前安装的版本 (${PLATFORM} ${USER_TYPE}) ..."
              HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
              "DisplayVersion"
   ReadRegStr $UninstallString \
-              HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
-              "UninstallString"
+             HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ipsc6_agent_wpfapp-${PLATFORM}" \
+             "UninstallString"
 !else
     !error "invalide USER_TYPE: ${USER_TYPE}"
 !endif
