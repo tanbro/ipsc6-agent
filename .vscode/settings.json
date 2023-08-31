@@ -1,5 +1,6 @@
 {
     "xml.format.closingBracketNewLine": true,
     "xml.format.splitAttributes": true,
-    "esbonio.server.enabled": false
+    "esbonio.server.enabled": false,
+    "cmake.configureOnOpen": false
 }

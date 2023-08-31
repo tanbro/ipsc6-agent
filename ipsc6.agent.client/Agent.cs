@@ -1008,7 +1008,7 @@ namespace ipsc6.agent.client
                         if (!isEverLostAllConnections)
                         {
                             isEverLostAllConnections = isNoOkConnections;
-                            logger.Debug("ExecuteReconnectAsync - 已丢失所有的 CTI 服务节点的连接!");
+                            logger.Error("ExecuteReconnectAsync - 已丢失所有的 CTI 服务节点的连接!");
                         }
                     }
                 }
@@ -1030,7 +1030,7 @@ namespace ipsc6.agent.client
                     // 如果正在工作状态，不能切换 main
                     if (isWorking)
                     {
-                        logger.DebugFormat("ExecuteReconnectAsync - 主连接 [{0}] 断开，但时处于工作状态，不得切换主连接", MainConnectionIndex);
+                        logger.WarnFormat("ExecuteReconnectAsync - 主连接 [{0}] 断开，但由于正处于工作状态，不切换主连接", MainConnectionIndex);
                     }
                     // 否则如果有可用的 minor，直接 切换 main!
                     else if (okMinorIndexList.Count > 0)
@@ -1043,7 +1043,7 @@ namespace ipsc6.agent.client
                         }
                         try
                         {
-                            logger.DebugFormat("ExecuteReconnectAsync - 原来的主连接 [{0}] 断开，切换主连接到 [{0}] ...", MainConnectionIndex, newMainIndex);
+                            logger.WarnFormat("ExecuteReconnectAsync - 原来的主连接 [{0}] 已断开，切换主连接到 [{0}] ...", MainConnectionIndex, newMainIndex);
                             await TakenAwayAsync(newMainIndex);
                         }
                         catch (BaseException) { }
@@ -1094,7 +1094,7 @@ namespace ipsc6.agent.client
                         {
                             lock (this)
                             {
-                                logger.DebugFormat("ExecuteReconnectAsync - 所有连接均已断开，即将执行重连，重新设置主连接为 [{0}] ...", reconnPair.Item2);
+                                logger.WarnFormat("ExecuteReconnectAsync - 所有连接均已断开，即将执行重连，重新设置主连接为 [{0}] ...", reconnPair.Item2);
                                 MainConnectionIndex = reconnPair.Item2;
                             }
                         }

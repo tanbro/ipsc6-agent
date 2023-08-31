@@ -6,44 +6,45 @@
 
 1. 安装 Python 3.6 或以上
 
-1. [_可选_] 在子目录 `.venv` 建立该项目的 Python 虚拟环境，并激活:
+1. 在子目录 `.venv` 建立该项目的 Python 虚拟环境，并激活:
 
     - Posix:
 
-        ```sh
-        python -m venv .venv
-        source venv/bin/activate
-        ```
+      ```bash
+      python -m venv .venv
+      source .venv/bin/activate
+      ```
 
-    - Windows 命令提示符:
+    - Windows:
 
-        ```bat
-        python -m venv .venv
-        venv\Scripts\Activate.bat
-        ```
+      ```bat
+      python -m venv .venv
+      .venv\Scripts\Activate.bat
+      ```
 
-1. 安装依赖软件
+1. 安装 PyPI 上的依赖软件包
 
     在上述 Python 虚拟环境激活的前提下执行命令:
 
-    ```sh
+    ```bash
     pip install -r requirements.txt
     ```
 
+   > **Tips:**
+   >
+   > 如果 PyPI 官方站点访问速度慢，可以考虑使用阿里云或者腾讯云镜像站。
+
 ## PlantUML 和 PDF 相关问题
 
-这个文档工程：
+这个文档工程需要的外部工具：
 
-- 使用 [PlantUML][] 绘图(通过 [plantuml-markdown][] 将 Markdown Code Block 中的 [PlantUML][] 代码转为图形)
-- 使用 [WeasyPrint][] (通过 [mkdocs-with-pdf][]) 将生成的 `HTML` 站点转为 `PDF` 文档
+- [_必需_] [PlantUML][] (通过 [plantuml-markdown][]): 将 Markdown Code Block 中的 [PlantUML][] 代码转为图形
 
-但这些工具链比较复杂，包括 [PlantUML][], [GraphViz][], [WeasyPrint][] 等，它们在 Windows 环境下可能并不容易使用。
+  默认使用 [PlantUML][] 的官方在线服务  <http://www.plantuml.com/plantuml> 生成图形，无需本地安装 [PlantUML][] 与 [GraphViz][]。
 
-如果难以配置，建议在较新的常见 `Linux` 发布版本 `docker` 镜像中构建这个工程。
+- [_可选_] [WeasyPrint][] (通过 [mkdocs-with-pdf][]): 将生成的 `HTML` 站点转为 `PDF` 文档
 
-> 💡 **Tip**:
->
-> 修改 `mkdocs.yml` 中的 [plantuml-markdown][] 插件设置，可直接使用公网上的 [PlantUML][] 在线绘图生成服务，如 <http://www.plantuml.com/plantuml>
+  如果难以在Windows / MacOS 环境下使用 [WeasyPrint][]，可以考虑利用较新的常见 `Linux` 发布版本的 `docker` 镜像构建这个工程。
 
 [mkdocs]: https://www.mkdocs.org/ "MkDocs is a fast, simple and downright gorgeous static site generator that's geared towards building project documentation."
 [material for mkdocs]: https://squidfunk.github.io/mkdocs-material/
